@@ -30,6 +30,7 @@
 
 var term = require( '../lib/terminal.js' ) ;
 var expect = require( 'expect.js' ) ;
+var print = process.stdout.write.bind( process.stdout ) ;
 
 
 
@@ -49,10 +50,24 @@ var expect = require( 'expect.js' ) ;
 
 describe( "colors" , function() {
 	
-	it( "should" , function() {
-		console.log( term.BLUE + 'Toto' ) ;
-		console.log( 'Tata' ) ;
-		console.log( term.red( 'Titi' ) + ' Tete' ) ;
+	it( "should" , function( done ) {
+		print( term.attr.blue.open + 'Toto' ) ;
+		print( 'Tata' ) ;
+		print( term.red( 'Titi' ) + ' Tete' ) ;
+		print( term.red( 'Titi' ) + ' Tete' ) ;
+		print( term.bold.underline.red( 'Tutu' ) ) ;
+		print( term.green.strike( 'Tyty' ) ) ;
+		print( term.magenta.italic( 'Tztz' ) ) ;
+		print( term.blink( 'Txtx' ) ) ;
+		print( term.attr.blue.open + 'Toto' + term.reset() + 'tata' ) ;
+		
+		print( term.windowTitle( 'wonderful title' ) ) ;
+		
+		print( term.test() ) ;
+		
+		print( term.moveToLowerLeft() + 'lowerleft!' ) ;
+		
+		setTimeout( done , 1500 ) ;
 	} ) ;
 } ) ;
 
