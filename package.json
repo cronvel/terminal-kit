@@ -1,7 +1,7 @@
 {
   "name": "terminal-kit",
   "version": "0.0.5",
-  "description": "Tree utilities.",
+  "description": "Terminal utilities.",
   "main": "lib/terminal.js",
   "directories": {
     "test": "test"
