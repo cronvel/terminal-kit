@@ -63,9 +63,9 @@ describe( "colors" , function() {
 		
 		print( term.windowTitle( 'wonderful title' ) ) ;
 		
-		print( term.test() ) ;
+		//print( term.moveToLowerLeft() + 'lowerleft!' ) ;
 		
-		print( term.moveToLowerLeft() + 'lowerleft!' ) ;
+		print( term.test() ) ;
 		
 		setTimeout( done , 1500 ) ;
 	} ) ;
