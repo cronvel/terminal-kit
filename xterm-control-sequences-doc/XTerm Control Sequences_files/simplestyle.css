@@ -1,0 +1,42 @@
+body {
+/* Verdana, - too wide */
+/* Lucida Grande, - cluttered */
+/* Droid Serif - ? */
+/* Optima, - maybe - seems light */
+/* Verdana, - large */
+/* Tahoma, - not bad */
+	font-family: Tahoma, Georgia, "Times New Roman", Times, serif;
+}
+
+h1 {
+	font-family: Helvetica, Geneva, Arial, SunSans-Regular, sans-serif;
+}
+
+h2 {
+	font-family: Helvetica, Geneva, Arial, SunSans-Regular, sans-serif;
+}
+
+*.no-header {
+	visibility:hidden;
+	overflow:hidden;
+	float:left;
+	clear: both;
+	width: 1px;
+	height: 1px;
+}
+
+*.small-caps {
+	font-variant: small-caps;
+}
+
+*.code-block {
+	/* font-family: "Courier New", Courier, monospace; */
+	/* font-family: "Lucida Console", Monaco, monospace; */
+	font-family: "Andale Mono", "Monotype.com", monospace;
+	font-size: 10pt;
+	width: 480pt;
+	padding-left: 0em;
+	padding-right: 0em;
+	color: black;
+	background-color: rgb(215,215,215);
+}
