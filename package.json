@@ -1,0 +1,33 @@
+{
+  "name": "terminal-kit",
+  "version": "0.0.4",
+  "description": "Tree utilities.",
+  "main": "lib/terminal.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "tree-kit": "0.0.4"
+  },
+  "devDependencies": {
+    "expect.js": "~0.3.1",
+    "jshint": "~2.4.4",
+    "mocha": "~1.17.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cronvel/terminal-kit.git"
+  },
+  "keywords": [
+    "terminal",
+    "color"
+  ],
+  "author": "Cédric Ronvel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cronvel/terminal-kit/issues"
+  }
+}

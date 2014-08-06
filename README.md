@@ -1,4 +1,3 @@
-terminal-kit
-============
+# Terminal kit
 
-Terminal utilities for node.js
+Terminal utilities for node.js.
