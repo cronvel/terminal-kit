@@ -51,21 +51,21 @@ var print = process.stdout.write.bind( process.stdout ) ;
 describe( "colors" , function() {
 	
 	it( "should" , function( done ) {
-		print( term.attr.blue.open + 'Toto' ) ;
-		print( 'Tata' ) ;
-		print( term.red( 'Titi' ) + ' Tete' ) ;
-		print( term.red( 'Titi' ) + ' Tete' ) ;
-		print( term.bold.underline.red( 'Tutu' ) ) ;
-		print( term.green.strike( 'Tyty' ) ) ;
-		print( term.magenta.italic( 'Tztz' ) ) ;
-		print( term.blink( 'Txtx' ) ) ;
-		print( term.attr.blue.open + 'Toto' + term.reset() + 'tata' ) ;
+		print( term.esc.style.blue.open + 'Blue' ) ;
+		print( 'normal' ) ;
+		print( term.red( 'Red' ) + ' normal' ) ;
+		print( term.red( 'Red' ) + ' normal' ) ;
+		print( term.bold.underline.red( 'Bold-underline-red' ) ) ;
+		print( term.green.strike( 'Green-strike' ) ) ;
+		print( term.magenta.italic( 'Magenta-italic' ) ) ;
+		print( term.blink( 'Blink' ) ) ;
+		print( term.esc.style.blue.open + 'Blue' + term.reset() + 'normal' ) ;
 		
 		print( term.windowTitle( 'wonderful title' ) ) ;
 		
 		//print( term.moveToLowerLeft() + 'lowerleft!' ) ;
 		
-		print( term.test() ) ;
+		print( term.esc.test ) ;
 		
 		setTimeout( done , 1500 ) ;
 	} ) ;
