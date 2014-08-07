@@ -53,19 +53,21 @@ describe( "colors" , function() {
 	it( "should" , function( done ) {
 		print( term.esc.style.blue.open + 'Blue' ) ;
 		print( 'normal' ) ;
-		print( term.red( 'Red' ) + ' normal' ) ;
-		print( term.red( 'Red' ) + ' normal' ) ;
-		print( term.bold.underline.red( 'Bold-underline-red' ) ) ;
-		print( term.green.strike( 'Green-strike' ) ) ;
-		print( term.magenta.italic( 'Magenta-italic' ) ) ;
-		print( term.blink( 'Blink' ) ) ;
+		term.red( 'Red' ) ;
+		print( ' normal' ) ;
+		term.red( 'Red' ) ;
+		print( ' normal' ) ;
+		term.bold.underline.red( 'Bold-underline-red' ) ;
+		term.green.strike( 'Green-strike' ) ;
+		term.magenta.italic( 'Magenta-italic' ) ;
+		term.blink( 'Blink' ) ;
 		print( term.esc.style.blue.open + 'Blue' + term.reset() + 'normal' ) ;
 		
-		print( term.windowTitle( 'wonderful title' ) ) ;
+		term.windowTitle( 'wonderful title' ) ;
 		
-		//print( term.moveToLowerLeft() + 'lowerleft!' ) ;
+		//term.moveToLowerLeft() ; print( 'lowerleft!' ) ;
 		
-		print( term.esc.test ) ;
+		//print( term.esc.test ) ;
 		
 		setTimeout( done , 1500 ) ;
 	} ) ;
