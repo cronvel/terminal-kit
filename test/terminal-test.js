@@ -51,7 +51,7 @@ var print = process.stdout.write.bind( process.stdout ) ;
 describe( "colors" , function() {
 	
 	it( "should" , function( done ) {
-		print( term.esc.style.blue.open + 'Blue' ) ;
+		print( term.esc.style.blue.on + 'Blue' ) ;
 		print( 'normal' ) ;
 		term.red( 'Red' ) ;
 		print( ' normal' ) ;
@@ -61,15 +61,24 @@ describe( "colors" , function() {
 		term.green.strike( 'Green-strike' ) ;
 		term.magenta.italic( 'Magenta-italic' ) ;
 		term.blink( 'Blink' ) ;
-		print( term.esc.style.blue.open + 'Blue' + term.reset() + 'normal' ) ;
+		print( term.esc.style.blue.on + 'Blue' ) ;
+		term.reset() ; print( 'normal' ) ;
 		
-		term.windowTitle( 'wonderful title' ) ;
+		//term.windowTitle( 'wonderful title' ) ;
 		
 		//term.moveToLowerLeft() ; print( 'lowerleft!' ) ;
 		
-		//print( term.esc.test ) ;
+		process.stdin.setRawMode( true ) ;
+		print( term.esc.io.mouseMotion.on ) ;
 		
-		setTimeout( done , 1500 ) ;
+		process.stdin.on( 'data' , function( chunk ) {
+			console.log( chunk ) ;
+		} ) ;
+		
+		setTimeout( function() {
+			print( term.esc.io.mouseMotion.off ) ;
+			done() ;
+		} , 1500 ) ;
 	} ) ;
 } ) ;
 
