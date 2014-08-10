@@ -78,6 +78,9 @@ describe( "colors" , function() {
 		term.up( 4 ) ;
 		term.red( 'up 4' ) ;
 		
+		term.moveTo( 1 , 1 ) ;
+		term.blue( 'origin' ) ;
+		
 		//term.moveToLowerLeft() ; print( 'lowerleft!' ) ;
 		
 		process.stdin.setRawMode( true ) ;
