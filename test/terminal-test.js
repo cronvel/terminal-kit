@@ -51,6 +51,15 @@ var print = process.stdout.write.bind( process.stdout ) ;
 describe( "colors" , function() {
 	
 	it( "should" , function( done ) {
+		
+		/*
+		var format = require( '../lib/format' ) ;
+		//console.log( format.count( '%i' ) ) ;
+		console.log( format( 'format %2s %1s' , 'one' , 2.1 ) ) ;
+		done() ;
+		return ;
+		//*/
+		
 		print( term.esc.blue.on + 'Blue' ) ;
 		print( 'normal' ) ;
 		term.red( 'Red' ) ;
@@ -62,9 +71,12 @@ describe( "colors" , function() {
 		term.magenta.italic( 'Magenta-italic' ) ;
 		term.blink( 'Blink' ) ;
 		print( term.esc.blue.on + 'Blue' ) ;
-		term.reset() ; print( 'normal' ) ;
+		term.styleReset() ; print( 'normal' ) ;
 		
-		//term.windowTitle( 'wonderful title' ) ;
+		term.windowTitle( 'wonderful title' ) ;
+		
+		term.up( 4 ) ;
+		term.red( 'up 4' ) ;
 		
 		//term.moveToLowerLeft() ; print( 'lowerleft!' ) ;
 		
