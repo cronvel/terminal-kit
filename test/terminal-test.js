@@ -56,6 +56,7 @@ describe( "colors" , function() {
 		var format = require( '../lib/format' ) ;
 		//console.log( format.count( '%i' ) ) ;
 		console.log( format( 'format %2s %1s' , 'one' , 2.1 ) ) ;
+		console.log( format( 'format %+1s > ' , 'one' , 2.1 ) ) ;
 		done() ;
 		return ;
 		//*/
