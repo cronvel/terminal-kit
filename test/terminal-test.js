@@ -30,7 +30,6 @@
 
 var term = require( '../lib/terminal.js' ) ;
 var expect = require( 'expect.js' ) ;
-var print = process.stdout.write.bind( process.stdout ) ;
 
 
 
@@ -55,46 +54,57 @@ describe( "colors" , function() {
 		/*
 		var format = require( '../lib/format' ) ;
 		//console.log( format.count( '%i' ) ) ;
-		console.log( format( 'format %2s %1s' , 'one' , 2.1 ) ) ;
-		console.log( format( 'format %+1s > ' , 'one' , 2.1 ) ) ;
+		//console.log( format( 'format %2s %1s' , 'one' , 2.1 ) ) ;
+		//console.log( format( 'format %+1s > ' , 'one' , 2.1 ) ) ;
+		//console.log( '>>> ' , Math.floor( -5 ) ) ;
+		console.log( 'start...' ) ;
+		term.right( 8 ) ;
+		term.right( 5 ) ;
+		term.right( 3 ) ;
 		done() ;
 		return ;
 		//*/
 		
-		print( term.esc.blue.on + 'Blue' ) ;
-		print( 'normal' ) ;
+		term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
+		term( term.esc.blue.on + 'Blue' ) ;
+		term( 'normal' ) ;
 		term.red( 'Red' ) ;
-		print( ' normal' ) ;
+		term( ' normal' ) ;
 		term.red( 'Red' ) ;
-		print( ' normal' ) ;
+		term( ' normal' ) ;
 		term.bold.underline.red( 'Bold-underline-red' ) ;
 		term.green.strike( 'Green-strike' ) ;
 		term.magenta.italic( 'Magenta-italic' ) ;
 		term.blink( 'Blink' ) ;
-		print( term.esc.blue.on + 'Blue' ) ;
-		term.styleReset() ; print( 'normal' ) ;
+		term( term.esc.blue.on + 'Blue' ) ;
+		term.styleReset() ; term( 'normal' ) ;
+		term.saveCursor() ;
 		
 		term.windowTitle( 'wonderful title' ) ;
 		
-		term.up( 4 ) ;
-		term.red( 'up 4' ) ;
+		term.up( 4 ).red( 'up ' ).cyan( 4 ) ;
 		
-		term.moveTo( 1 , 1 ) ;
-		term.blue( 'origin' ) ;
+		term.moveTo( 1 , 1 ).blue( 'origin' ) ;
+		term.move( 0 , 0 ).bold.cyan( '(0;0)' ) ;
+		term.move( 5 , 5 ).bold.brightYellow( '(+5;+5)' ) ;
+		term.move( -2 , -5 ) ; term.bold.brightGreen( '(-2;-5)' ) ;
+		term.restoreCursor() ;
 		
-		//term.moveToLowerLeft() ; print( 'lowerleft!' ) ;
+		//term.moveToLowerLeft() ; term( 'lowerleft!' ) ;
 		
-		process.stdin.setRawMode( true ) ;
-		print( term.esc.mouseMotion.on ) ;
+		//term( term.esc.mouseMotion.on ) ;
 		
-		process.stdin.on( 'data' , function( chunk ) {
-			console.log( chunk ) ;
+		term.grabInput() ;
+		
+		term.on( 'key' , function( code , char ) {
+			console.log( 'Key event:' , code , char ) ;
 		} ) ;
 		
 		setTimeout( function() {
-			print( term.esc.mouseMotion.off ) ;
+			term( term.esc.mouseMotion.off ) ;
+			term.beep() ;
 			done() ;
-		} , 1500 ) ;
+		} , 20000 ) ;
 	} ) ;
 } ) ;
 
