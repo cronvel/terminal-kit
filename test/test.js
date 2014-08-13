@@ -77,8 +77,8 @@ term.restoreCursor() ;
 
 term.grabInput() ;
 
-term.on( 'key' , function( code , char , buffer , string ) {
-	console.log( 'Key event:' , code.toString( 16 ) , char , buffer , string ) ;
+term.on( 'key' , function( code , codepoint , char , buffer , string ) {
+	console.log( 'Key event:' , new Buffer( code ) , codepoint && codepoint.toString( 16 ) , char , buffer , string ) ;
 } ) ;
 
 term.on( 'special' , function( buffer ) {
