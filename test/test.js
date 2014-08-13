@@ -75,18 +75,23 @@ term.restoreCursor() ;
 
 //term( term.esc.mouseMotion.on ) ;
 
-term.grabInput() ;
+//term.grabInput() ;
+term.grabInput( { mouse: 'button' } ) ;
 
-term.on( 'key' , function( code , codepoint , char , buffer , string ) {
-	console.log( 'Key event:' , new Buffer( code ) , codepoint && codepoint.toString( 16 ) , char , buffer , string ) ;
+term.on( 'key' , function( name , data ) {
+	console.log( 'Key event:' , name , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) , data.codepoint ? data.codepoint.toString( 16 ) : '' ) ;
 } ) ;
 
-term.on( 'special' , function( buffer ) {
-	console.log( 'Special event:' , buffer ) ;
+term.on( 'mouse' , function( name , data ) {
+	console.log( 'Mouse event:' , name , data ) ;
+} ) ;
+
+term.on( 'unknown' , function( buffer ) {
+	console.log( 'Unknown event:' , buffer ) ;
 } ) ;
 
 setTimeout( function() {
-	term( term.esc.mouseMotion.off ) ;
+	term.grabInput( false ) ;
 	term.beep() ;
 	process.exit() ;
 } , 20000 ) ;
