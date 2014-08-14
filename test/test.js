@@ -76,7 +76,7 @@ term.restoreCursor() ;
 //term( term.esc.mouseMotion.on ) ;
 
 //term.grabInput() ;
-term.grabInput( { mouse: 'button' } ) ;
+term.grabInput( { mouse: 'button' , focus: true } ) ;
 
 term.on( 'key' , function( name , matches , data ) {
 	console.log( 'Key event:' , name , matches , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) , data.codepoint ? data.codepoint.toString( 16 ) : '' ) ;
@@ -94,6 +94,6 @@ setTimeout( function() {
 	term.grabInput( false ) ;
 	term.beep() ;
 	process.exit() ;
-} , 20000 ) ;
+} , 5000 ) ;
 
 

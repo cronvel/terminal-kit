@@ -48,7 +48,7 @@ function terminate()
 term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
 term.green( 'Hit CTRL-C to quit.\n\n' ) ;
 
-term.grabInput( { mouse: 'button' } ) ;
+term.grabInput( { mouse: 'button' , focus: true } ) ;
 
 term.on( 'key' , function( name , matches , data ) {
 	
@@ -59,6 +59,10 @@ term.on( 'key' , function( name , matches , data ) {
 		term.green( 'CTRL-C received...\n' ) ;
 		terminate() ;
 	}
+} ) ;
+
+term.on( 'focus' , function( name , data ) {
+	console.log( "'focus' event:" , name , data ) ;
 } ) ;
 
 term.on( 'mouse' , function( name , data ) {
