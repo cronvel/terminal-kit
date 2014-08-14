@@ -47,7 +47,7 @@ return ;
 //*/
 
 term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
-term( term.esc.blue.on + 'Blue' ) ;
+term( term.esc.blue.on + 'Blue' + term.esc.blue.off ) ;
 term( 'normal' ) ;
 term.red( 'Red' ) ;
 term( ' normal' ) ;
@@ -78,8 +78,8 @@ term.restoreCursor() ;
 //term.grabInput() ;
 term.grabInput( { mouse: 'button' } ) ;
 
-term.on( 'key' , function( name , data ) {
-	console.log( 'Key event:' , name , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) , data.codepoint ? data.codepoint.toString( 16 ) : '' ) ;
+term.on( 'key' , function( name , matches , data ) {
+	console.log( 'Key event:' , name , matches , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) , data.codepoint ? data.codepoint.toString( 16 ) : '' ) ;
 } ) ;
 
 term.on( 'mouse' , function( name , data ) {
