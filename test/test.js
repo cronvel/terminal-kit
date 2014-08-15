@@ -71,6 +71,9 @@ term.move( 5 , 5 ).bold.brightYellow( '(+5;+5)' ) ;
 term.move( -2 , -5 ) ; term.bold.brightGreen( '(-2;-5)' ) ;
 term.restoreCursor() ;
 
+term( '\n' ) ;
+return ;
+
 //term.moveToLowerLeft() ; term( 'lowerleft!' ) ;
 
 //term( term.esc.mouseMotion.on ) ;
@@ -94,6 +97,6 @@ setTimeout( function() {
 	term.grabInput( false ) ;
 	term.beep() ;
 	process.exit() ;
-} , 5000 ) ;
+} , 2000 ) ;
 
 
