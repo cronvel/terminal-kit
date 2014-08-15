@@ -37,6 +37,7 @@ function terminate()
 {
 	term.brightBlack( 'About to exit...\n' ) ;
 	term.grabInput( false ) ;
+	term.applicationKeypad( false ) ;
 	term.beep() ;
 	
 	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
@@ -47,6 +48,9 @@ function terminate()
 
 term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
 term.green( 'Hit CTRL-C to quit.\n\n' ) ;
+
+// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
+term.applicationKeypad() ;
 
 term.grabInput( { mouse: 'button' , focus: true } ) ;
 
@@ -61,8 +65,8 @@ term.on( 'key' , function( name , matches , data ) {
 	}
 } ) ;
 
-term.on( 'focus' , function( name , data ) {
-	console.log( "'focus' event:" , name , data ) ;
+term.on( 'window' , function( name , data ) {
+	console.log( "'window' event:" , name , data ) ;
 } ) ;
 
 term.on( 'mouse' , function( name , data ) {

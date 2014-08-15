@@ -30,6 +30,10 @@
 
 var term = require( '../lib/terminal.js' ) ;
 
+var i ;
+
+
+
 // First set black as the background color?
 //term.bgBlack() ;
 term( 'This is the style test, each word should be styled accordingly with what it says it is.\n\n' ) ;
@@ -49,6 +53,10 @@ term.cyan( 'cyan ' ).brightCyan( 'brightCyan' )( '\n' ) ;
 term.blue( 'blue ' ).brightBlue( 'brightBlue' )( '\n' ) ;
 term.magenta( 'magenta ' ).brightMagenta( 'brightMagenta' )( '\n' ) ;
 
+// Check the color() function
+for ( i = 0 ; i < 16 ; i ++ ) { term.bold.color( i , '*' ) ; }
+term( '\n' ) ;
+
 
 
 // Test background colors
@@ -63,6 +71,10 @@ term.bgGreen( 'bgGreen ' ).bgBrightGreen( 'bgBrightGreen' )( '\n' ) ;
 term.bgCyan( 'bgCyan ' ).bgBrightCyan( 'bgBrightCyan' )( '\n' ) ;
 term.bgBlue( 'bgBlue ' ).bgBrightBlue( 'bgBrightBlue' )( '\n' ) ;
 term.bgMagenta( 'bgMagenta ' ).bgBrightMagenta( 'bgBrightMagenta' )( '\n' ) ;
+
+// Check the bgColor() function
+for ( i = 0 ; i < 16 ; i ++ ) { term.bgColor( i , ' ' ) ; }
+term( '\n' ) ;
 
 
 
