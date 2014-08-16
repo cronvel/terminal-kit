@@ -39,6 +39,7 @@ function terminate()
 	term.grabInput( false ) ;
 	term.applicationKeypad( false ) ;
 	term.beep() ;
+	term.fullscreen( false ) ;
 	
 	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
 	setTimeout( function() { process.exit() } , 100 ) ;
@@ -46,11 +47,14 @@ function terminate()
 
 
 
+term.fullscreen() ;
 term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
 term.green( 'Hit CTRL-C to quit.\n\n' ) ;
 
 // Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
 term.applicationKeypad() ;
+
+//term.keyboardModifier() ;
 
 term.grabInput( { mouse: 'button' , focus: true } ) ;
 
@@ -63,10 +67,20 @@ term.on( 'key' , function( name , matches , data ) {
 		term.green( 'CTRL-C received...\n' ) ;
 		terminate() ;
 	}
+	
+	if ( matches.indexOf( 'CTRL_R' ) >= 0 )
+	{
+		term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
+		term.requestCursorLocation() ;
+	}
 } ) ;
 
 term.on( 'window' , function( name , data ) {
 	console.log( "'window' event:" , name , data ) ;
+} ) ;
+
+term.on( 'info' , function( name , data ) {
+	console.log( "'info' event:" , name , data ) ;
 } ) ;
 
 term.on( 'mouse' , function( name , data ) {

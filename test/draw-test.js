@@ -68,7 +68,7 @@ var color = 2 ;
 
 term.on( 'key' , function( key , matches , data ) {
 	
-	term.saveCursor().moveTo( 0 , term.height ).deleteLine( 1 ).bgWhite.blue( 'Key pressed: ' + key ).restoreCursor() ;
+	term.saveCursor().moveTo( 0 , term.height ).eraseLine().bgWhite.blue( 'Key pressed: ' + key ).restoreCursor() ;
 	
 	switch ( key )
 	{
