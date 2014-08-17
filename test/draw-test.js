@@ -35,14 +35,16 @@ var term = require( '../lib/terminal.js' ) ;
 
 function terminate()
 {
-	//term.brightBlack( 'About to exit...\n' ) ;
-	term.grabInput( false ) ;
-	term.fullscreen( false ) ;
-	term.applicationKeypad( false ) ;
-	term.beep() ;
-	
-	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-	setTimeout( function() { process.exit() } , 100 ) ;
+	setTimeout( function() {
+		//term.brightBlack( 'About to exit...\n' ) ;
+		term.grabInput( false ) ;
+		term.fullscreen( false ) ;
+		term.applicationKeypad( false ) ;
+		term.beep() ;
+		
+		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
+		setTimeout( function() { process.exit() } , 100 ) ;
+	} , 100 ) ;
 } 
 
 
@@ -54,21 +56,20 @@ term.fullscreen() ;
 term.applicationKeypad() ;
 
 term.moveTo( 1 , 1 )
-	.bgWhite.blue( 'Arrows: move, CTRL+Arrows: draw, SHIFT+Arrows: draw brighter, ENTER/SPACE: in-place drawing\n1-8: change color - ' )
-	.bgWhite.green( 'CTRL-C to quit (size: %ix%i)\n' , term.width , term.height )
+	.bgWhite.blue( 'Arrows: move, CTRL+Arrows: draw, SHIFT+Arrows: draw brighter\nTAB: switch mode, ENTER/SPACE: in-place drawing 1-8: change color\n' )
+	.bgWhite.green( 'CTRL-C to quit (startup size: %ix%i)\n' , term.width , term.height )
 	.moveTo( 40 , 20 ) ;
 
 
 
 term.grabInput( { mouse: 'button' , focus: true } ) ;
+term.requestCursorLocation().requestScreenSize() ;
 
 
-
-var color = 2 ;
+var color = 2 , x = '' , y = '' , width = '' , height = '' ;
+var mode = 0 , modeString = [ 'move' , 'draw' , 'draw brigther' ] ;
 
 term.on( 'key' , function( key , matches , data ) {
-	
-	term.saveCursor().moveTo( 0 , term.height ).eraseLine().bgWhite.blue( 'Key pressed: ' + key ).restoreCursor() ;
 	
 	switch ( key )
 	{
@@ -82,10 +83,10 @@ term.on( 'key' , function( key , matches , data ) {
 		case '8' : 
 			color = parseInt( key ) - 1 ;
 			break ;
-		case 'UP' : term.up( 1 ) ; break ;
-		case 'DOWN' : term.down( 1 ) ; break ;
-		case 'LEFT' : term.left( 1 ) ; break ;
-		case 'RIGHT' : term.right( 1 ) ; break ;
+		case 'ALT_UP' : term.up( 1 ) ; break ;
+		case 'ALT_DOWN' : term.down( 1 ) ; break ;
+		case 'ALT_LEFT' : term.left( 1 ) ; break ;
+		case 'ALT_RIGHT' : term.right( 1 ) ; break ;
 		case 'CTRL_UP' : term.bgColor( color , ' ' ).left.up( 1 , 1 ).bgColor( color , ' ' ).left( 1 ) ; break ;
 		case 'CTRL_DOWN' : term.bgColor( color , ' ' ).left.down( 1 , 1 ).bgColor( color , ' ' ).left( 1 ) ; break ;
 		case 'CTRL_LEFT' : term.bgColor( color , ' ' ).left( 2 ).bgColor( color , ' ' ).left( 1 ) ; break ;
@@ -94,21 +95,60 @@ term.on( 'key' , function( key , matches , data ) {
 		case 'SHIFT_DOWN' : term.bgColor( color + 8 , ' ' ).left.down( 1 , 1 ).bgColor( color + 8 , ' ' ).left( 1 ) ; break ;
 		case 'SHIFT_LEFT' : term.bgColor( color + 8 , ' ' ).left( 2 ).bgColor( color + 8 , ' ' ).left( 1 ) ; break ;
 		case 'SHIFT_RIGHT' : term.bgColor( color + 8 , '  ' ).left( 1 ) ; break ;
+		case 'UP' :
+			if ( ! mode ) { term.up( 1 ) ; }
+			else { term.bgColor( color + 8 * ( mode - 1 ) , ' ' ).left.up( 1 , 1 ).bgColor( color + 8 * ( mode - 1 ) , ' ' ).left( 1 ) ; }
+			break ;
+		case 'DOWN' :
+			if ( ! mode ) { term.down( 1 ) ; }
+			else { term.bgColor( color + 8 * ( mode - 1 ) , ' ' ).left.down( 1 , 1 ).bgColor( color + 8 * ( mode - 1 ) , ' ' ).left( 1 ) ; }
+			break ;
+		case 'LEFT' :
+			if ( ! mode ) { term.left( 1 ) ; }
+			else { term.bgColor( color + 8 * ( mode - 1 ) , ' ' ).left( 2 ).bgColor( color + 8 * ( mode - 1 ) , ' ' ).left( 1 ) ; }
+			break ;
+		case 'RIGHT' :
+			if ( ! mode ) { term.right( 1 ) ; }
+			else { term.bgColor( color + 8 * ( mode - 1 ) , '  ' ).left( 1 ) ; }
+			break ;
 		case 'ENTER' : term.bgColor( color , ' ' ).left( 1 ) ; break ;
 		case ' ' : term.bgColor( color + 8 , ' ' ).left( 1 ) ; break ;
+		case 'TAB' : mode = ( mode + 1 ) % 3 ; break ;
 		case 'CTRL_C' : terminate() ; break ;
+	}
+	
+	term.requestCursorLocation()
+		.requestScreenSize()
+		.saveCursor()
+		.moveTo( 0 , term.height )
+		.eraseLine()
+		.bgWhite.blue(
+			'Arrow mode: ' + modeString[ mode ] +
+			' -- Cursor position: ' + x + ',' + y +
+			' -- Screen size: ' + width + ',' + height +
+			' -- Key pressed: ' + key
+		)
+		.restoreCursor() ;
+} ) ;
+
+
+
+term.on( 'terminal' , function( name , data ) {
+	
+	switch ( name )
+	{
+		case 'CURSOR_LOCATION' : x = data.x ; y = data.y ; break ;
+		case 'SCREEN_SIZE' : width = data.width ; height = data.height ; break ;
 	}
 } ) ;
 
 
 
-term.on( 'window' , function( name , data ) {
-//	console.log( "'window' event:" , name , data ) ;
-} ) ;
-
 term.on( 'mouse' , function( name , data ) {
 //	console.log( "'mouse' event:" , name , data ) ;
 } ) ;
+
+
 
 term.on( 'unknown' , function( buffer ) {
 //	console.log( "'unknown' event, buffer:" , buffer ) ;

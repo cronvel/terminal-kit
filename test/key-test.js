@@ -72,15 +72,12 @@ term.on( 'key' , function( name , matches , data ) {
 	{
 		term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
 		term.requestCursorLocation() ;
+		term.requestScreenSize() ;
 	}
 } ) ;
 
-term.on( 'window' , function( name , data ) {
-	console.log( "'window' event:" , name , data ) ;
-} ) ;
-
-term.on( 'info' , function( name , data ) {
-	console.log( "'info' event:" , name , data ) ;
+term.on( 'terminal' , function( name , data ) {
+	console.log( "'terminal' event:" , name , data ) ;
 } ) ;
 
 term.on( 'mouse' , function( name , data ) {
