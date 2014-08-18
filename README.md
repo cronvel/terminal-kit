@@ -178,10 +178,17 @@ All those functions are chainable, and their arguments can be combined.
 
 
 
-# Input management with `grabInput()`
+# Input management with `grabInput(options)`
 
-* grabInput(options): turn input grabbing on, keyboard entries will not be echoed, every input will generate an event
+* options: false/true/Object, *false* disable input grabbing, if it is *true* or an Object, then turn on input grabbing, if it is an Object,
+  then those properties are supported:
+	* mouse: if defined, it activate mouse event, those values are supported for 'mouse':
+		* 'button': report only button-event
+		* 'drag': report button-event, report motion-event only when a button is pressed (i.e. it is a mouse drag)
+		* 'motion': report button-event & all motion-event, use it only when needed, many escape sequences are sent from the terminal
+		  (for example, one may consider this for script running over SSH)
 
+This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event on the `term` object.
 
 Quick example:
 
@@ -248,6 +255,16 @@ Sometime, a key matches multiple combination. For example CTRL-M on linux boxes 
 So the event will provide as the 'name' argument the most useful/common, here *ENTER*.
 However the 'matches' argument will contain `[ ENTER , CTRL_M ]`.
 
+Also notice that some terminal will support less keys. For example, the Linux Console does not support SHIFT/CTRL/ALT + Arrows keys,
+it will produce a normal arrow key.
+There is no workaround here, the underlying keyboard driver simply does not support this.
+
+KP_* keys needs `applicationKeypad()`, e.g. without it KP_1 will report '1' or END.
+Some terminal does not support `applicationKeypad()` very well, and it is nearly impossible to differenciate (for example) a KP_1 from
+an END, or a KP_7 from a HOME, since most X terminal will be reported as xterm or xterm-256color happily, but still does not report key
+the same way...
+
+
 
 ## 'terminal' event
 * name: string, the name of the subtype of event
@@ -270,6 +287,7 @@ The argument 'name' can be:
 * FOCUS_OUT: it is emited if the terminal loses focus (if supported by your terminal)
 
 
+
 ## 'mouse' event
 * name: string, the name of the subtype of event
 * data: Object, provide the mouse coordinate and keyboard modifier status, properties:
@@ -287,6 +305,9 @@ The argument 'name' can be:
 * MOUSE_LEFT_BUTTON_RELEASED: when this button is released
 * MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
 * MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
+* MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
 * MOUSE_MOTION: if the options `{ mouse: 'motion' }` is given to grabInput(), every move of the mouse will fire this event,
   if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
+
+
 
