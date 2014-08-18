@@ -1,6 +1,6 @@
 {
   "name": "terminal-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Terminal utilities.",
   "main": "lib/terminal.js",
   "directories": {
