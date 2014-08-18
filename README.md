@@ -212,3 +212,81 @@ term.on( 'mouse' , function( name , data ) {
 	console.log( "'mouse' event:" , name , data ) ;
 } ) ;
 ```
+
+
+## 'key' event ( name , matches )
+* name: string, the key name
+* matches: array of matched key name
+
+The 'key' event is emited whenever the user type something on the keyboard.
+
+If `name` is a single char, this is a regular UTF8 character, entered by the user.
+If the user type a word, each UTF8 character will produce its own 'key' event.
+
+If `name` is a multiple chars string, then it is a SPECIAL key.
+
+List of SPECIAL keys:
+
+  ESCAPE ENTER BACKSPACE NUL TAB SHIFT_TAB 
+  UP DOWN RIGHT LEFT
+  INSERT DELETE HOME END PAGE_UP PAGE_DOWN
+  KP_NUMLOCK KP_DIVIDE KP_MULTIPLY KP_MINUS KP_PLUS KP_DELETE KP_ENTER
+  KP_0 KP_1 KP_2 KP_3 KP_4 KP_5 KP_6 KP_7 KP_8 KP_9
+  F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12
+  SHIFT_UP SHIFT_DOWN SHIFT_RIGHT SHIFT_LEFT
+  ALT_UP ALT_DOWN ALT_RIGHT ALT_LEFT
+  CTRL_UP CTRL_DOWN CTRL_RIGHT CTRL_LEFT
+
+And modifier on regular A-Z key:
+
+  CTRL_A ALT_A CTRL_ALT_A
+  CTRL_B ALT_B CTRL_ALT_B
+  CTRL_C ALT_C CTRL_ALT_C
+  ...
+
+Sometime, a key matches multiple combination. For example CTRL-M on linux boxes is always the same as ENTER.
+So the event will provide as the 'name' argument the most useful/common, here *ENTER*.
+However the 'matches' argument will contain `[ ENTER , CTRL_M ]`.
+
+
+## 'terminal' event
+* name: string, the name of the subtype of event
+* data: Object, provide some data depending on the event
+
+The 'terminal' event is emited for terminal generic information.
+
+The argument 'name' can be:
+
+* CURSOR_LOCATION: it is emited in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
+
+* SCREEN_SIZE: it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of the screen in characters,
+  and 'resized' (true/false) if the size has changed
+
+* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time issuing a requestScreenSize() is useless,
+  node will be notified of screen resizing, and so this event will be emited
+
+* FOCUS_IN: it is emited if the terminal gains focus (if supported by your terminal)
+
+* FOCUS_OUT: it is emited if the terminal loses focus (if supported by your terminal)
+
+
+## 'mouse' event
+* name: string, the name of the subtype of event
+* data: Object, provide the mouse coordinate and keyboard modifier status, properties:
+	* x: integer, the row number where the mouse is
+	* y: integer, the column number where the mouse is
+	* ctrl: true/false, if the CTRL key is down or not
+	* alt: true/false, if the ALT key is down or not
+	* shift: true/false, if the SHIFT key is down or not
+
+Activated when grabInput() is used with the 'mouse' options, e.g. `{ mouse: 'button' }`, `{ mouse: 'drag' }` or `{ mouse: 'motion' }`.
+
+The argument 'name' can be:
+
+* MOUSE_LEFT_BUTTON_PRESSED: well... it is emited when the left mouse button is pressed
+* MOUSE_LEFT_BUTTON_RELEASED: when this button is released
+* MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
+* MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
+* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is given to grabInput(), every move of the mouse will fire this event,
+  if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
+
