@@ -180,13 +180,14 @@ All those functions are chainable, and their arguments can be combined.
 
 # Input management with `grabInput(options)`
 
-* options: false/true/Object, *false* disable input grabbing, if it is *true* or an Object, then turn on input grabbing, if it is an Object,
-  then those properties are supported:
+* options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
+  if it is an Object then those properties are supported:
 	* mouse: if defined, it activate mouse event, those values are supported for 'mouse':
 		* 'button': report only button-event
 		* 'drag': report button-event, report motion-event only when a button is pressed (i.e. it is a mouse drag)
 		* 'motion': report button-event & all motion-event, use it only when needed, many escape sequences are sent from the terminal
 		  (for example, one may consider this for script running over SSH)
+	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
 
 This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event on the `term` object.
 
