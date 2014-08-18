@@ -3,6 +3,7 @@
 # Terminal Kit
 
 Terminal utilities for node.js, it supports 'xterm' compatible terminal and the Linux Console.
+It does not depend on ncurses.
 
 * License: MIT
 * Current status: alpha/unstable
@@ -12,7 +13,7 @@ Work in progress, only a rough documentation ATM.
 
 
 
-# Feature
+# Features
 
 * colors
 * styles (bold, underline, italic, and many more)
@@ -33,13 +34,34 @@ var term = require( 'terminal-kit' ) ;
 term( 'Hello world!\n' ) ; // output "Hello world!" normally
 term.red( 'red' ) ; // output 'red' in red
 term.bold( 'bold' ) ; // output 'bold' in bold
-term.bold.underline.red( 'mixed' ) ; // output 'mixed' using bold, underlined red, exposing style-mixing syntax
-term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ; // printf() style formating everywhere: this will output 'My name is Jack, I'm 32.' in green
+
+// output 'mixed' using bold, underlined red, exposing style-mixing syntax
+term.bold.underline.red( 'mixed' ) ; 
+
+// printf() style formating everywhere: this will output 'My name is Jack, I'm 32.' in green
+term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
+
+// Width and height of the terminal
+term( 'The terminal size is %dx%d' , term.width , term.height ) ;
+
+// Move the cursor at the upper-left corner
+term.moveTo( 1 , 1 ) ;
+
+// We can always pass additionnal arguments that will be displayed...
+term.moveTo( 1 , 1 , 'Upper-left corner' ) ;
+
+// ... and formated
+term.moveTo( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
+
+// ... or even combined with other styles
+term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 ```
 
 
 
 # Short function description
+
+All those functions are chainable, and their arguments can be combined.
 
 
 ## Common/Misc
@@ -107,7 +129,7 @@ term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ; // printf() style forma
 * blink(): blink text, not widely supported
 * inverse(): foreground and background color
 * hidden(): invisible, but can be copy/paste'd
-* strike(): strike throught
+* strike(): strike through
 
 
 ## Cursors
@@ -139,7 +161,6 @@ term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ; // printf() style forma
 * requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
 * requestScreenSize(): request for screen size, a 'terminal' event will be fired when available (rarely useful, most of time this event is fired on resize)
 * applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
-* grabInput(options): turn input grabbing on, keyboard entry will not be echoed, every input will generate an event
 
 
 ## Internal input/output (do not use directly, use grabInput() instead)
@@ -156,7 +177,11 @@ term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ; // printf() style forma
 * windowTitle(): set the title of an xterm-compatible window
 
 
+
 # Input management with `grabInput()`
+
+* grabInput(options): turn input grabbing on, keyboard entry will not be echoed, every input will generate an event
+
 
 Quick example:
 
@@ -169,7 +194,7 @@ function terminate()
 	setTimeout( function() { process.exit() } , 100 ) ;
 }
 
-term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
+term.bold.cyan( 'Type anything on the keyboard...\n' ) ;
 term.green( 'Hit CTRL-C to quit.\n\n' ) ;
 
 term.grabInput( { mouse: 'button' } ) ;

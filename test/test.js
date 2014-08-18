@@ -45,7 +45,8 @@ term.green.strike( 'Green-strike' ) ;
 term.magenta.italic( 'Magenta-italic' ) ;
 term.blink( 'Blink' ) ;
 term( term.esc.blue.on + 'Blue' ) ;
-term.styleReset() ; term( 'normal' ) ;
+term.styleReset() ; term( 'normal\n' ) ;
+term( 'The terminal size is %dx%d' , term.width , term.height ) ;
 term.saveCursor() ;
 
 term.windowTitle( 'wonderful title' ) ;
@@ -56,6 +57,7 @@ term.moveTo( 1 , 1 ).blue( 'origin' ) ;
 term.move( 0 , 0 ).bold.cyan( '(0;0)' ) ;
 term.move( 5 , 5 ).bold.brightYellow( '(+5;+5)' ) ;
 term.move( -2 , -5 ) ; term.bold.brightGreen( '(-2;-5)' ) ;
+term.moveTo.cyan( 1 , 2 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) 
 term.restoreCursor() ;
 
 term( '\n' ) ;
