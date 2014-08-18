@@ -180,13 +180,13 @@ All those functions are chainable, and their arguments can be combined.
 
 # Input management with `grabInput()`
 
-* grabInput(options): turn input grabbing on, keyboard entry will not be echoed, every input will generate an event
+* grabInput(options): turn input grabbing on, keyboard entries will not be echoed, every input will generate an event
 
 
 Quick example:
 
 ```js
-var term = require( '../lib/terminal.js' ) ;
+var term = require( 'terminal-kit' ) ;
 
 function terminate()
 {
