@@ -8,8 +8,7 @@
   },
   "dependencies": {
     "async-kit": "^0.4.3",
-    "tree-kit": "^0.0.5",
-    "ttys": "0.0.3"
+    "tree-kit": "^0.0.5"
   },
   "devDependencies": {
     "expect.js": "~0.3.1",

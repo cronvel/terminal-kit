@@ -28,7 +28,11 @@
 /* jshint unused:false */
 
 
+
+var term = require( '../lib/terminal.js' ) ;
 var format = require( '../lib/format.js' ) ;
+
+
 
 console.log( '2:' , format.count( '%i %s' ) ) ;
 
@@ -46,4 +50,5 @@ console.log( format.call( filters , 'FABC: %[fixed]%s%s%s' , 'A' , 'B' , 'C' ) )
 console.log( format.call( filters , 'f(x,y)=28: %s%[fxy:%a%a]' , 'f(x,y)=' , 5 , 3 ) ) ;
 console.log( format.call( filters , 'f(x,y)=14: %s%[fxy:%+1a%-1a]' , 'f(x,y)=' , 5 , 3 ) ) ;
 
+term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
