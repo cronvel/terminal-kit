@@ -7,7 +7,7 @@ It does not depend on ncurses.
 
 * License: MIT
 * Current status: alpha/unstable
-* Platform: linux, tested with gnome-terminal, xterm and Linux Console so far
+* Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far
 
 Work in progress, only a rough documentation ATM.
 
