@@ -31,7 +31,8 @@
 
 var term = require( '../lib/terminal.js' ) ;
 
-
+//term( "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 , '20th col' ).hideCursor( false ) ;
+//process.exit() ;
 
 term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
 term( term.esc.blue.on + 'Blue' + term.esc.blue.off ) ;

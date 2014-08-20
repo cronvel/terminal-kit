@@ -26,33 +26,14 @@
 */
 
 /* jshint unused:false */
-
+/* global describe, it, before, after */
 
 
 var term = require( '../lib/terminal.js' ) ;
-var format = require( '../lib/format.js' ) ;
 
 
+term.getParentTerminal( function( error , name , pid ) {
+	console.log( arguments ) ;
+} ) ;
 
-console.log( format( '0: %u' , 0 ) ) ;
-console.log( format( '1: %U' , 0 ) ) ;
-console.log( format( '0: %u' ) ) ;
-console.log( format( '1: %U' ) ) ;
-console.log( format( 'ABC: %s%s%s' , 'A' , 'B' , 'C' ) ) ;
-console.log( format( 'BAC: %+1s%-1s%s' , 'A' , 'B' , 'C' ) ) ;
-console.log( format( 'CBC: %3s%s' , 'A' , 'B' , 'C' ) ) ;
-
-console.log( '2:' , format.count( '%i %s' ) ) ;
-
-var filters = {
-	fixed: function() { return 'F' ; } ,
-	double: function( str ) { return '' + str + str ; } ,
-	fxy: function( a , b ) { return '' + ( a * a + b ) ; }
-} ;
-
-console.log( format.call( filters , 'FABC: %[fixed]%s%s%s' , 'A' , 'B' , 'C' ) ) ;
-console.log( format.call( filters , 'f(x,y)=28: %s%[fxy:%a%a]' , 'f(x,y)=' , 5 , 3 ) ) ;
-console.log( format.call( filters , 'f(x,y)=14: %s%[fxy:%+1a%-1a]' , 'f(x,y)=' , 5 , 3 ) ) ;
-
-term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
