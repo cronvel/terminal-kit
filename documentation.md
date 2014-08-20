@@ -9,8 +9,6 @@ It does not depend on ncurses.
 * Current status: alpha/unstable
 * Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far
 
-Work in progress, only a rough documentation ATM.
-
 
 
 # Features
@@ -30,12 +28,20 @@ Work in progress, only a rough documentation ATM.
 # Quick example
 
 ```js
+// Require the lib
 var term = require( 'terminal-kit' ) ;
-term( 'Hello world!\n' ) ; // output "Hello world!" normally
-term.red( 'red' ) ; // output 'red' in red
-term.bold( 'bold' ) ; // output 'bold' in bold
 
-// output 'mixed' using bold, underlined red, exposing style-mixing syntax
+// The term() function simply output a string to stdout, using current style
+// output "Hello world!" in default terminal's colors
+term( 'Hello world!\n' ) ;
+
+// This output 'red' in red
+term.red( 'red' ) ;
+
+// This output 'bold' in bold
+term.bold( 'bold' ) ;
+
+// output 'mixed' using bold, underlined & red, exposing the style-mixing syntax
 term.bold.underline.red( 'mixed' ) ; 
 
 // printf() style formating everywhere: this will output 'My name is Jack, I'm 32.' in green
@@ -59,8 +65,9 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 
 
-# Short function description
+# Standard function description
 
+For all the functions above, additionnal arguments can be provided
 All those functions are chainable, and their arguments can be combined.
 
 
@@ -153,7 +160,7 @@ All those functions are chainable, and their arguments can be combined.
 * eraseLineAfter(): erase current line after the cursor
 * eraseLineBefore(): erase current line before the cursor
 * eraseLine(): erase current line
-* alternateScreenBuffer(boolean): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
+* alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
 
 
 ## Input/Output
