@@ -147,8 +147,14 @@ All those functions are chainable, and their arguments can be combined.
 * down(n): move the cursor 'n' chars down
 * right(n): move the cursor 'n' chars right
 * left(n): move the cursor 'n' chars left
+* nextLine(n): move the cursor to beginning of the line, 'n' lines down
+* previousLine(n): move the cursor to beginning of the line, 'n' lines up
+* column(x): move the cursor to column x
+* scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom
+* scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top
 * moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
 * move(x,y): relative move of the cursor
+* hideCursor(boolean): hide/show the cursor
 
 
 ## Editing
