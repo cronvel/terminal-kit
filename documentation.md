@@ -88,7 +88,8 @@ Also those string support a printf()-like formating syntax.
 So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."*.
 
 All those functions are chainable, and their arguments can be combined.
-We can do `term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )` which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
+We can do:  
+`term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )` which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
 
 
 ## Common/Misc
