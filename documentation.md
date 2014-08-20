@@ -67,8 +67,25 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 # Standard function description
 
-For all the functions above, additionnal arguments can be provided
+For all the functions above, additionnal arguments can be provided.
+
+If a boolean is provided, it will turn the feature *on* or *off*.
+For example `term.red( true )` turn all subsequent output in red, while `term.red( false )` disable red and go back to default color.
+
+Without arguments, it is always the same as *true*, e.g. `term.red()` do the same thing than `term.red()`.
+
+Some function cannot be turned off, they just perform an action.
+For example `term.reset()` reset the terminal, usually to its default.
+This is not reversible, thus `term.reset( false )` does nothing.
+
+If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the feature is turn *off*.
+That's it: `term.red( 'Hello world!' )` is the same as `term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
+
+Also those string support a printf()-like formating syntax.
+So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."*.
+
 All those functions are chainable, and their arguments can be combined.
+We can do `term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )` which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
 
 
 ## Common/Misc
@@ -154,7 +171,7 @@ All those functions are chainable, and their arguments can be combined.
 * scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top
 * moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
 * move(x,y): relative move of the cursor
-* hideCursor(boolean): hide/show the cursor
+* hideCursor(): hide/show the cursor
 
 
 ## Editing
@@ -172,7 +189,7 @@ All those functions are chainable, and their arguments can be combined.
 ## Input/Output
 
 * requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
-* requestScreenSize(): request for screen size, a 'terminal' event will be fired when available (rarely useful, most of time this event is fired on resize)
+* requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
 * applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
 
 
@@ -203,6 +220,7 @@ All those functions are chainable, and their arguments can be combined.
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
 
 This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event on the `term` object.
+
 
 Quick example:
 
@@ -290,11 +308,11 @@ The argument 'name' can be:
 
 * CURSOR_LOCATION: it is emited in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
 
-* SCREEN_SIZE: it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of the screen in characters,
-  and 'resized' (true/false) if the size has changed
+* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time node.js will be notified of screen resizing, and so this event will be emited,
+  data contains 'width' & 'height', the size of the screen in characters
 
-* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time issuing a requestScreenSize() is useless,
-  node will be notified of screen resizing, and so this event will be emited
+* SCREEN_SIZE: **rarely useful** it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of the screen in characters,
+  and 'resized' (true/false) if the size has changed without node.js being notified
 
 * FOCUS_IN: it is emited if the terminal gains focus (if supported by your terminal)
 
