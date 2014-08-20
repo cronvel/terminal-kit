@@ -79,9 +79,12 @@ For example `term.reset()` reset the terminal, usually to its default.
 This is not reversible, thus `term.reset( false )` does nothing.
 
 If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the feature is turn *off*.
-That's it: `term.red( 'Hello world!' )` is the same as `term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
+That's it:  
+`term.red( 'Hello world!' )`  
+... is the same as:  
+`term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
 
-Also those string support a printf()-like formating syntax.
+Also those string support a printf()-like formating syntax.  
 So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."*.
 
 All those functions are chainable, and their arguments can be combined.
