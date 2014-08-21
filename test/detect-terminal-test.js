@@ -29,11 +29,13 @@
 /* global describe, it, before, after */
 
 
-var term = require( '../lib/terminal.js' ) ;
 
-
-term.getParentTerminal( function( error , name , pid ) {
-	console.log( arguments ) ;
+require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+	
+	term( 'Terminal name: %s\n' , term.appName ) ;
+	term( 'Terminal app: %s\n' , term.app ) ;
+	term( 'Terminal type: %s\n' , term.type ) ;
+	term( 'Config file: %s\n' , term.termconfigFile ) ;
 } ) ;
 
 
