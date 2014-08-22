@@ -65,9 +65,11 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 
 
-# Standard function description
+# Standard methods description
 
-For all the functions above, additionnal arguments can be provided.
+Standard methods map low-level terminal capabilities.
+
+For all the functions below, additionnal arguments can be provided.
 
 If a boolean is provided, it will turn the feature *on* or *off*.
 For example `term.red( true )` turn all subsequent output in red, while `term.red( false )` disable red and go back to default color.
@@ -94,125 +96,181 @@ We can do:
 
 ## Common/Misc
 
-* reset(): full reset the terminal.
-* error(): it just set error to true so it will write to STDERR instead of STDOUT
-* beep(): emit a beep
+* .reset(): full reset the terminal.
+* .error(): it just set error to true so it will write to STDERR instead of STDOUT
+* .beep(): emit a beep
 
 
 ## Foreground colors
 
-* defaultColor(): back to the default foreground color
-* black(): ...
-* red(): ...
-* green(): ...
-* yellow(): dark yellow, most of time brown or orange
-* blue(): ...
-* magenta(): ...
-* cyan(): ...
-* white(): ...
-* brightBlack(): ...
-* brightRed(): ...
-* brightGreen(): ...
-* brightYellow(): true yellow
-* brightBlue(): ...
-* brightMagenta(): ...
-* brightCyan(): ...
-* brightWhite(): ...
-* color(register): choose between 16 colors using an 0..15 integer
-* darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
-* brightColor(register): choose between 8 bright colors using an 0..7 integer
+* .defaultColor(): back to the default foreground color
+* .black(): ...
+* .red(): ...
+* .green(): ...
+* .yellow(): dark yellow, most of time brown or orange
+* .blue(): ...
+* .magenta(): ...
+* .cyan(): ...
+* .white(): ...
+* .brightBlack(): ...
+* .brightRed(): ...
+* .brightGreen(): ...
+* .brightYellow(): true yellow
+* .brightBlue(): ...
+* .brightMagenta(): ...
+* .brightCyan(): ...
+* .brightWhite(): ...
+* .color(register): choose between 16 colors using an 0..15 integer
+* .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
+* .brightColor(register): choose between 8 bright colors using an 0..7 integer
 
 
 ## Background colors
 
-* bgDefaultColor(): back to the default background color
-* bgBlack(): ...
-* bgRed(): ...
-* bgGreen(): ...
-* bgYellow(): dark yellow, most of time brown or orange
-* bgBlue(): ...
-* bgMagenta(): ...
-* bgCyan(): ...
-* bgWhite(): ...
-* bgDarkColor(): ...
-* bgBrightBlack(): ...
-* bgBrightRed(): ...
-* bgBrightGreen(): ...
-* bgBrightYellow(): true yellow
-* bgBrightBlue(): ...
-* bgBrightMagenta(): ...
-* bgBrightCyan(): ...
-* bgColor(register): choose between 16 colors using an 0..15 integer
-* bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
-* bgBrightColor(): choose between 8 bright colors using an 0..7 integer
+* .bgDefaultColor(): back to the default background color
+* .bgBlack(): ...
+* .bgRed(): ...
+* .bgGreen(): ...
+* .bgYellow(): dark yellow, most of time brown or orange
+* .bgBlue(): ...
+* .bgMagenta(): ...
+* .bgCyan(): ...
+* .bgWhite(): ...
+* .bgDarkColor(): ...
+* .bgBrightBlack(): ...
+* .bgBrightRed(): ...
+* .bgBrightGreen(): ...
+* .bgBrightYellow(): true yellow
+* .bgBrightBlue(): ...
+* .bgBrightMagenta(): ...
+* .bgBrightCyan(): ...
+* .bgColor(register): choose between 16 colors using an 0..15 integer
+* .bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
+* .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
 
 
 ## Styles
 
-* styleReset(): reset all styles and go back to default colors without
-* bold(): bold text
-* dim(): faint color
-* italic(): italic
-* underline(): underline
-* blink(): blink text, not widely supported
-* inverse(): foreground and background color
-* hidden(): invisible, but can be copy/paste'd
-* strike(): strike through
+* .styleReset(): reset all styles and go back to default colors without
+* .bold(): bold text
+* .dim(): faint color
+* .italic(): italic
+* .underline(): underline
+* .blink(): blink text, not widely supported
+* .inverse(): foreground and background color
+* .hidden(): invisible, but can be copy/paste'd
+* .strike(): strike through
 
 
 ## Cursors
 
-* saveCursor(): save cursor position
-* restoreCursor(): restore a previously saved cursor position
-* up(n): move the cursor 'n' chars up
-* down(n): move the cursor 'n' chars down
-* right(n): move the cursor 'n' chars right
-* left(n): move the cursor 'n' chars left
-* nextLine(n): move the cursor to beginning of the line, 'n' lines down
-* previousLine(n): move the cursor to beginning of the line, 'n' lines up
-* column(x): move the cursor to column x
-* scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom, the absolute cursor position do not change (Linux Console don't support it)
-* scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top, the absolute cursor position do not change (Linux Console don't support it)
-* moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
-* move(x,y): relative move of the cursor
-* hideCursor(): hide/show the cursor
+* .saveCursor(): save cursor position
+* .restoreCursor(): restore a previously saved cursor position
+* .up(n): move the cursor 'n' chars up
+* .down(n): move the cursor 'n' chars down
+* .right(n): move the cursor 'n' chars right
+* .left(n): move the cursor 'n' chars left
+* .nextLine(n): move the cursor to beginning of the line, 'n' lines down
+* .previousLine(n): move the cursor to beginning of the line, 'n' lines up
+* .column(x): move the cursor to column x
+* .scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom, the absolute cursor position do not change (Linux Console don't support it)
+* .scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top, the absolute cursor position do not change (Linux Console don't support it)
+* .moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
+* .move(x,y): relative move of the cursor
+* .hideCursor(): hide/show the cursor
 
 
 ## Editing
 
-* clear(): clear the screen and move the cursor to the upper-left corner
-* eraseDisplayBelow(): erase everything below the cursor
-* eraseDisplayAbove(): erase everything above the cursor
-* eraseDisplay(): erase everything
-* eraseLineAfter(): erase current line after the cursor
-* eraseLineBefore(): erase current line before the cursor
-* eraseLine(): erase current line
-* alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
+* .clear(): clear the screen and move the cursor to the upper-left corner
+* .eraseDisplayBelow(): erase everything below the cursor
+* .eraseDisplayAbove(): erase everything above the cursor
+* .eraseDisplay(): erase everything
+* .eraseLineAfter(): erase current line after the cursor
+* .eraseLineBefore(): erase current line before the cursor
+* .eraseLine(): erase current line
+* .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
 
 
 ## Input/Output
 
-* requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
-* requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
-* applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
+* .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
+* .requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
+* .applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
 
 
 ## Internal input/output (do not use directly, use grabInput() instead)
 
-* mouseButton(): ask the terminal to send event when a mouse button is pressed, with the mouse cursor position
-* mouseDrag(): ask the terminal to send event when a mouse button is pressed and when draging, with the mouse cursor position
-* mouseMotion(): ask the terminal to send all mouse event, even mouse motion that occurs without buttons
-* mouseSGR(): another mouse protocol that extend coordinate mapping (without it, it supports only 223 rows and columns)
-* focusEvent(): ask the terminal to send event when it gains and loses focus, not widely supported
+* .mouseButton(): ask the terminal to send event when a mouse button is pressed, with the mouse cursor position
+* .mouseDrag(): ask the terminal to send event when a mouse button is pressed and when draging, with the mouse cursor position
+* .mouseMotion(): ask the terminal to send all mouse event, even mouse motion that occurs without buttons
+* .mouseSGR(): another mouse protocol that extend coordinate mapping (without it, it supports only 223 rows and columns)
+* .focusEvent(): ask the terminal to send event when it gains and loses focus, not widely supported
 
 
 ## OS functions (not widely supported)
 
-* windowTitle(): set the title of an xterm-compatible window
+* .windowTitle(): set the title of an xterm-compatible window
 
 
 
-# Input management with `grabInput(options)`
+# Advanced methods description
+
+Advanced methods are high-level librairie functions.
+
+
+
+## .getParentTerminalInfo( callback )
+
+* callback `Function( error , codename , name , pid )` where:
+	* error: truthy if it has failed for some reason
+	* codename: the code name of the terminal, as used by terminfo
+	* name: the real binary name of the terminal
+	* pid: the PID of the terminal
+
+This method detect on which terminal your application run.
+It does **\*NOT\*** use the $TERM environment variable.
+It iterates through parent process until a known terminal is found, or process of PID 1 is reached (the *init* process).
+
+Obviously, it does not works over SSH.
+
+
+
+## .getDetectedTerminal( callback )
+
+* callback `Function( error , codename , name , pid )` where:
+	* error: truthy if it has failed for some reason
+	* term: the terminal object created specifically for your terminal
+
+This is a shortcut that call `.getParentTerminalInfo()` then use `.createTerminal()` with the correct arguments.
+This will give you a terminal object with the best support that this lib is able to give to you.
+
+It does not works over SSH.
+
+Example **\*NOT\***  using `.getDetectedTerminal()`:
+```js
+var term = require( 'terminal-kit' ) ;
+term.cyan( 'Hello world!' ) ;
+```
+This will give you a terminal object based on the $TERM environment variable, that works fine in most case.
+But please consider that most of modern terminal reports them as an *xterm* or an *xterm-256color* terminal.
+They claim being xterm-compatible, but most of them support only 33% to 50% of xterm features,
+and even major terminal like *gnome-terminal* or *Konsole* are terrible.
+
+Example using `.getDetectedTerminal()`:
+```js
+require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+	term.cyan( 'Terminal name: %s\n' , term.appName ) ;
+	term.cyan( 'Terminal app: %s\n' , term.app ) ;
+	term.cyan( 'Terminal type: %s\n' , term.type ) ;
+	term.cyan( 'Config file: %s\n' , term.termconfigFile ) ;
+} ) ;
+```
+This will give you the best compatibility possible, at the cost of a callback.
+
+
+
+## .grabInput( options )
 
 * options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
   if it is an Object then those properties are supported:
@@ -223,7 +281,8 @@ We can do:
 		  (for example, one may consider this for script running over SSH)
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
 
-This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event on the `term` object.
+This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event
+on the `term` object.
 
 
 Quick example:
@@ -257,7 +316,15 @@ term.on( 'mouse' , function( name , data ) {
 ```
 
 
+
+# Events
+
+Event are fired on your `term` object.
+
+
+
 ## 'key' event ( name , matches )
+
 * name: string, the key name
 * matches: array of matched key name
 
@@ -303,6 +370,7 @@ the same way...
 
 
 ## 'terminal' event
+
 * name: string, the name of the subtype of event
 * data: Object, provide some data depending on the event
 
@@ -325,6 +393,7 @@ The argument 'name' can be:
 
 
 ## 'mouse' event
+
 * name: string, the name of the subtype of event
 * data: Object, provide the mouse coordinate and keyboard modifier status, properties:
 	* x: integer, the row number where the mouse is
