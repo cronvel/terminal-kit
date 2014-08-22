@@ -270,6 +270,18 @@ This will give you the best compatibility possible, at the cost of a callback.
 
 
 
+## .fullscreen( options )
+
+* options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
+  if it is an object it supports those properties:
+	* noAlternate `boolean` true if the alternate screen buffer should not be used
+
+Basically, this method try to achieve the same goal than the native terminal capability *alternate screen buffer*.
+If *alternate screen buffer* is disabled on your terminal, it will provide a clean fallback, clearing the screen and positionning
+the cursor at the upper-left corner.
+
+
+
 ## .grabInput( options )
 
 * options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
