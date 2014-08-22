@@ -253,13 +253,13 @@ var term = require( 'terminal-kit' ) ;
 term.cyan( 'Hello world!' ) ;
 ```
 This will give you a terminal object based on the $TERM environment variable, that works fine in most case.
-But please consider that most of modern terminal reports them as an *xterm* or an *xterm-256color* terminal.
+But please consider that most of modern terminal report them as an *xterm* or an *xterm-256color* terminal.
 They claim being xterm-compatible, but most of them support only 33% to 50% of xterm features,
 and even major terminal like *gnome-terminal* or *Konsole* are terrible.
 
 Example using `.getDetectedTerminal()`:
 ```js
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+require( 'terminal-kit' ).getDetectedTerminal( function( error , term ) {
 	term.cyan( 'Terminal name: %s\n' , term.appName ) ;
 	term.cyan( 'Terminal app: %s\n' , term.app ) ;
 	term.cyan( 'Terminal type: %s\n' , term.type ) ;
