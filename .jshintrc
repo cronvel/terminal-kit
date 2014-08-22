@@ -1,0 +1,40 @@
+{
+	// Generic options
+	"maxerr" : 20,
+	
+	// Predefined globals (node.js, browser, etc...)
+	"node" : true,
+	"browser" : false,
+	"jquery" : false,
+	
+	
+	// Security
+	"eqeqeq" : true, // true: Require triple equals (===) for comparison
+	//"forin" : true, // true: Require filtering for..in loops with obj.hasOwnProperty()
+	"latedef" : false, // true: Require variables/functions to be defined before being used
+	"undef" : true, // true: Require all non-global variables to be declared (prevents global leaks)
+	"unused" : true, // true: Require all defined variables be used
+	
+	// Style
+	"indent" : 4, // Specify indentation spacing
+	"camelcase" : true,
+	// "maxlen" : 120,
+	"curly" : true,
+	"newcap" : true, // Require capitalization of all constructor functions e.g. `new F()`.
+	"noempty" : true, // Prohibit use of empty blocks.
+	"nonew" : false, // Prohibit use of constructors for side-effects.
+	"plusplus" : false, // Prohibit use of `++` & `--`.
+	"sub" : false, // Tolerate all forms of subscript notation besides dot notation e.g. `dict['key']` instead of `dict.key`.
+	"smarttabs" : true, // This option suppresses warnings about mixed tabs and spaces when the latter are used for alignmnent only. 
+	"trailing" : true, // Prohibit trailing whitespaces.
+	"immed" : true, // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
+	"quotmark" : false, // Quotation mark consistency:
+		// false    : do nothing (default)
+		// true     : ensure whatever is used is consistent
+		// "single" : require single quotes
+		// "double" : require double quotes
+	"maxparams" : 6, // {int} Max number of formal params allowed per function
+	"maxdepth" : 6, // {int} Max depth of nested blocks (within functions)
+	"asi" : false, // true: Tolerate Automatic Semicolon Insertion (no semicolons)
+	"boss" : false // true: Tolerate assignments where comparisons would be expected
+}

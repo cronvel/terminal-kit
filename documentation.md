@@ -65,6 +65,14 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 
 
+# Install
+
+Use Node Package Manager:
+
+    npm install terminal-kit
+
+
+
 # Standard methods description
 
 Standard methods map low-level terminal capabilities.
