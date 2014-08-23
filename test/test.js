@@ -29,10 +29,18 @@
 /* global describe, it, before, after */
 
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
-	//term.down( 3 , "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 , '20th col' ).down( 3 , '\n' ).hideCursor( false ) ;
-	//process.exit() ;
+//var term = require( '../lib/terminal.js' ) ;
+require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+	
+	/*
+	term( 'Terminal name: %s\n' , term.appName ) ;
+	term( 'Terminal app: %s\n' , term.app ) ;
+	term( 'Terminal type: %s\n' , term.type ) ;
+	term( 'Config file: %s\n' , term.termconfigFile ) ;
+	term.down( 3 , "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 , '20th col' ).down( 3 , '\n' ).hideCursor( false ) ;
+	process.exit() ;
+	*/
 
 	term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
 	term( term.esc.blue.on + 'Blue' + term.esc.blue.off ) ;
