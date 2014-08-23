@@ -1,5 +1,9 @@
 
 
-<terminal>.generic.js refers to the terminal type reported by the $TERM environment variable, e.g. xterm-256color
 <terminal>.js refers to the real terminal application, e.g. gnome-terminal, konsole, ...
-terminfo.js contains for each method the terminfo name of the capability
+
+<terminal>.generic.js refers to a fail-safe version of a terminal used when we got the terminal identifier
+using the $TERM environment variable and it happens that this identifier is shared with not-so-compliant terminal,
+e.g. xterm-256color.
+
+terminfo.js contains for each method the terminfo name of the capability.
