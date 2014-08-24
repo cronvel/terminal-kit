@@ -34,7 +34,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term( 'Terminal name: %s\n' , term.appName ) ;
 	term( 'Terminal app: %s\n' , term.app ) ;
-	term( 'Terminal type: %s\n' , term.type ) ;
+	term( 'Terminal generic: %s\n' , term.generic ) ;
 	term( 'Config file: %s\n' , term.termconfigFile ) ;
 } ) ;
 

@@ -270,7 +270,7 @@ Example using `.getDetectedTerminal()`:
 require( 'terminal-kit' ).getDetectedTerminal( function( error , term ) {
 	term.cyan( 'Terminal name: %s\n' , term.appName ) ;
 	term.cyan( 'Terminal app: %s\n' , term.app ) ;
-	term.cyan( 'Terminal type: %s\n' , term.type ) ;
+	term.cyan( 'Terminal generic: %s\n' , term.generic ) ;
 	term.cyan( 'Config file: %s\n' , term.termconfigFile ) ;
 } ) ;
 ```

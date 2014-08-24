@@ -36,7 +36,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	/*
 	term( 'Terminal name: %s\n' , term.appName ) ;
 	term( 'Terminal app: %s\n' , term.app ) ;
-	term( 'Terminal type: %s\n' , term.type ) ;
+	term( 'Terminal generic: %s\n' , term.generic ) ;
 	term( 'Config file: %s\n' , term.termconfigFile ) ;
 	term.down( 3 , "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 , '20th col' ).down( 3 , '\n' ).hideCursor( false ) ;
 	process.exit() ;
