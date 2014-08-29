@@ -383,9 +383,9 @@ it will produce a normal arrow key.
 There is no workaround here, the underlying keyboard driver simply does not support this.
 
 KP_* keys needs `applicationKeypad()`, e.g. without it KP_1 will report '1' or END.
-Some terminal does not support `applicationKeypad()` very well, and it is nearly impossible to differenciate (for example) a KP_1 from
-an END, or a KP_7 from a HOME, since most X terminal will be reported as xterm or xterm-256color happily, but still does not report key
-the same way...
+
+Some terminal does not support `applicationKeypad()` at all, sometime turning numlock off can works, sometime not,
+so it is nearly impossible to differenciate (for example) a KP_1 from an END, or a KP_7 from a HOME.
 
 
 
