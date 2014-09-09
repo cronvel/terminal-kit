@@ -56,6 +56,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	//term.keyboardModifier() ;
 
 	term.grabInput( { mouse: 'button' , focus: true } ) ;
+	//term.grabInput( { mouse: 'motion' , focus: true } ) ;
 
 	term.on( 'key' , function( name , matches , data ) {
 		
