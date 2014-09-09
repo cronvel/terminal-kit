@@ -48,7 +48,7 @@ log/jshint.log: log/npm-dev-install.log lib/terminal.js lib/format.js
 
 # Mocha BDD STDOUT test
 log/mocha.log: log/npm-dev-install.log lib/terminal.js lib/format.js test/terminal-test.js
-	${MOCHA} test/terminal-test.js -R list | tee log/mocha.log ; exit $${PIPESTATUS[0]}
+	${MOCHA} test/terminal-test.js -R spec | tee log/mocha.log ; exit $${PIPESTATUS[0]}
 
 # README
 README.md: documentation.md bdd-spec.md
