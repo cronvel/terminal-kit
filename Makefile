@@ -43,11 +43,11 @@ JSHINT=./node_modules/jshint/bin/jshint --verbose
 # Files rules
 
 # JsHint STDOUT test
-log/jshint.log: log/npm-dev-install.log lib/terminal.js lib/format.js
-	${JSHINT} lib/terminal.js lib/format.js lib/termconfig/*.js | tee log/jshint.log ; exit $${PIPESTATUS[0]}
+log/jshint.log: log/npm-dev-install.log lib/terminal.js
+	${JSHINT} lib/terminal.js lib/termconfig/*.js | tee log/jshint.log ; exit $${PIPESTATUS[0]}
 
 # Mocha BDD STDOUT test
-log/mocha.log: log/npm-dev-install.log lib/terminal.js lib/format.js test/terminal-test.js
+log/mocha.log: log/npm-dev-install.log lib/terminal.js test/terminal-test.js
 	${MOCHA} test/terminal-test.js -R spec | tee log/mocha.log ; exit $${PIPESTATUS[0]}
 
 # README

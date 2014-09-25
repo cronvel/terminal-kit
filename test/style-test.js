@@ -55,7 +55,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	// Check the color() function
 	for ( i = 0 ; i < 16 ; i ++ ) { term.bold.color( i , '*' ) ; }
 	term( '\n' ) ;
-
+	
 
 
 	// Test background colors
