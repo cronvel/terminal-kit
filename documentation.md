@@ -106,6 +106,7 @@ We can do:
 
 * .reset(): full reset the terminal.
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
+* .str(): do not output anything, instead return a string containing the sequences
 * .beep(): emit a beep
 
 

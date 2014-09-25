@@ -68,6 +68,9 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.move( -2 , -5 ) ; term.bold.brightGreen( '(-2;-5)' ) ;
 	term.moveTo.cyan( 1 , 2 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) 
 	term.restoreCursor() ;
+	
+	var toto = term.str.red( 'toto' ) ;
+	console.log( '\nconsole.log(toto):' , toto ) ;
 
 	term( '\n' ) ;
 } ) ;
