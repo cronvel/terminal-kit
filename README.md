@@ -246,7 +246,7 @@ Obviously, it does not works over SSH.
 
 ## .getDetectedTerminal( callback )
 
-* callback `Function( error , codename , name , pid )` where:
+* callback `Function( error , term )` where:
 	* error: truthy if it has failed for some reason
 	* term: the terminal object created specifically for your terminal
 
