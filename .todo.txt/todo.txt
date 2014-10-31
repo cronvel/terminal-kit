@@ -1,0 +1,4 @@
+generic function that accept RGB in input and translate it into the closest color in the xterm palette @code
+find a way to edit the xterm palette @code
+find a way to factorize code between konsole.js, konsole-256color, xterm.js & xterm-256color @code
+(A) finish checking derivation between termconfig @code

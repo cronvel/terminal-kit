@@ -1,0 +1,1 @@
+(A) add a default/base terminal config containing empty code { on:'',off:'' } so terminal type that don't have x or y function will not crash the application (e.g. 256 colors functions)
