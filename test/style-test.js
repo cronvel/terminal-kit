@@ -105,17 +105,6 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
 
 
-	// Test styles
-
-	term.bold( '\n=== 256 colors test  ===\n\n' ) ;
-	
-	for ( i = 0 ; i <= 255 ; i ++ ) { term.color256( i , "[%d]" , i ) ; }
-	term( '\n' ) ;
-	for ( i = 0 ; i <= 255 ; i ++ ) { term.bgColor256( i , "[%d]" , i ) ; }
-	term( '\n' ) ;
-
-
-
 	// Reset before exiting...
 
 	term( '\n' ) ;
