@@ -346,6 +346,48 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
+## .yesOrNo( [yes] , [no] , callback )
+	* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
+	* no `string` or `Array` contains a key code or an array of key code that will trigger the 
+	* callback( error , result )
+		* error `mixed` truthy if an underlying error occurs
+		* result `boolean` true for 'yes' or false for 'no'
+
+Wait for user input, call the completion callback when the user hit the 'y' key or the 'n' key,
+*result* will be true if the user hit any *yes* keys or false if the user hit any *no* keys.
+Other keys do not do anything.
+
+Turn input grabbing on if necessary.
+
+We can specify the keys for *yes* and *no* by providing a string or an array of string.
+
+Quick example:
+
+```js
+function question()
+{
+	term( 'Do you like javascript? [Y|n]\n' ) ;
+	
+	// Exit on y, Y and ENTER key
+	// Ask again on n and N
+	term.yesOrNo( [ 'y' , 'o' , 'ENTER' ] , [ 'n' ] , function( error , result ) {
+	
+		if ( result )
+		{
+			term.green( "'Yes' detected! Exiting now!\n" ) ;
+			process.exit() ;
+		}
+		else
+		{
+			term.red( "'No' detected, asking again!\n" ) ;
+			question() ;
+		}
+	} ) ;
+}
+```
+
+
+
 # Events
 
 Event are fired on your `term` object.

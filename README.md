@@ -346,6 +346,48 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
+## .yesOrNo( [yes] , [no] , callback )
+	* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
+	* no `string` or `Array` contains a key code or an array of key code that will trigger the 
+	* callback( error , result )
+		* error `mixed` truthy if an underlying error occurs
+		* result `boolean` true for 'yes' or false for 'no'
+
+Wait for user input, call the completion callback when the user hit the 'y' key or the 'n' key,
+*result* will be true if the user hit any *yes* keys or false if the user hit any *no* keys.
+Other keys do not do anything.
+
+Turn input grabbing on if necessary.
+
+We can specify the keys for *yes* and *no* by providing a string or an array of string.
+
+Quick example:
+
+```js
+function question()
+{
+	term( 'Do you like javascript? [Y|n]\n' ) ;
+	
+	// Exit on y, Y and ENTER key
+	// Ask again on n and N
+	term.yesOrNo( [ 'y' , 'o' , 'ENTER' ] , [ 'n' ] , function( error , result ) {
+	
+		if ( result )
+		{
+			term.green( "'Yes' detected! Exiting now!\n" ) ;
+			process.exit() ;
+		}
+		else
+		{
+			term.red( "'No' detected, asking again!\n" ) ;
+			question() ;
+		}
+	} ) ;
+}
+```
+
+
+
 # Events
 
 Event are fired on your `term` object.
@@ -372,6 +414,10 @@ List of SPECIAL keys:
     KP_NUMLOCK KP_DIVIDE KP_MULTIPLY KP_MINUS KP_PLUS KP_DELETE KP_ENTER
     KP_0 KP_1 KP_2 KP_3 KP_4 KP_5 KP_6 KP_7 KP_8 KP_9
     F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12
+    SHIFT_F1 SHIFT_F2 SHIFT_F3 SHIFT_F4 SHIFT_F5 SHIFT_F6 SHIFT_F7 SHIFT_F8 SHIFT_F9 SHIFT_F10 SHIFT_F11 SHIFT_F12
+    CTRL_F1 CTRL_F2 CTRL_F3 CTRL_F4 CTRL_F5 CTRL_F6 CTRL_F7 CTRL_F8 CTRL_F9 CTRL_F10 CTRL_F11 CTRL_F12
+    CTRL_SHIFT_F1 CTRL_SHIFT_F2 CTRL_SHIFT_F3 CTRL_SHIFT_F4 CTRL_SHIFT_F5 CTRL_SHIFT_F6
+	CTRL_SHIFT_F7 CTRL_SHIFT_F8 CTRL_SHIFT_F9 CTRL_SHIFT_F10 CTRL_SHIFT_F11 CTRL_SHIFT_F12
     SHIFT_UP SHIFT_DOWN SHIFT_RIGHT SHIFT_LEFT
     ALT_UP ALT_DOWN ALT_RIGHT ALT_LEFT
     CTRL_UP CTRL_DOWN CTRL_RIGHT CTRL_LEFT
