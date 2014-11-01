@@ -132,6 +132,10 @@ We can do:
 * .color(register): choose between 16 colors using an 0..15 integer
 * .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
 * .brightColor(register): choose between 8 bright colors using an 0..7 integer
+* .color256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
+* .color256rgb(r,g,b): if the terminal support 256 colors, set the color from RGB value in the 0..5 range
+* .color256gray(l): if the terminal support 256 colors, set the color from the grayscale where the lightness
+	value is in the 0..25 range
 
 
 ## Background colors
@@ -156,6 +160,10 @@ We can do:
 * .bgColor(register): choose between 16 colors using an 0..15 integer
 * .bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
 * .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
+* .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
+* .bgColor256rgb(r,g,b): if the terminal support 256 colors, set the color from RGB value in the 0..5 range
+* .bgColor256gray(l): if the terminal support 256 colors, set the color from the grayscale where the lightness
+	value is in the 0..25 range
 
 
 ## Styles
