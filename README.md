@@ -13,7 +13,7 @@ It does not depend on ncurses.
 
 # Features
 
-* colors, 256 colors if the terminal support it
+* colors, 256 colors if the terminal supports it
 * styles (bold, underline, italic, and many more)
 * string formating
 * style mixing
@@ -21,6 +21,7 @@ It does not depend on ncurses.
 * keyboard input
 * mouse support
 * terminal window title
+* input field
 * event-driven
 
 
@@ -102,12 +103,14 @@ We can do:
 `term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )` which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
 
 
+
 ## Common/Misc
 
 * .reset(): full reset the terminal.
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
 * .str(): do not output anything, instead return a string containing the sequences
 * .beep(): emit a beep
+
 
 
 ## Foreground colors
@@ -138,6 +141,7 @@ We can do:
 	value is in the 0..25 range
 
 
+
 ## Background colors
 
 * .bgDefaultColor(): back to the default background color
@@ -166,6 +170,7 @@ We can do:
 	value is in the 0..25 range
 
 
+
 ## Styles
 
 * .styleReset(): reset all styles and go back to default colors without
@@ -177,6 +182,7 @@ We can do:
 * .inverse(): foreground and background color
 * .hidden(): invisible, but can be copy/paste'd
 * .strike(): strike through
+
 
 
 ## Cursors
@@ -197,6 +203,7 @@ We can do:
 * .hideCursor(): hide/show the cursor
 
 
+
 ## Editing
 
 * .clear(): clear the screen and move the cursor to the upper-left corner
@@ -215,11 +222,13 @@ We can do:
 * .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
 
 
+
 ## Input/Output
 
 * .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
 * .requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
 * .applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
+
 
 
 ## Internal input/output (do not use directly, use grabInput() instead)
@@ -229,6 +238,7 @@ We can do:
 * .mouseMotion(): ask the terminal to send all mouse event, even mouse motion that occurs without buttons
 * .mouseSGR(): another mouse protocol that extend coordinate mapping (without it, it supports only 223 rows and columns)
 * .focusEvent(): ask the terminal to send event when it gains and loses focus, not widely supported
+
 
 
 ## OS functions (not widely supported)
@@ -352,6 +362,17 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
+## .getCursorLocation( callback )
+
+* callback( error , x , y )
+	* error `mixed` truthy if an underlying error occurs
+	* x `integer` the x coordinate of the cursor
+	* y `integer` the y coordinate of the cursor
+
+Get the cursor location.
+
+
+
 ## .yesOrNo( [options] , callback )
 	* options `Object` where:
 		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
@@ -394,6 +415,7 @@ function question()
 	} ) ;
 }
 ```
+
 
 
 ## .inputField( [options] , callback )
