@@ -1,1 +1,2 @@
 find a way to edit the xterm palette @code
+document .getCursorLocation() @doc
