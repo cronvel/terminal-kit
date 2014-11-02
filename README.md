@@ -206,6 +206,12 @@ We can do:
 * .eraseLineAfter(): erase current line after the cursor
 * .eraseLineBefore(): erase current line before the cursor
 * .eraseLine(): erase current line
+* .insertLine(n): insert n lines
+* .deleteLine(n): delete n lines
+* .insert(n): insert n char after (like the INSERT key)
+* .delete(n): delete n char after (like the DELETE key)
+* .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1)
+  followed by a .delete(1)
 * .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
 
 
@@ -346,9 +352,12 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
-## .yesOrNo( [yes] , [no] , callback )
-	* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
-	* no `string` or `Array` contains a key code or an array of key code that will trigger the 
+## .yesOrNo( [options] , callback )
+	* options `Object` where:
+		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
+		* no `string` or `Array` contains a key code or an array of key code that will trigger the 
+		* echoYes `String` contains what to write on yes, default 'yes'
+		* echoNo `String` contains what to write on no, default 'no'
 	* callback( error , result )
 		* error `mixed` truthy if an underlying error occurs
 		* result `boolean` true for 'yes' or false for 'no'
@@ -368,22 +377,53 @@ function question()
 {
 	term( 'Do you like javascript? [Y|n]\n' ) ;
 	
-	// Exit on y, Y and ENTER key
-	// Ask again on n and N
-	term.yesOrNo( [ 'y' , 'o' , 'ENTER' ] , [ 'n' ] , function( error , result ) {
+	// Exit on y and ENTER key
+	// Ask again on n
+	term.yesOrNo( { yes: [ 'y' , 'ENTER' ] , no: [ 'n' ] } , function( error , result ) {
 	
 		if ( result )
 		{
-			term.green( "'Yes' detected! Exiting now!\n" ) ;
+			term.green( "'Yes' detected! Good bye!\n" ) ;
 			process.exit() ;
 		}
 		else
 		{
-			term.red( "'No' detected, asking again!\n" ) ;
+			term.red( "'No' detected, are you sure?\n" ) ;
 			question() ;
 		}
 	} ) ;
 }
+```
+
+
+## .inputField( [options] , callback )
+	* options `Object` where:
+		* echo `boolean` if true (the default), input are displayed on the terminal
+	* callback( error , input )
+		* error `mixed` truthy if an underlying error occurs
+		* input `string` the user input
+
+Wait for user input, call the completion callback when the user hit the *ENTER* key and pass the user input
+to the callback.
+
+This support accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
+and the *home* and *end* key.
+
+Turn input grabbing on if necessary.
+
+Quick example:
+
+```js
+function question()
+{
+	term( 'Please enter your name: ' ) ;
+	
+	term.inputField( function( error , input ) {
+	
+		term.green( "\nYour name is '%s'\n" , input ) ;
+		process.exit() ;
+	} ) ;
+}	
 ```
 
 
