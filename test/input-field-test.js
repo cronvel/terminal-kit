@@ -33,25 +33,19 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
 	function question()
 	{
-		term( 'Do you like javascript? [y|n] ' ) ;
+		term( 'Please enter your name: ' ) ;
 		
-		//term.yesOrNo( { yes: [ 'y' , 'o' , 'ENTER' ] , no: [ 'n' ] , echoYes: 'yes' , echoNo: 'no' } , function( error , result ) {
-		term.yesOrNo( function( error , result ) {
+		term.inputField( function( error , input ) {
 			
 			if ( error )
 			{
 				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
 				question() ;
 			}
-			else if ( result )
-			{
-				term.green( "\n'Yes' detected! Good bye!\n" ) ;
-				terminate() ;
-			}
 			else
 			{
-				term.red( "\n'No' detected, are you sure?\n" ) ;
-				question() ;
+				term.green( "\nYour name is '%s'\n" , input ) ;
+				terminate() ;
 			}
 		} ) ;
 	}
@@ -66,7 +60,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	}
 	
 	
-	term.bold.cyan( 'Yes or no test, hit anything on the keyboard to see how it is detected...\n' ) ;
+	term.bold.cyan( 'Input field test, type something and hit the ENTER key...\n' ) ;
 	question() ; 
 } ) ;
 
