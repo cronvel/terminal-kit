@@ -1,6 +1,6 @@
 {
   "name": "terminal-kit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Terminal utilities with support for colors (even 256 colors), styles, inputs, mouse and many more...",
   "main": "lib/terminal.js",
   "directories": {
