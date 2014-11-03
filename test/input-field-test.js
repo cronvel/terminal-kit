@@ -49,9 +49,45 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 			}
 		} ) ;
 	}
-
-
-
+	
+	
+	
+	function funkyCursor()
+	{
+		/*
+		term.cursorColorRgb(
+			Math.floor( 30 + Math.random() * 200 ) ,
+			Math.floor( 30 + Math.random() * 200 ) ,
+			Math.floor( 30 + Math.random() * 200 )
+		) ;
+		*/
+		term.cursorColor(
+			Math.floor( Math.random() * 8 ) ,
+			Math.floor( Math.random() * 8 )
+		) ;
+		setTimeout( funkyCursor , 200 ) ;
+	}
+	
+	
+	
+	function funkyBackground()
+	{
+		return ;
+		term.defaultBgColorRgb(
+			Math.floor( 0 + Math.random() * 100 ) ,
+			Math.floor( 0 + Math.random() * 100 ) ,
+			Math.floor( 0 + Math.random() * 100 )
+		) ;
+		term.defaultColorRgb(
+			Math.floor( 150 + Math.random() * 100 ) ,
+			Math.floor( 150 + Math.random() * 100 ) ,
+			Math.floor( 150 + Math.random() * 100 )
+		) ;
+		setTimeout( funkyBackground , 2000 ) ;
+	}
+	
+	
+	
 	function terminate()
 	{
 		term.grabInput( false ) ;
@@ -62,6 +98,8 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term.bold.cyan( 'Input field test, type something and hit the ENTER key...\n' ) ;
 	question() ; 
+	funkyCursor() ;
+	funkyBackground() ;
 } ) ;
 
 

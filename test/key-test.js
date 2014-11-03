@@ -60,7 +60,13 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
 	term.on( 'key' , function( name , matches , data ) {
 		
-		console.log( "'key' event:" , name , matches , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) , data.codepoint ? data.codepoint.toString( 16 ) : '' ) ;
+		console.log(
+			"'key' event:" ,
+			name ,
+			matches ,
+			Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) ,
+			data.codepoint ? data.codepoint.toString( 16 ) : ''
+		) ;
 		
 		if ( matches.indexOf( 'CTRL_C' ) >= 0 )
 		{
