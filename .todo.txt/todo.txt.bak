@@ -1,4 +1,3 @@
-x 2014-11-01 generic function that accept RGB in input and translate it into the closest color in the xterm palette @code
 find a way to edit the xterm palette @code
-x 2014-11-01 find a way to factorize code between konsole.js, konsole-256color, xterm.js & xterm-256color @code
-x 2014-11-01 finish checking derivation between termconfig @code
+document .getCursorLocation() @doc
+review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
