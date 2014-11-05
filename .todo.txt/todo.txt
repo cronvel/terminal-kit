@@ -2,3 +2,4 @@ find a way to edit the xterm palette @code
 document .getCursorLocation() @doc
 (A) review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
 (A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
+add na:true to all non-applicable sequences @code

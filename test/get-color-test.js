@@ -31,22 +31,30 @@
 
 require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
+	var terminating = false ;
 	
 	function terminate()
 	{
+		terminating = true ;
 		term.brightBlack( 'About to exit...\n' ) ;
 		term.grabInput( false ) ;
 		
 		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() } , 100 ) ;
-	} 
+		setTimeout( function() { process.exit() } , 250 ) ;
+	}
 	
 	var i = 0 ;
 	
 	function getColors() {
+		
+		if ( terminating ) { return ; }
+		
 		term.getColorRegister( i , function get( error , reg ) {
+			
 			if ( error ) { term.red( error.toString() + '\n' ) ; }
 			else { term( '#%u -- R:%u G:%u B:%u\n' , reg.register , reg.r , reg.g , reg.b ) ; }
+			
+			if ( terminating ) { return ; }
 			
 			if ( i < 255 ) { i ++ ; getColors() ; }
 			else { terminate() ; }

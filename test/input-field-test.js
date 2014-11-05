@@ -60,11 +60,15 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 			Math.floor( 30 + Math.random() * 200 ) ,
 			Math.floor( 30 + Math.random() * 200 )
 		) ;
-		*/
+		//*/
+		
+		//*
 		term.cursorColor(
 			Math.floor( Math.random() * 8 ) ,
 			Math.floor( Math.random() * 8 )
 		) ;
+		//*/
+		
 		setTimeout( funkyCursor , 200 ) ;
 	}
 	
