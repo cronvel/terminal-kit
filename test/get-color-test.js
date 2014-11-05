@@ -45,7 +45,9 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	function getColors() {
 		term.getColorRegister( i , function get( error , reg ) {
-			term( '#%u -- R:%u G:%u B:%u\n' , reg.register , reg.r , reg.g , reg.b ) ;
+			if ( error ) { term.red( error.toString() + '\n' ) ; }
+			else { term( '#%u -- R:%u G:%u B:%u\n' , reg.register , reg.r , reg.g , reg.b ) ; }
+			
 			if ( i < 255 ) { i ++ ; getColors() ; }
 			else { terminate() ; }
 		} ) ;
