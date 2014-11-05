@@ -54,7 +54,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	function funkyCursor()
 	{
-		/*
+		//*
 		term.cursorColorRgb(
 			Math.floor( 30 + Math.random() * 200 ) ,
 			Math.floor( 30 + Math.random() * 200 ) ,
@@ -62,7 +62,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 		) ;
 		//*/
 		
-		//*
+		/*
 		term.cursorColor(
 			Math.floor( Math.random() * 8 ) ,
 			Math.floor( Math.random() * 8 )
