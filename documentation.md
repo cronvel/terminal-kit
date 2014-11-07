@@ -241,9 +241,13 @@ We can do:
 
 
 
-## OS functions (not widely supported)
+## Misc
 
-* .windowTitle(): set the title of an xterm-compatible window
+* .windowTitle(str): set the title of an xterm-compatible window to *str*
+* .setCursorColor(register): set the cursor color to one of the 256 *register*
+* .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
+* .setDefaultColorRgb(r,g,b): set the value of the default foreground color
+* .setDefaultBgColorRgb(): set the value of the default background color, this is the terminal window background
 
 
 
