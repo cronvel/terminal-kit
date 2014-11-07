@@ -30,8 +30,8 @@
 
 
 require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
-
-	/*
+	
+	//*
 	var r = Math.floor( Math.random() * 256 ) ;
 	var g = Math.floor( Math.random() * 256 ) ;
 	var b = Math.floor( Math.random() * 256 ) ;
@@ -39,7 +39,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.setCursorColorRgb( r , g , b ) ;
 	//*/
 	
-	//*
+	/*
 	var c = Math.floor( Math.random() * 8 ) ;
 	term.bold.cyan( 'Setting the cursor color to register %d\n' , c ) ;
 	term.setCursorColor( c , 0 ) ;
