@@ -1,3 +1,6 @@
 find a way to edit the xterm palette @code
 document .getCursorLocation() @doc
-review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
+(A) review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
+(A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
+add na:true to all non-applicable sequences @code
+x 2014-11-07 .setCursorColor() doesn't match the right color in Linux Console @code
