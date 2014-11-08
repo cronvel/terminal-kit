@@ -1,4 +1,22 @@
 
+v0.4.1
+------
+
+.color256rgb() -> .colorRgb()
+.bgColor256rgb() -> .bgColororRgb()
+.color256gray() -> .colorGrayscale()
+.bgColor256gray() -> .bgColorGrayscale()
+
+Fallback for 256 colors, if not supported by the terminal, it picks the closest color in the 16 colors.
+.setCursorColor() & .setCursorColorRgb() now work fine with the Linux Console.
+
+
+v0.3.8
+------
+
+.setCursorColor() & .setCursorColorRgb() to change the color of the cursor.
+
+
 v0.3.4 - v0.3.7
 ---------------
 

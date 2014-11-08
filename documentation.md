@@ -136,9 +136,10 @@ We can do:
 * .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
 * .brightColor(register): choose between 8 bright colors using an 0..7 integer
 * .color256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
-* .color256rgb(r,g,b): if the terminal support 256 colors, set the color from RGB value in the 0..5 range
-* .color256gray(l): if the terminal support 256 colors, set the color from the grayscale where the lightness
-	value is in the 0..25 range
+* .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette),
+	r,g,b are in the 0..255 range
+* .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette)
+	l is in the 0..255 range
 
 
 
@@ -165,9 +166,10 @@ We can do:
 * .bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
 * .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
 * .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
-* .bgColor256rgb(r,g,b): if the terminal support 256 colors, set the color from RGB value in the 0..5 range
-* .bgColor256gray(l): if the terminal support 256 colors, set the color from the grayscale where the lightness
-	value is in the 0..25 range
+* .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette) as the background color,
+	r,g,b are in the 0..255 range
+* .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette) as the
+	background color, l is in the 0..255 range
 
 
 
