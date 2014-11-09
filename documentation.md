@@ -6,7 +6,7 @@ Terminal utilities for node.js, it supports 'xterm' compatible terminal and the 
 It does not depend on ncurses.
 
 * License: MIT
-* Current status: alpha/unstable
+* Current status: beta
 * Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far
 
 
