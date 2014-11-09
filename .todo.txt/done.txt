@@ -2,3 +2,5 @@ x 2014-11-01 generic function that accept RGB in input and translate it into the
 x 2014-11-01 find a way to factorize code between konsole.js, konsole-256color, xterm.js & xterm-256color @code
 x 2014-11-01 finish checking derivation between termconfig @code
 x 2014-11-07 .setCursorColor() doesn't match the right color in Linux Console @code
+x 2014-11-09 document .getCursorLocation() @doc
+x 2014-11-09 Konsole & grayscale @bug
