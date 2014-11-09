@@ -379,6 +379,20 @@ Get the cursor location.
 
 
 
+## .getColorRegister( register , callback )
+
+* register `number` the register number in the 0..255 range
+* callback( error , rgb )
+	* error `mixed` truthy if an underlying error occurs
+	* rgb `Object` where:
+		* r `number` in the 0..255 range, the red value
+		* g `number` in the 0..255 range, the green value
+		* b `number` in the 0..255 range, the blue value
+
+Get the RGB values of a color register.
+
+
+
 ## .yesOrNo( [options] , callback )
 	* options `Object` where:
 		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes

@@ -4,3 +4,5 @@ x 2014-11-01 finish checking derivation between termconfig @code
 x 2014-11-07 .setCursorColor() doesn't match the right color in Linux Console @code
 x 2014-11-09 document .getCursorLocation() @doc
 x 2014-11-09 Konsole & grayscale @bug
+x 2014-11-09 review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
+x 2014-11-09 document .getColorRegister() @doc
