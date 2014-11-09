@@ -56,7 +56,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 			
 			if ( terminating ) { return ; }
 			
-			if ( i < 255 ) { i ++ ; getColors() ; }
+			if ( i < 15 ) { i ++ ; getColors() ; }
 			else { terminate() ; }
 		} ) ;
 	} ;
