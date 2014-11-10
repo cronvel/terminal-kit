@@ -6,7 +6,7 @@ Terminal utilities for node.js, it supports 'xterm' compatible terminal and the 
 It does not depend on ncurses.
 
 * License: MIT
-* Current status: alpha/unstable
+* Current status: beta
 * Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far
 
 
@@ -376,6 +376,20 @@ term.on( 'mouse' , function( name , data ) {
 	* y `integer` the y coordinate of the cursor
 
 Get the cursor location.
+
+
+
+## .getColorRegister( register , callback )
+
+* register `number` the register number in the 0..255 range
+* callback( error , rgb )
+	* error `mixed` truthy if an underlying error occurs
+	* rgb `Object` where:
+		* r `number` in the 0..255 range, the red value
+		* g `number` in the 0..255 range, the green value
+		* b `number` in the 0..255 range, the blue value
+
+Get the RGB values of a color register.
 
 
 

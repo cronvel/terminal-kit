@@ -2,6 +2,9 @@
 v0.4.2
 ------
 
+Bugfix: .getDetectedTerminal() do not issue error anymore if no terminal was detected, it simply returns
+the default terminal.
+New: the HSL cylender coordinate is now used to pick up the closest color register match for RGB.
 Status of the lib is now BETA.
 
 
