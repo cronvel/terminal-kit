@@ -1,5 +1,5 @@
 find a way to edit the xterm palette @code
 (A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
-(A) .defaultColorRegister()
 Konsole and Linux Console color scheme
+(A) .setColor() for xterm @code
