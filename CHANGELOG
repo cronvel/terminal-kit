@@ -1,4 +1,17 @@
 
+v0.4.4
+------
+
+.getPalette() request from the terminal (if supported) the current 16 colors palette in use.
+
+
+
+v0.4.3
+------
+
+Now the lib is aware of the default VGA palette for the Linux Console.
+
+
 v0.4.2
 ------
 
