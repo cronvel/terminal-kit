@@ -13,7 +13,7 @@ It does not depend on ncurses.
 
 # Features
 
-* colors, 256 colors if the terminal supports it
+* colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
 * string formating
 * style mixing
