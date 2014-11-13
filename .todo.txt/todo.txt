@@ -3,3 +3,4 @@ find a way to edit the xterm palette @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
 Konsole and Linux Console color scheme
 (A) .setColor() for xterm @code
+(A) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()

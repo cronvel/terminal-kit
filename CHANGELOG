@@ -3,7 +3,8 @@ v0.4.4
 ------
 
 .getPalette() request from the terminal (if supported) the current 16 colors palette in use.
-
+.setColor() set a color register to RGB
+.setPalette() set the 16 colors palette, it is possible to specify a color name
 
 
 v0.4.3
