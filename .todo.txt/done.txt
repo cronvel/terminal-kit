@@ -7,3 +7,6 @@ x 2014-11-09 Konsole & grayscale @bug
 x 2014-11-09 review xterm vs xterm-256color function availability: color256(), cursorColor(), etc @code
 x 2014-11-09 document .getColorRegister() @doc
 x 2014-11-11 defaultColorRegister
+x 2014-11-14 .setColor() for xterm @code
+x 2014-11-14 find a way to edit the xterm palette @code
+x 2014-11-14 Konsole and Linux Console color scheme

@@ -393,6 +393,23 @@ Get the RGB values of a color register.
 
 
 
+## .getPalette( register , callback )
+
+* callback( error , palette )
+	* error `mixed` truthy if an underlying error occurs
+	* palette `Array` of 16 `Object` where:
+		* r `number` in the 0..255 range, the red value
+		* g `number` in the 0..255 range, the green value
+		* b `number` in the 0..255 range, the blue value
+		* name `string` the name of the color
+
+Request from the terminal the 16-colors palette in use.
+
+If the terminal does not support the feature, then the default palette for this terminal is provided,
+and each color that was modified by the lib replace it.
+
+
+
 ## .yesOrNo( [options] , callback )
 	* options `Object` where:
 		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
