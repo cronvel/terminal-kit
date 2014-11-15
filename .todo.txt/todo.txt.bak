@@ -1,10 +1,8 @@
 (A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
 (A) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
-(A) document v0.4.4 features @doc
 (A) use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
 (C) add a summary to the documentation @doc
-(A) .*Grayscale() HSL match should tend more toward lightness @bug
 documentation on term.state (term.state.button.left, etc) @doc
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
-(B) find out why Konsole doesn't have screen-size in the draw test @bug
+try to find a way to disable word-wrap, if possible @r&d

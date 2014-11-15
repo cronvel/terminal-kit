@@ -230,7 +230,8 @@ We can do:
 ## Input/Output
 
 * .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
-* .requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
+* .requestScreenSize(): **DEPRECATED** request for screen size, a 'terminal' event will be fired when available,
+	**DO NOT USE**: use .width and .height instead, those properties are updated whenever a resize event is received
 * .requestColor(n): **rarely useful** request for color *n*, **DO NOT USE**: use high-level .getColor() instead
 * .applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
 

@@ -117,14 +117,13 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 		}
 		
 		term.requestCursorLocation()
-			.requestScreenSize()
 			.saveCursor()
 			.moveTo( 0 , term.height )
 			.eraseLine()
 			.bgWhite.blue(
 				'Arrow mode: ' + modeString[ mode ] +
 				' -- Cursor position: ' + x + ',' + y +
-				' -- Screen size: ' + width + ',' + height +
+				' -- Screen size: ' + term.width + ',' + term.height +
 				' -- Key pressed: ' + key
 			)
 			.restoreCursor() ;
