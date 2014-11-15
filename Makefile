@@ -37,17 +37,18 @@ clean: clean-all
 
 MOCHA=./node_modules/mocha/bin/mocha
 JSHINT=./node_modules/jshint/bin/jshint --verbose
+SOURCES=`find ./lib/ -name "*.js*"`
 
 
 
 # Files rules
 
 # JsHint STDOUT test
-log/jshint.log: log/npm-dev-install.log lib/terminal.js
-	${JSHINT} lib/terminal.js lib/termconfig/*.js | tee log/jshint.log ; exit $${PIPESTATUS[0]}
+log/jshint.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js
+	${JSHINT} lib/*.js lib/colorScheme/*.json lib/termconfig/*.js | tee log/jshint.log ; exit $${PIPESTATUS[0]}
 
 # Mocha BDD STDOUT test
-log/mocha.log: log/npm-dev-install.log lib/terminal.js test/terminal-test.js
+log/mocha.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js
 	${MOCHA} test/terminal-test.js -R spec | tee log/mocha.log ; exit $${PIPESTATUS[0]}
 
 # README
@@ -55,11 +56,11 @@ README.md: documentation.md bdd-spec.md
 	cat documentation.md > README.md
 
 # Mocha Markdown BDD spec
-bdd-spec.md: log/npm-dev-install.log lib/terminal.js test/terminal-test.js
+bdd-spec.md: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js
 	${MOCHA} test/terminal-test.js -R markdown > bdd-spec.md
 
 # Upgrade version in package.json
-log/upgrade-package.log: lib/terminal.js test/terminal-test.js documentation.md
+log/upgrade-package.log: lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js documentation.md
 	npm version patch -m "Upgrade package.json version to %s" | tee log/upgrade-package.log ; exit $${PIPESTATUS[0]}
 
 # Publish to NPM
@@ -67,7 +68,7 @@ log/npm-publish.log: check-if-master-branch log/upgrade-package.log
 	npm publish | tee log/npm-publish.log ; exit $${PIPESTATUS[0]}
 
 # Push to Github/master
-log/github-push.log: lib/terminal.js test/terminal-test.js package.json
+log/github-push.log: lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js package.json
 	#'npm version patch' create the git tag by itself... 
 	#git tag v`cat package.json | grep version | sed -r 's/.*"([0-9.]*)".*/\1/'`
 	git push origin master --tags | tee log/github-push.log ; exit $${PIPESTATUS[0]}

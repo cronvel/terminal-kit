@@ -396,7 +396,7 @@ Get the RGB values of a color register.
 
 
 
-## .setColor( register , r , g , b ) *or* .setColor( register , rgb )
+## .setColor( register , r , g , b , [names] ) *or* .setColor( register , rgb , [names] )
 
 * register `number` the register number in the 0..255 range
 * r `number` in the 0..255 range, the red value
@@ -406,6 +406,7 @@ Get the RGB values of a color register.
 	* r `number` in the 0..255 range, the red value
 	* g `number` in the 0..255 range, the green value
 	* b `number` in the 0..255 range, the blue value
+* names `Array` of `string`: names for that color, it default to an empty array
 
 Set the RGB values for a color indexed by the integer *register*.
 

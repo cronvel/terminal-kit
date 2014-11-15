@@ -1,4 +1,11 @@
 
+v0.5.2
+------
+
+Refactoring
+.setColor() now accept a "names" argument
+
+
 v0.5.1
 ------
 
