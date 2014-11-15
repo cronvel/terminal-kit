@@ -8,3 +8,4 @@ add na:true or fb:true to all non-applicable or fallback sequences @code
 try to find a way to disable word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (B) specific support for rxvt, urxvt and xfce4-terminal @code
+(A) xfce color scheme
