@@ -49,7 +49,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 		
 		if ( terminating ) { return ; }
 		
-		term.getColorRegister( i , function get( error , reg ) {
+		term.getColor( i , function get( error , reg ) {
 			
 			if ( error ) { term.red( error.toString() + '\n' ) ; }
 			else { term( '#%u -- R:%u G:%u B:%u\n' , reg.register , reg.r , reg.g , reg.b ) ; }

@@ -1,5 +1,7 @@
 (A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
-x 2014-11-14 Konsole and Linux Console color scheme
 (A) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
 (A) document v0.4.4 features @doc
+(A) use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
+(C) add a summary to the documentation @doc
+x 2014-11-15 .getColorRegister() -> .getColor() @code

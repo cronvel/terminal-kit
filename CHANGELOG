@@ -1,4 +1,11 @@
 
+v0.5.1
+------
+
+.getColorRegister() -> .getColor()
+Documentation on v0.4.4 features, and about the 24 bits feature.
+
+
 v0.4.5
 ------
 
@@ -8,9 +15,9 @@ Bugfix: now Konsole can use 24 bits colors.
 v0.4.4
 ------
 
-.getPalette() request from the terminal (if supported) the current 16 colors palette in use.
 .setColor() set a color register to RGB
-.setPalette() set the 16 colors palette, it is possible to specify a color name
+.getPalette() request from the terminal (if supported) the current 16 colors palette in use.
+.setPalette() set the 16 colors palette, it is possible to specify a color scheme name
 
 
 v0.4.3
