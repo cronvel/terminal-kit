@@ -3,17 +3,18 @@
 # Terminal Kit
 
 Terminal utilities for node.js, it supports 'xterm' compatible terminal and the Linux Console.
-It does not depend on ncurses.
+It does **NOT** depend on ncurses.
 
 * License: MIT
 * Current status: beta
-* Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far
+* Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far,
+	also it should be compatible with any xterm-compatible terminal
 
 
 
 # Features
 
-* colors, 256 colors if the terminal supports it
+* colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
 * string formating
 * style mixing
@@ -136,9 +137,10 @@ We can do:
 * .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
 * .brightColor(register): choose between 8 bright colors using an 0..7 integer
 * .color256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
-* .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette),
-	r,g,b are in the 0..255 range
-* .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette)
+* .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the 
+	exact color if the terminal support 24 bits colors), r,g,b are in the 0..255 range
+* .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or
+	even the exact color if the terminal support 24 bits colors)
 	l is in the 0..255 range
 
 
@@ -166,10 +168,10 @@ We can do:
 * .bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
 * .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
 * .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
-* .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette) as the background color,
-	r,g,b are in the 0..255 range
-* .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette) as the
-	background color, l is in the 0..255 range
+* .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the
+	exact color if the terminal support 24 bits colors) as the background color, r,g,b are in the 0..255 range
+* .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or even
+	the exact color if the terminal support 24 bits colors) as the background color, l is in the 0..255 range
 
 
 
@@ -229,6 +231,7 @@ We can do:
 
 * .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
 * .requestScreenSize(): **rarely useful** request for screen size, a 'terminal' event will be fired when available
+* .requestColor(n): **rarely useful** request for color *n*, **DO NOT USE**: use high-level .getColor() instead
 * .applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
 
 
@@ -379,7 +382,7 @@ Get the cursor location.
 
 
 
-## .getColorRegister( register , callback )
+## .getColor( register , callback )
 
 * register `number` the register number in the 0..255 range
 * callback( error , rgb )
@@ -390,6 +393,52 @@ Get the cursor location.
 		* b `number` in the 0..255 range, the blue value
 
 Get the RGB values of a color register.
+
+
+
+## .setColor( register , r , g , b ) *or* .setColor( register , rgb )
+
+* register `number` the register number in the 0..255 range
+* r `number` in the 0..255 range, the red value
+* g `number` in the 0..255 range, the green value
+* b `number` in the 0..255 range, the blue value
+* rgb `Object` where:
+	* r `number` in the 0..255 range, the red value
+	* g `number` in the 0..255 range, the green value
+	* b `number` in the 0..255 range, the blue value
+
+Set the RGB values for a color indexed by the integer *register*.
+
+
+
+## .getPalette( register , callback )
+
+* callback( error , palette )
+	* error `mixed` truthy if an underlying error occurs
+	* palette `Array` of 16 `Object` where:
+		* r `number` in the 0..255 range, the red value
+		* g `number` in the 0..255 range, the green value
+		* b `number` in the 0..255 range, the blue value
+		* names `Array` of `string`, names for this color
+
+Request from the terminal the 16-colors palette in use.
+
+If the terminal does not support the feature, then the default palette for this terminal is provided,
+and each color that was modified by the lib replace it.
+
+
+
+## .setPalette( palette )
+
+* palette either:
+	* `Array` of 16 `Object` where:
+		* r `number` in the 0..255 range, the red value
+		* g `number` in the 0..255 range, the green value
+		* b `number` in the 0..255 range, the blue value
+		* names `Array` of `string`, names for this color
+	* *OR* `string` one of the built-in palette (default, gnome, konsole, linux, solarized, vga, xterm)
+
+If the terminal support it, it will reset the 16-colors palette to the provided one.
 
 
 
