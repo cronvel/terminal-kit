@@ -7,8 +7,14 @@ It does **NOT** depend on ncurses.
 
 * License: MIT
 * Current status: beta
-* Platform: linux, tested with gnome-terminal, Konsole, xterm and Linux Console so far,
-	also it should be compatible with any xterm-compatible terminal
+* Platform: linux, it should be compatible with any xterm-compatible terminal, it has been tested successfully with:
+	* gnome-terminal
+	* Konsole
+	* xterm
+	* Terminator
+	* rxvt/urxvt
+	* xfce4-terminal
+	* Linux Console
 
 
 
