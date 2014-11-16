@@ -44,6 +44,30 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.bold.cyan( 'Setting the cursor color to register %d\n' , c ) ;
 	term.setCursorColor( c , 0 ) ;
 	//*/
+	
+	var t = Math.floor( Math.random() * 6 ) ;
+	
+	switch ( t )
+	{
+		case 0 :
+			term.blockCursor( 'Block cursor\n' ) ;
+			break ;
+		case 1 :
+			term.blinkingBlockCursor( 'Blinking block cursor\n' ) ;
+			break ;
+		case 2 :
+			term.underlineCursor( 'Underline cursor\n' ) ;
+			break ;
+		case 3 :
+			term.blinkingUnderlineCursor( 'Blinking underline cursor\n' ) ;
+			break ;
+		case 4 :
+			term.beamCursor( 'Beam cursor\n' ) ;
+			break ;
+		case 5 :
+			term.blinkingBeamCursor( 'Blinking Beam cursor\n' ) ;
+			break ;
+	}
 } ) ;
 
 

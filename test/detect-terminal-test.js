@@ -35,8 +35,8 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	if ( error ) { console.log( 'Error:' , error ) ; process.exit( 1 ) ; }
 	
 	term( 'Terminal name: %s\n' , term.appName ) ;
-	term( 'Terminal app: %s\n' , term.app ) ;
-	term( 'Terminal generic: %s\n' , term.generic ) ;
+	term( 'Terminal app ID: %s\n' , term.app ) ;
+	term( 'Generic terminal: %s\n' , term.generic ) ;
 	term( 'Config file: %s\n' , term.termconfigFile ) ;
 } ) ;
 
