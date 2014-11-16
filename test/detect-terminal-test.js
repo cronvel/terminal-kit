@@ -29,8 +29,20 @@
 /* global describe, it, before, after */
 
 
+var term = require( '../lib/terminal.js' ) ;
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
+term( 'Terminal name: %s\n' , term.appName ) ;
+term( 'Terminal app ID: %s\n' , term.app ) ;
+term( 'Generic terminal: %s\n' , term.generic ) ;
+term( 'Config file: %s\n' , term.termconfigFile ) ;
+term( '\n' ) ;
+
+
+
+term.getDetectedTerminal( function( error , term ) {
+	
+	term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
 	
 	if ( error ) { console.log( 'Error:' , error ) ; process.exit( 1 ) ; }
 	
@@ -38,6 +50,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term( 'Terminal app ID: %s\n' , term.app ) ;
 	term( 'Generic terminal: %s\n' , term.generic ) ;
 	term( 'Config file: %s\n' , term.termconfigFile ) ;
+	term( '\n' ) ;
 } ) ;
 
 
