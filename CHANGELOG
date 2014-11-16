@@ -1,4 +1,11 @@
 
+v0.5.6
+------
+
+Bugfix: .grabInput() leak when called multiple times.
+Better support for rxvt/urxvt.
+
+
 v0.5.5
 ------
 

@@ -48,16 +48,17 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 
 	term.fullscreen() ;
 	term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
-	term.green( 'Hit CTRL-C to quit.\n\n' ) ;
-
+	term.green( 'Hit CTRL-C to quit, CTRL-D to change the mouse reporting mode\n\n' ) ;
+	
 	// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
 	term.applicationKeypad() ;
 
 	//term.keyboardModifier() ;
 
-	term.grabInput() ;
-	//term.grabInput( { mouse: 'motion' , focus: true } ) ;
+	term.grabInput( { mouse: 'button' , focus: true } ) ;
 
+	var mouseMode = 1 ;
+	
 	term.on( 'key' , function( name , matches , data ) {
 		
 		console.log(
@@ -79,6 +80,32 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 			term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
 			term.requestCursorLocation() ;
 			term.requestScreenSize() ;
+		}
+		
+		if ( matches.indexOf( 'CTRL_D' ) >= 0 )
+		{
+			term.green( 'CTRL-D received: ' ) ;
+			mouseMode = ( mouseMode + 1 ) % 4 ;
+			
+			switch ( mouseMode )
+			{
+				case 0 :
+					term.green( 'turn mouse off\n' ) ;
+					term.grabInput( { mouse: false , focus: true } ) ;
+					break ;
+				case 1 :
+					term.green( 'mouse in button mode\n' ) ;
+					term.grabInput( { mouse: 'button' , focus: true } ) ;
+					break ;
+				case 2 :
+					term.green( 'mouse in drag mode\n' ) ;
+					term.grabInput( { mouse: 'drag' , focus: true } ) ;
+					break ;
+				case 3 :
+					term.green( 'mouse in motion mode\n' ) ;
+					term.grabInput( { mouse: 'motion' , focus: true } ) ;
+					break ;
+			}
 		}
 	} ) ;
 

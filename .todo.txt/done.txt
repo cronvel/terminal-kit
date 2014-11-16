@@ -13,3 +13,6 @@ x 2014-11-14 Konsole and Linux Console color scheme
 x 2014-11-15 .getColorRegister() -> .getColor() @code
 x 2014-11-15 find out why Konsole doesn't have screen-size in the draw test @bug
 x 2014-11-15 document v0.4.4 features @doc
+x 2014-11-16 xfce color scheme
+x 2014-11-16 rxvt F keys @code
+x 2014-11-16 specific support for rxvt, urxvt and xfce4-terminal @code

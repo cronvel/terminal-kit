@@ -1,8 +1,10 @@
-(A) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
+(D) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
 (A) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
-(A) use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
+use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
 (C) add a summary to the documentation @doc
-documentation on term.state (term.state.button.left, etc) @doc
+(C) documentation on term.state (term.state.button.left, etc) @doc
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
 try to find a way to disable word-wrap, if possible @r&d
+mrxvt support: draw-test does not work @bug
+x 2014-11-16 specific support for rxvt, urxvt and xfce4-terminal @code
