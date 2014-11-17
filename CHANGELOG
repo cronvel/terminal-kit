@@ -1,4 +1,11 @@
 
+v0.5.9
+------
+
+SSH detection, this does not improve things except that .getDetectedTerminal() use simple guessing
+rather than the expensive .getParentTerminalInfo().
+
+
 v0.5.8
 ------
 

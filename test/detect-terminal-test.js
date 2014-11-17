@@ -39,6 +39,7 @@ term( '\n' ) ;
 
 
 term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
+term( '.guessTerminal(): %J\n' , term.guessTerminal() ) ;
 term( 'Terminal name: %s\n' , term.appName ) ;
 term( 'Terminal app ID: %s\n' , term.appId ) ;
 term( 'Generic terminal: %s\n' , term.generic ) ;
@@ -47,17 +48,23 @@ term( '\n' ) ;
 
 
 
-term.getDetectedTerminal( function( error , term ) {
+term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
+term.getParentTerminalInfo( function( error , info ) {
 	
-	term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
+	if ( error ) { console.log( 'Error:' , error ) ; return ; }
+	term( '.getParentTerminalInfo(): %J\n' , info ) ;
 	
-	if ( error ) { console.log( 'Error:' , error ) ; process.exit( 1 ) ; }
-	
-	term( 'Terminal name: %s\n' , term.appName ) ;
-	term( 'Terminal app ID: %s\n' , term.appId ) ;
-	term( 'Generic terminal: %s\n' , term.generic ) ;
-	term( 'Config file: %s\n' , term.termconfigFile ) ;
-	term( '\n' ) ;
+	term.getDetectedTerminal( function( error , term ) {
+		
+		if ( error ) { console.log( 'Error:' , error ) ; return ; }
+		
+		term( 'Terminal name: %s\n' , term.appName ) ;
+		term( 'Terminal app ID: %s\n' , term.appId ) ;
+		term( 'Generic terminal: %s\n' , term.generic ) ;
+		term( 'Config file: %s\n' , term.termconfigFile ) ;
+		term( '\n' ) ;
+	} ) ;
 } ) ;
+
 
 

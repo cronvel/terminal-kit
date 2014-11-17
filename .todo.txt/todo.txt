@@ -8,3 +8,4 @@ use the 'name' attribute of color, in colorScheme/ palette, something like accep
 try to find a way to disable word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
+(E) terminfo support @doc
