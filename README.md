@@ -626,6 +626,7 @@ The argument 'name' can be:
 * MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
 * MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
 * MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
+* MOUSE_BUTTON_RELEASED: a button were release, however the terminal does not tell us which one
 * MOUSE_MOTION: if the options `{ mouse: 'motion' }` is given to grabInput(), every move of the mouse will fire this event,
   if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
 
