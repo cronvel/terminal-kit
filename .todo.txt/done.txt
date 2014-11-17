@@ -16,3 +16,4 @@ x 2014-11-15 document v0.4.4 features @doc
 x 2014-11-16 xfce color scheme
 x 2014-11-16 rxvt F keys @code
 x 2014-11-16 specific support for rxvt, urxvt and xfce4-terminal @code
+x 2014-11-17 Eterm color scheme & keys @code

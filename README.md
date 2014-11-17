@@ -15,6 +15,7 @@ It does **NOT** depend on ncurses.
 	* xfce4-terminal
 	* Linux Console
 	* rxvt/urxvt
+	* Eterm
 
 
 

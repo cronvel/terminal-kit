@@ -53,7 +53,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.magenta( 'magenta ' ).brightMagenta( 'brightMagenta' )( '\n' ) ;
 
 	// Check the color() function
-	for ( i = 0 ; i < 16 ; i ++ ) { term.bold.color( i , '*' ) ; }
+	for ( i = 0 ; i < 16 ; i ++ ) { term.color( i , '*' ) ; }
 	term( '\n' ) ;
 	
 

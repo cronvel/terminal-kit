@@ -7,4 +7,5 @@ use the 'name' attribute of color, in colorScheme/ palette, something like accep
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
 try to find a way to disable word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
-x 2014-11-16 specific support for rxvt, urxvt and xfce4-terminal @code
+(B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
+x 2014-11-17 Eterm color scheme & keys @code
