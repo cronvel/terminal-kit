@@ -51,7 +51,7 @@ term( '\n' ) ;
 term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
 term.getParentTerminalInfo( function( error , info ) {
 	
-	if ( error ) { term( '.getParentTerminalInfo() Error: %J\n' , error ) ; }
+	if ( error ) { term( '.getParentTerminalInfo() %s\n' , error ) ; }
 	else { term( '.getParentTerminalInfo(): %J\n' , info ) ; }
 	
 	term.getDetectedTerminal( function( error , term ) {
