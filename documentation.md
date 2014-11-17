@@ -8,13 +8,13 @@ It does **NOT** depend on ncurses.
 * License: MIT
 * Current status: beta
 * Platform: linux, it should be compatible with any xterm-compatible terminal, it has been tested successfully with:
+	* xterm
 	* gnome-terminal
 	* Konsole
-	* xterm
 	* Terminator
-	* rxvt/urxvt
 	* xfce4-terminal
 	* Linux Console
+	* rxvt/urxvt
 
 
 
@@ -278,7 +278,7 @@ Advanced methods are high-level librairie functions.
 	* pid: the PID of the terminal
 
 This method detect on which terminal your application run.
-It does **\*NOT\*** use the $TERM environment variable.
+It does **\*NOT\*** use the $TERM environment variable, except as a fallback.
 It iterates through parent process until a known terminal is found, or process of PID 1 is reached (the *init* process).
 
 Obviously, it does not works over SSH.
@@ -294,7 +294,7 @@ Obviously, it does not works over SSH.
 This is a shortcut that call `.getParentTerminalInfo()` then use `.createTerminal()` with the correct arguments.
 This will give you a terminal object with the best support that this lib is able to give to you.
 
-It does not works over SSH.
+It does not works over SSH, but fallback to standard terminal guessing.
 
 Example **\*NOT\***  using `.getDetectedTerminal()`:
 ```js

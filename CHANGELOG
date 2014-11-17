@@ -1,4 +1,11 @@
 
+v0.5.7
+------
+
+Better support for rxvt/urxvt.
+Better terminal guessing.
+
+
 v0.5.6
 ------
 

@@ -31,9 +31,16 @@
 
 var term = require( '../lib/terminal.js' ) ;
 
+term.green( '\n== Environment variable ==\n\n' ) ;
+term( '$TERM: %s\n' , process.env.TERM ) ;
+term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
+term( '\n' ) ;
+
+
+
 term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
 term( 'Terminal name: %s\n' , term.appName ) ;
-term( 'Terminal app ID: %s\n' , term.app ) ;
+term( 'Terminal app ID: %s\n' , term.appId ) ;
 term( 'Generic terminal: %s\n' , term.generic ) ;
 term( 'Config file: %s\n' , term.termconfigFile ) ;
 term( '\n' ) ;
@@ -47,7 +54,7 @@ term.getDetectedTerminal( function( error , term ) {
 	if ( error ) { console.log( 'Error:' , error ) ; process.exit( 1 ) ; }
 	
 	term( 'Terminal name: %s\n' , term.appName ) ;
-	term( 'Terminal app ID: %s\n' , term.app ) ;
+	term( 'Terminal app ID: %s\n' , term.appId ) ;
 	term( 'Generic terminal: %s\n' , term.generic ) ;
 	term( 'Config file: %s\n' , term.termconfigFile ) ;
 	term( '\n' ) ;
