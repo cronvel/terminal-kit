@@ -1,4 +1,10 @@
 
+v0.5.13
+-------
+
+Bugfix when COLORTERM is not defined, it causes a crash.
+
+
 v0.5.12
 -------
 
