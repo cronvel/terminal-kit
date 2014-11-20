@@ -49,6 +49,7 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.fullscreen() ;
 	term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
 	term.green( 'Hit CTRL-C to quit, CTRL-D to change the mouse reporting mode\n\n' ) ;
+	term.green( 'mouse in motion mode\n' ) ;
 
 	// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
 	term.applicationKeypad() ;
