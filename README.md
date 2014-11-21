@@ -27,7 +27,7 @@ It does **NOT** depend on ncurses.
 * style mixing
 * cursor positionning
 * keyboard input
-* mouse support
+* mouse support (GPM is supported for the Linux Console)
 * terminal window title
 * input field
 * event-driven
