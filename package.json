@@ -25,6 +25,7 @@
   },
   "keywords": [
     "terminal",
+    "console",
     "xterm",
     "color",
     "256 colors",
@@ -32,6 +33,7 @@
     "input",
     "input field",
     "mouse",
+    "gpm",
     "cursor"
   ],
   "author": "Cédric Ronvel",

@@ -9,3 +9,5 @@ try to find a way to disable word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
 (E) terminfo support @doc
+(B) chainable 'noFormat()' which disable the format() behaviour, to speed up computing (important for screenBuffer redraw()) @code
+document .noFormat() ??? @doc
