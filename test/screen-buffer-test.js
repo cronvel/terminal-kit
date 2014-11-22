@@ -38,16 +38,32 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 		//buffer.redrawChars() ;
 		buffer.redraw() ;
 		buffer.offsetX ++ ;
-		if ( moved ++ < 20 ) { setTimeout( moveRedraw , 100 ) ; }
+		
+		//buffer2.redraw() ;
+		//buffer2.offsetX -- ;
+		
+		if ( moved ++ < 20 ) { setTimeout( moveRedraw , 150 ) ; }
 		else { term.fullscreen( false ) ; }
 	}
 	
-	term.fullscreen() ;
-	buffer = term.createScreenBuffer( { width: 10 , height: 10 } ) ;
-	//buffer.moveTo( 4 , 7 , 'toto' ) ;
-	buffer.moveTo.red( 4 , 7 , 'toto' ) ;
-	//buffer.dumpChars() ;
-	moveRedraw() ;
+	//term.fullscreen() ;
+	
+	var buffer = term.createScreenBuffer( { width: 10 , height: 10 } ) ;
+	buffer.moveTo.brightCyan( 3 , 2 , 'toto' ) ;
+	buffer.moveTo.red.underline( 4 , 7 , 'titi' ) ;
+	buffer.magenta( '!' ) ;
+	buffer.moveTo.green.underline( 4 , 8 , '*' ) ;
+	
+	var buffer2 = term.createScreenBuffer( { width: 3 , height: 3 , offsetX: 70 , offsetY: 7 } ) ;
+	buffer2.moveTo.brightYellow( 2 , 2 , '*' ) ;
+	
+	console.log( 'b1:' , buffer.charBuffer.foo ) ;
+	console.log( 'b2:' , buffer2.charBuffer.foo ) ;
+	
+	buffer.dumpChars() ;
+	//buffer.dump() ;
+	
+	//moveRedraw() ;
 } ) ;
 
 

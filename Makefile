@@ -37,7 +37,6 @@ clean: clean-all
 
 MOCHA=./node_modules/mocha/bin/mocha
 JSHINT=./node_modules/jshint/bin/jshint --verbose
-SOURCES=`find ./lib/ -name "*.js*"`
 
 
 
