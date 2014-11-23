@@ -28,7 +28,6 @@
 /* jshint unused:false */
 
 
-sb = require( '../lib/screenBuffer2.js' ) ;
 
 require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
@@ -51,9 +50,11 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	//term.fullscreen() ;
 	
-	var buffer = sb.create( term , { width: 8 , height: 8 } ).clear() ;
-	buffer.put( 3 , 2 , 0 , 'toto' ) ;
-	buffer.put( 4 , 5 , 0 , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+	var green = ( 2 << 24 ) ;
+	
+	var buffer = term.ScreenBuffer.create( term , { width: 8 , height: 8 } ).clear() ;
+	buffer.put( 3 , 2 , green , 'toto' ) ;
+	buffer.put( 4 , 5 , green , '𝌆' ) ;	// <-- takes more than one UCS-2 character
 	
 	//buffer.dumpChars() ;
 	//buffer.dump() ;
