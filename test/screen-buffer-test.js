@@ -33,37 +33,44 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	var moved = 0 ;
 	
+	//*
 	function moveRedraw()
 	{
-		//buffer.redrawChars() ;
-		buffer.redraw() ;
+		//buffer.drawChars() ;
+		buffer.draw() ;
 		buffer.offsetX ++ ;
 		
-		//buffer2.redraw() ;
-		//buffer2.offsetX -- ;
+		buffer2.draw() ;
+		buffer2.offsetX -- ;
+		
+		buffer3.offsetX = Math.floor( Math.random() * 8 ) ;
+		buffer3.draw() ;
 		
 		if ( moved ++ < 20 ) { setTimeout( moveRedraw , 150 ) ; }
-		else { term.fullscreen( false ) ; }
+		else
+		{
+			term.hideCursor( true ) ;
+			term.fullscreen( false ) ;
+		}
 	}
+	//*/
 	
-	//term.fullscreen() ;
+	var buffer = term.ScreenBuffer.create( term , { width: 8 , height: 8 } ).clear() ;
+	buffer.put( 3 , 2 , { color: 'red' , bgColor: 'brightBlack' , underline: true } , 'toto' ) ;
+	buffer.put( 4 , 5 , { color: 'brightYellow' , bold: true } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
 	
-	var buffer = term.createScreenBuffer( { width: 10 , height: 10 } ) ;
-	buffer.moveTo.brightCyan( 3 , 2 , 'toto' ) ;
-	buffer.moveTo.red.underline( 4 , 7 , 'titi' ) ;
-	buffer.magenta( '!' ) ;
-	buffer.moveTo.green.underline( 4 , 8 , '*' ) ;
+	var buffer2 = term.ScreenBuffer.create( term , { width: 3 , height: 1 , offsetX: 70 , offsetY: 3 } ).clear() ;
+	buffer2.put( 0 , 0 , { color: 'yellow' } , '<--' ) ;
 	
-	var buffer2 = term.createScreenBuffer( { width: 3 , height: 3 , offsetX: 70 , offsetY: 7 } ) ;
-	buffer2.moveTo.brightYellow( 2 , 2 , '*' ) ;
+	var buffer3 = term.ScreenBuffer.create( buffer , { width: 3 , height: 3 , offsetX: 2 , offsetY: 6 } ).clear() ;
+	buffer3.put( 1 , 1 , { color: 'brightMagenta' } , '*' ) ;
 	
-	console.log( 'b1:' , buffer.charBuffer.foo ) ;
-	console.log( 'b2:' , buffer2.charBuffer.foo ) ;
+	//buffer3.draw() ;
+	//buffer.dump() ; return ;
 	
-	buffer.dumpChars() ;
-	//buffer.dump() ;
-	
-	//moveRedraw() ;
+	term.fullscreen() ;
+	term.hideCursor() ;
+	moveRedraw() ;
 } ) ;
 
 
