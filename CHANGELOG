@@ -2,7 +2,7 @@
 v0.5.15
 -------
 
-New: screenBuffer object.
+New: term.ScreenBuffer object. Still a work in progress. Documentation will be available when stabilized.
 
 
 v0.5.14
