@@ -77,7 +77,7 @@ function terminate()
 function createBackground()
 {
 	sprites.background = term.ScreenBuffer.create( viewport , { width: 200 , height: 30 } ).clear() ;
-	createBackgroundTrails( 50 ) ;
+	createBackgroundTrails( 70 ) ;
 }
 
 
@@ -101,6 +101,13 @@ function createBackgroundTrails( nTrails )
 
 
 
+function nextPosition()
+{
+	sprites.background.offsetX = sprites.background.offsetX - 1 ;
+}
+
+
+
 function draw()
 {
 	sprites.background.draw() ;
@@ -110,9 +117,22 @@ function draw()
 
 
 
-init( function() {
+var frame = 0 ;
+function animate( nAnim , callback )
+{
+	frame ++ ;
 	draw() ;
-	terminate() ;
+	nextPosition() ;
+	if ( frame < nAnim ) { setTimeout( function() { animate( nAnim , callback ) ; } , 50 ) ; }
+	else { callback() ; }
+}
+
+
+
+init( function() {
+	animate( 50 , function() {
+		terminate() ;
+	} ) ;
 } ) ;
 
 
