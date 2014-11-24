@@ -50,11 +50,15 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	
 	//term.fullscreen() ;
 	
-	var green = ( 2 << 24 ) ;
-	
 	var buffer = term.ScreenBuffer.create( term , { width: 8 , height: 8 } ).clear() ;
+	buffer.put( 3 , 2 , { color: 'red' , bgColor: 'brightBlack' , underline: true } , 'toto' ) ;
+	buffer.put( 4 , 5 , { color: 'brightYellow' , bold: true } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+	
+	/*
 	buffer.put( 3 , 2 , green , 'toto' ) ;
-	buffer.put( 4 , 5 , green , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+	buffer.put( 3 , 2 , { color: 'green' , underline: true } , 'toto' ) ;
+	buffer.put.red.underline( 3 , 2 , 'toto' ) ;
+	*/
 	
 	//buffer.dumpChars() ;
 	//buffer.dump() ;
