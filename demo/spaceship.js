@@ -114,7 +114,7 @@ function createBackgroundTrails( nTrails )
 function createSpaceship()
 {
 	sprites.spaceship = term.ScreenBuffer.createFromDataString(
-		{ attr: { color: 'cyan' } , transparencyChar: ' ' } ,
+		{ attr: { color: 'cyan' } , transparencyChar: '#' } ,
 		fs.readFileSync( './spaceship1.txt' )
 	) ;
 	sprites.spaceship.x = 3 ;
@@ -158,7 +158,7 @@ function nextPosition()
 function draw()
 {
 	sprites.background.draw( { target: viewport } ) ;
-	sprites.spaceship.draw( { target: viewport } ) ;
+	sprites.spaceship.draw( { target: viewport , transparency: true } ) ;
 	viewport.draw() ;
 	//sprites.background.dumpChars() ;
 }
