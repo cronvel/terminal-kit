@@ -27,6 +27,7 @@
 
 
 
+var fs = require( 'fs' ) ;
 var term = require( '../lib/terminal.js' ) ;
 
 
@@ -44,16 +45,21 @@ function init( callback )
 		
 		term = detectedTerm ;
 		
-		viewport = term.ScreenBuffer.create( term , {
-			width: Math.min( term.width - 2 , 100 ) ,
-			height: Math.min( term.height - 2 , 30 )
-		} ).clear() ;
+		viewport = term.ScreenBuffer.create( {
+			target: term ,
+			width: Math.min( term.width ) ,
+			height: Math.min( term.height - 1 ) ,
+			y: 2
+		} ) ;
 		
 		createBackground() ;
+		createSpaceship() ;
 		
 		//term.fullscreen() ;
+		term.moveTo.eraseLine.bgWhite.green( 1 , 1 , 'Arrow keys: move the ship - CTRL-C: Quit\n' ) ;
 		term.hideCursor() ;
 		term.grabInput() ;
+		term.on( 'key' , inputs ) ;
 		callback() ;
 	} ) ;
 }
@@ -76,8 +82,8 @@ function terminate()
 
 function createBackground()
 {
-	sprites.background = term.ScreenBuffer.create( viewport , { width: 200 , height: 30 } ).clear() ;
-	createBackgroundTrails( 70 ) ;
+	sprites.background = term.ScreenBuffer.create( { width: viewport.width * 5 , height: viewport.height } ) ;
+	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.01 ) ;
 }
 
 
@@ -94,8 +100,48 @@ function createBackgroundTrails( nTrails )
 		
 		for ( j = 0 ; j < length ; j ++ )
 		{
-			sprites.background.put( ( x + j ) % sprites.background.width , y , { color: 8 } , '-' ) ;
+			sprites.background.put( {
+				x: ( x + j ) % sprites.background.width ,
+				y: y ,
+				attr: { color: 8 }
+			} , '-' ) ;
 		}
+	}
+}
+
+
+
+function createSpaceship()
+{
+	sprites.spaceship = term.ScreenBuffer.createFromDataString(
+		{ attr: { color: 'cyan' } , transparencyChar: ' ' } ,
+		fs.readFileSync( './spaceship1.txt' )
+	) ;
+	sprites.spaceship.x = 3 ;
+	sprites.spaceship.y = Math.floor( viewport.height / 2 - sprites.spaceship.height / 2 ) ;
+}
+
+
+
+function inputs( key )
+{
+	switch ( key )
+	{
+		case 'UP' :
+			sprites.spaceship.y -- ;
+			break ;
+		case 'DOWN' :
+			sprites.spaceship.y ++ ;
+			break ;
+		case 'LEFT' :
+			sprites.spaceship.x -- ;
+			break ;
+		case 'RIGHT' :
+			sprites.spaceship.x ++ ;
+			break ;
+		case 'CTRL_C':
+			terminate() ;
+			break ;
 	}
 }
 
@@ -103,36 +149,33 @@ function createBackgroundTrails( nTrails )
 
 function nextPosition()
 {
-	sprites.background.offsetX = sprites.background.offsetX - 1 ;
+	sprites.background.x -- ;
+	if ( sprites.background.x <= - sprites.background.width ) { sprites.background.x = 0 ; }
 }
 
 
 
 function draw()
 {
-	sprites.background.draw() ;
+	sprites.background.draw( { target: viewport } ) ;
+	sprites.spaceship.draw( { target: viewport } ) ;
 	viewport.draw() ;
 	//sprites.background.dumpChars() ;
 }
 
 
 
-var frame = 0 ;
-function animate( nAnim , callback )
+function animate()
 {
-	frame ++ ;
 	draw() ;
 	nextPosition() ;
-	if ( frame < nAnim ) { setTimeout( function() { animate( nAnim , callback ) ; } , 50 ) ; }
-	else { callback() ; }
+	setTimeout( animate , 50 ) ;
 }
 
 
 
 init( function() {
-	animate( 50 , function() {
-		terminate() ;
-	} ) ;
+	animate() ;
 } ) ;
 
 
