@@ -47,7 +47,7 @@ function init( callback )
 		term = detectedTerm ;
 		
 		viewport = termkit.ScreenBuffer.create( {
-			target: term ,
+			dst: term ,
 			width: Math.min( term.width ) ,
 			height: Math.min( term.height - 1 ) ,
 			y: 2
@@ -114,7 +114,7 @@ function createBackgroundTrails( nTrails )
 
 function createSpaceship()
 {
-	sprites.spaceship = termkit.ScreenBuffer.createFromDataString(
+	sprites.spaceship = termkit.ScreenBuffer.createFromChars(
 		{ attr: { color: 'cyan' } , transparencyChar: '#' } ,
 		fs.readFileSync( './spaceship1.txt' )
 	) ;
@@ -158,8 +158,9 @@ function nextPosition()
 
 function draw()
 {
-	sprites.background.draw( { target: viewport } ) ;
-	sprites.spaceship.draw( { target: viewport , transparency: true } ) ;
+	sprites.background.draw( { dst: viewport } ) ;
+	//sprites.spaceship.draw( { dst: viewport , transparency: true } ) ;
+	sprites.spaceship.draw( { dst: viewport } ) ;
 	viewport.draw() ;
 	//sprites.background.dumpChars() ;
 }
