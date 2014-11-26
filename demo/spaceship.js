@@ -159,8 +159,8 @@ function nextPosition()
 function draw()
 {
 	sprites.background.draw( { dst: viewport } ) ;
-	//sprites.spaceship.draw( { dst: viewport , transparency: true } ) ;
-	sprites.spaceship.draw( { dst: viewport } ) ;
+	sprites.spaceship.draw( { dst: viewport , transparency: true } ) ;
+	//sprites.spaceship.draw( { dst: viewport } ) ;
 	viewport.draw() ;
 	//sprites.background.dumpChars() ;
 }

@@ -64,13 +64,13 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 	} ) ;
 	
-	it( ".adjustToSrc() should adjust accordingly" , function() {
+	it( ".clip() should adjust accordingly" , function() {
 		
 		var srcRect , dstRect ;
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , 0 , 0 , true ) ;
+		srcRect.clip( dstRect , 0 , 0 , true ) ;
 		
 		expect( dstRect ).to.eql( { xmin: 10, ymin: 20, xmax: 25, ymax: 40 , isNull: false } ) ;
 		expect( srcRect ).to.eql( { xmin: 10, ymin: 20, xmax: 25, ymax: 40 , isNull: false } ) ;
@@ -78,7 +78,7 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , 5 , 0 , true ) ;
+		srcRect.clip( dstRect , 5 , 0 , true ) ;
 		
 		expect( dstRect ).to.eql( { xmin: 15, ymin: 20, xmax: 25, ymax: 40 , isNull: false } ) ;
 		expect( srcRect ).to.eql( { xmin: 10, ymin: 20, xmax: 20, ymax: 40 , isNull: false } ) ;
@@ -86,7 +86,7 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , -8 , 0 , true ) ;
+		srcRect.clip( dstRect , -8 , 0 , true ) ;
 		
 		expect( dstRect ).to.eql( { xmin: 2, ymin: 20, xmax: 22, ymax: 40 , isNull: false } ) ;
 		expect( srcRect ).to.eql( { xmin: 10, ymin: 20, xmax: 30, ymax: 40 , isNull: false } ) ;
@@ -94,7 +94,7 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , -31 , 0 , true ) ;
+		srcRect.clip( dstRect , -31 , 0 , true ) ;
 		
 		expect( dstRect.isNull ).to.be( true ) ;
 		expect( srcRect.isNull ).to.be( true ) ;
@@ -102,7 +102,7 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , -8 , 5 , true ) ;
+		srcRect.clip( dstRect , -8 , 5 , true ) ;
 		
 		expect( dstRect ).to.eql( { xmin: 2, ymin: 20, xmax: 22, ymax: 45 , isNull: false } ) ;
 		expect( srcRect ).to.eql( { xmin: 10, ymin: 15, xmax: 30, ymax: 40 , isNull: false } ) ;
@@ -110,7 +110,7 @@ describe( "ScreenBuffer.Rect" , function() {
 		
 		dstRect = Rect.create( { xmin: 0 , ymin: 20 , xmax: 25 , ymax: 45 , isNull: false } ) ;
 		srcRect = Rect.create( { xmin: 10 , ymin: 10 , xmax: 30 , ymax: 40 , isNull: false } ) ;
-		dstRect.adjustToSrc( srcRect , 0 , -21 , true ) ;
+		srcRect.clip( dstRect , 0 , -21 , true ) ;
 		
 		expect( dstRect.isNull ).to.be( true ) ;
 		expect( srcRect.isNull ).to.be( true ) ;
