@@ -1,6 +1,12 @@
 
+v0.6.1
+------
+
+ScreenBuffer refactoring.
+
+
 v0.6.0
--------
+------
 
 Major change in the module.exports tree: the backward compatibility is broken, but it can be easily fixed.
 Just replace:
