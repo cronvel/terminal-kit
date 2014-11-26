@@ -29,7 +29,8 @@
 /* global describe, it, before, after */
 
 
-var term = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/terminal.js' ) ;
+var term = termkit.terminal ;
 
 term.green( '\n== Environment variable ==\n\n' ) ;
 term( '$TERM: %s\n' , process.env.TERM ) ;
@@ -39,7 +40,7 @@ term( '\n' ) ;
 
 
 term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
-term( '.guessTerminal(): %J\n' , term.guessTerminal() ) ;
+term( '.guessTerminal(): %J\n' , termkit.guessTerminal() ) ;
 term( 'Terminal name: %s\n' , term.appName ) ;
 term( 'Terminal app ID: %s\n' , term.appId ) ;
 term( 'Generic terminal: %s\n' , term.generic ) ;
@@ -49,12 +50,12 @@ term( '\n' ) ;
 
 
 term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
-term.getParentTerminalInfo( function( error , info ) {
+termkit.getParentTerminalInfo( function( error , info ) {
 	
 	if ( error ) { term( '.getParentTerminalInfo() %s\n' , error ) ; }
 	else { term( '.getParentTerminalInfo(): %J\n' , info ) ; }
 	
-	term.getDetectedTerminal( function( error , term ) {
+	termkit.getDetectedTerminal( function( error , term ) {
 		
 		if ( error ) { console.log( 'Error:' , error ) ; return ; }
 		

@@ -28,10 +28,14 @@
 /* jshint unused:false */
 
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+
+var terminal = require( '../lib/terminal.js' ) ;
+
+
+
+terminal.getDetectedTerminal( function( error , term ) {
 	
 	var i ;
-
 
 	// First set black as the background color?
 	//term.bgBlack() ;

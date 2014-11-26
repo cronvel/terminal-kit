@@ -1,4 +1,22 @@
 
+v0.6.0
+-------
+
+Major change in the module.exports tree: the backward compatibility is broken, but it can be easily fixed.
+Just replace:
+
+var term = require( 'terminal-kit' ) ;
+
+... by:
+
+var term = require( 'terminal-kit' ).terminal ;
+
+Now, that is when the .terminal property is accessed for the first time that a terminal is guessed.
+
+This make the code cleaner and remove any trouble when circular require() occurs: the module does not perform
+anything until an userland code request so.
+
+
 v0.5.17
 -------
 

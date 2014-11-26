@@ -28,7 +28,8 @@
 
 
 var fs = require( 'fs' ) ;
-var term = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/terminal.js' ) ;
+var term ;
 
 
 
@@ -39,13 +40,13 @@ var viewport , sprites = {} ;
 
 function init( callback )
 {
-	term.getDetectedTerminal( function( error , detectedTerm ) {
+	termkit.getDetectedTerminal( function( error , detectedTerm ) {
 		
 		if ( error ) { throw new Error( 'Cannot detect terminal.' ) ; }
 		
 		term = detectedTerm ;
 		
-		viewport = term.ScreenBuffer.create( {
+		viewport = termkit.ScreenBuffer.create( {
 			target: term ,
 			width: Math.min( term.width ) ,
 			height: Math.min( term.height - 1 ) ,
@@ -82,7 +83,7 @@ function terminate()
 
 function createBackground()
 {
-	sprites.background = term.ScreenBuffer.create( { width: viewport.width * 5 , height: viewport.height } ) ;
+	sprites.background = termkit.ScreenBuffer.create( { width: viewport.width * 5 , height: viewport.height } ) ;
 	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.01 ) ;
 }
 
@@ -113,7 +114,7 @@ function createBackgroundTrails( nTrails )
 
 function createSpaceship()
 {
-	sprites.spaceship = term.ScreenBuffer.createFromDataString(
+	sprites.spaceship = termkit.ScreenBuffer.createFromDataString(
 		{ attr: { color: 'cyan' } , transparencyChar: '#' } ,
 		fs.readFileSync( './spaceship1.txt' )
 	) ;

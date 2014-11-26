@@ -19,7 +19,7 @@ It does **NOT** depend on ncurses.
 
 
 
-# Features
+# Key features
 
 * colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
@@ -30,15 +30,16 @@ It does **NOT** depend on ncurses.
 * mouse support (GPM is supported for the Linux Console)
 * terminal window title
 * input field
+* screen & off-screen buffers (a concept similar to SDL's *Surface*)
 * event-driven
 
 
 
-# Quick example
+# Quick examples
 
 ```js
 // Require the lib
-var term = require( 'terminal-kit' ) ;
+var term = require( 'terminal-kit' ).terminal ;
 
 // The term() function simply output a string to stdout, using current style
 // output "Hello world!" in default terminal's colors
@@ -82,7 +83,17 @@ Use Node Package Manager:
 
 
 
-# Standard methods description
+# Some conventions used in this document
+
+In all examples, `termkit` is assumed to be `var termkit = require( 'terminal-kit' ) ;` while `term` is assumed
+to be `var term = require( 'terminal-kit' ).terminal ; ` or `var term = termkit.terminal ;`.
+
+So `term` is an instanceof of `termkit.Terminal`, that should in almost all cases match correctly the terminal you
+are currently using.
+
+
+
+# Description of standard methods of a **Terminal** instance 
 
 Standard methods map low-level terminal capabilities.
 
@@ -264,62 +275,9 @@ We can do:
 
 
 
-# Advanced methods description
+# Description of advanced methods of a **Terminal** instance
 
 Advanced methods are high-level librairie functions.
-
-
-
-## .getParentTerminalInfo( callback )
-
-* callback `Function( error , codename , name , pid )` where:
-	* error: truthy if it has failed for some reason
-	* codename: the code name of the terminal, as used by terminfo
-	* name: the real binary name of the terminal
-	* pid: the PID of the terminal
-
-This method detect on which terminal your application run.
-It does **\*NOT\*** use the $TERM environment variable, except as a fallback.
-It iterates through parent process until a known terminal is found, or process of PID 1 is reached (the *init* process).
-
-Obviously, it does not works over SSH.
-
-
-
-## .getDetectedTerminal( callback )
-
-* callback `Function( error , term )` where:
-	* error: truthy if it has failed for some reason
-	* term: the terminal object created specifically for your terminal
-
-This is a shortcut that call `.getParentTerminalInfo()` then use `.createTerminal()` with the correct arguments.
-This will give you a terminal object with the best support that this lib is able to give to you.
-
-It does not works over SSH, but fallback to standard terminal guessing.
-
-Example **\*NOT\***  using `.getDetectedTerminal()`:
-```js
-var term = require( 'terminal-kit' ) ;
-term.cyan( 'Hello world!' ) ;
-```
-This will give you a terminal object based on the $TERM environment variable, that works fine in most case.
-But please consider that most of modern terminal report them as an *xterm* or an *xterm-256color* terminal.
-They claim being xterm-compatible, but most of them support only 33% to 50% of xterm features,
-and even major terminal like *gnome-terminal* or *Konsole* are terrible.
-
-Example using `.getDetectedTerminal()`:
-```js
-require( 'terminal-kit' ).getDetectedTerminal( function( error , term ) {
-	term.cyan( 'Terminal name: %s\n' , term.appName ) ;
-	term.cyan( 'Terminal app: %s\n' , term.app ) ;
-	term.cyan( 'Terminal generic: %s\n' , term.generic ) ;
-	term.cyan( 'Config file: %s\n' , term.termconfigFile ) ;
-} ) ;
-```
-This will give you the best compatibility possible, at the cost of a callback.
-
-
-
 ## .fullscreen( options )
 
 * options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
@@ -350,8 +308,6 @@ on the `term` object.
 Quick example:
 
 ```js
-var term = require( 'terminal-kit' ) ;
-
 function terminate()
 {
 	term.grabInput( false ) ;
@@ -629,6 +585,64 @@ The argument 'name' can be:
 * MOUSE_BUTTON_RELEASED: a button were release, however the terminal does not tell us which one
 * MOUSE_MOTION: if the options `{ mouse: 'motion' }` is given to grabInput(), every move of the mouse will fire this event,
   if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
+
+
+
+# Static methods of `termkit` (i.e. the module's root)
+
+## .getParentTerminalInfo( callback )
+
+* callback `Function( error , codename , name , pid )` where:
+	* error: truthy if it has failed for some reason
+	* codename: the code name of the terminal, as used by terminfo
+	* name: the real binary name of the terminal
+	* pid: the PID of the terminal
+
+This method detect on which terminal your application run.
+It does **\*NOT\*** use the $TERM or $COLORTERM environment variable, except as a fallback.
+It iterates through parent process until a known terminal is found, or process of PID 1 is reached (the *init* process).
+
+Obviously, it does not works over SSH.
+
+Also, it only works on UNIX family OS.
+
+
+
+## .getDetectedTerminal( callback )
+
+* callback `Function( error , term )` where:
+	* error: truthy if it has failed for some reason
+	* term: the terminal object created specifically for your terminal
+
+This is a shortcut that call `.getParentTerminalInfo()` then use `.createTerminal()` with the correct arguments.
+This will give you a terminal object with the best support that this lib is able to give to you.
+
+It does not works over SSH, but fallback to standard terminal guessing.
+
+Example **\*NOT\***  using `.getDetectedTerminal()`:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+term.cyan( 'Hello world!' ) ;
+```
+This will give you a terminal object based on the $TERM and $COLORTERM environment variable, that works fine in
+almost all cases.
+
+Some troubles may arise if the $COLORTERM environment variable is not found.
+
+Most of modern terminal report them as an *xterm* or an *xterm-256color* terminal in the $TERM environment variable.
+They claim being xterm-compatible, but most of them support only 33% to 50% of xterm features,
+and even major terminal like *gnome-terminal* or *Konsole* are sometimes terrible.
+
+Example using `.getDetectedTerminal()`:
+```js
+require( 'terminal-kit' ).getDetectedTerminal( function( error , term ) {
+	term.cyan( 'Terminal name: %s\n' , term.appName ) ;
+	term.cyan( 'Terminal app: %s\n' , term.app ) ;
+	term.cyan( 'Terminal generic: %s\n' , term.generic ) ;
+	term.cyan( 'Config file: %s\n' , term.termconfigFile ) ;
+} ) ;
+```
+This will give you the best compatibility possible, at the cost of a callback.
 
 
 
