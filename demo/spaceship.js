@@ -72,9 +72,9 @@ function terminate()
 	//term.fullscreen( false ) ;
 	term.hideCursor( false ) ;
 	term.grabInput( false ) ;
-	term( '\n\n' ) ;
 	
 	setTimeout( function() {
+		term( '\n\n' ) ;
 		process.exit() ;
 	} , 100 ) ;
 }
@@ -115,7 +115,7 @@ function createBackgroundTrails( nTrails )
 function createSpaceship()
 {
 	sprites.spaceship = termkit.ScreenBuffer.createFromChars(
-		{ attr: { color: 'cyan' } , transparencyChar: '#' } ,
+		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' } ,
 		fs.readFileSync( './spaceship1.txt' )
 	) ;
 	sprites.spaceship.x = 3 ;
@@ -160,8 +160,7 @@ function draw()
 {
 	sprites.background.draw( { dst: viewport } ) ;
 	sprites.spaceship.draw( { dst: viewport , transparency: true } ) ;
-	//sprites.spaceship.draw( { dst: viewport } ) ;
-	viewport.draw() ;
+	viewport.draw( { diffOnly: false } ) ;
 	//sprites.background.dumpChars() ;
 }
 
