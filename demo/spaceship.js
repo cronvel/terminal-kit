@@ -84,7 +84,15 @@ function terminate()
 function createBackground()
 {
 	sprites.background = termkit.ScreenBuffer.create( { width: viewport.width * 5 , height: viewport.height } ) ;
-	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.01 ) ;
+	
+	sprites.planet = termkit.ScreenBuffer.createFromChars(
+		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
+		fs.readFileSync( './data/saturn.txt' )
+	) ;
+	
+	createBackgroundStars( sprites.background.width * sprites.background.height * 0.004 ) ;
+	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.008 ) ;
+	createBackgroundPlanets( sprites.background.width * sprites.background.height * 0.0001 ) ;
 }
 
 
@@ -112,11 +120,52 @@ function createBackgroundTrails( nTrails )
 
 
 
+function createBackgroundStars( nStars )
+{
+	var i , x , y , c , char , stars = [ '*' , '.' , 'o' , '+' , '°' ] ;
+	
+	for ( i = 0 ; i < nStars ; i ++ )
+	{
+		x = Math.floor( Math.random() * sprites.background.width ) ;
+		y = Math.floor( Math.random() * sprites.background.height ) ;
+		char = stars[ Math.floor( Math.random() * stars.length ) ] ;
+		c = Math.floor( Math.random() * 16 ) ;
+		
+		sprites.background.put( {
+			x: x ,
+			y: y ,
+			attr: { color: c }
+		} , char ) ;
+	}
+}
+
+
+
+function createBackgroundPlanets( nPlanets )
+{
+	var i , x , y ;
+	
+	for ( i = 0 ; i < nPlanets ; i ++ )
+	{
+		x = Math.floor( Math.random() * sprites.background.width ) ;
+		y = Math.floor( Math.random() * sprites.background.height ) ;
+		
+		sprites.planet.draw( {
+			dst: sprites.background ,
+			x: Math.floor( x - sprites.planet.width / 2 ) ,
+			y: Math.floor( y - sprites.planet.height / 2 ) ,
+			transparency: true
+		} ) ;
+	}
+}
+
+
+
 function createSpaceship()
 {
 	sprites.spaceship = termkit.ScreenBuffer.createFromChars(
 		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' } ,
-		fs.readFileSync( './spaceship1.txt' )
+		fs.readFileSync( './data/spaceship1.txt' )
 	) ;
 	sprites.spaceship.x = 3 ;
 	sprites.spaceship.y = Math.floor( viewport.height / 2 - sprites.spaceship.height / 2 ) ;
