@@ -74,7 +74,7 @@ function terminate()
 	term.grabInput( false ) ;
 	
 	setTimeout( function() {
-		term( '\n\n' ) ;
+		term.moveTo( 1 , term.height , '\n\n' ) ;
 		process.exit() ;
 	} , 100 ) ;
 }
@@ -205,12 +205,19 @@ function nextPosition()
 
 
 
+frames = 0 ;
 function draw()
 {
 	sprites.background.draw( { dst: viewport } ) ;
-	sprites.spaceship.draw( { dst: viewport , transparency: true } ) ;
-	viewport.draw( { diffOnly: false } ) ;
-	//sprites.background.dumpChars() ;
+	sprites.spaceship.draw( { dst: viewport , transparency: true , wrap: 'both' } ) ;
+	var stats = viewport.draw( { diffOnly: true } ) ;
+	
+	term.moveTo.eraseLine.bgWhite.green( 1 , 1 ,
+		'Arrow keys: move the ship - CTRL-C: Quit - Stats: %d cells, %d moves, %d attrs, %d writes\n' ,
+		stats.cells , stats.moves , stats.attrs , stats.writes
+	) ;
+	
+	frames ++ ;
 }
 
 
