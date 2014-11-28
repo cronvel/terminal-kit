@@ -208,7 +208,7 @@ function nextPosition()
 frames = 0 ;
 function draw()
 {
-	sprites.background.draw( { dst: viewport } ) ;
+	sprites.background.draw( { dst: viewport , tile: 'both' } ) ;
 	sprites.spaceship.draw( { dst: viewport , transparency: true , wrap: 'both' } ) ;
 	var stats = viewport.draw( { diffOnly: true } ) ;
 	
