@@ -1,4 +1,10 @@
 
+v0.6.6
+------
+
+The buffer to buffer blitter now support the 'tile' option.
+
+
 v0.6.5
 ------
 
