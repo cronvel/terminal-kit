@@ -1,4 +1,10 @@
 
+v0.6.8
+------
+
+Refactoring, so the tile-variant & the wrap-variant of blitter are now available for the terminal blitter.
+
+
 v0.6.7
 ------
 
