@@ -83,7 +83,7 @@ function terminate()
 
 function createBackground()
 {
-	sprites.background = termkit.ScreenBuffer.create( { width: viewport.width * 5 , height: viewport.height } ) ;
+	sprites.background = termkit.ScreenBuffer.create( { width: viewport.width * 4 , height: viewport.height } ) ;
 	
 	sprites.planet = termkit.ScreenBuffer.createFromChars(
 		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
@@ -154,7 +154,8 @@ function createBackgroundPlanets( nPlanets )
 			dst: sprites.background ,
 			x: Math.floor( x - sprites.planet.width / 2 ) ,
 			y: Math.floor( y - sprites.planet.height / 2 ) ,
-			transparency: true
+			transparency: true ,
+			wrap: 'x'
 		} ) ;
 	}
 }
@@ -200,7 +201,6 @@ function inputs( key )
 function nextPosition()
 {
 	sprites.background.x -- ;
-	if ( sprites.background.x <= - sprites.background.width ) { sprites.background.x = 0 ; }
 }
 
 
@@ -208,12 +208,12 @@ function nextPosition()
 frames = 0 ;
 function draw()
 {
-	sprites.background.draw( { dst: viewport , tile: 'both' } ) ;
+	sprites.background.draw( { dst: viewport , tile: true } ) ;
 	sprites.spaceship.draw( { dst: viewport , transparency: true , wrap: 'both' } ) ;
 	var stats = viewport.draw( { diffOnly: true } ) ;
 	
 	term.moveTo.eraseLine.bgWhite.green( 1 , 1 ,
-		'Arrow keys: move the ship - CTRL-C: Quit - Stats: %d cells, %d moves, %d attrs, %d writes\n' ,
+		'Arrow keys: move the ship - CTRL-C: Quit - Redraw stats: %d cells, %d moves, %d attrs, %d writes\n' ,
 		stats.cells , stats.moves , stats.attrs , stats.writes
 	) ;
 	

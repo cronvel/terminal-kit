@@ -1,4 +1,11 @@
 
+v0.6.7
+------
+
+The 'tile' blitter is now faster and cleaner.
+Some bugfix on buffer creation (size should be integer, not float).
+
+
 v0.6.6
 ------
 
