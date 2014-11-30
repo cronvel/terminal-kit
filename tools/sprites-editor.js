@@ -35,10 +35,17 @@ var term ;
 
 
 var filepath ;
-var viewport , statusBar , hintBar , canvas ;
+var viewport , statusBar , hintBar , canvas , background ;
+
+
+
+var MODE_CHARS = 0 ;
+//var MODE_TRANSPARENCY = 1 ;
+var MODE_LENGTH = 1 ;
 
 var editingMode = {
-	mode: 'chars' ,
+	mode: MODE_CHARS ,
+	transparencyColor: 13 ,
 	attr: {
 		bgColor: 0 ,
 		color: 7
@@ -57,7 +64,10 @@ function init( callback )
 		
 		if ( process.argv.length < 3 )
 		{
-			term.blue( 'Usage is:\n' ).brightCyan( './' + path.basename( process.argv[ 1 ] ) ).cyan.italic( ' <file>' )( '\n\n' ) ;
+			term.blue( 'Usage is:\n' )
+				.brightCyan( './' + path.basename( process.argv[ 1 ] ) )
+				.cyan.italic( ' <screen-buffer file>' )( '\n\n' ) ;
+			
 			process.exit( 1 ) ;
 		}
 		
@@ -95,6 +105,16 @@ function init( callback )
 			terminate( error.message ) ;
 			return ;
 		}
+		
+		background = termkit.ScreenBuffer.create( {
+			dst: viewport ,
+			width: canvas.width ,
+			height: canvas.height ,
+			y: 1 ,
+			noClear: true
+		} ) ;
+		background.clear( { attr: { bgColor: editingMode.transparencyColor } , char: ' ' } ) ;
+		
 		
 		term.fullscreen() ;
 		//term.moveTo.eraseLine.bgWhite.green( 1 , 1 , 'Arrow keys: move - CTRL-C: Quit\n' ) ;
@@ -164,6 +184,7 @@ function save()
 {
 	try {
 		canvas.saveSync( filepath ) ;
+		randomHint( "File '" + filepath + "' saved!" , 'red' , 'yellow' ) ;
 	}
 	catch ( error ) {
 		terminate( error.message ) ;
@@ -182,7 +203,8 @@ function refreshCursorPosition()
 
 function redrawCanvas()
 {
-	canvas.draw() ;
+	background.draw() ;
+	canvas.draw( { transparency: true } ) ;
 	viewport.draw( { diffOnly: true } ) ;
 	refreshCursorPosition() ;
 }
@@ -207,20 +229,45 @@ function redrawHintBar()
 
 
 
+function refreshBackground()
+{
+	background.clear( { attr: { bgColor: editingMode.transparencyColor } , char: ' ' } ) ;
+	redrawCanvas() ;
+}
+
+
+
 function refreshStatusBar()
 {
+	var mode = '' ;
 	var styles = [] ;
-	var options = { attr: { bgColor: 'brightWhite' , color: 'green' } } ;
+	var keyOptions = { attr: { bgColor: 'brightWhite' , color: 'green' } } ;
+	var valueOptions = { attr: { bgColor: 'brightWhite' , color: 'blue' } } ;
 	
-	statusBar.clear( { attr: options.attr , char: ' ' } ) ;
+	statusBar.clear( { attr: keyOptions.attr , char: ' ' } ) ;
 	statusBar.cx = statusBar.cy = 0 ;
 	
-	statusBar.put( options , '  fg: %d' , editingMode.attr.color ) ;
+	statusBar.put( keyOptions , 'Ed. Mode: ' ) ;
+	switch ( editingMode.mode )
+	{
+		case MODE_CHARS :
+			mode = 'characters' ;
+			break ;
+		case MODE_TRANSPARENCY :
+			mode = 'transparency' ;
+			break ;
+	}
+	statusBar.put( valueOptions , mode ) ;
+	
+	statusBar.put( keyOptions , '  fg: ' ) ;
+	statusBar.put( valueOptions , editingMode.attr.color ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.color } } , ' ' ) ;
 	
-	statusBar.put( options , '  bg: %d' , editingMode.attr.bgColor ) ;
+	statusBar.put( keyOptions , '  bg: ' ) ;
+	statusBar.put( valueOptions , editingMode.attr.bgColor ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.bgColor } } , ' ' ) ;
 	
+	if ( editingMode.attr.transparency ) { styles.push( 'transparency' ) ; }
 	if ( editingMode.attr.bold ) { styles.push( 'bold' ) ; }
 	if ( editingMode.attr.dim ) { styles.push( 'dim' ) ; }
 	if ( editingMode.attr.italic ) { styles.push( 'italic' ) ; }
@@ -233,8 +280,12 @@ function refreshStatusBar()
 	if ( styles.length ) { styles = styles.join( '+' ) ; }
 	else { styles = 'none' ; }
 	
-	statusBar.put( options , '  styles: ' ) ;
-	statusBar.put( { attr: { bgColor: 'brightWhite' , color: 'blue' } } , styles ) ;
+	statusBar.put( keyOptions , '  styles: ' ) ;
+	statusBar.put( valueOptions , styles ) ;
+	
+	statusBar.put( keyOptions , '  trans: ' ) ;
+	statusBar.put( valueOptions , editingMode.transparencyColor ) ;
+	statusBar.put( { attr: { bgColor: editingMode.transparencyColor } } , ' ' ) ;
 	
 	redrawStatusBar() ;
 }
@@ -245,9 +296,11 @@ var hintTimeout ;
 var hintIndex = 0 ;
 var hints = [
 	'CTRL-C: Quit' ,
+	'CTRL-S: Save file' ,
 	
 	'Arrow keys: Move the cursor' ,
 	'CTRL + Arrow keys or SHIFT + Arrow keys: Move the cursor to the boundaries' ,
+	'TAB: switch editing mode' ,
 	
 	'F1: Next hint' ,
 	
@@ -255,10 +308,13 @@ var hints = [
 	'F6: Next foreground color' ,
 	'F7: Previous background color' ,
 	'F8: Next background color' ,
+	'F9: Previous editor\'s transparency color' ,
+	'F10: Next editor\'s transparency color' ,
 	
+	'CTRL-T: Turn transparency on/off' ,
 	'CTRL-B: Turn bold on/off' ,
 	'CTRL-D: Turn dim on/off' ,
-	'CTRL-T: Turn italic on/off' ,
+	'CTRL-L: Turn italic on/off' ,
 	'CTRL-U: Turn underline on/off' ,
 	'CTRL-K: Turn blink on/off' ,
 	'CTRL-N: Turn inverse on/off' ,
@@ -266,13 +322,16 @@ var hints = [
 	'CTRL-Y: Turn strike on/off'
 ] ;
 
-function randomHint( forcedHint )
+function randomHint( forcedHint , color , bgColor )
 {
 	var hint ;
 	
 	if ( hintTimeout ) { clearTimeout( hintTimeout ) ; }
 	
-	hintBar.clear( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
+	if ( color === undefined ) { color = 'green' ; }
+	if ( bgColor === undefined ) { bgColor = 'brightWhite' ; }
+	
+	hintBar.clear( { attr: { bgColor: bgColor } , char: ' ' } ) ;
 	
 	if ( typeof forcedHint === 'string' )
 	{
@@ -294,7 +353,7 @@ function randomHint( forcedHint )
 		hint = hints[ hintIndex ] ;
 	}
 	
-	hintBar.put( { x: 0 , y: 0 , attr: { bgColor: 'brightWhite' , color: 'green' } } , hint ) ;
+	hintBar.put( { x: 0 , y: 0 , attr: { bgColor: bgColor , color: color } } , hint ) ;
 	
 	redrawHintBar() ;
 	hintTimeout = setTimeout( randomHint , 5000 ) ;
@@ -324,6 +383,12 @@ function inputs( key )
 		// Save the file
 		case 'CTRL_S':
 			save() ;
+			break ;
+		
+		// Switch mode
+		case 'TAB':
+			editingMode.mode = ( editingMode.mode + 1 ) % MODE_LENGTH ;
+			refreshStatusBar() ;
 			break ;
 		
 		// Move keys
@@ -395,8 +460,24 @@ function inputs( key )
 			if ( editingMode.attr.bgColor > 255 ) { editingMode.attr.bgColor = 0 ; }
 			refreshStatusBar() ;
 			break ;
+		case 'F9':
+			editingMode.transparencyColor -- ;
+			if ( editingMode.transparencyColor < 0 ) { editingMode.transparencyColor = 255 ; }
+			refreshStatusBar() ;
+			refreshBackground() ;
+			break ;
+		case 'F10':
+			editingMode.transparencyColor ++ ;
+			if ( editingMode.transparencyColor > 255 ) { editingMode.transparencyColor = 0 ; }
+			refreshStatusBar() ;
+			refreshBackground() ;
+			break ;
 		
 		// Styles keys
+		case 'CTRL_T':
+			editingMode.attr.transparency = ! editingMode.attr.transparency ;
+			refreshStatusBar() ;
+			break ;
 		case 'CTRL_B':
 			editingMode.attr.bold = ! editingMode.attr.bold ;
 			refreshStatusBar() ;
@@ -405,7 +486,7 @@ function inputs( key )
 			editingMode.attr.dim = ! editingMode.attr.dim ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_T':
+		case 'CTRL_L':
 			editingMode.attr.italic = ! editingMode.attr.italic ;
 			refreshStatusBar() ;
 			break ;
@@ -444,3 +525,5 @@ function inputs( key )
 
 init( function() {
 } ) ;
+
+
