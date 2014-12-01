@@ -30,6 +30,7 @@
 var fs = require( 'fs' ) ;
 var termkit = require( '../lib/terminal.js' ) ;
 var term ;
+var ScreenBuffer = termkit.ScreenBuffer ;
 
 
 
@@ -46,7 +47,7 @@ function init( callback )
 		
 		term = detectedTerm ;
 		
-		viewport = termkit.ScreenBuffer.create( {
+		viewport = ScreenBuffer.create( {
 			dst: term ,
 			width: Math.min( term.width ) ,
 			height: Math.min( term.height - 1 ) ,
@@ -83,9 +84,9 @@ function terminate()
 
 function createBackground()
 {
-	sprites.background = termkit.ScreenBuffer.create( { width: viewport.width * 4 , height: viewport.height } ) ;
+	sprites.background = ScreenBuffer.create( { width: viewport.width * 4 , height: viewport.height } ) ;
 	
-	sprites.planet = termkit.ScreenBuffer.createFromChars(
+	sprites.planet = ScreenBuffer.createFromChars(
 		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
 		fs.readFileSync( './data/saturn.txt' )
 	) ;
@@ -154,7 +155,7 @@ function createBackgroundPlanets( nPlanets )
 			dst: sprites.background ,
 			x: Math.floor( x - sprites.planet.width / 2 ) ,
 			y: Math.floor( y - sprites.planet.height / 2 ) ,
-			transparency: true ,
+			blending: true ,
 			wrap: 'x'
 		} ) ;
 	}
@@ -164,8 +165,8 @@ function createBackgroundPlanets( nPlanets )
 
 function createSpaceship()
 {
-	sprites.spaceship = termkit.ScreenBuffer.createFromChars(
-		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' } ,
+	sprites.spaceship = ScreenBuffer.createFromChars(
+		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' , transparencyType: ScreenBuffer.TRANSPARENCY } ,
 		fs.readFileSync( './data/spaceship1.txt' )
 	) ;
 	sprites.spaceship.x = 3 ;
@@ -209,7 +210,7 @@ frames = 0 ;
 function draw()
 {
 	sprites.background.draw( { dst: viewport , tile: true } ) ;
-	sprites.spaceship.draw( { dst: viewport , transparency: true , wrap: 'both' } ) ;
+	sprites.spaceship.draw( { dst: viewport , blending: true , wrap: 'both' } ) ;
 	var stats = viewport.draw( { diffOnly: true } ) ;
 	
 	term.moveTo.eraseLine.bgWhite.green( 1 , 1 ,

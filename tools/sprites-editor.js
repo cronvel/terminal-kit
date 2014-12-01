@@ -45,7 +45,13 @@ var MODE_LENGTH = 1 ;
 
 var editingMode = {
 	mode: MODE_CHARS ,
-	transparencyColor: 13 ,
+	background : {
+		char: ' ' ,
+		attr: {
+			bgColor: 13 ,
+			color: 15
+		}
+	} ,
 	attr: {
 		bgColor: 0 ,
 		color: 7
@@ -80,6 +86,15 @@ function init( callback )
 			y: 1
 		} ) ;
 		
+		background = termkit.ScreenBuffer.create( {
+			dst: viewport ,
+			width: term.width ,
+			height: term.height - 2 ,
+			y: 1 ,
+			noClear: true
+		} ) ;
+		background.clear( editingMode.background.attr ) ;
+		
 		statusBar = termkit.ScreenBuffer.create( {
 			dst: viewport ,
 			width: viewport.width ,
@@ -105,15 +120,6 @@ function init( callback )
 			terminate( error.message ) ;
 			return ;
 		}
-		
-		background = termkit.ScreenBuffer.create( {
-			dst: viewport ,
-			width: canvas.width ,
-			height: canvas.height ,
-			y: 1 ,
-			noClear: true
-		} ) ;
-		background.clear( { attr: { bgColor: editingMode.transparencyColor } , char: ' ' } ) ;
 		
 		
 		term.fullscreen() ;
@@ -231,7 +237,7 @@ function redrawHintBar()
 
 function refreshBackground()
 {
-	background.clear( { attr: { bgColor: editingMode.transparencyColor } , char: ' ' } ) ;
+	background.clear( editingMode.background ) ;
 	redrawCanvas() ;
 }
 
@@ -267,25 +273,31 @@ function refreshStatusBar()
 	statusBar.put( valueOptions , editingMode.attr.bgColor ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.bgColor } } , ' ' ) ;
 	
-	if ( editingMode.attr.transparency ) { styles.push( 'transparency' ) ; }
+	if ( editingMode.attr.fgTransparency ) { styles.push( 'f-trans' ) ; }
+	if ( editingMode.attr.bgTransparency ) { styles.push( 'b-trans' ) ; }
+	if ( editingMode.attr.styleTransparency ) { styles.push( 's-trans' ) ; }
+	if ( editingMode.attr.charTransparency ) { styles.push( 'c-trans' ) ; }
 	if ( editingMode.attr.bold ) { styles.push( 'bold' ) ; }
 	if ( editingMode.attr.dim ) { styles.push( 'dim' ) ; }
-	if ( editingMode.attr.italic ) { styles.push( 'italic' ) ; }
-	if ( editingMode.attr.underline ) { styles.push( 'underline' ) ; }
+	if ( editingMode.attr.italic ) { styles.push( 'ita' ) ; }
+	if ( editingMode.attr.underline ) { styles.push( 'under' ) ; }
 	if ( editingMode.attr.blink ) { styles.push( 'blink' ) ; }
-	if ( editingMode.attr.inverse ) { styles.push( 'inverse' ) ; }
+	if ( editingMode.attr.inverse ) { styles.push( 'inv' ) ; }
 	if ( editingMode.attr.hidden ) { styles.push( 'hidden' ) ; }
 	if ( editingMode.attr.strike ) { styles.push( 'strike' ) ; }
 	
-	if ( styles.length ) { styles = styles.join( '+' ) ; }
+	if ( styles.length ) { styles = styles.join( '|' ) ; }
 	else { styles = 'none' ; }
 	
 	statusBar.put( keyOptions , '  styles: ' ) ;
 	statusBar.put( valueOptions , styles ) ;
 	
-	statusBar.put( keyOptions , '  trans: ' ) ;
-	statusBar.put( valueOptions , editingMode.transparencyColor ) ;
-	statusBar.put( { attr: { bgColor: editingMode.transparencyColor } } , ' ' ) ;
+	statusBar.put( keyOptions , '  background: ' ) ;
+	statusBar.put( valueOptions , editingMode.background.attr.color ) ;
+	statusBar.put( { attr: { bgColor: editingMode.background.attr.color } } , ' ' ) ;
+	statusBar.put( valueOptions , editingMode.background.attr.bgColor ) ;
+	statusBar.put( { attr: { bgColor: editingMode.background.attr.bgColor } } , ' ' ) ;
+	statusBar.put( valueOptions , editingMode.background.char ) ;
 	
 	redrawStatusBar() ;
 }
@@ -298,9 +310,9 @@ var hints = [
 	'CTRL-C: Quit' ,
 	'CTRL-S: Save file' ,
 	
-	'Arrow keys: Move the cursor' ,
-	'CTRL + Arrow keys or SHIFT + Arrow keys: Move the cursor to the boundaries' ,
-	'TAB: switch editing mode' ,
+	'Arrow: Move the cursor' ,
+	'CTRL-Arrow, SHIFT-Arrow: Move the cursor to the boundaries' ,
+	//'TAB: switch editing mode' ,
 	
 	'F1: Next hint' ,
 	
@@ -311,15 +323,20 @@ var hints = [
 	'F9: Previous editor\'s transparency color' ,
 	'F10: Next editor\'s transparency color' ,
 	
-	'CTRL-T: Turn transparency on/off' ,
-	'CTRL-B: Turn bold on/off' ,
-	'CTRL-D: Turn dim on/off' ,
-	'CTRL-L: Turn italic on/off' ,
-	'CTRL-U: Turn underline on/off' ,
-	'CTRL-K: Turn blink on/off' ,
-	'CTRL-N: Turn inverse on/off' ,
-	'CTRL-P: Turn hidden on/off' ,
-	'CTRL-Y: Turn strike on/off'
+	'ALT-T: Toggle all transparencies' ,
+	'ALT-F: Toggle foreground transparency' ,
+	'ALT-G: Toggle background transparency' ,
+	'ALT-Y: Toggle style transparency' ,
+	'ALT-C: Toggle character transparency' ,
+	
+	'ALT-B: Toggle bold' ,
+	'ALT-D: Toggle dim' ,
+	'ALT-I: Toggle italic' ,
+	'ALT-U: Toggle underline' ,
+	'ALT-K: Toggle blink' ,
+	'ALT-N: Toggle inverse' ,
+	'ALT-H: Toggle hidden' ,
+	'ALT-S: Toggle strike'
 ] ;
 
 function randomHint( forcedHint , color , bgColor )
@@ -461,52 +478,73 @@ function inputs( key )
 			refreshStatusBar() ;
 			break ;
 		case 'F9':
-			editingMode.transparencyColor -- ;
-			if ( editingMode.transparencyColor < 0 ) { editingMode.transparencyColor = 255 ; }
+			editingMode.transparencyBgColor -- ;
+			if ( editingMode.transparencyBgColor < 0 ) { editingMode.transparencyBgColor = 255 ; }
 			refreshStatusBar() ;
 			refreshBackground() ;
 			break ;
 		case 'F10':
-			editingMode.transparencyColor ++ ;
-			if ( editingMode.transparencyColor > 255 ) { editingMode.transparencyColor = 0 ; }
+			editingMode.transparencyBgColor ++ ;
+			if ( editingMode.transparencyBgColor > 255 ) { editingMode.transparencyBgColor = 0 ; }
 			refreshStatusBar() ;
 			refreshBackground() ;
 			break ;
 		
-		// Styles keys
-		case 'CTRL_T':
-			editingMode.attr.transparency = ! editingMode.attr.transparency ;
+		// Blending keys
+		case 'ALT_T':
+			editingMode.transparency = ! editingMode.transparency ;
+			editingMode.attr.fgTransparency = editingMode.attr.bgTransparency =
+				editingMode.attr.styleTransparency = editingMode.attr.charTransparency = 
+				editingMode.transparency ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_B':
+		case 'ALT_F':
+			editingMode.attr.fgTransparency = ! editingMode.attr.fgTransparency ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_G':
+			editingMode.attr.bgTransparency = ! editingMode.attr.bgTransparency ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_Y':
+			editingMode.attr.styleTransparency = ! editingMode.attr.styleTransparency ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_C':
+			editingMode.attr.charTransparency = ! editingMode.attr.charTransparency ;
+			refreshStatusBar() ;
+			break ;
+		
+		// Styles keys
+		case 'ALT_B':
 			editingMode.attr.bold = ! editingMode.attr.bold ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_D':
+		case 'ALT_D':
 			editingMode.attr.dim = ! editingMode.attr.dim ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_L':
+		case 'ALT_I':
 			editingMode.attr.italic = ! editingMode.attr.italic ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_U':
+		case 'ALT_U':
 			editingMode.attr.underline = ! editingMode.attr.underline ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_K':
+		case 'ALT_K':
 			editingMode.attr.blink = ! editingMode.attr.blink ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_N':
+		case 'ALT_N':
 			editingMode.attr.inverse = ! editingMode.attr.inverse ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_P':
+		case 'ALT_H':
 			editingMode.attr.hidden = ! editingMode.attr.hidden ;
 			refreshStatusBar() ;
 			break ;
-		case 'CTRL_Y':
+		case 'ALT_S':
 			editingMode.attr.strike = ! editingMode.attr.strike ;
 			refreshStatusBar() ;
 			break ;

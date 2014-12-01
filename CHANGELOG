@@ -1,4 +1,11 @@
 
+v0.6.9
+------
+
+Many type of transparencies: foreground color, background color, style & character.
+New: a sprite editor, located in demo/sprite-editor.js.
+
+
 v0.6.8
 ------
 
