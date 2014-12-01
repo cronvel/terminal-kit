@@ -31,6 +31,7 @@ var fs = require( 'fs' ) ;
 var path = require( 'path' ) ;
 var termkit = require( '../lib/terminal.js' ) ;
 var term ;
+var ScreenBuffer = termkit.ScreenBuffer ;
 
 
 
@@ -79,14 +80,14 @@ function init( callback )
 		
 		filepath = process.argv[ 2 ] ;
 		
-		viewport = termkit.ScreenBuffer.create( {
+		viewport = ScreenBuffer.create( {
 			dst: term ,
 			width: term.width ,
 			height: term.height ,
 			y: 1
 		} ) ;
 		
-		background = termkit.ScreenBuffer.create( {
+		background = ScreenBuffer.create( {
 			dst: viewport ,
 			width: term.width ,
 			height: term.height - 2 ,
@@ -95,7 +96,7 @@ function init( callback )
 		} ) ;
 		background.clear( editingMode.background.attr ) ;
 		
-		statusBar = termkit.ScreenBuffer.create( {
+		statusBar = ScreenBuffer.create( {
 			dst: viewport ,
 			width: viewport.width ,
 			height: 1 ,
@@ -103,7 +104,7 @@ function init( callback )
 		} ) ;
 		statusBar.clear( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
 		
-		hintBar = termkit.ScreenBuffer.create( {
+		hintBar = ScreenBuffer.create( {
 			dst: viewport ,
 			width: viewport.width ,
 			height: 1 ,
@@ -158,7 +159,7 @@ function load()
 {
 	if ( ! fs.existsSync( filepath ) )
 	{
-		canvas = termkit.ScreenBuffer.create( {
+		canvas = ScreenBuffer.create( {
 			dst: viewport ,
 			width: viewport.width ,
 			height: viewport.height - 2 ,
@@ -169,12 +170,12 @@ function load()
 	}
 	
 	// If something is bad, let it crash, do not handle the exception here
-	canvas = termkit.ScreenBuffer.loadSync( filepath ) ;
+	canvas = ScreenBuffer.loadSync( filepath ) ;
 	
 	canvas.dst = viewport ;
 	canvas.y = 1 ;
 	/*
-	canvas = termkit.ScreenBuffer.create( {
+	canvas = ScreenBuffer.create( {
 		dst: viewport ,
 		width: viewport.width ,
 		height: viewport.height - 2 ,
@@ -253,6 +254,10 @@ function refreshStatusBar()
 	statusBar.clear( { attr: keyOptions.attr , char: ' ' } ) ;
 	statusBar.cx = statusBar.cy = 0 ;
 	
+	statusBar.put( keyOptions , 'Size: ' ) ;
+	statusBar.put( valueOptions , '%dx%d' , canvas.width , canvas.height ) ;
+	
+	/*
 	statusBar.put( keyOptions , 'Ed. Mode: ' ) ;
 	switch ( editingMode.mode )
 	{
@@ -264,6 +269,7 @@ function refreshStatusBar()
 			break ;
 	}
 	statusBar.put( valueOptions , mode ) ;
+	*/
 	
 	statusBar.put( keyOptions , '  fg: ' ) ;
 	statusBar.put( valueOptions , editingMode.attr.color ) ;
@@ -311,7 +317,7 @@ var hints = [
 	'CTRL-S: Save file' ,
 	
 	'Arrow: Move the cursor' ,
-	'CTRL-Arrow, SHIFT-Arrow: Move the cursor to the boundaries' ,
+	//'CTRL-Arrow, SHIFT-Arrow: Move the cursor to the boundaries' ,
 	//'TAB: switch editing mode' ,
 	
 	'F1: Next hint' ,
@@ -380,6 +386,8 @@ function randomHint( forcedHint , color , bgColor )
 
 function inputs( key )
 {
+	var rect ;
+	
 	if ( key.length === 1 )
 	{
 		// This is a normal printable char
@@ -414,11 +422,6 @@ function inputs( key )
 			if ( canvas.cy < 0 ) { canvas.cy = 0 ; }
 			refreshCursorPosition() ;
 			break ;
-		case 'CTRL_UP' :
-		case 'SHIFT_UP' :
-			canvas.cy = 0 ;
-			refreshCursorPosition() ;
-			break ;
 		case 'DOWN' :
 			canvas.cy ++ ;
 			if ( canvas.cy >= canvas.height ) { canvas.cy = canvas.height - 1 ; }
@@ -430,19 +433,9 @@ function inputs( key )
 			if ( canvas.cy >= canvas.height ) { canvas.cy = canvas.height - 1 ; }
 			refreshCursorPosition() ;
 			break ;
-		case 'CTRL_DOWN' :
-		case 'SHIFT_DOWN' :
-			canvas.cy = canvas.height - 1 ;
-			refreshCursorPosition() ;
-			break ;
 		case 'LEFT' :
 			canvas.cx -- ;
 			if ( canvas.cx < 0 ) { canvas.cx = 0 ; }
-			refreshCursorPosition() ;
-			break ;
-		case 'CTRL_LEFT' :
-		case 'SHIFT_LEFT' :
-			canvas.cx = 0 ;
 			refreshCursorPosition() ;
 			break ;
 		case 'RIGHT' :
@@ -450,10 +443,52 @@ function inputs( key )
 			if ( canvas.cx >= canvas.width ) { canvas.cx = canvas.width - 1 ; }
 			refreshCursorPosition() ;
 			break ;
-		case 'CTRL_RIGHT' :
+		
+		// Resize keys
+		case 'SHIFT_UP' :
+			canvas.cy = 0 ;
+			refreshCursorPosition() ;
+			break ;
+		case 'SHIFT_DOWN' :
+			canvas.cy = canvas.height - 1 ;
+			refreshCursorPosition() ;
+			break ;
+		case 'SHIFT_LEFT' :
+			canvas.cx = 0 ;
+			refreshCursorPosition() ;
+			break ;
 		case 'SHIFT_RIGHT' :
 			canvas.cx = canvas.width - 1 ;
 			refreshCursorPosition() ;
+			break ;
+		
+		case 'CTRL_UP' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.ymax -- ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'CTRL_DOWN' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.ymax ++ ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'CTRL_LEFT' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.xmax -- ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'CTRL_RIGHT' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.xmax ++ ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
 			break ;
 		
 		// Color keys
