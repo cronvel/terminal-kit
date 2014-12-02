@@ -1,9 +1,15 @@
 
+v0.6.11
+-------
+
+Improvement of the sprite editor (editor's background character is not customizable).
+
+
 v0.6.10
 -------
 
 Now it is possible to resize a ScreenBuffer.
-Improvement of the sprite editor.
+Improvement of the sprite editor (sprite resizing, editor's background colors are customizable).
 
 
 v0.6.9

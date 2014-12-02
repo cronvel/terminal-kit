@@ -47,9 +47,10 @@ var MODE_LENGTH = 1 ;
 var editingMode = {
 	mode: MODE_CHARS ,
 	background : {
+		charCode: 32 ,
 		char: ' ' ,
 		attr: {
-			bgColor: 13 ,
+			bgColor: 8 ,
 			color: 15
 		}
 	} ,
@@ -317,7 +318,8 @@ var hints = [
 	'CTRL-S: Save file' ,
 	
 	'Arrow: Move the cursor' ,
-	//'CTRL-Arrow, SHIFT-Arrow: Move the cursor to the boundaries' ,
+	'CTRL-Arrow: resize the sprite by moving the lower-right corner' ,
+	'SHIFT-Arrow: resize the sprite by moving the upper-left corner' ,
 	//'TAB: switch editing mode' ,
 	
 	'F1: Next hint' ,
@@ -326,8 +328,12 @@ var hints = [
 	'F6: Next foreground color' ,
 	'F7: Previous background color' ,
 	'F8: Next background color' ,
-	'F9: Previous editor\'s transparency color' ,
-	'F10: Next editor\'s transparency color' ,
+	
+	'F9: Previous editor\'s background\'s background color' ,
+	'F10: Next editor\'s background\'s background color' ,
+	'ALT-Q: Previous editor\'s background\'d foreground color' ,
+	'ALT-W: Next editor\'s background\'d foreground color' ,
+	'ALT-E: Change the editor\'s background\'d character to the next typed character' ,
 	
 	'ALT-T: Toggle all transparencies' ,
 	'ALT-F: Toggle foreground transparency' ,
@@ -384,15 +390,30 @@ function randomHint( forcedHint , color , bgColor )
 
 
 
+var comboKey = false ;
+
 function inputs( key )
 {
 	var rect ;
 	
 	if ( key.length === 1 )
 	{
-		// This is a normal printable char
-		canvas.put( { attr: editingMode.attr } , key ) ;
-		redrawCanvas() ;
+		switch ( comboKey )
+		{
+			case 'backgroundChar' :
+				editingMode.background.char = key ;
+				refreshStatusBar() ;
+				refreshBackground() ;
+				comboKey = false ;
+				break ;
+			
+			default :
+				// This is a normal printable char
+				canvas.put( { attr: editingMode.attr } , key ) ;
+				redrawCanvas() ;
+				break ;
+		}
+		
 		return ;
 	}
 	
@@ -411,10 +432,12 @@ function inputs( key )
 			break ;
 		
 		// Switch mode
+		/*
 		case 'TAB':
 			editingMode.mode = ( editingMode.mode + 1 ) % MODE_LENGTH ;
 			refreshStatusBar() ;
 			break ;
+		*/
 		
 		// Move keys
 		case 'UP' :
@@ -523,17 +546,34 @@ function inputs( key )
 			if ( editingMode.attr.bgColor > 255 ) { editingMode.attr.bgColor = 0 ; }
 			refreshStatusBar() ;
 			break ;
+		
+		// Background colors & chars keys
 		case 'F9':
-			editingMode.transparencyBgColor -- ;
-			if ( editingMode.transparencyBgColor < 0 ) { editingMode.transparencyBgColor = 255 ; }
+			editingMode.background.attr.bgColor -- ;
+			if ( editingMode.background.attr.bgColor < 0 ) { editingMode.background.attr.bgColor = 255 ; }
 			refreshStatusBar() ;
 			refreshBackground() ;
 			break ;
 		case 'F10':
-			editingMode.transparencyBgColor ++ ;
-			if ( editingMode.transparencyBgColor > 255 ) { editingMode.transparencyBgColor = 0 ; }
+			editingMode.background.attr.bgColor ++ ;
+			if ( editingMode.background.attr.bgColor > 255 ) { editingMode.background.attr.bgColor = 0 ; }
 			refreshStatusBar() ;
 			refreshBackground() ;
+			break ;
+		case 'ALT_Q':
+			editingMode.background.attr.color -- ;
+			if ( editingMode.background.attr.color < 0 ) { editingMode.background.attr.color = 255 ; }
+			refreshStatusBar() ;
+			refreshBackground() ;
+			break ;
+		case 'ALT_W':
+			editingMode.background.attr.color ++ ;
+			if ( editingMode.background.attr.color > 255 ) { editingMode.background.attr.color = 0 ; }
+			refreshStatusBar() ;
+			refreshBackground() ;
+			break ;
+		case 'ALT_E':
+			comboKey = 'backgroundChar' ;
 			break ;
 		
 		// Blending keys
