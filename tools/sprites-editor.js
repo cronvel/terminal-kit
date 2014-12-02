@@ -89,12 +89,12 @@ function init( callback )
 		
 		background = ScreenBuffer.create( {
 			dst: viewport ,
-			width: term.width ,
-			height: term.height - 2 ,
+			width: viewport.width ,
+			height: viewport.height - 2 ,
 			y: 1 ,
 			noClear: true
 		} ) ;
-		background.clear( editingMode.background.attr ) ;
+		background.clear( editingMode.background ) ;
 		
 		statusBar = ScreenBuffer.create( {
 			dst: viewport ,
@@ -211,7 +211,7 @@ function refreshCursorPosition()
 function redrawCanvas()
 {
 	background.draw() ;
-	canvas.draw( { transparency: true } ) ;
+	canvas.draw( { blending: true } ) ;
 	viewport.draw( { diffOnly: true } ) ;
 	refreshCursorPosition() ;
 }
@@ -464,28 +464,28 @@ function inputs( key )
 		
 		case 'CTRL_UP' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
-			rect.ymax -- ;
+			rect.set( { ymax: rect.ymax - 1 } ) ;
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
 			break ;
 		case 'CTRL_DOWN' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
-			rect.ymax ++ ;
+			rect.set( { ymax: rect.ymax + 1 } ) ;
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
 			break ;
 		case 'CTRL_LEFT' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
-			rect.xmax -- ;
+			rect.set( { xmax: rect.xmax - 1 } ) ;
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
 			break ;
 		case 'CTRL_RIGHT' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
-			rect.xmax ++ ;
+			rect.set( { xmax: rect.xmax + 1 } ) ;
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
