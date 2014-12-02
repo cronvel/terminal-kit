@@ -445,23 +445,6 @@ function inputs( key )
 			break ;
 		
 		// Resize keys
-		case 'SHIFT_UP' :
-			canvas.cy = 0 ;
-			refreshCursorPosition() ;
-			break ;
-		case 'SHIFT_DOWN' :
-			canvas.cy = canvas.height - 1 ;
-			refreshCursorPosition() ;
-			break ;
-		case 'SHIFT_LEFT' :
-			canvas.cx = 0 ;
-			refreshCursorPosition() ;
-			break ;
-		case 'SHIFT_RIGHT' :
-			canvas.cx = canvas.width - 1 ;
-			refreshCursorPosition() ;
-			break ;
-		
 		case 'CTRL_UP' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
 			rect.set( { ymax: rect.ymax - 1 } ) ;
@@ -486,6 +469,34 @@ function inputs( key )
 		case 'CTRL_RIGHT' :
 			rect = ScreenBuffer.Rect.create( canvas ) ;
 			rect.set( { xmax: rect.xmax + 1 } ) ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'SHIFT_UP' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.set( { ymin: rect.ymin - 1 } ) ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'SHIFT_DOWN' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.set( { ymin: rect.ymin + 1 } ) ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'SHIFT_LEFT' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.set( { xmin: rect.xmin - 1 } ) ;
+			canvas.resize( rect ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
+			break ;
+		case 'SHIFT_RIGHT' :
+			rect = ScreenBuffer.Rect.create( canvas ) ;
+			rect.set( { xmin: rect.xmin + 1 } ) ;
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
