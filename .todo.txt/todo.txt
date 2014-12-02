@@ -12,3 +12,4 @@ mrxvt support: draw-test does not work @bug
 (B) chainable 'noFormat()' which disable the format() behaviour, to speed up computing (important for screenBuffer redraw()) @code
 document .noFormat() ??? @doc
 (B) buffer should be created from a generic buffer creator for this terminal, currently, too much things are done again and again for each new buffer @code
+(B) document ALT_SHIFT_key features @doc

@@ -165,10 +165,15 @@ function createBackgroundPlanets( nPlanets )
 
 function createSpaceship()
 {
+	/*
 	sprites.spaceship = ScreenBuffer.createFromChars(
 		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' , transparencyType: ScreenBuffer.TRANSPARENCY } ,
 		fs.readFileSync( './data/spaceship1.txt' )
 	) ;
+	*/
+	
+	sprites.spaceship = ScreenBuffer.loadSync( './data/spaceship1.sbuf' ) ;
+	
 	sprites.spaceship.x = 3 ;
 	sprites.spaceship.y = Math.floor( viewport.height / 2 - sprites.spaceship.height / 2 ) ;
 }

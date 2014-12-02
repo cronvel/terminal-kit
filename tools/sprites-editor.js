@@ -29,6 +29,7 @@
 
 var fs = require( 'fs' ) ;
 var path = require( 'path' ) ;
+var tree = require( 'tree-kit' ) ;
 var termkit = require( '../lib/terminal.js' ) ;
 var term ;
 var ScreenBuffer = termkit.ScreenBuffer ;
@@ -40,14 +41,8 @@ var viewport , statusBar , hintBar , canvas , background ;
 
 
 
-var MODE_CHARS = 0 ;
-//var MODE_TRANSPARENCY = 1 ;
-var MODE_LENGTH = 1 ;
-
 var editingMode = {
-	mode: MODE_CHARS ,
 	background : {
-		charCode: 32 ,
 		char: ' ' ,
 		attr: {
 			bgColor: 8 ,
@@ -175,15 +170,6 @@ function load()
 	
 	canvas.dst = viewport ;
 	canvas.y = 1 ;
-	/*
-	canvas = ScreenBuffer.create( {
-		dst: viewport ,
-		width: viewport.width ,
-		height: viewport.height - 2 ,
-		y: 1
-	} ) ;
-	//*/
-	//console.error( canvas ) ;
 }
 
 
@@ -198,6 +184,24 @@ function save()
 		terminate( error.message ) ;
 		return ;
 	}
+}
+
+
+
+function fill( options )
+{
+	var fillBuffer = ScreenBuffer.create( {
+		dst: canvas ,
+		width: canvas.width ,
+		height: canvas.height ,
+		noClear: true
+	} ) ;
+	
+	//console.error( options ) ;
+	
+	fillBuffer.clear( options ) ;
+	fillBuffer.draw( { blending: true } ) ;
+	//fillBuffer.draw() ;
 }
 
 
@@ -245,12 +249,38 @@ function refreshBackground()
 
 
 
+function stylesString( attr )
+{
+	var styles = [] ;
+	
+	if ( attr.bold ) { styles.push( 'bold' ) ; }
+	if ( attr.dim ) { styles.push( 'dim' ) ; }
+	if ( attr.italic ) { styles.push( 'ita' ) ; }
+	if ( attr.underline ) { styles.push( 'under' ) ; }
+	if ( attr.blink ) { styles.push( 'blink' ) ; }
+	if ( attr.inverse ) { styles.push( 'inv' ) ; }
+	if ( attr.hidden ) { styles.push( 'hidden' ) ; }
+	if ( attr.strike ) { styles.push( 'strike' ) ; }
+	
+	if ( attr.fgTransparency ) { styles.push( 'f-trans' ) ; }
+	if ( attr.bgTransparency ) { styles.push( 'b-trans' ) ; }
+	if ( attr.styleTransparency ) { styles.push( 's-trans' ) ; }
+	if ( attr.charTransparency ) { styles.push( 'c-trans' ) ; }
+	
+	if ( styles.length ) { styles = styles.join( '|' ) ; }
+	else { styles = 'none' ; }
+	
+	return styles ;
+}
+
+
+
 function refreshStatusBar()
 {
-	var mode = '' ;
-	var styles = [] ;
+	var styles = '' ;
 	var keyOptions = { attr: { bgColor: 'brightWhite' , color: 'green' } } ;
 	var valueOptions = { attr: { bgColor: 'brightWhite' , color: 'blue' } } ;
+	var cursorCell = canvas.get() ;
 	
 	statusBar.clear( { attr: keyOptions.attr , char: ' ' } ) ;
 	statusBar.cx = statusBar.cy = 0 ;
@@ -258,46 +288,14 @@ function refreshStatusBar()
 	statusBar.put( keyOptions , 'Size: ' ) ;
 	statusBar.put( valueOptions , '%dx%d' , canvas.width , canvas.height ) ;
 	
-	/*
-	statusBar.put( keyOptions , 'Ed. Mode: ' ) ;
-	switch ( editingMode.mode )
-	{
-		case MODE_CHARS :
-			mode = 'characters' ;
-			break ;
-		case MODE_TRANSPARENCY :
-			mode = 'transparency' ;
-			break ;
-	}
-	statusBar.put( valueOptions , mode ) ;
-	*/
 	
-	statusBar.put( keyOptions , '  fg: ' ) ;
+	statusBar.put( keyOptions , '  Edit: ' ) ;
 	statusBar.put( valueOptions , editingMode.attr.color ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.color } } , ' ' ) ;
-	
-	statusBar.put( keyOptions , '  bg: ' ) ;
 	statusBar.put( valueOptions , editingMode.attr.bgColor ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.bgColor } } , ' ' ) ;
+	statusBar.put( valueOptions , stylesString( editingMode.attr ) ) ;
 	
-	if ( editingMode.attr.fgTransparency ) { styles.push( 'f-trans' ) ; }
-	if ( editingMode.attr.bgTransparency ) { styles.push( 'b-trans' ) ; }
-	if ( editingMode.attr.styleTransparency ) { styles.push( 's-trans' ) ; }
-	if ( editingMode.attr.charTransparency ) { styles.push( 'c-trans' ) ; }
-	if ( editingMode.attr.bold ) { styles.push( 'bold' ) ; }
-	if ( editingMode.attr.dim ) { styles.push( 'dim' ) ; }
-	if ( editingMode.attr.italic ) { styles.push( 'ita' ) ; }
-	if ( editingMode.attr.underline ) { styles.push( 'under' ) ; }
-	if ( editingMode.attr.blink ) { styles.push( 'blink' ) ; }
-	if ( editingMode.attr.inverse ) { styles.push( 'inv' ) ; }
-	if ( editingMode.attr.hidden ) { styles.push( 'hidden' ) ; }
-	if ( editingMode.attr.strike ) { styles.push( 'strike' ) ; }
-	
-	if ( styles.length ) { styles = styles.join( '|' ) ; }
-	else { styles = 'none' ; }
-	
-	statusBar.put( keyOptions , '  styles: ' ) ;
-	statusBar.put( valueOptions , styles ) ;
 	
 	statusBar.put( keyOptions , '  background: ' ) ;
 	statusBar.put( valueOptions , editingMode.background.attr.color ) ;
@@ -305,6 +303,15 @@ function refreshStatusBar()
 	statusBar.put( valueOptions , editingMode.background.attr.bgColor ) ;
 	statusBar.put( { attr: { bgColor: editingMode.background.attr.bgColor } } , ' ' ) ;
 	statusBar.put( valueOptions , editingMode.background.char ) ;
+	
+	
+	statusBar.put( keyOptions , '  cursor: ' ) ;
+	statusBar.put( valueOptions , cursorCell.attr.color ) ;
+	statusBar.put( { attr: { bgColor: cursorCell.attr.color } } , ' ' ) ;
+	statusBar.put( valueOptions , cursorCell.attr.bgColor ) ;
+	statusBar.put( { attr: { bgColor: cursorCell.attr.bgColor } } , ' ' ) ;
+	statusBar.put( valueOptions , cursorCell.char ) ;
+	statusBar.put( valueOptions , stylesString( cursorCell.attr ) ) ;
 	
 	redrawStatusBar() ;
 }
@@ -320,7 +327,6 @@ var hints = [
 	'Arrow: Move the cursor' ,
 	'CTRL-Arrow: resize the sprite by moving the lower-right corner' ,
 	'SHIFT-Arrow: resize the sprite by moving the upper-left corner' ,
-	//'TAB: switch editing mode' ,
 	
 	'F1: Next hint' ,
 	
@@ -331,9 +337,9 @@ var hints = [
 	
 	'F9: Previous editor\'s background\'s background color' ,
 	'F10: Next editor\'s background\'s background color' ,
-	'ALT-Q: Previous editor\'s background\'d foreground color' ,
-	'ALT-W: Next editor\'s background\'d foreground color' ,
-	'ALT-E: Change the editor\'s background\'d character to the next typed character' ,
+	'ALT-Q: Previous editor\'s background\'s foreground color' ,
+	'ALT-W: Next editor\'s background\'s foreground color' ,
+	'ALT-E: Change the editor\'s background\'s character to the next typed character' ,
 	
 	'ALT-T: Toggle all transparencies' ,
 	'ALT-F: Toggle foreground transparency' ,
@@ -402,6 +408,7 @@ function inputs( key )
 		{
 			case 'backgroundChar' :
 				editingMode.background.char = key ;
+				randomHint() ;
 				refreshStatusBar() ;
 				refreshBackground() ;
 				comboKey = false ;
@@ -431,40 +438,32 @@ function inputs( key )
 			save() ;
 			break ;
 		
-		// Switch mode
-		/*
-		case 'TAB':
-			editingMode.mode = ( editingMode.mode + 1 ) % MODE_LENGTH ;
-			refreshStatusBar() ;
-			break ;
-		*/
-		
 		// Move keys
 		case 'UP' :
 			canvas.cy -- ;
 			if ( canvas.cy < 0 ) { canvas.cy = 0 ; }
-			refreshCursorPosition() ;
+			refreshStatusBar() ;
 			break ;
 		case 'DOWN' :
 			canvas.cy ++ ;
 			if ( canvas.cy >= canvas.height ) { canvas.cy = canvas.height - 1 ; }
-			refreshCursorPosition() ;
+			refreshStatusBar() ;
 			break ;
 		case 'ENTER' :
 			canvas.cx = 0 ;
 			canvas.cy ++ ;
 			if ( canvas.cy >= canvas.height ) { canvas.cy = canvas.height - 1 ; }
-			refreshCursorPosition() ;
+			refreshStatusBar() ;
 			break ;
 		case 'LEFT' :
 			canvas.cx -- ;
 			if ( canvas.cx < 0 ) { canvas.cx = 0 ; }
-			refreshCursorPosition() ;
+			refreshStatusBar() ;
 			break ;
 		case 'RIGHT' :
 			canvas.cx ++ ;
 			if ( canvas.cx >= canvas.width ) { canvas.cx = canvas.width - 1 ; }
-			refreshCursorPosition() ;
+			refreshStatusBar() ;
 			break ;
 		
 		// Resize keys
@@ -574,7 +573,42 @@ function inputs( key )
 			break ;
 		case 'ALT_E':
 			comboKey = 'backgroundChar' ;
+			randomHint( "Press a key for the background character to use..." , 'red' , 'yellow' ) ;
 			break ;
+		
+		// Fill key
+		case 'ALT_SHIFT_F':
+			fill( tree.extend( { deep: true } , { char: ' ' } , { attr: editingMode.attr } , { attr: {
+				fgTransparency: false ,
+				bgTransparency: true ,
+				styleTransparency: true ,
+				charTransparency: true
+			} } ) ) ;
+			redrawCanvas() ;
+			break ;
+		case 'ALT_SHIFT_G':
+			fill( tree.extend( { deep: true } , editingMode , { char: ' ' , attr: {
+				fgTransparency: true ,
+				bgTransparency: false ,
+				styleTransparency: true ,
+				charTransparency: true
+			} } ) ) ;
+			redrawCanvas() ;
+			break ;
+		case 'ALT_SHIFT_Y':
+			fill( tree.extend( { deep: true } , editingMode , { char: ' ' , attr: {
+				fgTransparency: true ,
+				bgTransparency: true ,
+				styleTransparency: false ,
+				charTransparency: true
+			} } ) ) ;
+			redrawCanvas() ;
+			break ;
+			
+		/* Usefull? also it needs a combo of key
+		case 'ALT_SHIFT_C':
+			break ;
+		*/
 		
 		// Blending keys
 		case 'ALT_T':
