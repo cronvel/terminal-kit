@@ -192,16 +192,24 @@ function fill( options )
 {
 	var fillBuffer = ScreenBuffer.create( {
 		dst: canvas ,
-		width: canvas.width ,
-		height: canvas.height ,
+		width: 1 ,
+		height: 1 ,
 		noClear: true
 	} ) ;
 	
 	//console.error( options ) ;
 	
 	fillBuffer.clear( options ) ;
-	fillBuffer.draw( { blending: true } ) ;
+	fillBuffer.draw( { blending: true , tile: true } ) ;
 	//fillBuffer.draw() ;
+}
+
+
+
+function putAttr( attr )
+{
+	var cell = canvas.get() ;
+	canvas.put( { attr: attr } , cell.char ) ;
 }
 
 
@@ -340,6 +348,12 @@ var hints = [
 	'ALT-Q: Previous editor\'s background\'s foreground color' ,
 	'ALT-W: Next editor\'s background\'s foreground color' ,
 	'ALT-E: Change the editor\'s background\'s character to the next typed character' ,
+	
+	'CTRL-SPACE: only put the currents editing attributes, without changing the character' ,
+	
+	'ALT-SHIFT-F: Fill with the current foreground color' ,
+	'ALT-SHIFT-G: Fill with the current background color' ,
+	'ALT-SHIFT-Y: Fill with the current style' ,
 	
 	'ALT-T: Toggle all transparencies' ,
 	'ALT-F: Toggle foreground transparency' ,
@@ -587,7 +601,7 @@ function inputs( key )
 			redrawCanvas() ;
 			break ;
 		case 'ALT_SHIFT_G':
-			fill( tree.extend( { deep: true } , editingMode , { char: ' ' , attr: {
+			fill( tree.extend( { deep: true } , { char: ' ' } , { attr: editingMode.attr } , { attr: {
 				fgTransparency: true ,
 				bgTransparency: false ,
 				styleTransparency: true ,
@@ -596,7 +610,7 @@ function inputs( key )
 			redrawCanvas() ;
 			break ;
 		case 'ALT_SHIFT_Y':
-			fill( tree.extend( { deep: true } , editingMode , { char: ' ' , attr: {
+			fill( tree.extend( { deep: true } , { char: ' ' } , { attr: editingMode.attr } , { attr: {
 				fgTransparency: true ,
 				bgTransparency: true ,
 				styleTransparency: false ,
@@ -609,6 +623,11 @@ function inputs( key )
 		case 'ALT_SHIFT_C':
 			break ;
 		*/
+		
+		case 'NUL':	// NUL = CTRL-SPACE
+			putAttr( editingMode.attr ) ;
+			redrawCanvas() ;
+			break ;
 		
 		// Blending keys
 		case 'ALT_T':
