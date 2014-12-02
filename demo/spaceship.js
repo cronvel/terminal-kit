@@ -91,6 +91,8 @@ function createBackground()
 		fs.readFileSync( './data/saturn.txt' )
 	) ;
 	
+	sprites.planet = ScreenBuffer.loadSync( './data/saturn.sbuf' ) ;
+	
 	createBackgroundStars( sprites.background.width * sprites.background.height * 0.004 ) ;
 	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.008 ) ;
 	createBackgroundPlanets( sprites.background.width * sprites.background.height * 0.0001 ) ;
