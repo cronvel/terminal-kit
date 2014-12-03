@@ -1,4 +1,11 @@
 
+v0.6.13
+-------
+
+ScreenBuffer .put() now support writing in any of the 4 directions.
+The sprite editor can set the writing direction.
+
+
 v0.6.12
 -------
 

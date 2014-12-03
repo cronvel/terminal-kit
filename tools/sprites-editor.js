@@ -41,7 +41,17 @@ var viewport , statusBar , hintBar , canvas , background ;
 
 
 
+var arrows = {
+	left: '←' ,
+	right: '→' ,
+	up: '↑' ,
+	down: '↓'
+} ;
+
+
+
 var editingMode = {
+	direction: 'right' ,
 	background : {
 		char: ' ' ,
 		attr: {
@@ -209,7 +219,7 @@ function fill( options )
 function putAttr( attr )
 {
 	var cell = canvas.get() ;
-	canvas.put( { attr: attr } , cell.char ) ;
+	canvas.put( { attr: attr , direction: editingMode.direction } , cell.char ) ;
 }
 
 
@@ -298,6 +308,7 @@ function refreshStatusBar()
 	
 	
 	statusBar.put( keyOptions , '  Edit: ' ) ;
+	statusBar.put( valueOptions , arrows[ editingMode.direction ] ) ;
 	statusBar.put( valueOptions , editingMode.attr.color ) ;
 	statusBar.put( { attr: { bgColor: editingMode.attr.color } } , ' ' ) ;
 	statusBar.put( valueOptions , editingMode.attr.bgColor ) ;
@@ -335,6 +346,7 @@ var hints = [
 	'Arrow: Move the cursor' ,
 	'CTRL-Arrow: resize the sprite by moving the lower-right corner' ,
 	'SHIFT-Arrow: resize the sprite by moving the upper-left corner' ,
+	'ALT-Arrow: change the writing direction' ,
 	
 	'F1: Next hint' ,
 	
@@ -430,7 +442,7 @@ function inputs( key )
 			
 			default :
 				// This is a normal printable char
-				canvas.put( { attr: editingMode.attr } , key ) ;
+				canvas.put( { attr: editingMode.attr , direction: editingMode.direction } , key ) ;
 				redrawCanvas() ;
 				break ;
 		}
@@ -536,6 +548,24 @@ function inputs( key )
 			canvas.resize( rect ) ;
 			refreshStatusBar() ;
 			redrawCanvas() ;
+			break ;
+		
+		// Direction keys
+		case 'ALT_UP' :
+			editingMode.direction = 'up' ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_DOWN' :
+			editingMode.direction = 'down' ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_LEFT' :
+			editingMode.direction = 'left' ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_RIGHT' :
+			editingMode.direction = 'right' ;
+			refreshStatusBar() ;
 			break ;
 		
 		// Color keys
