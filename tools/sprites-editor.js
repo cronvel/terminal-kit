@@ -136,8 +136,9 @@ function init( callback )
 		randomHint( 'Welcome to the ASCII Art sprite editor!' ) ;
 		redrawCanvas() ;
 		
-		term.grabInput() ;
+		term.grabInput( { mouse: 'button' } ) ;
 		term.on( 'key' , inputs ) ;
+		term.on( 'mouse' , mouseInputs ) ;
 		
 		callback() ;
 	} ) ;
@@ -725,6 +726,27 @@ function inputs( key )
 			// Next hint
 			randomHint( hintIndex + 1 ) ;
 			break ;
+	}
+}
+
+
+
+function mouseInputs( eventType , data )
+{
+	var x , y ;
+	
+	//console.error( event , data ) ;
+	if ( eventType === 'MOUSE_LEFT_BUTTON_PRESSED' )
+	{
+		x = data.x - 1 ;
+		y = data.y - 2 ;
+		
+		if ( data.x >= 0 && data.x < canvas.width && data.y >= 0 && data.y < canvas.height )
+		{
+			canvas.cx = x ;
+			canvas.cy = y ;
+			refreshStatusBar() ;
+		}
 	}
 }
 
