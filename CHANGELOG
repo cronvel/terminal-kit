@@ -1,4 +1,10 @@
 
+v0.7.0
+-------
+
+ScreenBuffer now use Big Endian: there is no performance drop on Little Endian system and the code is less error prone.
+
+
 v0.6.14
 -------
 
