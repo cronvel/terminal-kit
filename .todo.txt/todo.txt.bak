@@ -5,7 +5,10 @@ use the 'name' attribute of color, in colorScheme/ palette, something like accep
 (C) add a summary to the documentation @doc
 (C) documentation on term.state (term.state.button.left, etc) @doc
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
-try to find a way to disable word-wrap, if possible @r&d
+try to find a way to disable terminal's word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
-x 2014-11-17 Eterm color scheme & keys @code
+(E) terminfo support @code
+document .noFormat() ??? @doc
+x 2014-12-04 document ALT_SHIFT_key features @doc
+(A) document all the ScreenBuffer feature @doc

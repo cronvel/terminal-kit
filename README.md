@@ -520,9 +520,9 @@ List of SPECIAL keys:
 
 And modifier on regular A-Z key:
 
-    CTRL_A ALT_A CTRL_ALT_A
-    CTRL_B ALT_B CTRL_ALT_B
-    CTRL_C ALT_C CTRL_ALT_C
+    CTRL_A ALT_A CTRL_ALT_A ALT_SHIFT_A
+    CTRL_B ALT_B CTRL_ALT_B ALT_SHIFT_B
+    CTRL_C ALT_C CTRL_ALT_C ALT_SHIFT_C
     ...
 
 Sometime, a key matches multiple combination. For example CTRL-M on linux boxes is always the same as ENTER.

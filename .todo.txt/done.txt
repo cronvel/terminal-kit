@@ -17,3 +17,5 @@ x 2014-11-16 xfce color scheme
 x 2014-11-16 rxvt F keys @code
 x 2014-11-16 specific support for rxvt, urxvt and xfce4-terminal @code
 x 2014-11-17 Eterm color scheme & keys @code
+x 2014-12-04 chainable 'noFormat()' which disable the format() behaviour, to speed up computing (important for screenBuffer redraw()) @code
+x 2014-12-04 document ALT_SHIFT_key features @doc
