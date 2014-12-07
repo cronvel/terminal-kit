@@ -1,4 +1,10 @@
 
+v0.9.1
+-------
+
+Removing tools/sprite-editor.js: the editor has now its own package: 'leeted'.
+
+
 v0.9.0
 -------
 
