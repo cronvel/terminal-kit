@@ -31,7 +31,7 @@
 var palette = process.argv[ 2 ] || 'xterm' ;
 
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	term.setPalette( palette ) ;
 	process.exit() ;

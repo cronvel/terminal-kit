@@ -29,7 +29,7 @@
 
 
 
-var terminal = require( '../lib/terminal.js' ) ;
+var terminal = require( '../lib/termkit.js' ) ;
 
 
 

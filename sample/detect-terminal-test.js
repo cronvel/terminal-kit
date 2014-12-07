@@ -29,7 +29,7 @@
 /* global describe, it, before, after */
 
 
-var termkit = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 term.green( '\n== Environment variable ==\n\n' ) ;

@@ -29,7 +29,7 @@
 
 
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 
 	function terminate()
@@ -51,8 +51,9 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.green( 'Hit CTRL-C to quit.\n\n' ) ;
 
 	// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
-	term.applicationKeypad() ;
-
+	var applicationKeypad = true ;
+	term.applicationKeypad( applicationKeypad ) ;
+	
 	//term.keyboardModifier() ;
 
 	term.grabInput() ;
@@ -61,38 +62,29 @@ require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
 	term.on( 'key' , function( name , matches , data ) {
 		
 		console.log(
-			"'key' event:" ,
-			name ,
-			matches ,
-			Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) ,
-			data.codepoint ? data.codepoint.toString( 16 ) : ''
+			"Key:" , name ,
+			", length:" , name.length ,
+			", all matches:" , matches ,
+			", is character:" , data.isCharacter ,
+			", codepoint:" , data.codepoint ? data.codepoint.toString( 16 ) : '' ,
+			", buffer:" , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 )
 		) ;
 		
-		if ( matches.indexOf( 'CTRL_C' ) >= 0 )
+		switch ( name )
 		{
-			term.green( 'CTRL-C received...\n' ) ;
-			terminate() ;
+			case 'CTRL_C' :
+				term.green( 'CTRL-C received...\n' ) ;
+				terminate() ;
+				break ;
+			
+			case 'CTRL_K' :
+				applicationKeypad = ! applicationKeypad ;
+				term.applicationKeypad( applicationKeypad ) ;
+				term.green( 'CTRL-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
+				break ;
 		}
 		
-		if ( matches.indexOf( 'CTRL_R' ) >= 0 )
-		{
-			term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
-			term.requestCursorLocation() ;
-			term.requestScreenSize() ;
-		}
-	} ) ;
-
-	term.on( 'terminal' , function( name , data ) {
-		console.log( "'terminal' event:" , name , data ) ;
 	} ) ;
 	
-	term.on( 'mouse' , function( name , data ) {
-		console.log( "'mouse' event:" , name , data ) ;
-	} ) ;
-
-	term.on( 'unknown' , function( buffer ) {
-		console.log( "'unknown' event, buffer:" , buffer ) ;
-	} ) ;
-
 } ) ;
 

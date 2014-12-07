@@ -31,7 +31,7 @@
 
 var expect = require( 'expect.js' ) ;
 
-var termkit = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 

@@ -30,7 +30,7 @@
 var fs = require( 'fs' ) ;
 var path = require( 'path' ) ;
 var tree = require( 'tree-kit' ) ;
-var termkit = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
 var term ;
 var ScreenBuffer = termkit.ScreenBuffer ;
 
@@ -45,7 +45,8 @@ var arrows = {
 	left: '←' ,
 	right: '→' ,
 	up: '↑' ,
-	down: '↓'
+	down: '↓' ,
+	none: 'x'
 } ;
 
 
@@ -100,7 +101,7 @@ function init( callback )
 			y: 1 ,
 			noClear: true
 		} ) ;
-		background.clear( editingMode.background ) ;
+		background.fill( editingMode.background ) ;
 		
 		statusBar = ScreenBuffer.create( {
 			dst: viewport ,
@@ -108,7 +109,7 @@ function init( callback )
 			height: 1 ,
 			noClear: true
 		} ) ;
-		statusBar.clear( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
+		statusBar.fill( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
 		
 		hintBar = ScreenBuffer.create( {
 			dst: viewport ,
@@ -117,7 +118,7 @@ function init( callback )
 			y: viewport.height - 1 ,
 			noClear: true
 		} ) ;
-		hintBar.clear( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
+		hintBar.fill( { attr: { bgColor: 'brightWhite' } , char: ' ' } ) ;
 		
 		try {
 			load( filepath ) ;
@@ -210,7 +211,7 @@ function fill( options )
 	
 	//console.error( options ) ;
 	
-	fillBuffer.clear( options ) ;
+	fillBuffer.fill( options ) ;
 	fillBuffer.draw( { blending: true , tile: true } ) ;
 	//fillBuffer.draw() ;
 }
@@ -262,7 +263,7 @@ function redrawHintBar()
 
 function refreshBackground()
 {
-	background.clear( editingMode.background ) ;
+	background.fill( editingMode.background ) ;
 	redrawCanvas() ;
 }
 
@@ -301,7 +302,7 @@ function refreshStatusBar()
 	var valueOptions = { attr: { bgColor: 'brightWhite' , color: 'blue' } } ;
 	var cursorCell = canvas.get() ;
 	
-	statusBar.clear( { attr: keyOptions.attr , char: ' ' } ) ;
+	statusBar.fill( { attr: keyOptions.attr , char: ' ' } ) ;
 	statusBar.cx = statusBar.cy = 0 ;
 	
 	statusBar.put( keyOptions , 'Size: ' ) ;
@@ -348,6 +349,7 @@ var hints = [
 	'CTRL-Arrow: resize the sprite by moving the lower-right corner' ,
 	'SHIFT-Arrow: resize the sprite by moving the upper-left corner' ,
 	'ALT-Arrow: change the writing direction' ,
+	'ALT-SPACE / ALT-SHIFT-SPACE: in place editing, do not move the cursor after writing a char' ,
 	
 	'F1: Next hint' ,
 	
@@ -363,6 +365,7 @@ var hints = [
 	'ALT-E: Change the editor\'s background\'s character to the next typed character' ,
 	
 	'CTRL-SPACE: only put the currents editing attributes, without changing the character' ,
+	'ALT-SPACE: ' ,
 	
 	'ALT-SHIFT-F: Fill with the current foreground color' ,
 	'ALT-SHIFT-G: Fill with the current background color' ,
@@ -393,7 +396,7 @@ function randomHint( forcedHint , color , bgColor )
 	if ( color === undefined ) { color = 'green' ; }
 	if ( bgColor === undefined ) { bgColor = 'brightWhite' ; }
 	
-	hintBar.clear( { attr: { bgColor: bgColor } , char: ' ' } ) ;
+	hintBar.fill( { attr: { bgColor: bgColor } , char: ' ' } ) ;
 	
 	if ( typeof forcedHint === 'string' )
 	{
@@ -425,11 +428,11 @@ function randomHint( forcedHint , color , bgColor )
 
 var comboKey = false ;
 
-function inputs( key )
+function inputs( key , matches , data )
 {
 	var rect ;
 	
-	if ( key.length === 1 )
+	if ( data.isCharacter )
 	{
 		switch ( comboKey )
 		{
@@ -444,6 +447,7 @@ function inputs( key )
 			default :
 				// This is a normal printable char
 				canvas.put( { attr: editingMode.attr , direction: editingMode.direction } , key ) ;
+				refreshStatusBar() ;
 				redrawCanvas() ;
 				break ;
 		}
@@ -463,6 +467,15 @@ function inputs( key )
 		// Save the file
 		case 'CTRL_S':
 			save() ;
+			break ;
+		
+		// Combine left + put a space without moving
+		case 'BACKSPACE' :
+			canvas.cx -- ;
+			if ( canvas.cx < 0 ) { canvas.cx = 0 ; }
+			canvas.put( { attr: editingMode.attr , dx: 0 , dy: 0 } , ' ' ) ;
+			refreshStatusBar() ;
+			redrawCanvas() ;
 			break ;
 		
 		// Move keys
@@ -566,6 +579,10 @@ function inputs( key )
 			break ;
 		case 'ALT_RIGHT' :
 			editingMode.direction = 'right' ;
+			refreshStatusBar() ;
+			break ;
+		case 'ALT_SPACE' :
+			editingMode.direction = 'none' ;
 			refreshStatusBar() ;
 			break ;
 		

@@ -29,7 +29,7 @@
 
 
 
-var termkit = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
 var gpm = require( '../lib/gpm.js' ) ;
 
 

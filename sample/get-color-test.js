@@ -29,7 +29,7 @@
 
 
 
-require( '../lib/terminal.js' ).getDetectedTerminal( function( error , term ) {
+require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	var terminating = false ;
 	

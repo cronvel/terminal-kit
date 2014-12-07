@@ -28,7 +28,7 @@
 
 
 var fs = require( 'fs' ) ;
-var termkit = require( '../lib/terminal.js' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
 var term ;
 var ScreenBuffer = termkit.ScreenBuffer ;
 

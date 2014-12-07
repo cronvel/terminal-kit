@@ -30,7 +30,7 @@
 
 
 
-var term = require( '../lib/terminal.js' ).terminal ;
+var term = require( '../lib/termkit.js' ).terminal ;
 	
 /*
 term( 'Terminal name: %s\n' , term.appName ) ;
