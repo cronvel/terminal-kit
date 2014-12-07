@@ -1,4 +1,11 @@
 
+v0.8.0
+-------
+
+The Rect class has moved from termkit.ScreenBuffer.Rect to termkit.Rect
+The 'key' event callback's argument #2 (data) now contains a 'isCharacter' property, true for printable, false for control
+
+
 v0.7.1
 -------
 
