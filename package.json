@@ -9,7 +9,7 @@
   "dependencies": {
     "async-kit": "^0.5.5",
     "string-kit": "^0.1.0",
-    "tree-kit": "^0.3.1"
+    "tree-kit": "^0.3.2"
   },
   "devDependencies": {
     "expect.js": "^0.3.1",
