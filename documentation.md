@@ -99,7 +99,7 @@ are currently using.
 
 
 
-# Description of standard methods of a **Terminal** instance 
+# Standard methods of a **Terminal** instance 
 
 Standard methods map low-level terminal capabilities.
 
@@ -281,7 +281,7 @@ We can do:
 
 
 
-# Description of advanced methods of a **Terminal** instance
+# Advanced methods of a **Terminal** instance
 
 Advanced methods are high-level librairie functions.
 ## .fullscreen( options )
@@ -516,10 +516,13 @@ List of SPECIAL keys:
     KP_NUMLOCK KP_DIVIDE KP_MULTIPLY KP_MINUS KP_PLUS KP_DELETE KP_ENTER
     KP_0 KP_1 KP_2 KP_3 KP_4 KP_5 KP_6 KP_7 KP_8 KP_9
     F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12
-    SHIFT_F1 SHIFT_F2 SHIFT_F3 SHIFT_F4 SHIFT_F5 SHIFT_F6 SHIFT_F7 SHIFT_F8 SHIFT_F9 SHIFT_F10 SHIFT_F11 SHIFT_F12
-    CTRL_F1 CTRL_F2 CTRL_F3 CTRL_F4 CTRL_F5 CTRL_F6 CTRL_F7 CTRL_F8 CTRL_F9 CTRL_F10 CTRL_F11 CTRL_F12
-    CTRL_SHIFT_F1 CTRL_SHIFT_F2 CTRL_SHIFT_F3 CTRL_SHIFT_F4 CTRL_SHIFT_F5 CTRL_SHIFT_F6
-	CTRL_SHIFT_F7 CTRL_SHIFT_F8 CTRL_SHIFT_F9 CTRL_SHIFT_F10 CTRL_SHIFT_F11 CTRL_SHIFT_F12
+    SHIFT_F1 SHIFT_F2 SHIFT_F3 SHIFT_F4 SHIFT_F5 SHIFT_F6
+	SHIFT_F7 SHIFT_F8 SHIFT_F9 SHIFT_F10 SHIFT_F11 SHIFT_F12
+    CTRL_F1 CTRL_F2 CTRL_F3 CTRL_F4 CTRL_F5 CTRL_F6
+	CTRL_F7 CTRL_F8 CTRL_F9 CTRL_F10 CTRL_F11 CTRL_F12
+    CTRL_SHIFT_F1 CTRL_SHIFT_F2 CTRL_SHIFT_F3 CTRL_SHIFT_F4
+	CTRL_SHIFT_F5 CTRL_SHIFT_F6 CTRL_SHIFT_F7 CTRL_SHIFT_F8
+	CTRL_SHIFT_F9 CTRL_SHIFT_F10 CTRL_SHIFT_F11 CTRL_SHIFT_F12
     SHIFT_UP SHIFT_DOWN SHIFT_RIGHT SHIFT_LEFT
     ALT_UP ALT_DOWN ALT_RIGHT ALT_LEFT
     CTRL_UP CTRL_DOWN CTRL_RIGHT CTRL_LEFT
@@ -596,7 +599,7 @@ The argument 'name' can be:
 
 
 
-# Static methods of `termkit` (i.e. the module's root)
+# Static methods of `termkit`, the module's root
 
 ## .getParentTerminalInfo( callback )
 
