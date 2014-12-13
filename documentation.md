@@ -2,7 +2,11 @@
 
 # Terminal Kit
 
-Terminal utilities for node.js, it supports 'xterm' compatible terminal and the Linux Console.
+A full-blown terminal lib featuring: 256 colors, styles, keys & mouse handling, input field, interactive 'yes or no', 
+screen buffer, and many more...
+Whether you need just colors & styles, build a simple interactive command line tool or build a complexe terminal application:
+this is the absolute terminal lib for Node.js!
+
 It does **NOT** depend on ncurses.
 
 * License: MIT
@@ -30,6 +34,7 @@ It does **NOT** depend on ncurses.
 * mouse support (GPM is supported for the Linux Console)
 * terminal window title
 * input field
+* interactive 'yes or no'
 * screen & off-screen buffers (a concept similar to SDL's *Surface*)
 * event-driven
 
