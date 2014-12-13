@@ -24,7 +24,7 @@ It does **NOT** depend on ncurses.
 
 
 
-# Key features
+## Key features
 
 * colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
@@ -41,7 +41,7 @@ It does **NOT** depend on ncurses.
 
 
 
-# Quick examples
+## Quick examples
 
 ```js
 // Require the lib
@@ -81,7 +81,7 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 
 
-# Install
+## Install
 
 Use Node Package Manager:
 
@@ -89,7 +89,7 @@ Use Node Package Manager:
 
 
 
-# Some conventions used in this document
+## Some conventions used in this document
 
 In all examples, `termkit` is assumed to be `var termkit = require( 'terminal-kit' ) ;` while `term` is assumed
 to be `var term = require( 'terminal-kit' ).terminal ; ` or `var term = termkit.terminal ;`.
@@ -99,7 +99,7 @@ are currently using.
 
 
 
-# Standard methods of a **Terminal** instance 
+## Standard methods of a **Terminal** instance 
 
 Standard methods map low-level terminal capabilities.
 
@@ -129,7 +129,7 @@ We can do:
 
 
 
-## Common/Misc
+### Common/Misc
 
 * .reset(): full reset the terminal.
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
@@ -138,7 +138,7 @@ We can do:
 
 
 
-## Foreground colors
+### Foreground colors
 
 * .defaultColor(): back to the default foreground color
 * .black(): ...
@@ -169,7 +169,7 @@ We can do:
 
 
 
-## Background colors
+### Background colors
 
 * .bgDefaultColor(): back to the default background color
 * .bgBlack(): ...
@@ -199,7 +199,7 @@ We can do:
 
 
 
-## Styles
+### Styles
 
 * .styleReset(): reset all styles and go back to default colors without
 * .bold(): bold text
@@ -213,7 +213,7 @@ We can do:
 
 
 
-## Cursors
+### Cursors
 
 * .saveCursor(): save cursor position
 * .restoreCursor(): restore a previously saved cursor position
@@ -232,7 +232,7 @@ We can do:
 
 
 
-## Editing
+### Editing
 
 * .clear(): clear the screen and move the cursor to the upper-left corner
 * .eraseDisplayBelow(): erase everything below the cursor
@@ -251,7 +251,7 @@ We can do:
 
 
 
-## Input/Output
+### Input/Output
 
 * .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
 * .requestScreenSize(): **DEPRECATED** request for screen size, a 'terminal' event will be fired when available,
@@ -261,7 +261,7 @@ We can do:
 
 
 
-## Internal input/output (do not use directly, use grabInput() instead)
+### Internal input/output (do not use directly, use grabInput() instead)
 
 * .mouseButton(): ask the terminal to send event when a mouse button is pressed, with the mouse cursor position
 * .mouseDrag(): ask the terminal to send event when a mouse button is pressed and when draging, with the mouse cursor position
@@ -271,7 +271,7 @@ We can do:
 
 
 
-## Misc
+### Misc
 
 * .windowTitle(str): set the title of an xterm-compatible window to *str*
 * .setCursorColor(register): set the cursor color to one of the 256 *register*
@@ -281,10 +281,10 @@ We can do:
 
 
 
-# Advanced methods of a **Terminal** instance
+## Advanced methods of a **Terminal** instance
 
 Advanced methods are high-level librairie functions.
-## .fullscreen( options )
+### .fullscreen( options )
 
 * options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
   if it is an object it supports those properties:
@@ -296,7 +296,7 @@ the cursor at the upper-left corner.
 
 
 
-## .grabInput( options )
+### .grabInput( options )
 
 * options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
   if it is an Object then those properties are supported:
@@ -341,7 +341,7 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
-## .getCursorLocation( callback )
+### .getCursorLocation( callback )
 
 * callback( error , x , y )
 	* error `mixed` truthy if an underlying error occurs
@@ -352,7 +352,7 @@ Get the cursor location.
 
 
 
-## .getColor( register , callback )
+### .getColor( register , callback )
 
 * register `number` the register number in the 0..255 range
 * callback( error , rgb )
@@ -366,7 +366,7 @@ Get the RGB values of a color register.
 
 
 
-## .setColor( register , r , g , b , [names] ) *or* .setColor( register , rgb , [names] )
+### .setColor( register , r , g , b , [names] ) *or* .setColor( register , rgb , [names] )
 
 * register `number` the register number in the 0..255 range
 * r `number` in the 0..255 range, the red value
@@ -382,7 +382,7 @@ Set the RGB values for a color indexed by the integer *register*.
 
 
 
-## .getPalette( register , callback )
+### .getPalette( register , callback )
 
 * callback( error , palette )
 	* error `mixed` truthy if an underlying error occurs
@@ -399,7 +399,7 @@ and each color that was modified by the lib replace it.
 
 
 
-## .setPalette( palette )
+### .setPalette( palette )
 
 * palette either:
 	* `Array` of 16 `Object` where:
@@ -413,7 +413,7 @@ If the terminal support it, it will reset the 16-colors palette to the provided 
 
 
 
-## .yesOrNo( [options] , callback )
+### .yesOrNo( [options] , callback )
 	* options `Object` where:
 		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
 		* no `string` or `Array` contains a key code or an array of key code that will trigger the 
@@ -458,7 +458,7 @@ function question()
 
 
 
-## .inputField( [options] , callback )
+### .inputField( [options] , callback )
 	* options `Object` where:
 		* echo `boolean` if true (the default), input are displayed on the terminal
 	* callback( error , input )
@@ -490,13 +490,13 @@ function question()
 
 
 
-# Events
+## Events
 
 Event are fired on your `term` object.
 
 
 
-## 'key' event ( name , matches )
+### 'key' event ( name , matches )
 
 * name: string, the key name
 * matches: array of matched key name
@@ -551,7 +551,7 @@ so it is nearly impossible to differenciate (for example) a KP_1 from an END, or
 
 
 
-## 'terminal' event
+### 'terminal' event
 
 * name: string, the name of the subtype of event
 * data: Object, provide some data depending on the event
@@ -574,7 +574,7 @@ The argument 'name' can be:
 
 
 
-## 'mouse' event
+### 'mouse' event
 
 * name: string, the name of the subtype of event
 * data: Object, provide the mouse coordinate and keyboard modifier status, properties:
@@ -599,9 +599,9 @@ The argument 'name' can be:
 
 
 
-# Static methods of `termkit`, the module's root
+## Static methods of `termkit`, the module's root
 
-## .getParentTerminalInfo( callback )
+### .getParentTerminalInfo( callback )
 
 * callback `Function( error , codename , name , pid )` where:
 	* error: truthy if it has failed for some reason
@@ -619,7 +619,7 @@ Also, it only works on UNIX family OS.
 
 
 
-## .getDetectedTerminal( callback )
+### .getDetectedTerminal( callback )
 
 * callback `Function( error , term )` where:
 	* error: truthy if it has failed for some reason
