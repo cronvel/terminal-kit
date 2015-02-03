@@ -314,6 +314,8 @@ on the `term` object.
 Quick example:
 
 ```js
+var term = require( 'terminal-kit' ).terminal ;
+
 function terminate()
 {
 	term.grabInput( false ) ;
@@ -434,6 +436,8 @@ We can specify the keys for *yes* and *no* by providing a string or an array of 
 Quick example:
 
 ```js
+var term = require( 'terminal-kit' ).terminal ;
+
 function question()
 {
 	term( 'Do you like javascript? [Y|n]\n' ) ;
@@ -476,6 +480,8 @@ Turn input grabbing on if necessary.
 Quick example:
 
 ```js
+var term = require( 'terminal-kit' ).terminal ;
+
 function question()
 {
 	term( 'Please enter your name: ' ) ;
