@@ -1,5 +1,11 @@
 
 
+v0.9.11
+-------
+
+.noFormat() is now documented (thus under the SemVer contract).
+
+
 v0.9.10
 -------
 

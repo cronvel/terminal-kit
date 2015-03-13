@@ -273,6 +273,8 @@ We can do:
 
 ### Misc
 
+* .noFormat(str): disable formating of the string - useful when your string may contains '%' (e.g. user input) and you
+	don't want to escape them
 * .windowTitle(str): set the title of an xterm-compatible window to *str*
 * .setCursorColor(register): set the cursor color to one of the 256 *register*
 * .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
