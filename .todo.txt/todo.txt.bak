@@ -10,5 +10,6 @@ mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
 (E) terminfo support @code
 document .noFormat() ??? @doc
-x 2014-12-04 document ALT_SHIFT_key features @doc
 (A) document all the ScreenBuffer feature @doc
+(B) TextBuffer class suitable for text editor @code
+use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code

@@ -22,6 +22,8 @@ It does **NOT** depend on ncurses.
 	* rxvt/urxvt
 	* Eterm
 
+Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.soulserv.net/tag/terminal/).
+
 
 
 ## Key features
@@ -44,7 +46,7 @@ It does **NOT** depend on ncurses.
 ## Quick examples
 
 ```js
-// Require the lib
+// Require the lib, get a working terminal
 var term = require( 'terminal-kit' ).terminal ;
 
 // The term() function simply output a string to stdout, using current style
@@ -160,12 +162,11 @@ We can do:
 * .color(register): choose between 16 colors using an 0..15 integer
 * .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
 * .brightColor(register): choose between 8 bright colors using an 0..7 integer
-* .color256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
+* .color256(register): if the terminal support 256 colors, it chooses between them using an 0..255 integer
 * .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the 
-	exact color if the terminal support 24 bits colors), r,g,b are in the 0..255 range
+	exact color if the terminal support 24 bits colors), *r,g,b* are in the 0..255 range
 * .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or
-	even the exact color if the terminal support 24 bits colors)
-	l is in the 0..255 range
+	even the exact color if the terminal support 24 bits colors), *l* is in the 0..255 range
 
 
 
@@ -193,15 +194,15 @@ We can do:
 * .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
 * .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
 * .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the
-	exact color if the terminal support 24 bits colors) as the background color, r,g,b are in the 0..255 range
+	exact color if the terminal support 24 bits colors) as the background color, *r,g,b* are in the 0..255 range
 * .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or even
-	the exact color if the terminal support 24 bits colors) as the background color, l is in the 0..255 range
+	the exact color if the terminal support 24 bits colors) as the background color, *l* is in the 0..255 range
 
 
 
 ### Styles
 
-* .styleReset(): reset all styles and go back to default colors without
+* .styleReset(): reset all styles and go back to default colors
 * .bold(): bold text
 * .dim(): faint color
 * .italic(): italic

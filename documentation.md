@@ -22,6 +22,8 @@ It does **NOT** depend on ncurses.
 	* rxvt/urxvt
 	* Eterm
 
+Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.soulserv.net/tag/terminal/).
+
 
 
 ## Key features
