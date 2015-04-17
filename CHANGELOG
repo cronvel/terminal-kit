@@ -1,5 +1,14 @@
 
 
+v0.10.0
+-------
+
+.inputField() now returns an object featuring some functions to control things during the input process:
+	* abort(): abort the input process and do not even call the inputField()'s callback
+	* stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
+	* getInput(): get the current input string
+
+
 v0.9.14
 -------
 

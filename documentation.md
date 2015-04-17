@@ -475,10 +475,18 @@ function question()
 Wait for user input, call the completion callback when the user hit the *ENTER* key and pass the user input
 to the callback.
 
-This support accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
+This supports accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
 and the *home* and *end* key.
 
-Turn input grabbing on if necessary.
+It turns input grabbing on if necessary.
+
+It returns an object featuring some functions to control things during the input process:
+
+* abort(): abort the input process and do not even call the inputField()'s callback
+* stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
+* getInput(): get the current input string
+
+
 
 Quick example:
 
