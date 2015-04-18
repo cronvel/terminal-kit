@@ -1,5 +1,11 @@
 
 
+v0.10.2
+-------
+
+.inputField() now supports an 'history' option, so UP and DOWN keys move up and down in the history
+
+
 v0.10.1
 -------
 

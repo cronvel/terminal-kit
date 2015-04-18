@@ -468,6 +468,7 @@ function question()
 ### .inputField( [options] , callback )
 	* options `Object` where:
 		* echo `boolean` if true (the default), input are displayed on the terminal
+		* history `Array` pass an history array, so UP and DOWN keys move up and down in the history
 	* callback( error , input )
 		* error `mixed` truthy if an underlying error occurs
 		* input `string` the user input
@@ -503,7 +504,7 @@ function question()
 {
 	term( 'Please enter your name: ' ) ;
 	
-	term.inputField( function( error , input ) {
+	term.inputField( { history: [ 'John' , 'Jack' , 'Bobby' ] } , function( error , input ) {
 	
 		term.green( "\nYour name is '%s'\n" , input ) ;
 		process.exit() ;

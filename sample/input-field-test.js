@@ -35,7 +35,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	{
 		term( 'Please enter your name: ' ) ;
 		
-		term.inputField( function( error , input ) {
+		term.inputField( { history : [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] } , function( error , input ) {
 			
 			if ( error )
 			{
