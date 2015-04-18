@@ -475,10 +475,24 @@ function question()
 Wait for user input, call the completion callback when the user hit the *ENTER* key and pass the user input
 to the callback.
 
-This support accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
+This supports accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
 and the *home* and *end* key.
 
-Turn input grabbing on if necessary.
+It turns input grabbing on if necessary.
+
+It returns an object featuring some functions to control things during the input process:
+
+* abort(): abort the input process and do not even call the inputField()'s callback
+* stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
+* getInput(): get the current input string
+* getPosition(): returns an object containing 'x' and 'y' properties, the coordinates where the input field starts
+* hide(): hide the input field, it still records keystrokes
+* show(): show the input field again
+* rebase(): rebase the input field to the current cursor position. Please note: it does NOT erase the previously entered
+  text, you have to use hide() before. It works this way because you may want to modify the screen in between, and
+  it needs some I/O with the terminal to works accordingly.
+
+
 
 Quick example:
 
