@@ -485,6 +485,12 @@ It returns an object featuring some functions to control things during the input
 * abort(): abort the input process and do not even call the inputField()'s callback
 * stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
 * getInput(): get the current input string
+* getPosition(): returns an object containing 'x' and 'y' properties, the coordinates where the input field starts
+* hide(): hide the input field, it still records keystrokes
+* show(): show the input field again
+* rebase(): rebase the input field to the current cursor position. Please note: it does NOT erase the previously entered
+  text, you have to use hide() before. It works this way because you may want to modify the screen in between, and
+  it needs some I/O with the terminal to works accordingly.
 
 
 
