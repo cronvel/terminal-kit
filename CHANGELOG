@@ -4,7 +4,7 @@ v0.10.1
 -------
 
 .inputField() returns more way to control it:
-	* getPosition(): returns an object containing 'x' and 'y' properties, the coordinates where the input field starts
+	* getPosition(): return an object containing 'x' and 'y' properties, the coordinates where the input field starts
 	* hide(): hide the input field, it still records keystrokes
 	* show(): show the input field again
 	* rebase(): rebase the input field to the current cursor position (it does NOT erase the previous one,
