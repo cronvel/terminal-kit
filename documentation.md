@@ -419,14 +419,15 @@ If the terminal support it, it will reset the 16-colors palette to the provided 
 
 
 ### .yesOrNo( [options] , callback )
-	* options `Object` where:
-		* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
-		* no `string` or `Array` contains a key code or an array of key code that will trigger the 
-		* echoYes `String` contains what to write on yes, default 'yes'
-		* echoNo `String` contains what to write on no, default 'no'
-	* callback( error , result )
-		* error `mixed` truthy if an underlying error occurs
-		* result `boolean` true for 'yes' or false for 'no'
+
+* options `Object` where:
+	* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
+	* no `string` or `Array` contains a key code or an array of key code that will trigger the 
+	* echoYes `String` contains what to write on yes, default 'yes'
+	* echoNo `String` contains what to write on no, default 'no'
+* callback( error , result )
+	* error `mixed` truthy if an underlying error occurs
+	* result `boolean` true for 'yes' or false for 'no'
 
 Wait for user input, call the completion callback when the user hit the 'y' key or the 'n' key,
 *result* will be true if the user hit any *yes* keys or false if the user hit any *no* keys.
@@ -466,15 +467,16 @@ function question()
 
 
 ### .inputField( [options] , callback )
-	* options `Object` where:
-		* echo `boolean` if true (the default), input are displayed on the terminal
-		* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
-		* autoComplete `Array` or `Function` (optional) an array of possible completion, so the TAB key will auto-complete
-		  the input field. If it is a function, it should accept an input `string` and return the completed `string`
-		  (if no completion can be done, it should return the input string)
-	* callback( error , input )
-		* error `mixed` truthy if an underlying error occurs
-		* input `string` the user input
+
+* options `Object` where:
+	* echo `boolean` if true (the default), input are displayed on the terminal
+	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
+	* autoComplete `Array` or `Function` (optional) an array of possible completion, so the TAB key will auto-complete
+	  the input field. If it is a function, it should accept an input `string` and return the completed `string`
+	  (if no completion can be done, it should return the input string)
+* callback( error , input )
+	* error `mixed` truthy if an underlying error occurs
+	* input `string` the user input
 
 Wait for user input, call the completion callback when the user hit the *ENTER* key and pass the user input
 to the callback.
