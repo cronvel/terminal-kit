@@ -1,5 +1,11 @@
 
 
+v0.10.3
+-------
+
+.inputField() now supports an 'autoComplete' option, see the doc
+
+
 v0.10.2
 -------
 

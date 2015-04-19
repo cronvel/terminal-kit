@@ -468,7 +468,10 @@ function question()
 ### .inputField( [options] , callback )
 	* options `Object` where:
 		* echo `boolean` if true (the default), input are displayed on the terminal
-		* history `Array` pass an history array, so UP and DOWN keys move up and down in the history
+		* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
+		* autoComplete `Array` or `Function` (optional) an array of possible completion, so the TAB key will auto-complete
+		  the input field. If it is a function, it should accept an input `string` and return the completed `string`
+		  (if no completion can be done, it should return the input string)
 	* callback( error , input )
 		* error `mixed` truthy if an underlying error occurs
 		* input `string` the user input
@@ -476,10 +479,18 @@ function question()
 Wait for user input, call the completion callback when the user hit the *ENTER* key and pass the user input
 to the callback.
 
-This supports accordingly the *left* and *right* arrow keys, the *delete* and *backspace* keys,
-and the *home* and *end* key.
-
 It turns input grabbing on if necessary.
+
+Special keys supported by the input field:
+
+* ENTER, KP_ENTER: end the input process and return the current user input
+* DELETE: delete
+* BACKSPACE: backward delete
+* LEFT, RIGHT: move the cursor one character left or right
+* HOME: move the cursor at the begining of the input field
+* END: move the cursor at the end of the input field
+* DOWN, UP: use the history feature (if `options.history` is set)
+* TAB: use the auto-completion feature (if `options.autoComplete` is set)
 
 It returns an object featuring some functions to control things during the input process:
 
@@ -495,16 +506,24 @@ It returns an object featuring some functions to control things during the input
 
 
 
-Quick example:
+Quick example, featuring *history* and *auto-completion*:
 
 ```js
 var term = require( 'terminal-kit' ).terminal ;
+
+var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
+
+var autoComplete = [
+	'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
+	'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
+	'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt'
+] ;
 
 function question()
 {
 	term( 'Please enter your name: ' ) ;
 	
-	term.inputField( { history: [ 'John' , 'Jack' , 'Bobby' ] } , function( error , input ) {
+	term.inputField( { history: history , autoComplete: autoComplete } , function( error , input ) {
 	
 		term.green( "\nYour name is '%s'\n" , input ) ;
 		process.exit() ;

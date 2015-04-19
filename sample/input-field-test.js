@@ -31,11 +31,19 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
+	var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
+	
+	var autoComplete = [
+		'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
+		'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
+		'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt'
+	] ;
+	
 	function question()
 	{
 		term( 'Please enter your name: ' ) ;
 		
-		term.inputField( { history : [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] } , function( error , input ) {
+		term.inputField( { history : history , autoComplete: autoComplete } , function( error , input ) {
 			
 			if ( error )
 			{
