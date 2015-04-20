@@ -1,5 +1,11 @@
 
 
+v0.10.4
+-------
+
+.inputField() returned value, the inputControler, is now an event emitter (it emits 'ready'), and it features a 'redraw()' method.
+
+
 v0.10.3
 -------
 

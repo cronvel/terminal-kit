@@ -494,17 +494,22 @@ Special keys supported by the input field:
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
 
-It returns an object featuring some functions to control things during the input process:
+It returns an EventEmitter object featuring some functions to control things during the input process:
 
 * abort(): abort the input process and do not even call the inputField()'s callback
 * stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
 * getInput(): get the current input string
 * getPosition(): return an object containing 'x' and 'y' properties, the coordinates where the input field starts
+* redraw(): redraw the input field, useful if you had echo'ed something that can mess it
 * hide(): hide the input field, it still records keystrokes
 * show(): show the input field again
 * rebase(): rebase the input field to the current cursor position. Please note: it does NOT erase the previously entered
   text, you have to use hide() before. It works this way because you may want to modify the screen in between, and
   it needs some I/O with the terminal to works accordingly.
+
+It emits:
+
+* *ready*: when the input field is ready (rarely useful)
 
 
 
