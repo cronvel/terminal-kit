@@ -13,3 +13,4 @@ document .noFormat() ??? @doc
 (A) document all the ScreenBuffer feature @doc
 (B) TextBuffer class suitable for text editor @code
 (A) use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code
+(A) document autoComplete.js @doc

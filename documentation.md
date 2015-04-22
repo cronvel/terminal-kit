@@ -71,7 +71,7 @@ term( 'The terminal size is %dx%d' , term.width , term.height ) ;
 // Move the cursor at the upper-left corner
 term.moveTo( 1 , 1 ) ;
 
-// We can always pass additionnal arguments that will be displayed...
+// We can always pass additional arguments that will be displayed...
 term.moveTo( 1 , 1 , 'Upper-left corner' ) ;
 
 // ... and formated
@@ -105,7 +105,7 @@ are currently using.
 
 Standard methods map low-level terminal capabilities.
 
-For all the functions below, additionnal arguments can be provided.
+For all the functions below, additional arguments can be provided.
 
 If a boolean is provided, it will turn the feature *on* or *off*.
 For example `term.red( true )` turn all subsequent output in red, while `term.red( false )` disable red and go back to default color.
