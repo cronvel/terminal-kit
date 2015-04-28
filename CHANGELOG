@@ -1,5 +1,11 @@
 
 
+v0.10.6
+-------
+
+Stupid Gnome-terminal do not set COLORTERM environment variable anymore... this is a workaround to detect it.
+
+
 v0.10.5
 -------
 

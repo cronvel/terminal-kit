@@ -35,6 +35,7 @@ var term = termkit.terminal ;
 term.green( '\n== Environment variable ==\n\n' ) ;
 term( '$TERM: %s\n' , process.env.TERM ) ;
 term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
+term( '$VTE_VERSION: %s\n' , process.env.VTE_VERSION ) ;
 term( '\n' ) ;
 
 
