@@ -99,7 +99,7 @@ to be `var term = require( 'terminal-kit' ).terminal ;` or `var term = termkit.t
 So `term` is an instanceof of `termkit.Terminal`, that should in almost all cases match correctly the terminal you
 are currently using. This is the *default* terminal.
 
-You can also define your own terminal, see [.createTerminal()](#ref.createTerminal).
+You can also define your own terminal interface, see [.createTerminal()](#ref.createTerminal).
 
 
 
