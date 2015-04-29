@@ -36,7 +36,9 @@ var terminal = require( '../lib/termkit.js' ) ;
 terminal.getDetectedTerminal( function( error , term ) {
 	
 	var i ;
-
+	
+	//term = terminal.terminal ;
+	
 	// First set black as the background color?
 	//term.bgBlack() ;
 	term( 'This is the style test, each word should be styled accordingly with what it says it is.\n\n' ) ;

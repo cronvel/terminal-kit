@@ -94,10 +94,12 @@ Use Node Package Manager:
 ## Some conventions used in this document
 
 In all examples, `termkit` is assumed to be `var termkit = require( 'terminal-kit' ) ;` while `term` is assumed
-to be `var term = require( 'terminal-kit' ).terminal ; ` or `var term = termkit.terminal ;`.
+to be `var term = require( 'terminal-kit' ).terminal ;` or `var term = termkit.terminal ;`.
 
 So `term` is an instanceof of `termkit.Terminal`, that should in almost all cases match correctly the terminal you
-are currently using.
+are currently using. This is the *default* terminal.
+
+You can also define your own terminal, see [.createTerminal()](#ref.createTerminal).
 
 
 
@@ -649,7 +651,32 @@ The argument 'name' can be:
 
 
 
+
+
 ## Static methods of `termkit`, the module's root
+
+<a name="ref.createTerminal"></a>
+### .createTerminal( options )
+
+* options `Object` an object of options, where:
+	* stdin `stream.Readable` (default: `process.stdin`) a readable input stream for the terminal interface's input
+	* stdout `stream.Writable` (default: `process.stdout`) a writable output stream for the terminal interface's output
+	* stderr `stream.Writable` (default: `process.stderr`) a writable output stream for the terminal interface's error output
+	* generic `string` (default: 'xterm') generic terminal application's identifier
+	* appId `string` specific terminal application's identifier (available ID's are files basename found in the
+	  lib/termconfig/ directory of the lib)
+	* appName `string` just an informative field
+	* processSigwinch `boolean` (default: false) true if the terminal can use the SIGWINCH signal to detect resizing
+
+This method creates a new terminal interface.
+
+Most of time, one may just use the default terminal interface, using `var term = require( 'terminal-kit' ).terminal ;`.
+That should cover 98% of use cases.
+
+However, it is sometime useful if we have some communication channel to a terminal other than STDIN/STDOUT,
+or if we know for sure the targeted terminal's ID and don't want to use the autodetect feature of the lib.
+
+
 
 ### .getParentTerminalInfo( callback )
 
@@ -659,7 +686,7 @@ The argument 'name' can be:
 	* name: the real binary name of the terminal
 	* pid: the PID of the terminal
 
-This method detect on which terminal your application run.
+This method detects on which terminal your application run.
 It does **\*NOT\*** use the $TERM or $COLORTERM environment variable, except as a fallback.
 It iterates through parent process until a known terminal is found, or process of PID 1 is reached (the *init* process).
 
