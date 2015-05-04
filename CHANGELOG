@@ -1,5 +1,11 @@
 
 
+v0.10.8
+-------
+
+New method: .singleLineMenu(), which creates a simple menu, the user can select item with arrow keys and RETURN/ENTER.
+
+
 v0.10.7
 -------
 
