@@ -1,5 +1,12 @@
 
 
+v0.10.9
+-------
+
+.inputField() now has the option 'autoCompleteMenu' to use in conjunction with 'autoComplete', it displays a single line menu
+displaying all the completion candidate, when more than one is possible.
+
+
 v0.10.8
 -------
 

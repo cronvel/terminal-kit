@@ -39,7 +39,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		var options = {
 			//y: 1
-			selectedStyle: term.dim.blue.bgGreen
+			selectedStyle: term.dim.blue.bgGreen ,
+			//exitOnUnexpectedKey: true
 		}
 		
 		term.singleLineMenu( items , options , function( error , index , text ) {
