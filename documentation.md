@@ -478,9 +478,9 @@ function question()
 	  (if no completion can be done, it should return the input string, if multiple candidate are possible, it should
 	  return an array of string)
 	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
-	  any auto-complete attempt that has many completion candidates will display a menu to choose between each possibilities.
-	  If an object is given, it will contain options for the .singleLineMenu() that is used for the completion (notice: some
-	  options are overwritten: 'y' and 'exitOnUnexpectedKey')
+	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
+	  possibilities. If an object is given, it should contain options for the .singleLineMenu() that is used for the completion
+	  (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
 * callback( error , input )
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
@@ -558,17 +558,18 @@ function question()
 	* nextPageHint `string` (default: ' » ') string indicator for a next page
 	* previousPageHint `string` (default: ' « ') string indicator for a previous page
 	* style `function` the style of unselected items, default to the current `term`
-	* selectedStyle `function` the style of the selected item, default to `term.bgYellow.magenta`
+	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
 * callback( error , selectedIndex , selectedText ), where:
 	* error `mixed` truthy if an underlying error occurs
-	* selectedIndex `number` the user-selected menu entry index
-	* selectedText `number` the user-selected menu entry text
-	* unexpectedKey `string` when 'exitOnUnexpectedKey' option is on, this is the unexpected key producing the exit
+	* selectedIndex `number` the user-selected menu item index
+	* selectedText `number` the user-selected menu item text
+	* unexpectedKey `string` when 'exitOnUnexpectedKey' option is on and an unexpected key is pressed, this contains
+	  the key that produced the exit
 
-It creates an interactive menu that take only a single line.
+It creates an interactive menu that uses only a single line.
 
-It features paging if items oversized the line length, and supports the following keys:
+It features paging if items oversize the line length, and supports the following keys:
 
 * ENTER, KP_ENTER: end the process and return the currently selected menu item
 * LEFT, RIGHT: move and select the previous or the next item in the menu
