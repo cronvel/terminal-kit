@@ -1,6 +1,6 @@
 (D) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
-(A) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
+(C) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
 use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
 (C) add a summary to the documentation @doc
 (C) documentation on term.state (term.state.button.left, etc) @doc
@@ -10,8 +10,8 @@ mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
 (E) terminfo support @code
 document .noFormat() ??? @doc
-(A) document all the ScreenBuffer feature @doc
+(C) document all the ScreenBuffer feature @doc
 (B) TextBuffer class suitable for text editor @code
 (A) use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code
-(A) document autoComplete.js @doc
-(A) document: .singleLineMenu(), .inputField() options (autoCompleteMenu, menuOptions) @doc
+(C) document autoComplete.js @doc
+(B) .inputField() 'autoComplete' option should accept asynchronous function as well (e.g. possibility to perform an async 'ls') @code

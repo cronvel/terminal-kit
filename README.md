@@ -473,9 +473,14 @@ function question()
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
 	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
-	* autoComplete `Array` or `Function` (optional) an array of possible completion, so the TAB key will auto-complete
+	* autoComplete `Array` or `Function( inputString )` (optional) an array of possible completion, so the TAB key will auto-complete
 	  the input field. If it is a function, it should accept an input `string` and return the completed `string`
-	  (if no completion can be done, it should return the input string)
+	  (if no completion can be done, it should return the input string, if multiple candidate are possible, it should
+	  return an array of string)
+	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
+	  any auto-complete attempt that has many completion candidates will display a menu to choose between each possibilities.
+	  If an object is given, it will contain options for the .singleLineMenu() that is used for the completion (notice: some
+	  options are overwritten: 'y' and 'exitOnUnexpectedKey')
 * callback( error , input )
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
@@ -495,6 +500,8 @@ Special keys supported by the input field:
 * END: move the cursor at the end of the input field
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
+
+Additionnal keys are used when the auto-completion display the menu (see .singleLineMenu() for details).
 
 It returns an EventEmitter object featuring some functions to control things during the input process:
 
@@ -532,12 +539,63 @@ function question()
 {
 	term( 'Please enter your name: ' ) ;
 	
-	term.inputField( { history: history , autoComplete: autoComplete } , function( error , input ) {
+	term.inputField( { history: history , autoComplete: autoComplete , autoCompleteMenu: true } , function( error , input ) {
 	
 		term.green( "\nYour name is '%s'\n" , input ) ;
 		process.exit() ;
 	} ) ;
 }	
+```
+
+
+
+### .singleLineMenu( menuItems , [options] , callback )
+
+* menuItems `array` of menu item text
+* options `object` of options, where:
+	* y `number` the line where the menu will be displayed, default to the next line
+	* separator `string` (default: '  ') the string separating each menu item
+	* nextPageHint `string` (default: ' » ') string indicator for a next page
+	* previousPageHint `string` (default: ' « ') string indicator for a previous page
+	* style `function` the style of unselected items, default to the current `term`
+	* selectedStyle `function` the style of the selected item, default to `term.bgYellow.magenta`
+	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
+* callback( error , selectedIndex , selectedText ), where:
+	* error `mixed` truthy if an underlying error occurs
+	* selectedIndex `number` the user-selected menu entry index
+	* selectedText `number` the user-selected menu entry text
+	* unexpectedKey `string` when 'exitOnUnexpectedKey' option is on, this is the unexpected key producing the exit
+
+It creates an interactive menu that take only a single line.
+
+It features paging if items oversized the line length, and supports the following keys:
+
+* ENTER, KP_ENTER: end the process and return the currently selected menu item
+* LEFT, RIGHT: move and select the previous or the next item in the menu
+* UP, DOWN: go the previous or the next page of items (if paging is used)
+* HOME, END: move and select the first or the last item of the menu
+
+If the 'exitOnUnexpectedKey' option is set, any other key will exit the menu, call the callback with `undefined` for any
+arguments except the last one (the *unexpectedKey* argument), that will contains the key that triggered the exit.
+
+Example, it creates a menu on the top of the terminal, with unselected items using inversed fg/bg colors, and the selected
+item blue on green:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+var items = [ 'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ] ;
+
+var options = {
+	y: 1 ,
+	style: term.inverse ,
+	selectedStyle: term.dim.blue.bgGreen
+} ;
+
+term.singleLineMenu( items , options , function( error , index , text ) {
+	term( '\n' ).eraseLineAfter.green( "#%s selected: %s\n" , index , text ) ;
+	process.exit() ;
+} ) ;
 ```
 
 

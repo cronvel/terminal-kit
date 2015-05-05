@@ -35,14 +35,13 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	{
 		var items = [
 			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
-			//'1' , '22' , '333' , '4444' , '55555' , '666666' , '7777777' , '88888888' , '999999999' , '0000000000'
 		] ;
 		
 		var options = {
-			//y: 1
-			//selectedStyle: term.dim.blue.bgGreen ,
-			//exitOnUnexpectedKey: true
-		}
+			y: 1 ,
+			style: term.inverse ,
+			selectedStyle: term.dim.blue.bgGreen
+		} ;
 		
 		term.singleLineMenu( items , options , function( error , index , text ) {
 			
