@@ -1,5 +1,13 @@
 
 
+v0.11.3
+-------
+
+* .inputField(): custom auto-completer can be asynchronous now, see the doc.
+
+* Documentation: static method termkit.autoComplete() is now documented.
+
+
 v0.11.2
 -------
 

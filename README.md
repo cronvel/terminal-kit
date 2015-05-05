@@ -132,6 +132,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.createTerminal()](#ref.createTerminal)
 	* [.getParentTerminalInfo()](#ref.getParentTerminalInfo)
 	* [.getDetectedTerminal()](#ref.getDetectedTerminal)
+	* [.autoComplete()](#ref.autoComplete)
 	
 
 
@@ -618,25 +619,27 @@ var term = termkit.terminal ;
 var autoCompleter = function autoCompleter( inputString , callback )
 {  
     fs.readdir( __dirname , function( error , files ) {
-        //console.log( files ) ;
         callback( undefined , termkit.autoComplete( files , inputString , true ) ) ;
     } ) ;
 } ;
     
 term( 'Choose a file: ' ) ;
 
-term.inputField( { autoComplete: autoCompleter , autoCompleteMenu: true } , function( error , input ) {
-	if ( error )
-	{
-		term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+term.inputField(
+	{ autoComplete: autoCompleter , autoCompleteMenu: true } ,
+	function( error , input ) {
+		if ( error )
+		{
+			term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+		}
+		else
+		{
+			term.green( "\nYour file is '%s'\n" , input ) ;
+		}
+		
+		process.exit() ;
 	}
-	else
-	{
-		term.green( "\nYour file is '%s'\n" , input ) ;
-	}
-	
-	process.exit() ;
-} ) ;
+) ;
 ```
 
 
