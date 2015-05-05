@@ -576,11 +576,11 @@ It features paging if items oversize the line length, and supports the following
 * UP, DOWN: go the previous or the next page of items (if paging is used)
 * HOME, END: move and select the first or the last item of the menu
 
-If the 'exitOnUnexpectedKey' option is set, any other key will exit the menu, call the callback with `undefined` for any
+If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, call the callback with `undefined` for any
 arguments except the last one (the *unexpectedKey* argument), that will contains the key that triggered the exit.
 
-Example, it creates a menu on the top of the terminal, with unselected items using inversed fg/bg colors, and the selected
-item blue on green:
+Example, it creates a menu on the top of the terminal, with unselected items using inversed foreground/background colors,
+and the selected item blue on green:
 
 ```js
 var term = require( 'terminal-kit' ).terminal ;
