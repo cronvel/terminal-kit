@@ -579,8 +579,7 @@ It features paging if items oversize the line length, and supports the following
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, call the callback with `undefined` for any
 arguments except the last one (the *unexpectedKey* argument), that will contains the key that triggered the exit.
 
-Example, it creates a menu on the top of the terminal, with unselected items using inversed foreground/background colors,
-and the selected item blue on green:
+Example:
 
 ```js
 var term = require( 'terminal-kit' ).terminal ;
@@ -588,7 +587,7 @@ var term = require( 'terminal-kit' ).terminal ;
 var items = [ 'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ] ;
 
 var options = {
-	y: 1 ,
+	y: 1 ,	// the menu will be on the top of the terminal
 	style: term.inverse ,
 	selectedStyle: term.dim.blue.bgGreen
 } ;
@@ -598,6 +597,9 @@ term.singleLineMenu( items , options , function( error , index , text ) {
 	process.exit() ;
 } ) ;
 ```
+
+It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
+and the selected item blue on green.
 
 
 
