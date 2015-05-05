@@ -1,5 +1,14 @@
 
 
+v0.11.0
+-------
+
+* .singleLineMenu() has more options: it is possible to define its own item separator, and customize the
+  new next/previous page hint feature
+
+* .inputField() option 'menuOption' has moved to/mixed with 'autoCompleteMenu'
+
+
 v0.10.9
 -------
 
