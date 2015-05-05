@@ -103,6 +103,38 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 
 
 
+## Table of Content
+
+* Basic *chainable* methods
+	* [Colors](#ref.colors)
+	* [Styles](#ref.styles)
+	* [Moving the cursor](#ref.movingCursor)
+	* [Editing the screen](#ref.editingScreen)
+	* [Input/Output](#ref.io)
+	* [Misc](#ref.misc)
+* Advanced methods
+	* [.fullscreen()](#ref.fullscreen)
+	* [.grabInput()](#ref.grabInput)
+	* [.getCursorLocation()](#ref.getCursorLocation)
+	* [.getColor()](#ref.getColor)
+	* [.setColor()](#ref.setColor)
+	* [.getPalette()](#ref.getPalette)
+	* [.setPalette()](#ref.setPalette)
+	* [.yesOrNo()](#ref.yesOrNo)
+	* [.inputField()](#ref.inputField)
+	* [.singleLineMenu()](#ref.singleLineMenu)
+* Events
+	* ['key'](#ref.event.key)
+	* ['terminal'](#ref.event.terminal)
+	* ['mouse'](#ref.event.mouse)
+* Static methods
+	* [.createTerminal()](#ref.createTerminal)
+	* [.getParentTerminalInfo()](#ref.getParentTerminalInfo)
+	* [.getDetectedTerminal()](#ref.getDetectedTerminal)
+	
+
+
+
 ## Standard methods of a **Terminal** instance 
 
 Standard methods map low-level terminal capabilities.
@@ -142,6 +174,7 @@ We can do:
 
 
 
+<a name="ref.colors"></a>
 ### Foreground colors
 
 * .defaultColor(): back to the default foreground color
@@ -202,6 +235,7 @@ We can do:
 
 
 
+<a name="ref.styles"></a>
 ### Styles
 
 * .styleReset(): reset all styles and go back to default colors
@@ -216,7 +250,8 @@ We can do:
 
 
 
-### Cursors
+<a name="ref.movingCursor"></a>
+### Moving the Cursor
 
 * .saveCursor(): save cursor position
 * .restoreCursor(): restore a previously saved cursor position
@@ -235,7 +270,8 @@ We can do:
 
 
 
-### Editing
+<a name="ref.editingScreen"></a>
+### Editing the Screen
 
 * .clear(): clear the screen and move the cursor to the upper-left corner
 * .eraseDisplayBelow(): erase everything below the cursor
@@ -254,6 +290,7 @@ We can do:
 
 
 
+<a name="ref.io"></a>
 ### Input/Output
 
 * .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
@@ -274,6 +311,7 @@ We can do:
 
 
 
+<a name="ref.misc"></a>
 ### Misc
 
 * .noFormat(str): disable string formating - useful when your string may contain `%` (e.g. user input) and you
@@ -289,6 +327,10 @@ We can do:
 ## Advanced methods of a **Terminal** instance
 
 Advanced methods are high-level librairie functions.
+
+
+
+<a name="ref.fullscreen"></a>
 ### .fullscreen( options )
 
 * options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
@@ -301,6 +343,7 @@ the cursor at the upper-left corner.
 
 
 
+<a name="ref.grabInput"></a>
 ### .grabInput( options )
 
 * options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
@@ -348,6 +391,7 @@ term.on( 'mouse' , function( name , data ) {
 
 
 
+<a name="ref.getCursorLocation"></a>
 ### .getCursorLocation( callback )
 
 * callback( error , x , y )
@@ -359,6 +403,7 @@ Get the cursor location.
 
 
 
+<a name="ref.getColor"></a>
 ### .getColor( register , callback )
 
 * register `number` the register number in the 0..255 range
@@ -373,6 +418,7 @@ Get the RGB values of a color register.
 
 
 
+<a name="ref.setColor"></a>
 ### .setColor( register , r , g , b , [names] ) *or* .setColor( register , rgb , [names] )
 
 * register `number` the register number in the 0..255 range
@@ -389,6 +435,7 @@ Set the RGB values for a color indexed by the integer *register*.
 
 
 
+<a name="ref.getPalette"></a>
 ### .getPalette( register , callback )
 
 * callback( error , palette )
@@ -406,6 +453,7 @@ and each color that was modified by the lib replace it.
 
 
 
+<a name="ref.setPalette"></a>
 ### .setPalette( palette )
 
 * palette either:
@@ -420,6 +468,7 @@ If the terminal support it, it will reset the 16-colors palette to the provided 
 
 
 
+<a name="ref.yesOrNo"></a>
 ### .yesOrNo( [options] , callback )
 
 * options `Object` where:
@@ -468,6 +517,7 @@ function question()
 
 
 
+<a name="ref.inputField"></a>
 ### .inputField( [options] , callback )
 
 * options `Object` where:
@@ -479,8 +529,8 @@ function question()
 	  return an array of string)
 	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
-	  possibilities. If an object is given, it should contain options for the .singleLineMenu() that is used for the completion
-	  (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
+	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
+	  that is used for the completion (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
 * callback( error , input )
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
@@ -501,7 +551,7 @@ Special keys supported by the input field:
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
 
-Additionnal keys are used when the auto-completion display the menu (see .singleLineMenu() for details).
+Additionnal keys are used when the auto-completion display the menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
 It returns an EventEmitter object featuring some functions to control things during the input process:
 
@@ -549,6 +599,7 @@ function question()
 
 
 
+<a name="ref.singleLineMenu"></a>
 ### .singleLineMenu( menuItems , [options] , callback )
 
 * menuItems `array` of menu item text
@@ -609,6 +660,7 @@ Event are fired on your `term` object.
 
 
 
+<a name="ref.event.key"></a>
 ### 'key' event ( name , matches )
 
 * name: string, the key name
@@ -664,6 +716,7 @@ so it is nearly impossible to differenciate (for example) a KP_1 from an END, or
 
 
 
+<a name="ref.event.terminal"></a>
 ### 'terminal' event
 
 * name: string, the name of the subtype of event
@@ -687,6 +740,7 @@ The argument 'name' can be:
 
 
 
+<a name="ref.event.mouse"></a>
 ### 'mouse' event
 
 * name: string, the name of the subtype of event
@@ -716,6 +770,8 @@ The argument 'name' can be:
 
 ## Static methods of `termkit`, the module's root
 
+
+
 <a name="ref.createTerminal"></a>
 ### .createTerminal( options )
 
@@ -739,6 +795,7 @@ or if we know for sure the targeted terminal's ID and don't want to use the auto
 
 
 
+<a name="ref.getParentTerminalInfo"></a>
 ### .getParentTerminalInfo( callback )
 
 * callback `Function( error , codename , name , pid )` where:
@@ -757,6 +814,7 @@ Also, it only works on UNIX family OS.
 
 
 
+<a name="ref.getDetectedTerminal"></a>
 ### .getDetectedTerminal( callback )
 
 * callback `Function( error , term )` where:
