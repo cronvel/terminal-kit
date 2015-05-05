@@ -523,10 +523,11 @@ function question()
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
 	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
-	* autoComplete `Array` or `Function( inputString )` (optional) an array of possible completion, so the TAB key will auto-complete
-	  the input field. If it is a function, it should accept an input `string` and return the completed `string`
-	  (if no completion can be done, it should return the input string, if multiple candidate are possible, it should
-	  return an array of string)
+	* autoComplete `Array` or `Function( inputString , [callback] )` (optional) an array of possible completion,
+	  so the TAB key will auto-complete the input field. If it is a function, it should accept an input `string`
+	  and return the completed `string` (if no completion can be done, it should return the input string,
+	  if multiple candidate are possible, it should return an array of string), if **the function accepts 2 arguments**
+	  (checked using *function*.length), then **the auto-completer will be asynchronous**!
 	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
 	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
@@ -600,6 +601,44 @@ function question()
 	) ;
 }	
 ```
+
+If we need our own auto-completer, we might take advantage of the built-in static method [termkit.autoComplete()](#ref.autoComplete).
+
+Custom auto-completer can be asynchronous, if the function's *length* is **exactly 2**.
+
+<a name="ref.example.autoComplete"></a>
+This is an example of a file selector that exposes the async behaviour of auto-completer and the usage of
+the static `termkit.autoComplete()` method:
+
+```js
+var fs = require( 'fs' ) ;
+var termkit = require( '../lib/termkit.js' ) ;
+var term = termkit.terminal ;
+
+var autoCompleter = function autoCompleter( inputString , callback )
+{  
+    fs.readdir( __dirname , function( error , files ) {
+        //console.log( files ) ;
+        callback( undefined , termkit.autoComplete( files , inputString , true ) ) ;
+    } ) ;
+} ;
+    
+term( 'Choose a file: ' ) ;
+
+term.inputField( { autoComplete: autoCompleter , autoCompleteMenu: true } , function( error , input ) {
+	if ( error )
+	{
+		term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+	}
+	else
+	{
+		term.green( "\nYour file is '%s'\n" , input ) ;
+	}
+	
+	process.exit() ;
+} ) ;
+```
+
 
 
 
@@ -855,5 +894,22 @@ require( 'terminal-kit' ).getDetectedTerminal( function( error , term ) {
 ```
 This will give you the best compatibility possible, at the cost of a callback.
 
+
+
+<a name="ref.autoComplete"></a>
+### .autoComplete( array , startString , [returnAlternatives] )
+
+* array `Array` of string, it is the list of completion candidates
+* startString `string` this is the input string to be completed
+* returnAlternatives `boolean` (default: false) when many candidates match the input, if *returnAlternatives* is set then
+  the method is allowed to return an array containing all matching candidates, else the input string (*startString*) is
+  returned unchanged
+
+This static method is used behind the scene by [.inputField()](#ref.inputField) when auto-completion mechanisms kick in.
+
+This method is exposed in the API because [.inputField()](#ref.inputField) supports user-defined auto-completers, such
+auto-completers might take advantage of this method for its final pass, after collecting relevant informations to feed it.
+
+[This is an example](#ref.example.autoComplete) of its usage.
 
 
