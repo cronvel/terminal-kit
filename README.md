@@ -103,7 +103,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 
 
 
-## Table of Content
+## Table of Contents
 
 * Basic *chainable* methods
 	* [Colors](#ref.colors)
@@ -132,7 +132,6 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.getParentTerminalInfo()](#ref.getParentTerminalInfo)
 	* [.getDetectedTerminal()](#ref.getDetectedTerminal)
 	
-
 
 
 ## Standard methods of a **Terminal** instance 
@@ -551,7 +550,7 @@ Special keys supported by the input field:
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
 
-Additionnal keys are used when the auto-completion display the menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
+Additionnal keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
 It returns an EventEmitter object featuring some functions to control things during the input process:
 
@@ -582,18 +581,22 @@ var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
 var autoComplete = [
 	'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
 	'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
-	'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt'
+	'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' ,
+	'Harry Truman' , 'Franklin Roosevelt'
 ] ;
 
 function question()
 {
 	term( 'Please enter your name: ' ) ;
 	
-	term.inputField( { history: history , autoComplete: autoComplete , autoCompleteMenu: true } , function( error , input ) {
+	term.inputField(
+		{ history: history , autoComplete: autoComplete , autoCompleteMenu: true } ,
+		function( error , input ) {
 	
-		term.green( "\nYour name is '%s'\n" , input ) ;
-		process.exit() ;
-	} ) ;
+			term.green( "\nYour name is '%s'\n" , input ) ;
+			process.exit() ;
+		}
+	) ;
 }	
 ```
 
