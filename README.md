@@ -62,7 +62,8 @@ term.bold( 'bold' ) ;
 // output 'mixed' using bold, underlined & red, exposing the style-mixing syntax
 term.bold.underline.red( 'mixed' ) ; 
 
-// printf() style formating everywhere: this will output 'My name is Jack, I'm 32.' in green
+// printf() style formating everywhere:
+// this will output 'My name is Jack, I'm 32.' in green
 term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
 // Width and height of the terminal
