@@ -657,12 +657,13 @@ term.inputField(
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
-* callback( error , selectedIndex , selectedText ), where:
+* callback( error , response ), where:
 	* error `mixed` truthy if an underlying error occurs
-	* selectedIndex `number` the user-selected menu item index
-	* selectedText `number` the user-selected menu item text
-	* unexpectedKey `string` when 'exitOnUnexpectedKey' option is on and an unexpected key is pressed, this contains
-	  the key that produced the exit
+	* response `Object` where
+		* selectedIndex `number` the user-selected menu item index
+		* selectedText `string` the user-selected menu item text
+		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
+		  the key that produced the exit
 
 It creates an interactive menu that uses only a single line.
 
@@ -673,8 +674,8 @@ It features paging if items oversize the line length, and supports the following
 * UP, DOWN: go the previous or the next page of items (if paging is used)
 * HOME, END: move and select the first or the last item of the menu
 
-If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, call the callback with `undefined` for any
-arguments except the last one (the *unexpectedKey* argument), that will contains the key that triggered the exit.
+If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
+does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
 
 Example:
 
@@ -689,14 +690,16 @@ var options = {
 	selectedStyle: term.dim.blue.bgGreen
 } ;
 
-term.singleLineMenu( items , options , function( error , index , text ) {
-	term( '\n' ).eraseLineAfter.green( "#%s selected: %s\n" , index , text ) ;
+term.clear() ;
+
+term.singleLineMenu( items , options , function( error , response ) {
+	term( '\n' ).eraseLineAfter.green( "#%s selected: %s\n" , response.selectedIndex , response.selectedText ) ;
 	process.exit() ;
 } ) ;
 ```
 
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
-and the selected item blue on green.
+and the selected item using blue on green.
 
 
 

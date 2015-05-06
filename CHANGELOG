@@ -1,5 +1,21 @@
 
 
+v0.12.0
+-------
+
+Backward compatibility broken: .singleLineMenu()'s callback is now:
+* callback( error , response ), where:
+	* error `mixed` truthy if an underlying error occurs
+	* response `Object` where
+		* selectedIndex `number` the user-selected menu item index
+		* selectedText `string` the user-selected menu item text
+		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
+		  the key that produced the exit
+
+Using named parameters for the callback is a more reliable and flexible API that will avoid breakage in the future,
+when feature will be added.
+
+
 v0.11.3
 -------
 
