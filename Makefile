@@ -51,7 +51,7 @@ log/mocha.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termc
 	${MOCHA} test/terminal-test.js -R spec | tee log/mocha.log ; exit $${PIPESTATUS[0]}
 
 # README
-README.md: documentation.md bdd-spec.md
+README.md: documentation.md
 	cat documentation.md > README.md
 
 # Mocha Markdown BDD spec

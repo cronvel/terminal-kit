@@ -1,5 +1,11 @@
 
 
+v0.12.1
+-------
+
+.singleLineMenu() callback's 'response' argument has 2 new properties: 'x' and 'y', the coordinates of the selected item.
+
+
 v0.12.0
 -------
 

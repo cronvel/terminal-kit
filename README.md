@@ -662,6 +662,8 @@ term.inputField(
 	* response `Object` where
 		* selectedIndex `number` the user-selected menu item index
 		* selectedText `string` the user-selected menu item text
+		* x `number` the x coordinate of the selected menu item (the first character)
+		* y `number` the y coordinate of the selected menu item (same coordinate for all items since it's a single line menu)
 		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
 		  the key that produced the exit
 
@@ -693,13 +695,20 @@ var options = {
 term.clear() ;
 
 term.singleLineMenu( items , options , function( error , response ) {
-	term( '\n' ).eraseLineAfter.green( "#%s selected: %s\n" , response.selectedIndex , response.selectedText ) ;
+	term( '\n' ).eraseLineAfter.green(
+		"#%s selected: %s (%s,%s)\n" ,
+		response.selectedIndex ,
+		response.selectedText ,
+		response.x ,
+		response.y
+	) ;
 	process.exit() ;
 } ) ;
 ```
 
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
 and the selected item using blue on green.
+When the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
 
 
 

@@ -52,7 +52,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				return ;
 			}
 			
-			term.green( "\n#%s selected: %s\n" , response.selectedIndex , response.selectedText ) ;
+			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
 			terminate() ;
 		} ) ;
 	}
@@ -66,8 +66,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		setTimeout( function() { process.exit() } , 100 ) ;
 	}
 	
-	
-	term.clear.bold.cyan( '\n\nSelect one item from the menu!' ) ;
+	term.clear() ;
+	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 	menu() ; 
 } ) ;
 
