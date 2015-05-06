@@ -20,3 +20,7 @@ x 2014-11-17 Eterm color scheme & keys @code
 x 2014-12-04 chainable 'noFormat()' which disable the format() behaviour, to speed up computing (important for screenBuffer redraw()) @code
 x 2014-12-04 document ALT_SHIFT_key features @doc
 x 2015-05-05 document: .singleLineMenu() and .inputField() the 'autoCompleteMenu' option @doc
+x 2015-05-06 .inputField() 'autoComplete' option should accept asynchronous function as well (e.g. possibility to perform an async 'ls') @code
+x 2015-05-06 add a summary to the documentation @doc
+x 2015-05-06 document .noFormat() ??? @doc
+x 2015-05-06 document autoComplete.js @doc
