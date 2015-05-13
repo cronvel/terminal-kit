@@ -378,7 +378,7 @@ term.grabInput( { mouse: 'button' } ) ;
 
 term.on( 'key' , function( name , matches , data ) {
 	console.log( "'key' event:" , name ) ;
-	if ( matches.indexOf( 'CTRL_C' ) >= 0 ) { terminate() ; }
+	if ( key === 'CTRL_C' ) { terminate() ; }
 } ) ;
 
 term.on( 'terminal' , function( name , data ) {
@@ -719,10 +719,15 @@ Event are fired on your `term` object.
 
 
 <a name="ref.event.key"></a>
-### 'key' event ( name , matches )
+### 'key' event ( name , matches , data )
 
-* name: string, the key name
-* matches: array of matched key name
+* name `string` the key name
+* matches `Array` of matched key name
+* data `Object` contains more informations, mostly useful for debugging purpose, where:
+	* isCharacter `boolean` is true if this is a *regular* character, i.e. *not* a control character
+	* codepoint `number` (optional) the utf-8 code point of the character, if relevant
+	* code `number` or `Buffer`, for multibyte character it is the raw `Buffer` input, for single byte character it is a `number`
+	  between 0 and 255
 
 The 'key' event is emited whenever the user type something on the keyboard.
 
@@ -731,6 +736,7 @@ If the user type a word, each UTF8 character will produce its own 'key' event.
 
 If `name` is a multiple chars string, then it is a SPECIAL key.
 
+<a name="ref.event.key.specialKeyCodes"></a>
 List of SPECIAL keys:
 
     ESCAPE ENTER BACKSPACE NUL TAB SHIFT_TAB 
