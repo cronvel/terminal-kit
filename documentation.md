@@ -351,9 +351,9 @@ the cursor at the upper-left corner.
   if it is an Object then those properties are supported:
 	* mouse: if defined, it activate mouse event, those values are supported for 'mouse':
 		* 'button': report only button-event
-		* 'drag': report button-event, report motion-event only when a button is pressed (i.e. it is a mouse drag)
-		* 'motion': report button-event & all motion-event, use it only when needed, many escape sequences are sent from the terminal
-		  (for example, one may consider this for script running over SSH)
+		* 'drag': report button-event and report motion-event only when a button is pressed (i.e. a mouse drag)
+		* 'motion': report button-event and all motion-event, use it only when needed, many escape sequences are sent from
+		  the terminal (e.g. you may consider it for script running over SSH)
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
 
 This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event
@@ -781,10 +781,10 @@ so it is nearly impossible to differenciate (for example) a KP_1 from an END, or
 
 
 <a name="ref.event.terminal"></a>
-### 'terminal' event
+### 'terminal' event ( name , data )
 
-* name: string, the name of the subtype of event
-* data: Object, provide some data depending on the event
+* name `string` the name of the subtype of event
+* data `Object` provide some data depending on the event's subtype
 
 The 'terminal' event is emited for terminal generic information.
 
@@ -792,8 +792,8 @@ The argument 'name' can be:
 
 * CURSOR_LOCATION: it is emited in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
 
-* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time node.js will be notified of screen resizing, and so this event will be emited,
-  data contains 'width' & 'height', the size of the screen in characters
+* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time node.js will be notified of screen resizing,
+  and so this event will be emited, data contains 'width' & 'height', the size of the screen in characters
 
 * SCREEN_SIZE: **rarely useful** it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of the screen in characters,
   and 'resized' (true/false) if the size has changed without node.js being notified
@@ -805,15 +805,15 @@ The argument 'name' can be:
 
 
 <a name="ref.event.mouse"></a>
-### 'mouse' event
+### 'mouse' event ( name , data )
 
-* name: string, the name of the subtype of event
-* data: Object, provide the mouse coordinate and keyboard modifier status, properties:
-	* x: integer, the row number where the mouse is
-	* y: integer, the column number where the mouse is
-	* ctrl: true/false, if the CTRL key is down or not
-	* alt: true/false, if the ALT key is down or not
-	* shift: true/false, if the SHIFT key is down or not
+* name `string` the name of the subtype of event
+* data `Object` provide the mouse coordinates and keyboard modifiers status, where:
+	* x `number` the row number where the mouse is
+	* y `number` the column number where the mouse is
+	* ctrl `boolean` true if the CTRL key is down or not
+	* alt `boolean` true if the ALT key is down or not
+	* shift `boolean` true if the SHIFT key is down or not
 
 Activated when grabInput() is used with the 'mouse' options, e.g. `{ mouse: 'button' }`, `{ mouse: 'drag' }` or `{ mouse: 'motion' }`.
 
@@ -824,8 +824,8 @@ The argument 'name' can be:
 * MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
 * MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
 * MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
-* MOUSE_BUTTON_RELEASED: a button were release, however the terminal does not tell us which one
-* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is given to grabInput(), every move of the mouse will fire this event,
+* MOUSE_BUTTON_RELEASED: a button were released, however the terminal does not tell us which one
+* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is passed to grabInput(), every moves of the mouse will fire this event,
   if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
 
 

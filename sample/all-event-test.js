@@ -29,6 +29,7 @@
 
 
 
+//var term = require( '../lib/termkit.js' ).terminal ;
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 
