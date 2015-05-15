@@ -7,9 +7,9 @@
     "test": "test"
   },
   "dependencies": {
-    "async-kit": "^0.5.7",
-    "string-kit": "^0.1.7",
-    "tree-kit": "^0.5.0"
+    "async-kit": "^0.5.9",
+    "string-kit": "^0.1.10",
+    "tree-kit": "^0.5.5"
   },
   "devDependencies": {
     "expect.js": "^0.3.1",

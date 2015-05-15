@@ -24,3 +24,4 @@ x 2015-05-06 .inputField() 'autoComplete' option should accept asynchronous func
 x 2015-05-06 add a summary to the documentation @doc
 x 2015-05-06 document .noFormat() ??? @doc
 x 2015-05-06 document autoComplete.js @doc
+x 2015-05-15 use async.wrapper.timeout() on all get*() functions that use request*() and event handling behind the scene @code

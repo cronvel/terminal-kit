@@ -1,4 +1,4 @@
-(D) use async.callTimeout() on all get*() functions that use request*() and event handling behind the scene @code
+x 2015-05-15 use async.wrapper.timeout() on all get*() functions that use request*() and event handling behind the scene @code
 add na:true or fb:true to all non-applicable or fallback sequences @code
 (C) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
 use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
@@ -8,8 +8,7 @@ try to find a way to disable terminal's word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
 (E) terminfo support @code
-x 2015-05-06 document .noFormat() ??? @doc
 (C) document all the ScreenBuffer feature @doc
 (B) TextBuffer class suitable for text editor @code
 (A) use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code
-x 2015-05-06 document autoComplete.js @doc
+(B) finish progressBar @code

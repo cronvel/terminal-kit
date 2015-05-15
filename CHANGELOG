@@ -1,5 +1,11 @@
 
 
+v0.12.3
+-------
+
+Bugfix: timeout detection for .getColor() and .getCursorLocation(), .inputField() is changed accordingly (and cleaned up)
+
+
 v0.12.2
 -------
 

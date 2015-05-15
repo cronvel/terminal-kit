@@ -48,11 +48,19 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			if ( error )
 			{
 				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
-				question() ;
+				terminate() ;
 			}
 			else
 			{
 				term.green( "\nYour name is '%s'\n" , input ) ;
+				terminate() ;
+			}
+		} ) ;
+		
+		term.on( 'key' , function( key ) {
+			if ( key === 'CTRL_C' )
+			{
+				term.green( 'CTRL-C detected...\n' ) ;
 				terminate() ;
 			}
 		} ) ;
@@ -109,8 +117,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term.bold.cyan( 'Input field test, type something and hit the ENTER key...\n' ) ;
 	question() ; 
-	funkyCursor() ;
-	funkyBackground() ;
+	//funkyCursor() ;
+	//funkyBackground() ;
 } ) ;
 
 
