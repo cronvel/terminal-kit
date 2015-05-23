@@ -1,0 +1,18 @@
+[
+	{ "r": 0, "g": 0, "b": 0, "names": [ "black" ] } ,
+	{ "r": 170, "g": 0, "b": 0, "names": [ "red" ] } ,
+	{ "r": 0, "g": 170, "b": 0, "names": [ "green" ] } ,
+	{ "r": 170, "g": 85, "b": 0, "names": [ "yellow" , "brown" ] } ,
+	{ "r": 0, "g": 0, "b": 170, "names": [ "blue" ] } ,
+	{ "r": 170, "g": 0, "b": 170, "names": [ "magenta" ] } ,
+	{ "r": 0, "g": 170, "b": 170, "names": [ "cyan" ] } ,
+	{ "r": 170, "g": 170, "b": 170, "names": [ "white" ] } ,
+	{ "r": 85, "g": 85, "b": 85, "names": [ "brightBlack" , "gray" ] } ,
+	{ "r": 255, "g": 85, "b": 85, "names": [ "brightRed" ] } ,
+	{ "r": 85, "g": 255, "b": 85, "names": [ "brightGreen" ] } ,
+	{ "r": 255, "g": 255, "b": 85, "names": [ "brightYellow" ] } ,
+	{ "r": 85, "g": 85, "b": 255, "names": [ "brightBlue" ] } ,
+	{ "r": 255, "g": 85, "b": 255, "names": [ "brightMagenta" ] } ,
+	{ "r": 85, "g": 255, "b": 255, "names": [ "brightCyan" ] } ,
+	{ "r": 255, "g": 255, "b": 255, "names": [ "brightWhite" ] }
+]
