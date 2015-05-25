@@ -1,9 +1,15 @@
 
 
+v0.12.8
+-------
+
+Minor fixes in the demo and tests.
+
+
 v0.12.7
 -------
 
-Fixed an error in the code that may have produced undiscovered bug.
+Fixed an error in the code that may have produced unreported bugs.
 
 
 v0.12.6

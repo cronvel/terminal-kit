@@ -118,13 +118,13 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		term.requestCursorLocation()
 			.saveCursor()
-			.moveTo( 0 , term.height )
+			.moveTo( 1 , term.height )
 			.eraseLine()
 			.bgWhite.blue(
 				'Arrow mode: ' + modeString[ mode ] +
-				' -- Cursor position: ' + x + ',' + y +
-				' -- Screen size: ' + term.width + ',' + term.height +
-				' -- Key pressed: ' + key
+				' -- Cur pos: ' + x + ',' + y +
+				' -- Scr size: ' + term.width + ',' + term.height +
+				' -- Key: ' + key
 			)
 			.restoreCursor() ;
 	} ) ;

@@ -88,10 +88,10 @@ function createBackground()
 	
 	sprites.planet = ScreenBuffer.createFromChars(
 		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
-		fs.readFileSync( './data/saturn.txt' )
+		fs.readFileSync( __dirname + '/data/saturn.txt' )
 	) ;
 	
-	sprites.planet = ScreenBuffer.loadSync( './data/saturn.sbuf' ) ;
+	sprites.planet = ScreenBuffer.loadSync( __dirname + '/data/saturn.sbuf' ) ;
 	
 	createBackgroundStars( sprites.background.width * sprites.background.height * 0.004 ) ;
 	createBackgroundTrails( sprites.background.width * sprites.background.height * 0.008 ) ;
@@ -170,11 +170,11 @@ function createSpaceship()
 	/*
 	sprites.spaceship = ScreenBuffer.createFromChars(
 		{ attr: { color: 'cyan' , bold: true } , transparencyChar: '#' , transparencyType: ScreenBuffer.TRANSPARENCY } ,
-		fs.readFileSync( './data/spaceship1.txt' )
+		fs.readFileSync( __dirname + '/data/spaceship1.txt' )
 	) ;
 	*/
 	
-	sprites.spaceship = ScreenBuffer.loadSync( './data/spaceship1.sbuf' ) ;
+	sprites.spaceship = ScreenBuffer.loadSync( __dirname + '/data/spaceship1.sbuf' ) ;
 	
 	sprites.spaceship.x = 3 ;
 	sprites.spaceship.y = Math.floor( viewport.height / 2 - sprites.spaceship.height / 2 ) ;
