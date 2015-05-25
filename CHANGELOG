@@ -1,5 +1,11 @@
 
 
+v0.12.7
+-------
+
+Fixed an error in the code that may have produced undiscovered bug.
+
+
 v0.12.6
 -------
 
