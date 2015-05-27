@@ -52,8 +52,14 @@ term.on( 'key' , function( key , matches , data ) {
 		case 'INSERT' :
 			term.insert( 1 ) ;
 			break ;
+		case 'ALT_INSERT' :
+			term.insertLine( 1 ) ;
+			break ;
 		case 'DELETE' :
 			term.delete( 1 ) ;
+			break ;
+		case 'ALT_DELETE' :
+			term.deleteLine( 1 ) ;
 			break ;
 		case 'CTRL_C' :
 			process.exit() ;
