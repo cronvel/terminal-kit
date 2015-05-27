@@ -171,7 +171,7 @@ We can do:
 * .reset(): full reset the terminal.
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
 * .str(): do not output anything, instead return a string containing the sequences
-* .beep(): emit a beep
+* .bell(): emit an audible bell
 
 
 
@@ -755,6 +755,9 @@ List of SPECIAL keys:
     SHIFT_UP SHIFT_DOWN SHIFT_RIGHT SHIFT_LEFT
     ALT_UP ALT_DOWN ALT_RIGHT ALT_LEFT
     CTRL_UP CTRL_DOWN CTRL_RIGHT CTRL_LEFT
+    SHIFT_INSERT SHIFT_DELETE SHIFT_HOME SHIFT_END SHIFT_PAGE_UP SHIFT_PAGE_DOWN
+    CTRL_INSERT CTRL_DELETE CTRL_HOME CTRL_END CTRL_PAGE_UP CTRL_PAGE_DOWN
+    ALT_INSERT ALT_DELETE ALT_HOME ALT_END ALT_PAGE_UP ALT_PAGE_DOWN
 	SHIFT_TAB ALT_TAB
 	ALT_SPACE CTRL_ALT_SPACE
 

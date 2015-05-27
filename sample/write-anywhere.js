@@ -49,12 +49,19 @@ term.on( 'key' , function( key , matches , data ) {
 		case 'RIGHT' :
 			term.right( 1 ) ;
 			break ;
+		case 'INSERT' :
+			term.insert( 1 ) ;
+			break ;
+		case 'DELETE' :
+			term.delete( 1 ) ;
+			break ;
 		case 'CTRL_C' :
 			process.exit() ;
 			break ;
 		default:
 			// Echo anything else
 			term.noFormat( Buffer.isBuffer( data.code ) ? data.code : String.fromCharCode( data.code ) ) ;
+			//console.error( require( 'string-kit' ).escape.control( data.code.toString() ) ) ;
 			break ;
 	}
 } ) ;

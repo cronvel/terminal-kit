@@ -1,5 +1,12 @@
 
 
+v0.13.0
+-------
+
+.beep() is deprecated, in favor of .bell().
+SHIFT / CTRL / ALT + INSERT / DELETE / PAGE_UP / PAGE_DOWN / HOME / END combo.
+
+
 v0.12.8
 -------
 
