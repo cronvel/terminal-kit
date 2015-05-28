@@ -21,6 +21,7 @@ It does **NOT** depend on ncurses.
 	* Linux Console
 	* rxvt/urxvt
 	* Eterm
+	* Terminology
 
 Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.soulserv.net/tag/terminal/).
 
