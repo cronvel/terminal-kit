@@ -11,3 +11,4 @@ mrxvt support: draw-test does not work @bug
 (B) TextBuffer class suitable for text editor @code
 (A) use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code
 (B) finish progressBar @code
+(B) .inputField() has a bug with full-width chars @bug

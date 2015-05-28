@@ -43,7 +43,12 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	{
 		term( 'Please enter your name: ' ) ;
 		
-		term.inputField( { history : history , autoComplete: autoComplete , autoCompleteMenu: true } , function( error , input ) {
+		term.inputField( {
+				history : history ,
+				autoComplete: autoComplete ,
+				autoCompleteMenu: true ,
+				//maxLength: 3
+			} , function( error , input ) {
 			
 			if ( error )
 			{

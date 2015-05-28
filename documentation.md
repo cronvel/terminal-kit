@@ -524,6 +524,7 @@ function question()
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
 	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
+	* maxLength `number` (optional) the maximum length (in characters) of the user input
 	* autoComplete `Array` or `Function( inputString , [callback] )` (optional) an array of possible completion,
 	  so the TAB key will auto-complete the input field. If it is a function, it should accept an input `string`
 	  and return the completed `string` (if no completion can be done, it should return the input string,

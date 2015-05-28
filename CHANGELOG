@@ -1,5 +1,13 @@
 
 
+v0.13.2
+-------
+
+.inputField():
+* now patched to support characters larger than 2 bytes, but it still has bugs due to full-width chars
+* new option 'maxLength': to not allow user to add more characters than this
+
+
 v0.13.0 - v0.13.1
 -----------------
 
