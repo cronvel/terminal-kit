@@ -46,7 +46,23 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	}
 	
 	term.bold( 'Serious stuff in progress: ' ) ;
-	progressBar = term.progressBar() ;
+	
+	progressBar = term.progressBar( {
+		width: 50 ,
+		percent: true ,
+		/*
+		barStyle: term.brightGreen.bold ,
+		barBracketStyle: term.brightWhite ,
+		percentStyle: term.brightMagenta.inverse ,
+		barChar: '~' ,
+		barHeadChar: '*' ,
+		
+		//barChar: ' ' ,
+		//barHeadChar: ' ' ,
+		//barStyle: term.bgCyan
+		//*/
+	} ) ;
+	
 	term.column( 1 ) ;
 	
 	doProgress() ;

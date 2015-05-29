@@ -1,5 +1,11 @@
 
 
+v0.13.6
+-------
+
+New method: .progressBar(), which creates a nice progress bar, see the documentation for details.
+
+
 v0.13.5
 -------
 

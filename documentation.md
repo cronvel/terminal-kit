@@ -125,6 +125,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.yesOrNo()](#ref.yesOrNo)
 	* [.inputField()](#ref.inputField)
 	* [.singleLineMenu()](#ref.singleLineMenu)
+	* [.progressBar()](#ref.progressBar)
 * Events
 	* ['key'](#ref.event.key)
 	* ['terminal'](#ref.event.terminal)
@@ -671,7 +672,7 @@ term.inputField(
 
 It creates an interactive menu that uses only a single line.
 
-It features paging if items oversize the line length, and supports the following keys:
+It features **paging** if items oversize the line length, and supports the following keys:
 
 * ENTER, KP_ENTER: end the process and return the currently selected menu item
 * LEFT, RIGHT: move and select the previous or the next item in the menu
@@ -711,6 +712,59 @@ term.singleLineMenu( items , options , function( error , response ) {
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
 and the selected item using blue on green.
 When the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
+
+
+
+<a name="ref.progressBar"></a>
+### .progressBar( [options] )
+
+* options `object` of options, all of them are **OPTIONAL**, where:
+	* width: `number` the total width of the progress bar, default to the max available width
+	* percent: `boolean` if true, it shows the progress in percent alongside with the progress bar
+	* barStyle `function` the style of the progress bar items, default to `term.cyan`
+	* barBracketStyle `function` the style of the progress bar bracket character, default to options.barStyle if given
+	  or `term.blue`
+	* percentStyle `function` the style of percent value string, default to `term.yellow`
+	* barChar `string` the char used for the bar, default to '='
+	* barHeadChar `string` the char used for the bar, default to '>'
+
+It creates a nice progress bar and return a controler object to interact with it.
+
+The controler provides those functions:
+
+* update( progressValue ): update the progress bar, with the arguments:
+	* progressValue `number` float between 0 and 1, the actual progress value to be displayed
+
+
+
+Example:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+var progressBar , progress = 0 ;
+
+function doProgress()
+{
+	progress += Math.random() / 10 ;
+	progressBar.update( progress ) ;
+	
+	if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
+	
+	setTimeout( doProgress , 100 + Math.random() * 400 ) ;
+}
+
+term.bold( 'Serious stuff in progress: ' ) ;
+
+progressBar = term.progressBar( {
+	width: 50 ,
+	percent: true
+} ) ;
+
+doProgress() ;
+```
+
+It creates a progress bar and feeds it with a random progress value, then quit when it reaches 100%.
 
 
 
