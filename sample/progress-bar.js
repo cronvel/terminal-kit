@@ -32,15 +32,27 @@
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	
-	var progress = 0 ;
+	var progress ;
 	var progressBar ;
 	
 	function doProgress()
 	{
-		progress += Math.random() / 10 ;
-		progressBar.update( progress ) ;
-		
-		if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
+		if ( progress === undefined )
+		{
+			if ( Math.random() < 0.08 )
+			{
+				progress = 0 ;
+			}
+			
+			progressBar.update( progress ) ;
+		}
+		else
+		{
+			progress += Math.random() / 10 ;
+			progressBar.update( progress ) ;
+			
+			if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
+		}
 		
 		setTimeout( doProgress , 100 + Math.random() * 400 ) ;
 	}
@@ -50,6 +62,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	progressBar = term.progressBar( {
 		width: 50 ,
 		percent: true ,
+		eta: true ,
 		/*
 		barStyle: term.brightGreen.bold ,
 		barBracketStyle: term.brightWhite ,
