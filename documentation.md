@@ -738,7 +738,7 @@ The controler provides those functions:
 * update( progressValue ): update the progress bar, with the arguments:
 	* progressValue `number` or `null`, `undefined`, etc:
 		* if it's a float between 0 and 1, it's the actual progress value to be displayed
-		* if `null` then it will display a wheel: something is in progress, but cannot be quantified
+		* if `null` then it will display a spinning wheel: something is in progress, but cannot be quantified
 
 
 
