@@ -1,5 +1,11 @@
 
 
+v0.13.7
+-------
+
+.progressBar() can display ETA (activated with the 'eta' option, see the doc)
+
+
 v0.13.6
 -------
 

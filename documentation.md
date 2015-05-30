@@ -721,19 +721,24 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 * options `object` of options, all of them are **OPTIONAL**, where:
 	* width: `number` the total width of the progress bar, default to the max available width
 	* percent: `boolean` if true, it shows the progress in percent alongside with the progress bar
+	* eta: `boolean` if true, it shows the Estimated Time of Arrival alongside with the progress bar
 	* barStyle `function` the style of the progress bar items, default to `term.cyan`
 	* barBracketStyle `function` the style of the progress bar bracket character, default to options.barStyle if given
 	  or `term.blue`
 	* percentStyle `function` the style of percent value string, default to `term.yellow`
+	* etaStyle `function` the style of the ETA display, default to `term.bold`
 	* barChar `string` the char used for the bar, default to '='
 	* barHeadChar `string` the char used for the bar, default to '>'
+	* maxRefreshTime `number` the maximum time between two refresh in ms, default to 500ms
 
 It creates a nice progress bar and return a controler object to interact with it.
 
 The controler provides those functions:
 
 * update( progressValue ): update the progress bar, with the arguments:
-	* progressValue `number` float between 0 and 1, the actual progress value to be displayed
+	* progressValue `number` or `null`, `undefined`, etc:
+		* if it's a float between 0 and 1, it's the actual progress value to be displayed
+		* if `null` then it will display a wheel: something is in progress, but cannot be quantified
 
 
 

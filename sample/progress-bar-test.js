@@ -39,12 +39,13 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	{
 		if ( progress === undefined )
 		{
-			if ( Math.random() < 0.08 )
+			if ( Math.random() < 0.1 )
 			{
 				progress = 0 ;
 			}
 			
 			progressBar.update( progress ) ;
+			setTimeout( doProgress , 200 + Math.random() * 600 ) ;
 		}
 		else
 		{
@@ -52,9 +53,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			progressBar.update( progress ) ;
 			
 			if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
+			
+			setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
 		}
-		
-		setTimeout( doProgress , 100 + Math.random() * 400 ) ;
 	}
 	
 	term.bold( 'Serious stuff in progress: ' ) ;
