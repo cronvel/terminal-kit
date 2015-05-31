@@ -35,8 +35,22 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	var progress ;
 	var progressBar ;
 	
+	var bullshit = [
+		'Serious stuff in progress:' ,
+		'Big Data mining:' ,
+		'Decrunching data:' ,
+		'Building scalable business:' ,
+	] ;
+	
 	function doProgress()
 	{
+		var data = {} ;
+		
+		if ( Math.random() < 0.3 )
+		{
+			data.title = bullshit[ Math.floor( Math.random() * bullshit.length ) ] ;
+		}
+		
 		if ( progress === undefined )
 		{
 			if ( Math.random() < 0.1 )
@@ -44,25 +58,41 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				progress = 0 ;
 			}
 			
-			progressBar.update( progress ) ;
+			data.progress = progress ;
+			
+			progressBar.update( data ) ;
 			setTimeout( doProgress , 200 + Math.random() * 600 ) ;
 		}
 		else
 		{
 			progress += Math.random() / 10 ;
-			progressBar.update( progress ) ;
 			
-			if ( progress >= 1 ) { term( '\n' ) ; setTimeout( process.exit , 2000 ) ; }
-			else { setTimeout( doProgress , 5000 + Math.random() * 1000 ) ; }
+			data.progress = progress ;
+			
+			progressBar.update( data ) ;
+			
+			if ( progress >= 1 )
+			{
+				setTimeout(
+					function() { term( '\n' ) ; process.exit() ; } ,
+					2000
+				) ;
+			}
+			else
+			{
+				setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
+			}
 		}
 	}
 	
-	term.bold( 'Serious stuff in progress: ' ) ;
+	//term.bold( 'Serious stuff in progress: ' ) ;
 	
 	progressBar = term.progressBar( {
-		width: 50 ,
+		width: 60 ,
 		percent: true ,
 		eta: true ,
+		title: bullshit[ Math.floor( Math.random() * bullshit.length ) ] ,
+		titleSize: 29 ,
 		/*
 		barStyle: term.brightGreen.bold ,
 		barBracketStyle: term.brightWhite ,

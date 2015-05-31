@@ -77,17 +77,27 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				}
 			}
 			
-			if ( queuedFiles.length + inProgressFiles.length === 0 ) { term( '\n' ) ; setTimeout( process.exit , 2000 ) ; }
-			else { setTimeout( doProgress , 2000 + Math.random() * 2000 ) ; }
+			if ( queuedFiles.length + inProgressFiles.length === 0 )
+			{
+				setTimeout(
+					function() { term( '\n' ) ; process.exit() ; } ,
+					2000
+				) ;
+			}
+			else
+			{
+				setTimeout( doProgress , 2000 + Math.random() * 2000 ) ;
+			}
 		}
 	}
 	
-	term.bold( 'Analysing files: ' ) ;
+	//term.bold( 'Analysing files: ' ) ;
 	
 	progressBar = term.progressBar( {
-		width: 70 ,
+		width: 80 ,
 		percent: true ,
 		eta: true ,
+		title: 'Analysing files:' ,
 		/*
 		barStyle: term.brightGreen.bold ,
 		barBracketStyle: term.brightWhite ,
