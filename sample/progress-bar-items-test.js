@@ -29,17 +29,24 @@
 
 
 
+var fs = require( 'fs' ) ;
+
+
+
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	
 	var progress ;
 	var progressBar ;
+	var queuedFiles = [] , inProgressFiles = [] ;
 	
 	function doProgress()
 	{
+		var file ;
+		
 		if ( progress === undefined )
 		{
-			if ( Math.random() < 0.1 )
+			if ( Math.random() < 10.1 )
 			{
 				progress = 0 ;
 			}
@@ -49,25 +56,38 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		}
 		else
 		{
-			progress += Math.random() / 10 ;
-			progressBar.update( progress ) ;
+			if ( queuedFiles.length && ( ! inProgressFiles.length || Math.random() < 0.5 ) )
+			{
+				//console.log( '\nstartItem\n' ) ;
+				file = queuedFiles.shift() ;
+				progressBar.startItem( file ) ;
+				inProgressFiles.push( file ) ;
+			}
+			else
+			{
+				//console.log( '\nitemDone\n' ) ;
+				progressBar.itemDone( inProgressFiles.shift() ) ;
+				
+				if ( ! inProgressFiles.length && queuedFiles.length )
+				{
+					//console.log( '\nstartItem\n' ) ;
+					file = queuedFiles.shift() ;
+					progressBar.startItem( file ) ;
+					inProgressFiles.push( file ) ;
+				}
+			}
 			
-			if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
-			
-			setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
+			if ( queuedFiles.length + inProgressFiles.length === 0 ) { term( '\n' ) ; setTimeout( process.exit , 2000 ) ; }
+			else { setTimeout( doProgress , 2000 + Math.random() * 2000 ) ; }
 		}
 	}
 	
-	var toInstall[
-	] ;
-	
-	term.bold( 'Installing: ' ) ;
+	term.bold( 'Analysing files: ' ) ;
 	
 	progressBar = term.progressBar( {
-		width: 50 ,
+		width: 70 ,
 		percent: true ,
 		eta: true ,
-		items: 10 ,
 		/*
 		barStyle: term.brightGreen.bold ,
 		barBracketStyle: term.brightWhite ,
@@ -83,7 +103,12 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term.column( 1 ) ;
 	
-	doProgress() ;
+	fs.readdir( __dirname , function( error , files ) {
+		if ( error ) { process.exit( 1 ) ; }
+		queuedFiles = files ;
+		progressBar.update( { items: files.length } ) ;
+		doProgress() ;
+	} ) ;
 } ) ;
 
 

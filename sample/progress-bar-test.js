@@ -52,9 +52,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			progress += Math.random() / 10 ;
 			progressBar.update( progress ) ;
 			
-			if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
-			
-			setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
+			if ( progress >= 1 ) { term( '\n' ) ; setTimeout( process.exit , 2000 ) ; }
+			else { setTimeout( doProgress , 5000 + Math.random() * 1000 ) ; }
 		}
 	}
 	
