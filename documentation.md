@@ -722,27 +722,47 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 	* width: `number` the total width of the progress bar, default to the max available width
 	* percent: `boolean` if true, it shows the progress in percent alongside with the progress bar
 	* eta: `boolean` if true, it shows the Estimated Time of Arrival alongside with the progress bar
+	* items `number` the number of items that should be completed, turns the *item mode* on
+	* title `string` the title of the current progress bar, turns the *title mode* on
 	* barStyle `function` the style of the progress bar items, default to `term.cyan`
 	* barBracketStyle `function` the style of the progress bar bracket character, default to options.barStyle if given
 	  or `term.blue`
 	* percentStyle `function` the style of percent value string, default to `term.yellow`
 	* etaStyle `function` the style of the ETA display, default to `term.bold`
+	* itemStyle `function` the style of the item display, default to `term.dim`
+	* titleStyle `function` the style of the title display, default to `term.bold`
+	* itemSize `number` the size of the item status, default to 33% of width
+	* titleSize `number` the size of the title, default to 33% of width or title.length depending on context
 	* barChar `string` the char used for the bar, default to '='
 	* barHeadChar `string` the char used for the bar, default to '>'
 	* maxRefreshTime `number` the maximum time between two refresh in ms, default to 500ms
+	* minRefreshTime `number` the minimum time between two refresh in ms, default to 100ms
 
 It creates a nice progress bar and return a controler object to interact with it.
 
 The controler provides those functions:
 
-* update( progressValue ): update the progress bar, with the arguments:
-	* progressValue `number` or `null`, `undefined`, etc:
-		* if it's a float between 0 and 1, it's the actual progress value to be displayed
-		* if `null` then it will display a spinning wheel: something is in progress, but cannot be quantified
+* update( updateObject ): update the progress bar, having the arguments:
+	* updateObject `object` or `number` or `null`, if it is an object it supports those properties:
+		* progress `number` or `null` the progress value:
+			* if it's a float between 0 and 1, it's the actual progress value to be displayed
+			* if `null` then it will display a spinning wheel: something is in progress, but cannot be quantified
+		* items `number` change the number of items that should be completed, turns the *item mode* on
+		* title `string` change the title of the current progress bar, turns the *title mode* on
+	  If *updateObject* is not an object, it's a shorthand for `{ progress: value }`
+
+* startItem( name ): in *item mode*, it informs the progress bar that a new item is processing, having arguments:
+	* name `string` the name of the item that will be displayed in the item status part of the progress bar
+
+* itemDone( name ): in *item mode*, it informs the progress bar that an item is now done, if that item was started using
+  `.startItem()`, it will be removed from the running item list. When the number of finished item reaches the `items` parameter
+  (see the `.progressBar()`'s 'items' option or `.update()` method's 'items' option), the progressBar reaches 100% and stop.
+  It has the arguments:
+	* name `string` the name of the item that just finished.
 
 
 
-Example:
+Example of a progress bar using fake data:
 
 ```js
 var term = require( 'terminal-kit' ).terminal ;
