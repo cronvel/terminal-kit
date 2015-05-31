@@ -743,8 +743,8 @@ It creates a nice progress bar and return a controler object to interact with it
 The controler provides those functions:
 
 * update( updateObject ): update the progress bar, having the arguments:
-	* updateObject `object` or `number` or `null`, If *updateObject* is not an object, it's a shorthand for `{ progress: value }`,
-	  it supports those properties:
+	* updateObject `object` or `number` or `null`. If *updateObject* is not an object, it's a shorthand for `{ progress: value }`.
+	  It supports those properties:
 		* progress `number` or `null` the progress value:
 			* if it's a float between 0 and 1, it's the actual progress value to be displayed
 			* if `null` then it will display a spinning wheel: something is in progress, but cannot be quantified
