@@ -743,13 +743,13 @@ It creates a nice progress bar and return a controler object to interact with it
 The controler provides those functions:
 
 * update( updateObject ): update the progress bar, having the arguments:
-	* updateObject `object` or `number` or `null`, if it is an object it supports those properties:
+	* updateObject `object` or `number` or `null`, If *updateObject* is not an object, it's a shorthand for `{ progress: value }`,
+	  it supports those properties:
 		* progress `number` or `null` the progress value:
 			* if it's a float between 0 and 1, it's the actual progress value to be displayed
 			* if `null` then it will display a spinning wheel: something is in progress, but cannot be quantified
 		* items `number` change the number of items that should be completed, turns the *item mode* on
 		* title `string` change the title of the current progress bar, turns the *title mode* on
-	  If *updateObject* is not an object, it's a shorthand for `{ progress: value }`
 
 * startItem( name ): in *item mode*, it informs the progress bar that a new item is processing, having arguments:
 	* name `string` the name of the item that will be displayed in the item status part of the progress bar
@@ -762,27 +762,36 @@ The controler provides those functions:
 
 
 
-Example of a progress bar using fake data:
+Example of a progress bar using fake progress values:
 
 ```js
 var term = require( 'terminal-kit' ).terminal ;
 
 var progressBar , progress = 0 ;
 
+
 function doProgress()
 {
+	// Add random progress
 	progress += Math.random() / 10 ;
 	progressBar.update( progress ) ;
 	
-	if ( progress >= 1 ) { term( '\n' ) ; process.exit() ; }
-	
-	setTimeout( doProgress , 100 + Math.random() * 400 ) ;
+	if ( progress >= 1 )
+	{
+		// Cleanup and exit
+		setTimeout( function() { term( '\n' ) ; process.exit() ; } , 200 ) ;
+	}
+	else
+	{
+		setTimeout( doProgress , 100 + Math.random() * 400 ) ;
+	}
 }
 
-term.bold( 'Serious stuff in progress: ' ) ;
 
 progressBar = term.progressBar( {
-	width: 50 ,
+	width: 80 ,
+	title: 'Serious stuff in progress:' ,
+	eta: true ,
 	percent: true
 } ) ;
 
@@ -790,6 +799,68 @@ doProgress() ;
 ```
 
 It creates a progress bar and feeds it with a random progress value, then quit when it reaches 100%.
+
+
+Example of a progress bar in *item mode*:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+var progressBar ;
+
+var thingsToDo = [
+	'update my lib' ,
+	'data analysing' ,
+	'serious business' ,
+	'decrunching data' ,
+	'do my laundry' ,
+	'optimizing'
+] ;
+
+var countDown = thingsToDo.length ;
+
+
+function start()
+{
+	if ( ! thingsToDo.length ) { return ; }
+	
+	var task = thingsToDo.shift() ;
+	
+	progressBar.startItem( task ) ;
+	
+	// Finish the task in...
+	setTimeout( done.bind( null , task ) , 500 + Math.random() * 1200 ) ;
+	
+	// Start another parallel task in...
+	setTimeout( start , 400 + Math.random() * 400 ) ;
+}
+
+
+function done( task )
+{
+	progressBar.itemDone( task ) ;
+	countDown -- ;
+	
+	// Cleanup and exit
+	if ( ! countDown )
+	{
+		setTimeout( function() { term( '\n' ) ; process.exit() ; } , 200 ) ;
+	}
+}
+
+
+progressBar = term.progressBar( {
+	width: 80 ,
+	title: 'Daily tasks:' ,
+	eta: true ,
+	percent: true ,
+	items: thingsToDo.length
+} ) ;
+
+start() ;
+```
+
+It creates a progress bar and start and finish task with a random time, then quit when everything is done.
 
 
 
