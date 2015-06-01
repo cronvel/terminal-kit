@@ -61,7 +61,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			data.progress = progress ;
 			
 			progressBar.update( data ) ;
-			setTimeout( doProgress , 200 + Math.random() * 600 ) ;
+			setTimeout( doProgress , 2 + Math.random() * 6 ) ;
 		}
 		else
 		{
@@ -73,6 +73,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			
 			if ( progress >= 1 )
 			{
+				term( '\n' ) ; process.exit() ;
 				setTimeout(
 					function() { term( '\n' ) ; process.exit() ; } ,
 					2000
@@ -80,7 +81,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			}
 			else
 			{
-				setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
+				setTimeout( doProgress , 5 + Math.random() * 1 ) ;
 			}
 		}
 	}
