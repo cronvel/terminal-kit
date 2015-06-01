@@ -170,7 +170,7 @@ We can do:
 
 ### Common/Misc
 
-* .reset(): full reset the terminal.
+* .reset(): full reset of the terminal
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
 * .str(): do not output anything, instead return a string containing the sequences
 * .bell(): emit an audible bell

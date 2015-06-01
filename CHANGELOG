@@ -1,5 +1,12 @@
 
 
+v0.13.11
+--------
+
+.progressBar(): update immediately if the progress value is >= 1, to prevent program from quitting before the progress bar
+had a chance to display 'done'.
+
+
 v0.13.10
 --------
 
