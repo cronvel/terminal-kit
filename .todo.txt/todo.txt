@@ -1,5 +1,5 @@
 add na:true or fb:true to all non-applicable or fallback sequences @code
-(C) @bug .getPalette() keep the event loop busy: a program do not exit without an explicit call to process.exit()
+
 use the 'name' attribute of color, in colorScheme/ palette, something like accepting a name instead of an integer in .color() & .bgColor() @code
 (C) documentation on term.state (term.state.button.left, etc) @doc
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
@@ -9,6 +9,6 @@ mrxvt support: draw-test does not work @bug
 (E) terminfo support @code
 (C) document all the ScreenBuffer feature @doc
 (B) TextBuffer class suitable for text editor @code
-(A) use terminal.js and webterm as the base for  unit test: the internal state of the terminal can be retrieved! @code
-(B) finish progressBar @code
 (B) .inputField() has a bug with full-width chars @bug
+(A) document .progressBar() .stop() and .resume() @doc
+(A) document .processExit() @doc
