@@ -1,5 +1,12 @@
 
 
+v0.13.16
+--------
+
+Improvement of cleanup code on exit.
+Issue #3 is fixed again (regression somewhere between 0.13.6 and 0.13.14).
+
+
 v0.13.15
 --------
 
