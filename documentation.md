@@ -516,7 +516,13 @@ function question()
 		}
 	} ) ;
 }
+
+question() ;
 ```
+
+It produces:
+
+![Yes or no output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/yes-no-doc1.gif)
 
 
 
@@ -603,7 +609,7 @@ term.inputField(
 ) ;
 ```
 
-Output:
+It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)
 
@@ -646,7 +652,7 @@ term.inputField(
 ) ;
 ```
 
-Output:
+It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)
 
@@ -712,6 +718,10 @@ term.singleLineMenu( items , options , function( error , response ) {
 	process.exit() ;
 } ) ;
 ```
+
+It produces:
+
+![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)
 
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
 and the selected item using blue on green.
@@ -802,7 +812,7 @@ progressBar = term.progressBar( {
 doProgress() ;
 ```
 
-Output:
+It produces:
 
 ![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)
 
@@ -868,7 +878,7 @@ progressBar = term.progressBar( {
 start() ;
 ```
 
-Output:
+It produces:
 
 ![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
 

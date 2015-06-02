@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var term = require( '../lib/termkit.js' ).terminal ;
+var term = require( 'terminal-kit' ).terminal ;
 
 var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
 
