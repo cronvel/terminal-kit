@@ -864,6 +864,10 @@ progressBar = term.progressBar( {
 start() ;
 ```
 
+Output:
+
+![Screenshot](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
+
 It creates a progress bar and start and finish task with a random time, then quit when everything is done.
 
 
