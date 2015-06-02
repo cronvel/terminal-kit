@@ -591,20 +591,21 @@ var autoComplete = [
 	'Harry Truman' , 'Franklin Roosevelt'
 ] ;
 
-function question()
-{
-	term( 'Please enter your name: ' ) ;
-	
-	term.inputField(
-		{ history: history , autoComplete: autoComplete , autoCompleteMenu: true } ,
-		function( error , input ) {
-	
-			term.green( "\nYour name is '%s'\n" , input ) ;
-			process.exit() ;
-		}
-	) ;
-}	
+term( 'Please enter your name: ' ) ;
+
+term.inputField(
+	{ history: history , autoComplete: autoComplete , autoCompleteMenu: true } ,
+	function( error , input ) {
+
+		term.green( "\nYour name is '%s'\n" , input ) ;
+		process.exit() ;
+	}
+) ;
 ```
+
+Output:
+
+![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)
 
 If we need our own auto-completer, we might take advantage of the built-in static method [termkit.autoComplete()](#ref.autoComplete).
 
@@ -616,7 +617,7 @@ the static `termkit.autoComplete()` method:
 
 ```js
 var fs = require( 'fs' ) ;
-var termkit = require( '../lib/termkit.js' ) ;
+var termkit = require( 'terminal-kit' ) ;
 var term = termkit.terminal ;
 
 var autoCompleter = function autoCompleter( inputString , callback )
@@ -645,6 +646,9 @@ term.inputField(
 ) ;
 ```
 
+Output:
+
+![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)
 
 
 
@@ -800,7 +804,7 @@ doProgress() ;
 
 Output:
 
-![Screenshot](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)
+![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)
 
 It creates a progress bar and feeds it with a random progress value, then quit when it reaches 100%.
 
@@ -866,7 +870,7 @@ start() ;
 
 Output:
 
-![Screenshot](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
+![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
 
 It creates a progress bar and start and finish task with a random time, then quit when everything is done.
 
