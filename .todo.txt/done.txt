@@ -26,3 +26,5 @@ x 2015-05-06 document .noFormat() ??? @doc
 x 2015-05-06 document autoComplete.js @doc
 x 2015-05-15 use async.wrapper.timeout() on all get*() functions that use request*() and event handling behind the scene @code
 x 2015-06-01 finish progressBar @code
+x 2015-06-02 document .progressBar() .stop() and .resume() @doc
+x 2015-06-02 document .processExit() @doc

@@ -346,6 +346,18 @@ the cursor at the upper-left corner.
 
 
 
+<a name="ref.processExit"></a>
+### .processExit( code )
+
+* code `number` the exit code
+
+This method should be used instead of calling `process.exit()` directly. The *code* argument will be transmitted to
+`process.exit()` as it is.
+
+It helps quitting cleanly your application without leaving the terminal in a bad state, so the user get a working shell back.
+
+
+
 <a name="ref.grabInput"></a>
 ### .grabInput( options )
 
@@ -773,6 +785,10 @@ The controler provides those functions:
   (see the `.progressBar()`'s 'items' option or `.update()` method's 'items' option), the progressBar reaches 100% and stop.
   It has the arguments:
 	* name `string` the name of the item that just finished.
+
+* stop(): stop the progress bar, no redraw will occurs
+
+* resume(): resume a previously stopped progress bar, it will be redrawn again
 
 
 

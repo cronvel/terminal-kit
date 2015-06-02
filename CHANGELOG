@@ -1,5 +1,15 @@
 
 
+v0.13.15
+--------
+
+Documentation: 
+* nice animated gif for each example of: progressBar, inputField, singleLineMenu, yesOrNo
+* fixes in the examples
+* .processExit() is now documentated, thus under SemVer
+* .progressBar(): .stop() and .resume() method are now documentated, thus under SemVer
+
+
 v0.13.14
 --------
 
