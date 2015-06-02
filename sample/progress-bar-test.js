@@ -61,7 +61,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			data.progress = progress ;
 			
 			progressBar.update( data ) ;
-			setTimeout( doProgress , 2 + Math.random() * 6 ) ;
+			setTimeout( doProgress , 200 + Math.random() * 600 ) ;
 		}
 		else
 		{
@@ -73,7 +73,6 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			
 			if ( progress >= 1 )
 			{
-				term( '\n' ) ; process.exit() ;
 				setTimeout(
 					function() { term( '\n' ) ; process.exit() ; } ,
 					2000
@@ -81,7 +80,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			}
 			else
 			{
-				setTimeout( doProgress , 5 + Math.random() * 1 ) ;
+				setTimeout( doProgress , 5000 + Math.random() * 1000 ) ;
 			}
 		}
 	}
@@ -89,7 +88,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	//term.bold( 'Serious stuff in progress: ' ) ;
 	
 	progressBar = term.progressBar( {
-		width: 60 ,
+		width: 70 ,
 		percent: true ,
 		eta: true ,
 		title: bullshit[ Math.floor( Math.random() * bullshit.length ) ] ,

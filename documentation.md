@@ -798,6 +798,10 @@ progressBar = term.progressBar( {
 doProgress() ;
 ```
 
+Output:
+
+![Screenshot](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)
+
 It creates a progress bar and feeds it with a random progress value, then quit when it reaches 100%.
 
 

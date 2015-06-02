@@ -1,0 +1,1 @@
+clear && byzanz-record -x 0 -y 66 -w 630 -h 18 -d 8 record.gif & sleep 0.3 && ./progress-bar-doc1.js && fg && gnome-open record.gif
