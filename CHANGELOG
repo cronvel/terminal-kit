@@ -1,5 +1,12 @@
 
 
+v0.14.0
+-------
+
+.singleLineMenu(): support for TAB and SHIFT_TAB keys that cycle forward and backward.
+.inputField(): same when in the auto-complete menu (since it uses .singleLineMenu() behind the scene)
+
+
 v0.13.16
 --------
 
