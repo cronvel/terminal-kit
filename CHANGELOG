@@ -1,5 +1,11 @@
 
 
+v0.14.1
+-------
+
+New method: .slowTyping(): it outputs some text with an old-fashioned slow-typing effect. See the doc.
+
+
 v0.14.0
 -------
 

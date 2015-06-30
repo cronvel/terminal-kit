@@ -126,6 +126,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.inputField()](#ref.inputField)
 	* [.singleLineMenu()](#ref.singleLineMenu)
 	* [.progressBar()](#ref.progressBar)
+	* [.slowTyping()](#ref.slowTyping)
 * Events
 	* ['key'](#ref.event.key)
 	* ['terminal'](#ref.event.terminal)
@@ -899,6 +900,39 @@ It produces:
 ![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
 
 It creates a progress bar and start and finish task with a random time, then quit when everything is done.
+
+
+
+<a name="ref.slowTyping"></a>
+### .slowTyping( str , [options] , callback )
+
+* str `string` the text to display
+* options `object` of options, where:
+	* style `function` the style of text, default to `term.green`
+	* flashStyle `function` or `falsy` if a `function` is given, then this is the style of the text for the flash effect,
+		if `falsy` then the flash effect is turn off, default to `term.bold.brightGreen`
+	* delay `number` average delay before printing the next char, default to 150 ms
+	* flashDelay `number` fixed delay before the `flashStyle` of the last printed char is replaced by the regular `style`,
+		default to 100 ms
+* callback `function` that will be called on completion
+
+It outputs some text with an old-fashioned slow-typing effect.
+
+Example:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term.slowTyping(
+	'What a wonderful world!\n' ,
+	{ flashStyle: term.brightWhite } ,
+	function() { process.exit() ; }
+) ;
+```
+
+It produces:
+
+![Slow typing output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/slow-typing-doc1.gif)
 
 
 
