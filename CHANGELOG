@@ -1,5 +1,12 @@
 
 
+v0.14.2
+-------
+
+.inputField() autoComplete function: if an array is returned and it contains a custom property 'prependText', the autoCompleteMenu
+will display items normaly, but it will return the chosen entry prepended with that text.
+
+
 v0.14.1
 -------
 
