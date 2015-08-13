@@ -1,5 +1,11 @@
 
 
+v0.14.3
+-------
+
+On the previous version, 'prependText' becomes 'prefix' (this feature is still not documented, thus not in the SemVer contract).
+
+
 v0.14.2
 -------
 
