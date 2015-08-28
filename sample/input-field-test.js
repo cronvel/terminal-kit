@@ -31,7 +31,10 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
-	var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
+	var history = [
+		"OMG my name was supa long, so much long I can't remember what it is, can you believe that?" ,
+		'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob'
+	] ;
 	
 	var autoComplete = [
 		'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
@@ -41,7 +44,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	function question()
 	{
-		term( 'Please enter your name: ' ) ;
+		term.green( 'Please enter your name: ' ) ;
 		
 		term.inputField( {
 				history : history ,

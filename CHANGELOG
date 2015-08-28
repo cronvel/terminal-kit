@@ -1,5 +1,11 @@
 
 
+v0.14.4
+-------
+
+.inputField(): fixed some issues with BACKSPACE when at the first column, and history UP and DOWN at the bottom line
+
+
 v0.14.3
 -------
 
