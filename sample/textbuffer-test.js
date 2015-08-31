@@ -32,46 +32,14 @@
 termkit = require( '../lib/termkit.js' ) ;
 term = termkit.terminal ;
 
-var moved = 0 ;
 
-//*
-function moveRedraw()
-{
-	//buffer.drawChars() ;
-	buffer.draw() ;
-	buffer.x ++ ;
-	
-	buffer2.draw() ;
-	buffer2.x -- ;
-	
-	buffer3.x = Math.floor( Math.random() * 8 ) ;
-	buffer3.draw() ;
-	
-	if ( moved ++ < 20 ) { setTimeout( moveRedraw , 150 ) ; }
-	else
-	{
-		term.hideCursor( true ) ;
-		term.fullscreen( false ) ;
-	}
-}
-//*/
+var tbuf = termkit.TextBuffer.create() ;
 
-var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 } ) ; //.clear() ;
-buffer.put( { x: 3 , y: 2 , attr: { color: 'red' , bgColor: 'brightBlack' , underline: true } } , 'toto' ) ;
-buffer.put( { x: 4 , y: 5 , attr: { color: 'brightYellow' , bold: true } } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
 
-var buffer2 = termkit.ScreenBuffer.create( { dst: term , width: 3 , height: 1 , x: 70 , y: 3 } ) ; //.clear() ;
-buffer2.put( { x: 0 , y: 0 , attr: { color: 'yellow' } } , '<--' ) ;
-
-var buffer3 = termkit.ScreenBuffer.create( { dst: buffer , width: 3 , height: 3 , x: 2 , y: 6 } ) ; //.clear() ;
-buffer3.put( { x: 1 , y: 1 , attr: { color: 'brightMagenta' } } , '*' ) ;
-
-//buffer3.draw() ;
-//buffer.dump() ; return ;
-
-term.fullscreen() ;
-term.hideCursor() ;
-moveRedraw() ;
+tbuf.insert( "bobby bob! " ) ;
+tbuf.insert( "bobby bob! " ) ;
+tbuf.insert( "\n\nbobby\nbob! " ) ;
+console.log( tbuf.textBuffer ) ;
 
 
 
