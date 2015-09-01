@@ -7,8 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "async-kit": "^0.5.9",
-    "string-kit": "^0.1.12",
+    "async-kit": "^0.5.10",
+    "string-kit": "^0.1.13",
     "tree-kit": "^0.5.5"
   },
   "devDependencies": {
