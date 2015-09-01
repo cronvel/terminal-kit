@@ -50,7 +50,7 @@ function terminate()
 
 
 term.fullscreen() ;
-term.moveTo( 1 , 1 ).bgWhite.blue( 'TextBuffer test   ' ).bgWhite.green( 'CTRL-C to quit' ) ;
+term.moveTo( 1 , 1 ).bgWhite.blue( 'Welcome to Neon!   ' ).bgWhite.green( 'CTRL-C to quit' ) ;
 term.grabInput() ;
 
 
