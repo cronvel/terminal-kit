@@ -55,6 +55,18 @@ term.grabInput() ;
 
 
 
+var attrs = [
+	termkit.ScreenBuffer.DEFAULT_ATTR ,
+	{ color: 'red', bgColor: 0 } ,
+	{ color: 'green', bgColor: 0 } ,
+	{ color: 'blue', bgColor: 0 } ,
+	{ color: 'red', bgColor: 0 , bold: true , italic: true } ,
+] ;
+
+var attrsIndex = 0 ;
+
+
+
 term.on( 'key' , function( key , matches , data ) {
 	
 	var draw , drawCursor ;
@@ -63,13 +75,16 @@ term.on( 'key' , function( key , matches , data ) {
 	
 	if ( data.isCharacter )
 	{
-		tbuf.insert( key ) ;
+		tbuf.insert( key , attrs[ attrsIndex ] ) ;
 		draw = drawCursor = true ;
 	}
 	else
 	{
 		switch ( key )
 		{
+			case 'CTRL_S' :
+				attrsIndex = ( attrsIndex + 1 ) % attrs.length ;
+				break ;
 			case 'UP' :
 				tbuf.move( 0 , -1 ) ;
 				drawCursor = true ;

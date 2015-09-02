@@ -1,5 +1,11 @@
 
 
+v0.14.6
+-------
+
+ScreenBuffer: delta optimization introduced in v0.14.5 is now disabled - not stable enough.
+
+
 v0.14.5
 -------
 
