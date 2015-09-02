@@ -10,3 +10,4 @@ mrxvt support: draw-test does not work @bug
 (B) TextBuffer class suitable for text editor @code
 (B) .inputField() has a bug with full-width chars @bug
 (B) ScreenBuffer char_size should be 2 bytes, punycode.ucs2.decode() is useless since bigger chars uses two cells @code
+(A) ScreenBuffer generateOptimizedEscapeSequence() does not works well with style @code

@@ -57,20 +57,30 @@ term.grabInput() ;
 
 var attrs = [
 	termkit.ScreenBuffer.DEFAULT_ATTR ,
-	{ color: 'red', bgColor: 0 } ,
-	{ color: 'green', bgColor: 0 } ,
-	{ color: 'blue', bgColor: 0 } ,
-	{ color: 'red', bgColor: 0 , bold: true , italic: true } ,
+	{ color: 'red', bgColor: 'black' } ,
+	{ color: 'green', bgColor: 'black' } ,
+	{ color: 'blue', bgColor: 'black' } ,
+	{ color: 'red', bgColor: 'black' , bold: true , italic: true } ,
+	{ color: 'red', bgColor: 'yellow' } ,
 ] ;
 
 var attrsIndex = 0 ;
+
+var emptyAttrs = [
+	{ bgColor: 'yellow' } ,
+	{ bgColor: 'brightYellow' } ,
+	{ bgColor: 'red' } ,
+	{ bgColor: 'blue' } ,
+	termkit.ScreenBuffer.DEFAULT_ATTR ,
+] ;
+
+var emptyAttrsIndex = 0 ;
 
 
 
 term.on( 'key' , function( key , matches , data ) {
 	
 	var draw , drawCursor ;
-	
 	
 	
 	if ( data.isCharacter )
@@ -85,6 +95,10 @@ term.on( 'key' , function( key , matches , data ) {
 			case 'CTRL_S' :
 				attrsIndex = ( attrsIndex + 1 ) % attrs.length ;
 				break ;
+			case 'CTRL_B' :
+				emptyAttrsIndex = ( emptyAttrsIndex + 1 ) % emptyAttrs.length ;
+				tbuf.setEmptyCellAttr( emptyAttrs[ emptyAttrsIndex ] ) ;
+				break ;
 			case 'UP' :
 				tbuf.move( 0 , -1 ) ;
 				drawCursor = true ;
@@ -94,15 +108,33 @@ term.on( 'key' , function( key , matches , data ) {
 				drawCursor = true ;
 				break ;
 			case 'LEFT' :
-				tbuf.move( -1 , 0 ) ;
+				//tbuf.move( -1 , 0 ) ;
+				tbuf.moveBackward() ;
 				drawCursor = true ;
 				break ;
 			case 'RIGHT' :
-				tbuf.move( 1 , 0 ) ;
+				//tbuf.move( 1 , 0 ) ;
+				tbuf.moveForward() ;
+				drawCursor = true ;
+				break ;
+			case 'END' :
+				tbuf.moveToEndOfLine() ;
+				drawCursor = true ;
+				break ;
+			case 'HOME' :
+				tbuf.moveToColumn( 0 ) ;
 				drawCursor = true ;
 				break ;
 			case 'ENTER' :
 				tbuf.newLine() ;
+				draw = drawCursor = true ;
+				break ;
+			case 'DELETE' :
+				tbuf.delete( 1 ) ;
+				draw = drawCursor = true ;
+				break ;
+			case 'BACKSPACE' :
+				tbuf.backDelete( 1 ) ;
 				draw = drawCursor = true ;
 				break ;
 			case 'CTRL_C' :
@@ -130,7 +162,9 @@ term.on( 'key' , function( key , matches , data ) {
 
 
 var sbuf = termkit.ScreenBuffer.create( { dst: term , width: 20 , height: 8 , x: 2 , y: 2 } ) ;
+
 var tbuf = termkit.TextBuffer.create( { dst: sbuf } ) ;
+tbuf.setEmptyCellAttr( emptyAttrs[ emptyAttrsIndex ] ) ;
 
 tbuf.draw() ;
 sbuf.draw() ;
