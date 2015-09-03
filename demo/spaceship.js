@@ -218,7 +218,7 @@ function draw()
 {
 	sprites.background.draw( { dst: viewport , tile: true } ) ;
 	sprites.spaceship.draw( { dst: viewport , blending: true , wrap: 'both' } ) ;
-	var stats = viewport.draw( { diffOnly: true } ) ;
+	var stats = viewport.draw( { delta: true } ) ;
 	
 	term.moveTo.eraseLine.bgWhite.green( 1 , 1 ,
 		'Arrow keys: move the ship - CTRL-C: Quit - Redraw stats: %d cells, %d moves, %d attrs, %d writes\n' ,

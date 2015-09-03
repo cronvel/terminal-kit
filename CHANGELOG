@@ -1,5 +1,12 @@
 
 
+v0.15.0
+-------
+
+ScreenBuffer: backward incompatible change: "draw( { diffOnly: true } )" is now "draw( { delta: true } )".
+TextBuffer: work in progress!
+
+
 v0.14.8 - v0.14.10
 ------------------
 
