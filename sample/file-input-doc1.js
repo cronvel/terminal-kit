@@ -6,8 +6,8 @@ var term = termkit.terminal ;
 term( 'Choose a file: ' ) ;
 
 term.fileInput(
-	{ baseDir: __dirname + '/../' } ,
-	//{ baseDir: '../' } ,
+	//{ baseDir: __dirname + '/../' } ,
+	{ baseDir: '../' } ,
 	function( error , input ) {
 		if ( error )
 		{
