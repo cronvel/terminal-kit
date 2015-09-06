@@ -1,5 +1,12 @@
 
 
+v0.15.2
+-------
+
+New method: fileInput(): it is build on an inputField() that auto-complete and display an auto-complete menu
+with all files available in the current directory.
+
+
 v0.15.1
 -------
 
