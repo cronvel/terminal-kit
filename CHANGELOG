@@ -1,5 +1,11 @@
 
 
+v0.15.6
+-------
+
+fileInput() and inputField() improvement and options: 'style', 'default', 'cancelable'.
+
+
 v0.15.4 - v0.15.5
 -----------------
 
