@@ -1,5 +1,11 @@
 
 
+v0.15.8
+-------
+
+ScreenBuffer: redraw delta bugfix
+
+
 v0.15.7
 -------
 
