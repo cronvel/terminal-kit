@@ -1,15 +1,21 @@
 
 
+v0.15.10
+--------
+
+TextBuffer: miscBuffer for application data.
+
+
 v0.15.9
 -------
 
-ScreenBuffer/TextBuffer: Rect constructor improvement
+ScreenBuffer/TextBuffer: Rect constructor improvement.
 
 
 v0.15.8
 -------
 
-ScreenBuffer: redraw delta bugfix
+ScreenBuffer: redraw delta bugfix.
 
 
 v0.15.7
@@ -33,7 +39,7 @@ TextBuffer: work in progress! (minor bugfixes)
 v0.15.3
 -------
 
-fileInput(): fixed few minor bugs
+fileInput(): fixed few minor bugs.
 
 
 v0.15.2
