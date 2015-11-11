@@ -1,5 +1,11 @@
 
 
+v0.15.11
+--------
+
+Dependencies: string-kit 0.2.x, async-kit 0.6.x.
+
+
 v0.15.10
 --------
 
