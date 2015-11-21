@@ -31,12 +31,16 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
+	term.grabInput() ;
+	
 	function question()
 	{
+		var controler ;
+		
 		term( 'Do you like javascript? [y|n] ' ) ;
 		
 		//term.yesOrNo( { yes: [ 'y' , 'o' , 'ENTER' ] , no: [ 'n' ] , echoYes: 'yes' , echoNo: 'no' } , function( error , result ) {
-		term.yesOrNo( function( error , result ) {
+		controler = term.yesOrNo( function( error , result ) {
 			
 			if ( error )
 			{
@@ -52,6 +56,15 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			{
 				term.red( "\n'No' detected, are you sure?\n" ) ;
 				question() ;
+			}
+		} ) ;
+		
+		term.on( 'key' , function( key ) {
+			if ( key === 'ESCAPE' )
+			{
+				term( 'Escape.\n' ) ;
+				controler.abort() ;
+				setTimeout( terminate , 2000 ) ;
 			}
 		} ) ;
 	}

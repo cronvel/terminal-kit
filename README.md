@@ -504,6 +504,12 @@ Turn input grabbing on if necessary.
 
 We can specify the keys for *yes* and *no* by providing a string or an array of string.
 
+It returns an object featuring some functions to control things during the input process:
+
+* abort(): abort the input process and do not even call the inputField()'s callback
+
+
+
 Quick example:
 
 ```js
