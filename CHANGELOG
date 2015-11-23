@@ -1,9 +1,8 @@
 
 v0.15.12
-========
+--------
 
 .yesOrNo(): now it returns a controler featuring the abort() method (see the doc)
-
 
 
 v0.15.11
