@@ -33,7 +33,6 @@ var termkit = require( '../lib/termkit.js' ) ;
 var gpm = require( '../lib/gpm.js' ) ;
 
 
-
 var handler = gpm.createHandler( { stdin: process.stdin , raw: false , mode: 'motion' /* 'drag' or 'button' */ } ) ;
 
 handler.on( 'mouse' , function( name , data ) {
