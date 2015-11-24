@@ -2,25 +2,25 @@
 v0.16.2
 -------
 
-Fixing the new .format() style so it works properly
+Fixing the new format feature so it works properly.
 
 
 v0.16.1
 -------
 
-linux gpm patch for node v4
+Linux gpm patch for node v4.
 
 
 v0.16.0
 -------
 
-using new string-kit's format feature
+Using new string-kit's format feature.
 
 
 v0.15.12
 --------
 
-.yesOrNo(): now it returns a controler featuring the abort() method (see the doc)
+.yesOrNo(): now it returns a controler featuring the abort() method (see the doc).
 
 
 v0.15.11
