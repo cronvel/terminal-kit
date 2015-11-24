@@ -1,4 +1,10 @@
 
+v0.16.2
+-------
+
+Fixing the new .format() style so it works properly
+
+
 v0.16.1
 -------
 
