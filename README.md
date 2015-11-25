@@ -31,8 +31,9 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 * colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
-* string formating
 * style mixing
+* string formating
+* short style markup
 * cursor positionning
 * keyboard input
 * mouse support (GPM is supported for the Linux Console)
@@ -61,11 +62,16 @@ term.red( 'red' ) ;
 term.bold( 'bold' ) ;
 
 // output 'mixed' using bold, underlined & red, exposing the style-mixing syntax
-term.bold.underline.red( 'mixed' ) ; 
+term.bold.underline.red( 'mixed' ) ;
 
 // printf() style formating everywhere:
 // this will output 'My name is Jack, I'm 32.' in green
 term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
+
+// Since v0.16.x, style markup are supported as a shorthand.
+// Those two lines produce the same result.
+term( "My name is " ).red( "Jack" )( " and I'm " ).green( "32\n" ) ;
+term( "My name is ^rJack^ and I'm ^g32\n" ) ;
 
 // Width and height of the terminal
 term( 'The terminal size is %dx%d' , term.width , term.height ) ;
@@ -154,14 +160,32 @@ Some function cannot be turned off, they just perform an action.
 For example `term.reset()` reset the terminal, usually to its default.
 This is not reversible, thus `term.reset( false )` does nothing.
 
-If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the feature is turn *off*.
+If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the
+feature is turn *off*.
 That's it:  
 `term.red( 'Hello world!' )`  
 ... is the same as:  
 `term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
 
 Also those string support a printf()-like formating syntax.  
-So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."*.
+So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."* in red.
+
+**New:** since *v0.16.x*, style markup are supported as a shorthand. Style markup are introduced by a caret `^` followed by another
+character.
+Colors are produced by the first letter of its name, e.g. red is produced with a `^r`, except black which is produced by `^k`.
+Other style are produced with a symbole. For example `^_` switch to underline.
+To remove all styles, `^:` or `^ ` can be used.
+A style reset is always produced at the end of the string as soon as one style markup was used.
+
+Those two lines produce the same result:
+```js
+term( "My name is " ).red( "Jack" )( " and I'm " ).green( "32\n" ) ;
+term( "My name is ^rJack^ and I'm ^g32\n" ) ;
+```
+
+See [the full style markup reference](https://github.com/cronvel/string-kit#ref.format.markup) for details.
+
+
 
 All those functions are chainable, and their arguments can be combined.
 We can do:  
