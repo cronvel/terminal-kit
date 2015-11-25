@@ -1,4 +1,10 @@
 
+v0.16.4
+-------
+
+Upgrade the string-kit dependency (important bugfix on the style markup feature)
+
+
 v0.16.3
 -------
 

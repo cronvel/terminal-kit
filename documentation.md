@@ -173,7 +173,7 @@ So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My
 **New:** since *v0.16.x*, style markup are supported as a shorthand. Style markup are introduced by a caret `^` followed by another
 character.
 Colors are produced by the first letter of its name, e.g. red is produced with a `^r`, except black which is produced by `^k`.
-Other style are produced with a symbole. For example `^_` switch to underline.
+Other styles are produced with a symbole. For example `^_` switch to underline.
 To remove all styles, `^:` or `^ ` can be used.
 A style reset is always produced at the end of the string as soon as one style markup was used.
 
