@@ -1,4 +1,10 @@
 
+v0.16.5
+-------
+
+New: termkit.spChars now contains some useful utf-8 characters
+
+
 v0.16.4
 -------
 
