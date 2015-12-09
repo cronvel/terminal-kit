@@ -57,7 +57,10 @@ var layout = term.createLayout( def , options ) ;
 
 layout.draw() ;
 
-term.moveTo( 1 , term.height ) ;
+layout.setAutoResize() ;
+setTimeout( function() {} , 10000 ) ;
+
+//term.moveTo( 1 , term.height ) ;
 
 
 
