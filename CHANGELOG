@@ -1,14 +1,20 @@
 
+v0.16.11
+--------
+
+Basic 'responsive' layout drawing is now working.
+
+
 v0.16.10
 --------
 
-Layout: work in progress
+Layout: work in progress.
 
 
 v0.16.9
 -------
 
-New feature: layout. Still in alpha
+New feature: .createLayout() -- still in alpha.
 
 
 v0.16.8
