@@ -53,6 +53,7 @@ var def = {
 //*
 var def = {
 	id: 'main' ,
+	y: 3 ,
 	widthPercent: 60 ,
 	heightPercent: 60 ,
 	rows: [
@@ -79,6 +80,9 @@ var def = {
 var options = {
 	boxChars: 'double'
 } ;
+
+term.clear() ;
+term.moveTo.brightMagenta.bold.italic( 1 , 1 , "Responsive terminal layout! Try resizing your terminal! ;)" ) ;
 
 //var layout = term.Layout.create( def , options ) ;
 var layout = term.createLayout( def , options ) ;

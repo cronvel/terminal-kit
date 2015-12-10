@@ -1,4 +1,10 @@
 
+v0.16.14
+--------
+
+.createLayout(): it is now possible to pass the x,y coordinate of the top-left corner of the layout
+
+
 v0.16.13
 --------
 
