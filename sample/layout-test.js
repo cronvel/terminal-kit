@@ -32,10 +32,10 @@
 console.error( "\n\n\n\n\n\n\n\n" ) ;
 term = require( '../lib/termkit.js' ).terminal ;
 
-
+//*
 var def = {
-	widthPercent: 50 ,
-	heightPercent: 50 ,
+	widthPercent: 60 ,
+	heightPercent: 60 ,
 	rows: [
 		{
 			heightPercent: 75 ,
@@ -48,6 +48,25 @@ var def = {
 		{}
 	]
 } ;
+//*/
+
+/*
+var def = {
+	widthPercent: 60 ,
+	heightPercent: 60 ,
+	rows: [
+		{
+			heightPercent: 75 ,
+			columns: [
+				{ widthPercent: 100/3 } ,
+				{} ,
+				{ width: 30 }
+			]
+		} ,
+		{}
+	]
+} ;
+//*/
 
 var options = {
 	box: 'double'
@@ -55,12 +74,26 @@ var options = {
 
 var layout = term.createLayout( def , options ) ;
 
+term.grabInput() ;
+term.hideCursor() ;
 layout.draw() ;
-
 layout.setAutoResize() ;
-setTimeout( function() {} , 10000 ) ;
+
+
+
+term.on( 'key' , function( key ) {
+	if ( key === 'CTRL_C' ) {
+		term.grabInput( false ) ;
+		term.hideCursor( false ) ;
+		term.clear() ;
+		process.exit() ;
+	}
+} ) ;
+
 
 //term.moveTo( 1 , term.height ) ;
+
+
 
 
 

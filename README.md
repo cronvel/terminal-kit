@@ -134,6 +134,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.progressBar()](#ref.progressBar)
 	* [.slowTyping()](#ref.slowTyping)
 * Events
+	* ['resize'](#ref.event.resize)
 	* ['key'](#ref.event.key)
 	* ['terminal'](#ref.event.terminal)
 	* ['mouse'](#ref.event.mouse)
@@ -972,6 +973,18 @@ Event are fired on your `term` object.
 
 
 
+<a name="ref.event.resize"></a>
+### 'resize' event ( data )
+
+* data `Object` the new size where:
+	* width `number` the new width in character
+	* height `number` the new height in character
+
+The 'resize' event is emited when the terminal get resized, and it contains the new width and height.
+Also `term.width` and `term.height` are updated too.
+
+
+
 <a name="ref.event.key"></a>
 ### 'key' event ( name , matches , data )
 
@@ -1049,11 +1062,12 @@ The argument 'name' can be:
 
 * CURSOR_LOCATION: it is emited in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
 
-* SCREEN_RESIZE: it is emited when a terminal resizing is detected, most of time node.js will be notified of screen resizing,
-  and so this event will be emited, data contains 'width' & 'height', the size of the screen in characters
+* SCREEN_RESIZE: **DEPRECATED! Will be removed in the next non-patch version! Use the 'resize' event instead!**
+  Currently it is emited when a terminal resizing is detected, most of time node.js will be notified of
+  screen resizing, and so this event will be emited, data contains 'width' & 'height', the size of the screen in characters
 
-* SCREEN_SIZE: **rarely useful** it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of the screen in characters,
-  and 'resized' (true/false) if the size has changed without node.js being notified
+* SCREEN_SIZE: **rarely useful** it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of
+  the screen in characters, and 'resized' (true/false) if the size has changed without node.js being notified
 
 * FOCUS_IN: it is emited if the terminal gains focus (if supported by your terminal)
 
