@@ -86,16 +86,22 @@ var layout = term.createLayout( def , options ) ;
 term.grabInput() ;
 term.hideCursor() ;
 layout.draw() ;
-layout.setAutoResize() ;
+layout.setAutoResize( true ) ;
 
 layout.boxes.percent.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
 layout.boxes.percent.draw() ;
 
-layout.boxes.auto.put( { x: 0 , y: 0 , attr: { color: 'green' } } , 'Auto sized box' ) ;
+layout.boxes.auto.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
 layout.boxes.auto.draw() ;
 
-layout.boxes.fixed.put( { x: 0 , y: 0 , attr: { color: 'cyan' } } , 'Fixed sized box' ) ;
+layout.boxes.auto2.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
+layout.boxes.auto2.draw() ;
+
+layout.boxes.fixed.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
 layout.boxes.fixed.draw() ;
+
+layout.boxes.fixed2.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
+layout.boxes.fixed2.draw() ;
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {

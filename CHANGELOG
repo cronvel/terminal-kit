@@ -1,4 +1,10 @@
 
+v0.16.13
+--------
+
+.createLayout(): now creates accessible and resizable ScreenBuffer surfaces on layout's leaf
+
+
 v0.16.12
 --------
 
