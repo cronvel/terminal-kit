@@ -14,3 +14,4 @@ mrxvt support: draw-test does not work @bug
 (A) document inputField autoComplete returning an array with a prefix key @doc
 (A) document fileInput @doc
 (A) document inputField() options 'minLength', 'default', 'style' and 'cancelable' @doc
+(A) document createLayout @doc

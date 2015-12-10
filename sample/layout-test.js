@@ -32,24 +32,6 @@
 console.error( "\n\n\n\n\n\n\n\n" ) ;
 term = require( '../lib/termkit.js' ).terminal ;
 
-//*
-var def = {
-	widthPercent: 60 ,
-	heightPercent: 60 ,
-	rows: [
-		{
-			heightPercent: 75 ,
-			columns: [
-				{ widthPercent: 100/3 } ,
-				{ width: 30 } ,
-				{}
-			]
-		} ,
-		{}
-	]
-} ;
-//*/
-
 /*
 var def = {
 	widthPercent: 60 ,
@@ -59,11 +41,37 @@ var def = {
 			heightPercent: 75 ,
 			columns: [
 				{ widthPercent: 100/3 } ,
+				{ width: 30 } ,
 				{} ,
-				{ width: 30 }
 			]
 		} ,
 		{}
+	]
+} ;
+//*/
+
+//*
+var def = {
+	id: 'main' ,
+	widthPercent: 60 ,
+	heightPercent: 60 ,
+	rows: [
+		{
+			id: '1st row' ,
+			heightPercent: 75 ,
+			columns: [
+				{ id: 'percent' , widthPercent: 100/3 } ,
+				{ id: 'auto' } ,
+				{ id: 'fixed' , width: 30 } ,
+			]
+		} ,
+		{
+			id: '2nd row' ,
+			columns: [
+				{ id: 'fixed2' , width: 20 } ,
+				{ id: 'auto2' } ,
+			]
+		}
 	]
 } ;
 //*/
