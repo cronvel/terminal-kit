@@ -1,4 +1,10 @@
 
+v0.16.12
+--------
+
+Bugfix .createLayout(): now it creates cross-junction like it should when two tee-junction overlap
+
+
 v0.16.11
 --------
 
