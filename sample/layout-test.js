@@ -77,9 +77,10 @@ var def = {
 //*/
 
 var options = {
-	box: 'double'
+	boxChars: 'double'
 } ;
 
+//var layout = term.Layout.create( def , options ) ;
 var layout = term.createLayout( def , options ) ;
 
 term.grabInput() ;
@@ -87,7 +88,14 @@ term.hideCursor() ;
 layout.draw() ;
 layout.setAutoResize() ;
 
+layout.boxes.percent.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
+layout.boxes.percent.draw() ;
 
+layout.boxes.auto.put( { x: 0 , y: 0 , attr: { color: 'green' } } , 'Auto sized box' ) ;
+layout.boxes.auto.draw() ;
+
+layout.boxes.fixed.put( { x: 0 , y: 0 , attr: { color: 'cyan' } } , 'Fixed sized box' ) ;
+layout.boxes.fixed.draw() ;
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
