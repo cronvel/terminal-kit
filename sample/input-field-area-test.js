@@ -54,7 +54,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 					width: 20 ,
 					height: 2 ,
 					textAttr: { color: 'brightYellow' , bgColor: 'blue' } ,
-					emptyCellAttr: { bgColor: 'blue' } ,
+					emptyAttr: { bgColor: 'blue' } ,
 				} ,
 				/*
 				history : history ,
