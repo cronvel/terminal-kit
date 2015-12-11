@@ -52,13 +52,12 @@ var def = {
 	]
 } ;
 
-var options = {
-} ;
-
 term.clear() ;
 
-var form = term.createForm( def , options ) ;
-form.run() ;
+var form = term.createForm( def , function( error , result ) {
+	term( '\n\nResult: %I' , result ) ;
+} ) ;
+//form.run() ;
 
 //term.grabInput() ;
 //form.draw() ;
