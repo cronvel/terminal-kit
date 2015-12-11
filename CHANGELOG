@@ -1,4 +1,10 @@
 
+v0.17.0
+-------
+
+New: .inputField() now has an 'area' mode (standard mode is now known as 'inline' mode) that use ScreenBuffer and TextBuffer for its rendering, allowing confined text-area-like inputs. This is still a work in progress and many features of the 'inline' mode are missing. This will allow creation of terminal forms.
+
+
 v0.16.14
 --------
 

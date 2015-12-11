@@ -44,14 +44,17 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	function question()
 	{
-		term.green( 'Please enter your name: ' ) ;
+		term.clear() ;
+		term.moveTo.green( 1 , 10 , 'Name: ' ) ;
 		
 		term.inputField( {
 				area: {
-					x: 10 ,
+					x: 7 ,
 					y: 10 ,
 					width: 20 ,
-					height: 2
+					height: 2 ,
+					textAttr: { color: 'brightYellow' , bgColor: 'blue' } ,
+					emptyCellAttr: { bgColor: 'blue' } ,
 				} ,
 				/*
 				history : history ,
@@ -68,7 +71,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			}
 			else
 			{
-				term.green( "\nYour name is '%s'\n" , input ) ;
+				term.green( "\n\nYour name is '%s'\n" , input ) ;
 				terminate() ;
 			}
 		} ) ;

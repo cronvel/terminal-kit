@@ -28,3 +28,4 @@ x 2015-05-15 use async.wrapper.timeout() on all get*() functions that use reques
 x 2015-06-01 finish progressBar @code
 x 2015-06-02 document .progressBar() .stop() and .resume() @doc
 x 2015-06-02 document .processExit() @doc
+x 2015-12-11 TextBuffer class suitable for text editor @code
