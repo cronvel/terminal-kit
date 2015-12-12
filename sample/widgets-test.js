@@ -37,14 +37,14 @@ term = termkit.terminal ;
 
 term.clear() ;
 
-var rootWidget = termkit.Widget.create( {
+var document = termkit.Document.create( {
 	parent: term
 } ) ;
 
-rootWidget.enable( true ) ;
+document.enable( true ) ;
 
 var widget1 = termkit.Text.create( {
-	parent: rootWidget ,
+	parent: document ,
 	label: 'bob' ,
 	x: 10 ,
 	y: 10 ,
@@ -53,7 +53,7 @@ var widget1 = termkit.Text.create( {
 widget1.enable( true ) ;
 
 var widget2 = termkit.Text.create( {
-	parent: rootWidget ,
+	parent: document ,
 	label: 'bill' ,
 	x: 13 ,
 	y: 12 ,
@@ -62,7 +62,7 @@ var widget2 = termkit.Text.create( {
 widget2.enable( true ) ;
 
 var widget3 = termkit.Button.create( {
-	parent: rootWidget ,
+	parent: document ,
 	label: 'jack' ,
 	x: 9 ,
 	y: 14 ,
