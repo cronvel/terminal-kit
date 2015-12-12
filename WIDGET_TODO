@@ -1,6 +1,6 @@
 
 OK	Terminal.js file and object separated from termkit.js
-	Terminal#object2attr
+OK	Terminal#object2attr
 OK	Move ScreenBuffer#color2index to termkit.color2index (through misc.js)
 	Terminal#put() that mimic ScreenBuffer#put()
 	Create a Widget object, that is recursive: it can have Widget children that can cycle focus using TAB and SHIFT_TAB

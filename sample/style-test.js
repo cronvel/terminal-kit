@@ -111,6 +111,16 @@ terminal.getDetectedTerminal( function( error , term ) {
 
 
 
+	// Test object2attr
+	
+	var attr ;
+	attr = term.object2attr( { color: 'blue' , bgColor: 'red' , underline: true , italic: true } ) ;
+	term( attr ) ;
+	term( '\nAttr test' ) ;
+	attr = term.object2attr( { color: 'blue' } ) ;
+	term( attr ) ;
+	term( '\nAttr test2' ) ;
+
 	// Reset before exiting...
 
 	term( '\n' ) ;
