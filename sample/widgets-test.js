@@ -1,10 +1,11 @@
+#!/usr/bin/env node
 /*
-	The Cedric's Swiss Knife (CSK) - CSK terminal toolbox
+	The Cedric's Swiss Knife (CSK) - CSK terminal toolbox test suite
 	
 	Copyright (c) 2009 - 2015 Cédric Ronvel 
 	
 	The MIT License (MIT)
-
+	
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
 	in the Software without restriction, including without limitation the rights
@@ -24,43 +25,75 @@
 	SOFTWARE.
 */
 
-
-
-var misc = {} ;
-module.exports = misc ;
+/* jshint unused:false */
 
 
 
-// Color name to index
-misc.color2index = function color2index( color )
-{
-	switch ( color.toLowerCase() )
+//console.error( "\n\n\n\n\n\n\n\n" ) ;
+termkit = require( '../lib/termkit.js' ) ;
+term = termkit.terminal ;
+
+
+
+term.clear() ;
+
+var rootWidget = termkit.Widget.create( {
+	parent: term
+} ) ;
+
+rootWidget.enable( true ) ;
+
+var widget1 = termkit.Text.create( {
+	parent: rootWidget ,
+	label: 'bob' ,
+	x: 10 ,
+	y: 10 ,
+} ) ;
+
+widget1.enable( true ) ;
+
+var widget2 = termkit.Text.create( {
+	parent: rootWidget ,
+	label: 'bill' ,
+	x: 13 ,
+	y: 12 ,
+} ) ;
+
+widget2.enable( true ) ;
+
+var widget3 = termkit.Button.create( {
+	parent: rootWidget ,
+	label: 'jack' ,
+	x: 9 ,
+	y: 14 ,
+} ) ;
+
+widget3.enable( true ) ;
+widget3.on( 'press' , function() {
+	term.moveTo( 1 , 16 , "Button pressed!" ) ;
+} ) ;
+
+
+widget1.focus( true ) ;
+
+
+term.grabInput() ;
+//form.draw() ;
+
+term.on( 'key' , function( key ) {
+	switch( key )
 	{
-		case 'black' : return 0 ;
-		case 'red' : return 1 ;
-		case 'green' : return 2 ;
-		case 'yellow' : return 3 ;
-		case 'blue' : return 4 ;
-		case 'magenta' : return 5 ;
-		case 'cyan' : return 6 ;
-		case 'white' : return 7 ;
-		case 'brightblack' : return 8 ;
-		case 'brightred' : return 9 ;
-		case 'brightgreen' : return 10 ;
-		case 'brightyellow' : return 11 ;
-		case 'brightblue' : return 12 ;
-		case 'brightmagenta' : return 13 ;
-		case 'brightcyan' : return 14 ;
-		case 'brightwhite' : return 15 ;
-		default : return undefined ;
+		case 'CTRL_C' :
+			term.grabInput( false ) ;
+			term.hideCursor( false ) ;
+			term.clear() ;
+			process.exit() ;
+			break ;
 	}
-} ;
+} ) ;
 
 
+//term.moveTo( 1 , term.height ) ;
 
-// Strip all control chars, if newline is true, only newline control chars are preserved
-misc.stripControlChars = function stripControlChars( str , newline ) {
-	if ( newline ) { return str.replace( /[\x00-\x09\x0b-\x1f\x7f]/g , '' ) ; }
-	else { return str.replace( /[\x00-\x1f\x7f]/g , '' ) ; }
-} ;
+
 
