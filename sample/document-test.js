@@ -37,35 +37,59 @@ term = termkit.terminal ;
 
 term.clear() ;
 
-var document = termkit.Document.create( {
-	parent: term
-} ) ;
+var document = term.createDocument() ;
 
 var button1 = termkit.Button.create( {
 	parent: document ,
-	label: '> bob' ,
+	content: '> bob' ,
+	value: 'bob' ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
 
 var button2 = termkit.Button.create( {
 	parent: document ,
-	label: '> bill' ,
+	content: '> bill' ,
+	value: 'bill' ,
 	x: 13 ,
 	y: 12 ,
 } ) ;
 
 var button3 = termkit.Button.create( {
 	parent: document ,
-	label: '> jack' ,
+	content: '> jack' ,
+	value: 'jack' ,
 	x: 9 ,
 	y: 14 ,
 } ) ;
 
-button3.on( 'press' , function() {
-	//term.moveTo( 1 , 16 , "Button pressed!" ) ;
-	console.error( 'Button pressed' ) ;
+var textInput1 = termkit.TextInput.create( {
+	parent: document ,
+	x: 5 ,
+	y: 16 ,
+	width: 30 ,
 } ) ;
+
+var textInput2 = termkit.TextInput.create( {
+	parent: document ,
+	x: 15 ,
+	y: 18 ,
+	width: 30 ,
+} ) ;
+
+button1.on( 'submit' , onSubmit ) ;
+button2.on( 'submit' , onSubmit ) ;
+button3.on( 'submit' , onSubmit ) ;
+textInput1.on( 'submit' , onSubmit ) ;
+textInput2.on( 'submit' , onSubmit ) ;
+
+function onSubmit( value )
+{
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
+	term.restoreCursor() ;
+}
 
 
 document.focusNext() ;
@@ -80,6 +104,7 @@ term.on( 'key' , function( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
+			term.styleReset() ;
 			term.clear() ;
 			process.exit() ;
 			break ;
