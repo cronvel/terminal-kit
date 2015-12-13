@@ -41,16 +41,12 @@ var document = termkit.Document.create( {
 	parent: term
 } ) ;
 
-document.enable( true ) ;
-
 var button1 = termkit.Button.create( {
 	parent: document ,
 	label: '> bob' ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
-
-button1.enable( true ) ;
 
 var button2 = termkit.Button.create( {
 	parent: document ,
@@ -59,8 +55,6 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-button2.enable( true ) ;
-
 var button3 = termkit.Button.create( {
 	parent: document ,
 	label: '> jack' ,
@@ -68,14 +62,12 @@ var button3 = termkit.Button.create( {
 	y: 14 ,
 } ) ;
 
-button3.enable( true ) ;
 button3.on( 'press' , function() {
 	//term.moveTo( 1 , 16 , "Button pressed!" ) ;
 	console.error( 'Button pressed' ) ;
 } ) ;
 
 
-//document.giveFocusTo( button1 ) ;
 document.focusNext() ;
 
 
