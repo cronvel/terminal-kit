@@ -43,38 +43,40 @@ var document = termkit.Document.create( {
 
 document.enable( true ) ;
 
-var widget1 = termkit.Text.create( {
+var button1 = termkit.Button.create( {
 	parent: document ,
-	label: 'bob' ,
+	label: '> bob' ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
 
-widget1.enable( true ) ;
+button1.enable( true ) ;
 
-var widget2 = termkit.Text.create( {
+var button2 = termkit.Button.create( {
 	parent: document ,
-	label: 'bill' ,
+	label: '> bill' ,
 	x: 13 ,
 	y: 12 ,
 } ) ;
 
-widget2.enable( true ) ;
+button2.enable( true ) ;
 
-var widget3 = termkit.Button.create( {
+var button3 = termkit.Button.create( {
 	parent: document ,
-	label: 'jack' ,
+	label: '> jack' ,
 	x: 9 ,
 	y: 14 ,
 } ) ;
 
-widget3.enable( true ) ;
-widget3.on( 'press' , function() {
-	term.moveTo( 1 , 16 , "Button pressed!" ) ;
+button3.enable( true ) ;
+button3.on( 'press' , function() {
+	//term.moveTo( 1 , 16 , "Button pressed!" ) ;
+	console.error( 'Button pressed' ) ;
 } ) ;
 
 
-widget1.focus( true ) ;
+//document.giveFocusTo( button1 ) ;
+document.focusNext() ;
 
 
 term.grabInput() ;
