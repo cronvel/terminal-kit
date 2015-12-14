@@ -65,6 +65,7 @@ var button3 = termkit.Button.create( {
 
 var textInput1 = termkit.TextInput.create( {
 	parent: document ,
+	label: 'First name: ' ,
 	x: 5 ,
 	y: 16 ,
 	width: 30 ,
@@ -72,6 +73,7 @@ var textInput1 = termkit.TextInput.create( {
 
 var textInput2 = termkit.TextInput.create( {
 	parent: document ,
+	label: 'Last name: ' ,
 	x: 15 ,
 	y: 18 ,
 	width: 30 ,

@@ -2,7 +2,8 @@
 v0.18.0
 -------
 
-New feature in progress: Document! It mimics the browser somewhat: a document with element, etc... layout, form and area-type inputField will move to this new Document feature (every 'inline' features will be kept separated)
+New feature in progress: Document! It mimics the browser somewhat: a document with element, etc... 
+layout, form and area-type inputField will move to this new Document feature (every 'inline' features will be kept separated).
 
 
 v0.17.0

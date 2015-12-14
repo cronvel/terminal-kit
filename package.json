@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "dependencies": {
     "array-kit": "^0.0.1",
     "async-kit": "^0.6.6",
