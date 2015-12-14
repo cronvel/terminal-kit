@@ -55,14 +55,6 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-var button3 = termkit.Button.create( {
-	parent: document ,
-	content: '> jack' ,
-	value: 'jack' ,
-	x: 9 ,
-	y: 14 ,
-} ) ;
-
 var textInput1 = termkit.TextInput.create( {
 	parent: document ,
 	label: 'First name: ' ,
@@ -78,6 +70,26 @@ var textInput2 = termkit.TextInput.create( {
 	y: 18 ,
 	width: 30 ,
 } ) ;
+
+var container1 = termkit.Container.create( {
+	parent: document ,
+	x: 50 ,
+	y: 8 ,
+	width: 30 ,
+	height: 10 ,
+} ) ;
+
+container1.screenBuffer.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
+
+var button3 = termkit.Button.create( {
+	parent: container1 ,
+	content: '> jack' ,
+	value: 'jack' ,
+	x: 9 ,
+	y: 14 ,
+} ) ;
+
+container1.draw() ;
 
 button1.on( 'submit' , onSubmit ) ;
 button2.on( 'submit' , onSubmit ) ;
