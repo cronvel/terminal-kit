@@ -30,52 +30,79 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-term = require( '../lib/termkit.js' ).terminal ;
+termkit = require( '../lib/termkit.js' ) ;
+term = termkit.terminal ;
 
-var def = {
-	inputs: [
-		{
-			id: 'firstName' ,
-			label: 'first name' ,
-			validator: { type: 'string' }
-		} ,
-		{
-			id: 'lastName' ,
-			label: 'last name' ,
-			validator: { type: 'string' }
-		} ,
-		{
-			id: 'age' ,
-			label: 'age' ,
-			validator: { type: 'string' }
-		}
-	]
-} ;
+
 
 term.clear() ;
 
-var form = term.createForm( def , function( error , result ) {
-	term( '\n\nResult: %I' , result ) ;
-} ) ;
-//form.run() ;
+var document = term.createDocument() ;
 
-//term.grabInput() ;
-//form.draw() ;
+
+var form = termkit.Form.create( {
+	parent: document ,
+	x: 10 ,
+	y: 10 ,
+	width: 40 ,
+	textInputs: [
+		{
+			key: 'firstName' ,
+			label: 'first name: ' ,
+			validator: { type: 'string' }
+		} ,
+		{
+			key: 'lastName' ,
+			label: 'last name: ' ,
+			validator: { type: 'string' }
+		} ,
+		{
+			key: 'age' ,
+			label: 'age: ' ,
+			validator: { type: 'string' }
+		}
+	] ,
+	buttons: [
+		{
+			content: '<Ok>' ,
+			value: 'ok'
+		} ,
+		{
+			content: '<Cancel>' ,
+			value: 'cancel'
+		}
+	]
+} ) ;
+
+
+
+form.on( 'submit' , onSubmit ) ;
+
+function onSubmit( buttonValue , values )
+{
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s %J\n' , buttonValue , values ) ;
+	term.restoreCursor() ;
+}
+
+
+
+document.focusNext() ;
+term.grabInput() ;
 
 term.on( 'key' , function( key ) {
-	if ( key === 'CTRL_C' ) {
-		term.grabInput( false ) ;
-		term.hideCursor( false ) ;
-		term.clear() ;
-		process.exit() ;
+	switch( key )
+	{
+		case 'CTRL_C' :
+			term.grabInput( false ) ;
+			term.hideCursor( false ) ;
+			term.styleReset() ;
+			term.clear() ;
+			process.exit() ;
+			break ;
 	}
 } ) ;
-
-
-//term.moveTo( 1 , term.height ) ;
-
-
-
 
 
 

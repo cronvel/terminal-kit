@@ -94,11 +94,9 @@ function onSubmit( value )
 }
 
 
+
 document.focusNext() ;
-
-
 term.grabInput() ;
-//form.draw() ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
@@ -112,9 +110,6 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
-//term.moveTo( 1 , term.height ) ;
 
 
 
