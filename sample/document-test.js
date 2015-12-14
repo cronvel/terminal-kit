@@ -85,11 +85,11 @@ var button3 = termkit.Button.create( {
 	parent: container1 ,
 	content: '> jack' ,
 	value: 'jack' ,
-	x: 9 ,
-	y: 14 ,
+	x: 2 ,
+	y: 2 ,
 } ) ;
 
-container1.draw() ;
+//container1.draw() ;
 
 button1.on( 'submit' , onSubmit ) ;
 button2.on( 'submit' , onSubmit ) ;

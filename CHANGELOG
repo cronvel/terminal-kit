@@ -1,4 +1,10 @@
 
+v0.19.2
+-------
+
+Document element: now perform recursive draw() and drawCursor() automatically
+
+
 v0.19.1
 -------
 
