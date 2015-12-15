@@ -30,82 +30,81 @@
 
 
 console.error( "\n\n\n\n\n\n\n\n" ) ;
-term = require( '../lib/termkit.js' ).terminal ;
+termkit = require( '../lib/termkit.js' ) ;
+term = termkit.terminal ;
 
-/*
-var def = {
-	widthPercent: 60 ,
-	heightPercent: 60 ,
-	rows: [
-		{
-			heightPercent: 75 ,
-			columns: [
-				{ widthPercent: 100/3 } ,
-				{ width: 30 } ,
-				{} ,
-			]
-		} ,
-		{}
-	]
-} ;
-//*/
 
-//*
-var def = {
-	id: 'main' ,
-	y: 3 ,
-	widthPercent: 60 ,
-	heightPercent: 60 ,
-	rows: [
-		{
-			id: '1st row' ,
-			heightPercent: 75 ,
-			columns: [
-				{ id: 'percent' , widthPercent: 100/3 } ,
-				{ id: 'auto' } ,
-				{ id: 'fixed' , width: 30 } ,
-			]
-		} ,
-		{
-			id: '2nd row' ,
-			columns: [
-				{ id: 'fixed2' , width: 20 } ,
-				{ id: 'auto2' } ,
-			]
-		}
-	]
-} ;
-//*/
 
-var options = {
-	boxChars: 'double'
-} ;
+
+
 
 term.clear() ;
-term.moveTo.brightMagenta.bold.italic( 1 , 1 , "Responsive terminal layout! Try resizing your terminal! ;)" ) ;
+//term.moveTo.brightMagenta.bold.italic( 1 , 1 , "Responsive terminal layout! Try resizing your terminal! ;)" ) ;
 
-//var layout = term.Layout.create( def , options ) ;
-var layout = term.createLayout( def , options ) ;
+var document = term.createDocument() ;
+
+var text = termkit.Text.create( {
+	parent: document ,
+	x: 1 ,
+	y: 1 ,
+	content: "Responsive terminal layout! Try resizing your terminal! ;)" ,
+	attr: {
+		color: 'brightMagenta' ,
+		bold: true ,
+		italic: true
+	}
+} ) ;
+
+var layout = termkit.Layout.create( {
+	parent: document ,
+	boxChars: 'double' ,
+	layout: {
+		id: 'main' ,
+		y: 3 ,
+		widthPercent: 60 ,
+		heightPercent: 60 ,
+		rows: [
+			{
+				id: '1st row' ,
+				heightPercent: 75 ,
+				columns: [
+					{ id: 'percent' , widthPercent: 100/3 } ,
+					{ id: 'auto' } ,
+					{ id: 'fixed' , width: 30 } ,
+				]
+			} ,
+			{
+				id: '2nd row' ,
+				columns: [
+					{ id: 'fixed2' , width: 20 } ,
+					{ id: 'auto2' } ,
+				]
+			}
+		]
+	}
+} ) ;
+
+layout.setAutoResize( true ) ;
 
 term.grabInput() ;
 term.hideCursor() ;
-layout.draw() ;
-layout.setAutoResize( true ) ;
+//layout.draw() ;
+//layout.setAutoResize( true ) ;
 
-layout.boxes.percent.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
-layout.boxes.percent.draw() ;
+document.elements.percent.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
+document.elements.percent.draw() ;
 
-layout.boxes.auto.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
-layout.boxes.auto.draw() ;
+document.elements.auto.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
+document.elements.auto.draw() ;
 
-layout.boxes.auto2.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
-layout.boxes.auto2.draw() ;
+document.elements.auto2.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
+document.elements.auto2.draw() ;
 
-layout.boxes.fixed.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
-layout.boxes.fixed.draw() ;
+document.elements.fixed.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
+document.elements.fixed.draw() ;
 
-layout.boxes.fixed2.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
-layout.boxes.fixed2.draw() ;
+document.elements.fixed2.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
+document.elements.fixed2.draw() ;
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {

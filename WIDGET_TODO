@@ -8,4 +8,6 @@ OK	Button should inherit from Widget
 OK	Document root Widget
 OK	Move inputField() area mode to an InputText object that inherit from Widget
 OK	Turn Forms into a Widget of Widgets
-	Layout should be a Widget, and each leaf boxes' ScreenBuffer should be Widgets too
+OK	Layout should be a Widget, and...
+	... and each leaf boxes' ScreenBuffer should be Widgets too
+	Full redraw of the whole document
