@@ -56,7 +56,7 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-/*
+//*
 var textInput1 = termkit.TextInput.create( {
 	parent: document ,
 	label: 'First name: ' ,
