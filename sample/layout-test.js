@@ -91,19 +91,19 @@ term.hideCursor() ;
 //layout.draw() ;
 //layout.setAutoResize( true ) ;
 
-document.elements.percent.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
+document.elements.percent.inputDst.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
 document.elements.percent.draw() ;
 
-document.elements.auto.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
+document.elements.auto.inputDst.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
 document.elements.auto.draw() ;
 
-document.elements.auto2.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
+document.elements.auto2.inputDst.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
 document.elements.auto2.draw() ;
 
-document.elements.fixed.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
+document.elements.fixed.inputDst.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
 document.elements.fixed.draw() ;
 
-document.elements.fixed2.dstChildren.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
+document.elements.fixed2.inputDst.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
 document.elements.fixed2.draw() ;
 
 term.on( 'key' , function( key ) {
