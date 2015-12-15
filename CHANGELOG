@@ -1,4 +1,10 @@
 
+v0.20.0
+-------
+
+Breaking API change: the Terminal 'resize' event now produce 2 args: width and height, instead of an object to be consistent with other internal events
+
+
 v0.19.4
 -------
 

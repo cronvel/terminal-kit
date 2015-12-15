@@ -974,11 +974,10 @@ Event are fired on your `term` object.
 
 
 <a name="ref.event.resize"></a>
-### 'resize' event ( data )
+### 'resize' event ( width , height )
 
-* data `Object` the new size where:
-	* width `number` the new width in character
-	* height `number` the new height in character
+* width `number` the new width in character
+* height `number` the new height in character
 
 The 'resize' event is emited when the terminal get resized, and it contains the new width and height.
 Also `term.width` and `term.height` are updated too.

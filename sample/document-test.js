@@ -47,6 +47,7 @@ var button1 = termkit.Button.create( {
 	y: 10 ,
 } ) ;
 
+
 var button2 = termkit.Button.create( {
 	parent: document ,
 	content: '> bill' ,
@@ -55,6 +56,7 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
+/*
 var textInput1 = termkit.TextInput.create( {
 	parent: document ,
 	label: 'First name: ' ,
@@ -79,7 +81,7 @@ var container1 = termkit.Container.create( {
 	height: 10 ,
 } ) ;
 
-container1.screenBuffer.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
+container1.inputDst.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
 
 var button3 = termkit.Button.create( {
 	parent: container1 ,
@@ -91,11 +93,12 @@ var button3 = termkit.Button.create( {
 
 //container1.draw() ;
 
-button1.on( 'submit' , onSubmit ) ;
-button2.on( 'submit' , onSubmit ) ;
-button3.on( 'submit' , onSubmit ) ;
-textInput1.on( 'submit' , onSubmit ) ;
 textInput2.on( 'submit' , onSubmit ) ;
+textInput1.on( 'submit' , onSubmit ) ;
+button3.on( 'submit' , onSubmit ) ;
+//*/
+button2.on( 'submit' , onSubmit ) ;
+button1.on( 'submit' , onSubmit ) ;
 
 function onSubmit( value )
 {
@@ -106,9 +109,10 @@ function onSubmit( value )
 }
 
 
-
 document.focusNext() ;
 term.grabInput() ;
+
+
 
 term.on( 'key' , function( key ) {
 	switch( key )
