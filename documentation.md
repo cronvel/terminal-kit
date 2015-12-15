@@ -11,8 +11,8 @@ this is the absolute terminal lib for Node.js!
 It does **NOT** depend on ncurses.
 
 * License: MIT
-* Current status: beta
-* Platform: linux, it should be compatible with any xterm-compatible terminal, it has been tested successfully with:
+* Current status: **really close to release!**
+* Platform: linux and any xterm-compatible terminal, it has been tested successfully with:
 	* xterm
 	* gnome-terminal
 	* Konsole
@@ -22,6 +22,7 @@ It does **NOT** depend on ncurses.
 	* rxvt/urxvt
 	* Eterm
 	* Terminology
+	* **Your terminal?** Help tracking terminal compatibilities [on github!](https://github.com/cronvel/terminal-kit/issues)
 
 Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.soulserv.net/tag/terminal/).
 
