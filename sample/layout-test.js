@@ -45,8 +45,6 @@ var document = term.createDocument() ;
 
 var text = termkit.Text.create( {
 	parent: document ,
-	x: 1 ,
-	y: 1 ,
 	content: "Responsive terminal layout! Try resizing your terminal! ;)" ,
 	attr: {
 		color: 'brightMagenta' ,
@@ -90,20 +88,35 @@ term.hideCursor() ;
 //layout.draw() ;
 //layout.setAutoResize( true ) ;
 
-document.elements.percent.inputDst.put( { x: 0 , y: 0 , attr: { color: 'red' } } , 'Percent sized box' ) ;
-document.elements.percent.draw() ;
+termkit.Text.create( {
+	parent: document.elements.percent ,
+	content: 'Percent sized box' ,
+	attr: { color: 'red' }
+} ) ;
 
-document.elements.auto.inputDst.put( { x: 0 , y: 0 , attr: { color: 'green' , italic: true } } , 'Auto sized box' ) ;
-document.elements.auto.draw() ;
+termkit.Text.create( {
+	parent: document.elements.auto ,
+	content: 'Auto sized box' ,
+	attr: { color: 'green' , italic: true }
+} ) ;
 
-document.elements.auto2.inputDst.put( { x: 0 , y: 0 , attr: { color: 'yellow' , italic: true } } , 'Auto sized box' ) ;
-document.elements.auto2.draw() ;
+termkit.Text.create( {
+	parent: document.elements.auto2 ,
+	content: 'Auto sized box' ,
+	attr: { color: 'yellow' , italic: true }
+} ) ;
 
-document.elements.fixed.inputDst.put( { x: 0 , y: 0 , attr: { color: 'cyan' , bold: true } } , 'Fixed size box' ) ;
-document.elements.fixed.draw() ;
+termkit.Text.create( {
+	parent: document.elements.fixed ,
+	content: 'Fixed size box' ,
+	attr: { color: 'cyan' , bold: true }
+} ) ;
 
-document.elements.fixed2.inputDst.put( { x: 0 , y: 0 , attr: { color: 'magenta' , bold: true } } , 'Fixed size box' ) ;
-document.elements.fixed2.draw() ;
+termkit.Text.create( {
+	parent: document.elements.fixed2 ,
+	content: 'Fixed size box' ,
+	attr: { color: 'magenta' , bold: true }
+} ) ;
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {

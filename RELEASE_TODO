@@ -1,0 +1,21 @@
+
+Must have:
+
+	ScreenBuffer documentation
+	TextBuffer documentation
+	ScreenBuffer full-width chars bugfixes
+	TextBuffer full-width chars bugfixes
+	Extract ScreenBuffer loader/saver, one file per version
+	Change the ScreenBuffer format: use only 2 bytes for chars, since a full-width char consume 2 cells
+	ScreenBuffer#put() behaviour: no wrap by default, clipping rather than putting things at the bounding limit
+	Inline inputField documentation on the lastest features: keyBindings, minLength, default, style, cancelable
+	Inline fileInput documentation
+
+
+
+Nice to have:
+
+	Input processing refacto (take it from Atomic Terminal)
+	Document the Document feature (Button, Element, TextInput, Text, Layout, etc)
+	24 bits ScreenBuffer
+	

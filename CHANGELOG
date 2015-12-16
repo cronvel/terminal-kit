@@ -1,8 +1,14 @@
 
+v0.20.3
+-------
+
+ScreenBuffer clipping bugfixed. Document drawing algorithm refactored to support resizing.
+
+
 v0.20.2
 -------
 
-Document: redraw mecanism
+Document: redraw mecanism.
 
 
 v0.20.1
@@ -14,7 +20,8 @@ Document Element Layout is now resizable like the deprecated inline layout was.
 v0.20.0
 -------
 
-Breaking API change: the Terminal 'resize' event now produce 2 args: width and height, instead of an object to be consistent with other internal events
+Breaking API change: the Terminal 'resize' event now produces 2 args: width and height, instead of an object to be consistent
+with other internal events
 
 
 v0.19.4

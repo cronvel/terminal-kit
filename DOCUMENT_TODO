@@ -1,0 +1,13 @@
+
+OK	Terminal.js file and object separated from termkit.js
+OK	Terminal#object2attr
+OK	Move ScreenBuffer#color2index to termkit.color2index (through misc.js)
+OK	Terminal#put() that mimic ScreenBuffer#put()
+OK	Create a Element object, that is recursive: it can have Element children that can cycle focus using TAB and SHIFT_TAB
+OK	Button should inherit from Element
+OK	Document root Element
+OK	Move inputField() area mode to an InputText object that inherit from Element
+OK	Turn Forms into a Element of Elements
+OK	Layout should be a Element, and...
+OK	... and each leaf boxes' ScreenBuffer should be Elements too
+OK	Full redraw of the whole document
