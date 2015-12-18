@@ -1,4 +1,10 @@
 
+v0.20.5
+-------
+
+Document now rely on nextgen-events instead of built-in events.
+
+
 v0.20.4
 -------
 
