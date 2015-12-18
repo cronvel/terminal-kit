@@ -1,8 +1,14 @@
 
+v0.20.6
+-------
+
+Document Container now has a backgroundAttr option
+
+
 v0.20.5
 -------
 
-Document now rely on nextgen-events instead of built-in events.
+Document now rely on nextgen-events instead of Node.js' built-in events.
 
 
 v0.20.4

@@ -37,7 +37,9 @@ term = termkit.terminal ;
 
 term.clear() ;
 
-var document = term.createDocument() ;
+var document = term.createDocument( {
+//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
+} ) ;
 
 var button1 = termkit.Button.create( {
 	parent: document ,
@@ -47,7 +49,6 @@ var button1 = termkit.Button.create( {
 	y: 10 ,
 } ) ;
 
-
 var button2 = termkit.Button.create( {
 	parent: document ,
 	content: '> bill' ,
@@ -56,7 +57,6 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-//*
 var textInput1 = termkit.TextInput.create( {
 	parent: document ,
 	label: 'First name: ' ,
@@ -79,9 +79,10 @@ var container1 = termkit.Container.create( {
 	y: 8 ,
 	width: 30 ,
 	height: 10 ,
+	backgroundAttr: { bgColor: 'yellow' } ,
 } ) ;
 
-container1.inputDst.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
+//container1.inputDst.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
 
 var button3 = termkit.Button.create( {
 	parent: container1 ,
@@ -96,7 +97,6 @@ var button3 = termkit.Button.create( {
 textInput2.on( 'submit' , onSubmit ) ;
 textInput1.on( 'submit' , onSubmit ) ;
 button3.on( 'submit' , onSubmit ) ;
-//*/
 button2.on( 'submit' , onSubmit ) ;
 button1.on( 'submit' , onSubmit ) ;
 
@@ -107,6 +107,7 @@ function onSubmit( value )
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
 	term.restoreCursor() ;
 }
+
 
 
 document.focusNext() ;
