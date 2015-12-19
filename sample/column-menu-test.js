@@ -46,7 +46,7 @@ var columnMenu = termkit.ColumnMenu.create( {
 	x: 0 ,
 	y: 5 ,
 	//width: 50 ,
-	buttons: [
+	items: [
 		{
 			content: 'File' ,
 			value: 'file'

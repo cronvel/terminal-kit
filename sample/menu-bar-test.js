@@ -41,7 +41,7 @@ var document = term.createDocument() ;
 
 
 
-var rowMenu = termkit.RowMenu.create( {
+var menuBar = termkit.MenuBar.create( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
@@ -49,7 +49,25 @@ var rowMenu = termkit.RowMenu.create( {
 	items: [
 		{
 			content: 'File' ,
-			value: 'file'
+			value: 'file' ,
+			items: [
+				{
+					content: 'Load' ,
+					value: 'load'
+				} ,
+				{
+					content: 'Save' ,
+					value: 'save'
+				} ,
+				{
+					content: 'Save as' ,
+					value: 'saveAs'
+				} ,
+				{
+					content: 'Export' ,
+					value: 'export'
+				} ,
+			]
 		} ,
 		{
 			content: 'Edit' ,
@@ -80,7 +98,7 @@ var rowMenu = termkit.RowMenu.create( {
 
 
 
-rowMenu.on( 'submit' , onSubmit ) ;
+menuBar.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue )
 {
