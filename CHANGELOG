@@ -1,4 +1,10 @@
 
+v0.20.9
+-------
+
+Document: reversing the logic of preventing propagation of event to parent: now returning a truthy value prevent that.
+
+
 v0.20.8
 -------
 
