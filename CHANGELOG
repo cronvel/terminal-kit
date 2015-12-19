@@ -1,4 +1,10 @@
 
+v0.20.10
+--------
+
+Document: Menu is now known as RowMenu. ColumnMenu is in progress. (Those features are not under semver yet - i.e. not documented yet, so no minor version bump for that).
+
+
 v0.20.9
 -------
 

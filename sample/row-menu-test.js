@@ -41,7 +41,7 @@ var document = term.createDocument() ;
 
 
 
-var menu = termkit.Menu.create( {
+var rowMenu = termkit.RowMenu.create( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
@@ -80,7 +80,7 @@ var menu = termkit.Menu.create( {
 
 
 
-menu.on( 'submit' , onSubmit ) ;
+rowMenu.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue )
 {
