@@ -71,7 +71,25 @@ var menuBar = termkit.MenuBar.create( {
 		} ,
 		{
 			content: 'Edit' ,
-			value: 'edit'
+			value: 'edit' ,
+			items: [
+				{
+					content: 'Copy' ,
+					value: 'copy'
+				} ,
+				{
+					content: 'Paste' ,
+					value: 'paste'
+				} ,
+				{
+					content: 'Undo' ,
+					value: 'undo'
+				} ,
+				{
+					content: 'Redo' ,
+					value: 'redo'
+				} ,
+			]
 		} ,
 		{
 			content: 'View' ,
