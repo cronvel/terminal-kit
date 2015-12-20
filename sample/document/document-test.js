@@ -30,59 +30,81 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-termkit = require( '../lib/termkit.js' ) ;
+termkit = require( '../../lib/termkit.js' ) ;
 term = termkit.terminal ;
 
 
 
 term.clear() ;
 
-var document = term.createDocument() ;
-
-
-var form = termkit.Form.create( {
-	parent: document ,
-	x: 10 ,
-	y: 10 ,
-	width: 40 ,
-	textInputs: [
-		{
-			key: 'firstName' ,
-			label: 'first name: ' ,
-			validator: { type: 'string' }
-		} ,
-		{
-			key: 'lastName' ,
-			label: 'last name: ' ,
-			validator: { type: 'string' }
-		} ,
-		{
-			key: 'age' ,
-			label: 'age: ' ,
-			validator: { type: 'string' }
-		}
-	] ,
-	buttons: [
-		{
-			content: '<Ok>' ,
-			value: 'ok'
-		} ,
-		{
-			content: '<Cancel>' ,
-			value: 'cancel'
-		}
-	]
+var document = term.createDocument( {
+//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
+var button1 = termkit.Button.create( {
+	parent: document ,
+	content: '> bob' ,
+	value: 'bob' ,
+	x: 10 ,
+	y: 10 ,
+} ) ;
 
+var button2 = termkit.Button.create( {
+	parent: document ,
+	content: '> bill' ,
+	value: 'bill' ,
+	x: 13 ,
+	y: 12 ,
+} ) ;
 
-form.on( 'submit' , onSubmit ) ;
+var textInput1 = termkit.TextInput.create( {
+	parent: document ,
+	label: 'First name: ' ,
+	x: 5 ,
+	y: 16 ,
+	width: 30 ,
+} ) ;
 
-function onSubmit( buttonValue , values )
+var textInput2 = termkit.TextInput.create( {
+	parent: document ,
+	label: 'Last name: ' ,
+	x: 15 ,
+	y: 18 ,
+	width: 30 ,
+} ) ;
+
+var container1 = termkit.Container.create( {
+	parent: document ,
+	x: 50 ,
+	y: 8 ,
+	width: 30 ,
+	height: 10 ,
+	backgroundAttr: { bgColor: 'yellow' } ,
+} ) ;
+
+//container1.inputDst.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
+
+var button3 = termkit.Button.create( {
+	parent: container1 ,
+	content: '> jack' ,
+	value: 'jack' ,
+	x: 2 ,
+	y: 2 ,
+} ) ;
+
+//container1.draw() ;
+
+textInput2.on( 'submit' , onSubmit ) ;
+textInput1.on( 'submit' , onSubmit ) ;
+button3.on( 'submit' , onSubmit ) ;
+button2.on( 'submit' , onSubmit ) ;
+button1.on( 'submit' , onSubmit ) ;
+
+function onSubmit( value )
 {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s %J\n' , buttonValue , values ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
 	term.restoreCursor() ;
 }
 
@@ -90,6 +112,8 @@ function onSubmit( buttonValue , values )
 
 document.focusNext() ;
 term.grabInput() ;
+
+
 
 term.on( 'key' , function( key ) {
 	switch( key )

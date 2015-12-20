@@ -30,7 +30,7 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-termkit = require( '../lib/termkit.js' ) ;
+termkit = require( '../../lib/termkit.js' ) ;
 term = termkit.terminal ;
 
 
@@ -40,53 +40,49 @@ term.clear() ;
 var document = term.createDocument() ;
 
 
-
-var rowMenu = termkit.RowMenu.create( {
+var form = termkit.Form.create( {
 	parent: document ,
-	x: 0 ,
-	y: 0 ,
-	//width: 50 ,
-	items: [
+	x: 10 ,
+	y: 10 ,
+	width: 40 ,
+	textInputs: [
 		{
-			content: 'File' ,
-			value: 'file'
+			key: 'firstName' ,
+			label: 'first name: ' ,
+			validator: { type: 'string' }
 		} ,
 		{
-			content: 'Edit' ,
-			value: 'edit'
+			key: 'lastName' ,
+			label: 'last name: ' ,
+			validator: { type: 'string' }
 		} ,
 		{
-			content: 'View' ,
-			value: 'view'
+			key: 'age' ,
+			label: 'age: ' ,
+			validator: { type: 'string' }
+		}
+	] ,
+	buttons: [
+		{
+			content: '<Ok>' ,
+			value: 'ok'
 		} ,
 		{
-			content: 'History' ,
-			value: 'history'
-		} ,
-		{
-			content: 'Bookmarks' ,
-			value: 'bookmarks'
-		} ,
-		{
-			content: 'Tools' ,
-			value: 'tools'
-		} ,
-		{
-			content: 'Help' ,
-			value: 'help'
-		} ,
+			content: '<Cancel>' ,
+			value: 'cancel'
+		}
 	]
 } ) ;
 
 
 
-rowMenu.on( 'submit' , onSubmit ) ;
+form.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue )
+function onSubmit( buttonValue , values )
 {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s %J\n' , buttonValue , values ) ;
 	term.restoreCursor() ;
 }
 

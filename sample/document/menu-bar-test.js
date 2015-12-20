@@ -30,7 +30,7 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-termkit = require( '../lib/termkit.js' ) ;
+termkit = require( '../../lib/termkit.js' ) ;
 term = termkit.terminal ;
 
 
@@ -41,46 +41,54 @@ var document = term.createDocument() ;
 
 
 
-var columnMenu = termkit.ColumnMenu.create( {
+var menuBar = termkit.MenuBar.create( {
 	parent: document ,
 	x: 0 ,
-	y: 5 ,
+	y: 0 ,
 	//width: 50 ,
 	items: [
 		{
 			content: 'File' ,
-			value: 'file'
+			value: 'file' ,
+			items: [
+				{ content: 'Load' , value: 'load' } ,
+				{ content: 'Save' , value: 'save' } ,
+				{ content: 'Save as' , value: 'saveAs' } ,
+				{ content: 'Export' , value: 'export' } ,
+			]
 		} ,
 		{
 			content: 'Edit' ,
-			value: 'edit'
-		} ,
-		{
-			content: 'View' ,
-			value: 'view'
-		} ,
-		{
-			content: 'History' ,
-			value: 'history'
-		} ,
-		{
-			content: 'Bookmarks' ,
-			value: 'bookmarks'
+			value: 'edit' ,
+			items: [
+				{ content: 'Copy' , value: 'copy' } ,
+				{ content: 'Paste' , value: 'paste' } ,
+				{ content: 'Undo' , value: 'undo' } ,
+				{ content: 'Redo' , value: 'redo' } ,
+			]
 		} ,
 		{
 			content: 'Tools' ,
-			value: 'tools'
+			value: 'tools' ,
+			items: [
+				{ content: 'Script fu' , value: 'scriptFu' } ,
+				{ content: 'Decrunch' , value: 'decrunch' } ,
+			]
 		} ,
 		{
 			content: 'Help' ,
-			value: 'help'
+			value: 'help' ,
+			items: [
+				{ content: 'Reference' , value: 'reference' } ,
+				{ content: 'About' , value: 'about' } ,
+			]
 		} ,
 	]
 } ) ;
 
 
 
-columnMenu.on( 'submit' , onSubmit ) ;
+menuBar.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue )
 {

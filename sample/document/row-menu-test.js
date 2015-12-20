@@ -30,7 +30,7 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-termkit = require( '../lib/termkit.js' ) ;
+termkit = require( '../../lib/termkit.js' ) ;
 term = termkit.terminal ;
 
 
@@ -41,7 +41,7 @@ var document = term.createDocument() ;
 
 
 
-var menuBar = termkit.MenuBar.create( {
+var rowMenu = termkit.RowMenu.create( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
@@ -49,47 +49,11 @@ var menuBar = termkit.MenuBar.create( {
 	items: [
 		{
 			content: 'File' ,
-			value: 'file' ,
-			items: [
-				{
-					content: 'Load' ,
-					value: 'load'
-				} ,
-				{
-					content: 'Save' ,
-					value: 'save'
-				} ,
-				{
-					content: 'Save as' ,
-					value: 'saveAs'
-				} ,
-				{
-					content: 'Export' ,
-					value: 'export'
-				} ,
-			]
+			value: 'file'
 		} ,
 		{
 			content: 'Edit' ,
-			value: 'edit' ,
-			items: [
-				{
-					content: 'Copy' ,
-					value: 'copy'
-				} ,
-				{
-					content: 'Paste' ,
-					value: 'paste'
-				} ,
-				{
-					content: 'Undo' ,
-					value: 'undo'
-				} ,
-				{
-					content: 'Redo' ,
-					value: 'redo'
-				} ,
-			]
+			value: 'edit'
 		} ,
 		{
 			content: 'View' ,
@@ -116,7 +80,7 @@ var menuBar = termkit.MenuBar.create( {
 
 
 
-menuBar.on( 'submit' , onSubmit ) ;
+rowMenu.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue )
 {
