@@ -100,7 +100,7 @@ function onSubmit( buttonValue )
 
 
 
-document.focusNext() ;
+//document.focusNext() ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
