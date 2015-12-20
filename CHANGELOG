@@ -1,4 +1,10 @@
 
+v0.20.14
+--------
+
+Document Form navigation. TextBuffer .moveForward() bugfix
+
+
 v0.20.13
 --------
 
