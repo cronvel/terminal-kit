@@ -111,7 +111,6 @@ function onSubmit( value )
 
 
 document.focusNext() ;
-term.grabInput() ;
 
 
 

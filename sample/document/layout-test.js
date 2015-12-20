@@ -83,7 +83,6 @@ var layout = termkit.Layout.create( {
 } ) ;
 
 
-term.grabInput() ;
 term.hideCursor() ;
 //layout.draw() ;
 //layout.setAutoResize( true ) ;

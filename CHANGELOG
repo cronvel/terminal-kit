@@ -1,4 +1,10 @@
 
+v0.20.18
+--------
+
+New: all interactive Document Elements now react to the mouse 'click' and 'hover' event!
+
+
 v0.20.17
 --------
 

@@ -93,7 +93,6 @@ function onSubmit( buttonValue )
 
 
 document.focusNext() ;
-term.grabInput() ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
