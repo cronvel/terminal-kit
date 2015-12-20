@@ -41,7 +41,7 @@ var document = term.createDocument() ;
 
 
 
-var menuBar = termkit.MenuBar.create( {
+var dropDownMenu = termkit.DropDownMenu.create( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
@@ -88,7 +88,7 @@ var menuBar = termkit.MenuBar.create( {
 
 
 
-menuBar.on( 'submit' , onSubmit ) ;
+dropDownMenu.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue )
 {
