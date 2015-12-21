@@ -1,4 +1,10 @@
 
+v0.20.20
+--------
+
+Document: all Element now have a .destroy() method.
+
+
 v0.20.19
 --------
 
