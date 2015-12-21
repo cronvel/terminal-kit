@@ -1,4 +1,10 @@
 
+v0.20.21
+--------
+
+Document: new method .clear() that remove all children
+
+
 v0.20.20
 --------
 
