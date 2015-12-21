@@ -117,6 +117,7 @@ termkit.Text.create( {
 	attr: { color: 'magenta' , bold: true }
 } ) ;
 
+
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
 		term.grabInput( false ) ;
