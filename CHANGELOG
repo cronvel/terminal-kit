@@ -1,4 +1,10 @@
 
+v0.20.23
+--------
+
+Document: .attach()/.detach()/.destroy() bugfixes.
+
+
 v0.20.22
 --------
 
