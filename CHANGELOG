@@ -1,8 +1,14 @@
 
+v0.20.29
+--------
+
+Document: Document#focusNext() infinite loop bugfixed, .redraw() for moving and resizing Element, Text#setContent() redraw bugfixed.
+
+
 v0.20.28
 --------
 
-Documentation spelling
+Documentation spelling.
 
 
 v0.20.27

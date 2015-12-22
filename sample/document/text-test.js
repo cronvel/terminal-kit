@@ -66,10 +66,12 @@ var text2 = termkit.Text.create( {
 	y: 4 ,
 } ) ;
 
+//console.error( text2.parent ) ; process.exit() ;
 //container1.draw() ;
 
 
 term.on( 'key' , function( key ) {
+	
 	switch( key )
 	{
 		case 'CTRL_C' :
@@ -78,6 +80,23 @@ term.on( 'key' , function( key ) {
 			term.styleReset() ;
 			term.clear() ;
 			process.exit() ;
+			break ;
+		
+		case 'ENTER' :
+		case 'KP_ENTER' :
+			text2.setContent( text2.getContent() + '\n' ) ;
+			break ;
+		
+		case 'BACKSPACE' :
+		case 'DELETE' :
+			text2.setContent( text2.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
+			//console.error( "content should be:'" + text2.getContent().trim().split( '\n' ).slice( 0 , -1 ).join( '\n' ) + "'" ) ;
+			//console.error( "content:'" + text2.getContent() + "'\n" ) ;
+			//text2.setContent( "bob" ) ;
+			break ;
+		
+		default :
+			text2.setContent( text2.getContent() + key ) ;
 			break ;
 	}
 } ) ;
