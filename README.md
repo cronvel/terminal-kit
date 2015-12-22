@@ -363,7 +363,7 @@ Advanced methods are high-level library functions.
 <a name="ref.fullscreen"></a>
 ### .fullscreen( options )
 
-* options: true/false/object: if truthy it activate fullscreen mode, falsey return to normal mode,
+* options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
   if it is an object it supports those properties:
 	* noAlternate `boolean` true if the alternate screen buffer should not be used
 
@@ -941,8 +941,8 @@ It creates a progress bar and start and finish task with a random time, then qui
 * str `string` the text to display
 * options `object` of options, where:
 	* style `function` the style of text, default to `term.green`
-	* flashStyle `function` or `falsey` if a `function` is given, then this is the style of the text for the flash effect,
-		if `falsey` then the flash effect is turn off, default to `term.bold.brightGreen`
+	* flashStyle `function` or `falsy` if a `function` is given, then this is the style of the text for the flash effect,
+		if `falsy` then the flash effect is turn off, default to `term.bold.brightGreen`
 	* delay `number` average delay before printing the next char, default to 150 ms
 	* flashDelay `number` fixed delay before the `flashStyle` of the last printed char is replaced by the regular `style`,
 		default to 100 ms

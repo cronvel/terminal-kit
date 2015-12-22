@@ -33,9 +33,9 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 * colors, 256 colors or even 24 bits colors, if the terminal supports it
 * styles (bold, underline, italic, and many more)
 * style mixing
-* string formating
+* string formatting
 * short style markup
-* cursor positionning
+* cursor positioning
 * keyboard input
 * mouse support (GPM is supported for the Linux Console)
 * terminal window title
@@ -65,7 +65,7 @@ term.bold( 'bold' ) ;
 // output 'mixed' using bold, underlined & red, exposing the style-mixing syntax
 term.bold.underline.red( 'mixed' ) ;
 
-// printf() style formating everywhere:
+// printf() style formatting everywhere:
 // this will output 'My name is Jack, I'm 32.' in green
 term.green( "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
@@ -169,13 +169,13 @@ That's it:
 ... is the same as:  
 `term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
 
-Also those string support a printf()-like formating syntax.  
+Also those string support a printf()-like formatting syntax.  
 So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."* in red.
 
 **New:** since *v0.16.x*, style markup are supported as a shorthand. Style markup are introduced by a caret `^` followed by another
 character.
 Colors are produced by the first letter of its name, e.g. red is produced with a `^r`, except black which is produced by `^k`.
-Other styles are produced with a symbole. For example `^_` switch to underline.
+Other styles are produced with a symbol. For example `^_` switch to underline.
 To remove all styles, `^:` or `^ ` can be used.
 A style reset is always produced at the end of the string as soon as one style markup was used.
 
@@ -344,7 +344,7 @@ We can do:
 <a name="ref.misc"></a>
 ### Misc
 
-* .noFormat(str): disable string formating - useful when your string may contain `%` (e.g. user input) and you
+* .noFormat(str): disable string formatting - useful when your string may contain `%` (e.g. user input) and you
 	don't want to escape them
 * .windowTitle(str): set the title of an xterm-compatible window to *str*
 * .setCursorColor(register): set the cursor color to one of the 256 *register*
@@ -356,7 +356,7 @@ We can do:
 
 ## Advanced methods of a **Terminal** instance
 
-Advanced methods are high-level librairie functions.
+Advanced methods are high-level library functions.
 
 
 
@@ -602,17 +602,17 @@ Special keys supported by the input field:
 * DELETE: delete
 * BACKSPACE: backward delete
 * LEFT, RIGHT: move the cursor one character left or right
-* HOME: move the cursor at the begining of the input field
+* HOME: move the cursor at the beginning of the input field
 * END: move the cursor at the end of the input field
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
 
-Additionnal keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
+Additional keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
 It returns an EventEmitter object featuring some functions to control things during the input process:
 
 * abort(): abort the input process and do not even call the inputField()'s callback
-* stop(): stop the input process now, call the inputField()'s callback (same behaviour than a regular 'ENTER' key pressed)
+* stop(): stop the input process now, call the inputField()'s callback (same behavior than a regular 'ENTER' key pressed)
 * getInput(): get the current input string
 * getPosition(): return an object containing 'x' and 'y' properties, the coordinates where the input field starts
 * redraw(): redraw the input field, useful if you had echo'ed something that can mess it
@@ -663,7 +663,7 @@ If we need our own auto-completer, we might take advantage of the built-in stati
 Custom auto-completer can be asynchronous, if the function's *length* is **exactly 2**.
 
 <a name="ref.example.autoComplete"></a>
-This is an example of a file selector that exposes the async behaviour of auto-completer and the usage of
+This is an example of a file selector that exposes the async behavior of auto-completer and the usage of
 the static `termkit.autoComplete()` method:
 
 ```js
@@ -797,9 +797,9 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 	* maxRefreshTime `number` the maximum time between two refresh in ms, default to 500ms
 	* minRefreshTime `number` the minimum time between two refresh in ms, default to 100ms
 
-It creates a nice progress bar and return a controler object to interact with it.
+It creates a nice progress bar and return a controller object to interact with it.
 
-The controler provides those functions:
+The controller provides those functions:
 
 * update( updateObject ): update the progress bar, having the arguments:
 	* updateObject `object` or `number` or `null`. If *updateObject* is not an object, it's a shorthand for `{ progress: value }`.
@@ -877,7 +877,7 @@ var progressBar ;
 
 var thingsToDo = [
 	'update my lib' ,
-	'data analysing' ,
+	'data analyzing' ,
 	'serious business' ,
 	'decrunching data' ,
 	'do my laundry' ,
@@ -980,7 +980,7 @@ Event are fired on your `term` object.
 * width `number` the new width in character
 * height `number` the new height in character
 
-The 'resize' event is emited when the terminal get resized, and it contains the new width and height.
+The 'resize' event is emitted when the terminal get resized, and it contains the new width and height.
 Also `term.width` and `term.height` are updated too.
 
 
@@ -996,7 +996,7 @@ Also `term.width` and `term.height` are updated too.
 	* code `number` or `Buffer`, for multibyte character it is the raw `Buffer` input, for single byte character it is a `number`
 	  between 0 and 255
 
-The 'key' event is emited whenever the user type something on the keyboard.
+The 'key' event is emitted whenever the user type something on the keyboard.
 
 If `name` is a single char, this is a regular UTF8 character, entered by the user.
 If the user type a word, each UTF8 character will produce its own 'key' event.
@@ -1046,7 +1046,7 @@ There is no workaround here, the underlying keyboard driver simply does not supp
 KP_* keys needs `applicationKeypad()`, e.g. without it KP_1 will report '1' or END.
 
 Some terminal does not support `applicationKeypad()` at all, sometime turning numlock off can works, sometime not,
-so it is nearly impossible to differenciate (for example) a KP_1 from an END, or a KP_7 from a HOME.
+so it is nearly impossible to differentiate (for example) a KP_1 from an END, or a KP_7 from a HOME.
 
 
 
@@ -1056,22 +1056,22 @@ so it is nearly impossible to differenciate (for example) a KP_1 from an END, or
 * name `string` the name of the subtype of event
 * data `Object` provide some data depending on the event's subtype
 
-The 'terminal' event is emited for terminal generic information.
+The 'terminal' event is emitted for terminal generic information.
 
 The argument 'name' can be:
 
-* CURSOR_LOCATION: it is emited in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
+* CURSOR_LOCATION: it is emitted in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
 
 * SCREEN_RESIZE: **DEPRECATED! Will be removed in the next non-patch version! Use the 'resize' event instead!**
-  Currently it is emited when a terminal resizing is detected, most of time node.js will be notified of
-  screen resizing, and so this event will be emited, data contains 'width' & 'height', the size of the screen in characters
+  Currently it is emitted when a terminal resizing is detected, most of time node.js will be notified of
+  screen resizing, and so this event will be emitted, data contains 'width' & 'height', the size of the screen in characters
 
-* SCREEN_SIZE: **rarely useful** it is emited in response of a requestScreenSize(), data contains 'width' & 'height', the size of
+* SCREEN_SIZE: **rarely useful** it is emitted in response of a requestScreenSize(), data contains 'width' & 'height', the size of
   the screen in characters, and 'resized' (true/false) if the size has changed without node.js being notified
 
-* FOCUS_IN: it is emited if the terminal gains focus (if supported by your terminal)
+* FOCUS_IN: it is emitted if the terminal gains focus (if supported by your terminal)
 
-* FOCUS_OUT: it is emited if the terminal loses focus (if supported by your terminal)
+* FOCUS_OUT: it is emitted if the terminal loses focus (if supported by your terminal)
 
 
 
@@ -1090,7 +1090,7 @@ Activated when grabInput() is used with the 'mouse' options, e.g. `{ mouse: 'but
 
 The argument 'name' can be:
 
-* MOUSE_LEFT_BUTTON_PRESSED: well... it is emited when the left mouse button is pressed
+* MOUSE_LEFT_BUTTON_PRESSED: well... it is emitted when the left mouse button is pressed
 * MOUSE_LEFT_BUTTON_RELEASED: when this button is released
 * MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
 * MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
