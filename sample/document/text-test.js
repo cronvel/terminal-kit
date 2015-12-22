@@ -90,9 +90,6 @@ term.on( 'key' , function( key ) {
 		case 'BACKSPACE' :
 		case 'DELETE' :
 			text2.setContent( text2.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
-			//console.error( "content should be:'" + text2.getContent().trim().split( '\n' ).slice( 0 , -1 ).join( '\n' ) + "'" ) ;
-			//console.error( "content:'" + text2.getContent() + "'\n" ) ;
-			//text2.setContent( "bob" ) ;
 			break ;
 		
 		default :

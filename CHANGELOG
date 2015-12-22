@@ -1,4 +1,10 @@
 
+v0.20.30
+--------
+
+TextBuffer: 'hidden' option, .setHidden(), .getHidden(). Document TextInput Element now has the 'hidden' option for passwords
+
+
 v0.20.29
 --------
 

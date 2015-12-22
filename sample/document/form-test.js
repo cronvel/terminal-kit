@@ -47,6 +47,18 @@ var form = termkit.Form.create( {
 	width: 40 ,
 	textInputs: [
 		{
+			key: 'login' ,
+			label: 'Login: ' ,
+			validator: { type: 'string' }
+		} ,
+		{
+			key: 'password' ,
+			label: 'Password: ' ,
+			hidden: true ,
+			//textAttr: { bgColor: 'blue' , hidden: true } ,
+			validator: { type: 'string' }
+		} ,
+		{
 			key: 'firstName' ,
 			label: 'first name: ' ,
 			validator: { type: 'string' }
@@ -60,7 +72,7 @@ var form = termkit.Form.create( {
 			key: 'age' ,
 			label: 'age: ' ,
 			validator: { type: 'string' }
-		}
+		} ,
 	] ,
 	buttons: [
 		{
