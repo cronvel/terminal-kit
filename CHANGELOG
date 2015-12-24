@@ -1,4 +1,10 @@
 
+v0.20.32
+--------
+
+Internally replacing home-made arrayKit.fill() with ES6 Array#fill()
+
+
 v0.20.31
 --------
 
