@@ -1,4 +1,10 @@
 
+v0.21.2
+-------
+
+Linux Console: repairing .color256(), thus repairing ScreenBuffer features.
+
+
 v0.21.1
 -------
 
