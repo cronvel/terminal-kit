@@ -1,4 +1,10 @@
 
+v0.21.0
+-------
+
+Removing inline widget: .layout() and .form(), their Document counter-part should be used instead.
+
+
 v0.20.32
 --------
 
