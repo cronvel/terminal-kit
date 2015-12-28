@@ -1,4 +1,10 @@
 
+v0.21.4
+-------
+
+ScreenBuffer: optimized (delta) escape sequences for the terminal blitter are now working properly
+
+
 v0.21.3
 -------
 
