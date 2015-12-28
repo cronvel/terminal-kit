@@ -9,7 +9,6 @@ mrxvt support: draw-test does not work @bug
 (C) document all the ScreenBuffer feature @doc
 (B) .inputField() has a bug with full-width chars @bug
 (B) ScreenBuffer char_size should be 2 bytes, punycode.ucs2.decode() is useless since bigger chars uses two cells @code
-(A) ScreenBuffer generateOptimizedEscapeSequence() does not works well with style @code
 (A) document inputField autoComplete returning an array with a prefix key @doc
 (A) document fileInput @doc
 (A) document .inputField() options 'minLength', 'default', 'style' and 'cancelable' @doc

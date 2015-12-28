@@ -29,3 +29,4 @@ x 2015-06-01 finish progressBar @code
 x 2015-06-02 document .progressBar() .stop() and .resume() @doc
 x 2015-06-02 document .processExit() @doc
 x 2015-12-11 TextBuffer class suitable for text editor @code
+x 2015-12-28 ScreenBuffer generateOptimizedEscapeSequence() does not works well with style @code
