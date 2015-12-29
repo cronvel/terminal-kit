@@ -1,8 +1,14 @@
 
+v0.21.5
+-------
+
+Dependencies.
+
+
 v0.21.4
 -------
 
-ScreenBuffer: optimized (delta) escape sequences for the terminal blitter are now working properly
+ScreenBuffer: optimized (delta) escape sequences for the terminal blitter are now working properly.
 
 
 v0.21.3
@@ -32,19 +38,19 @@ Removing inline widget: .layout() and .form(), their Document counter-part shoul
 v0.20.32
 --------
 
-Internally replacing home-made arrayKit.fill() with ES6 Array#fill()
+Internally replacing home-made arrayKit.fill() with ES6 Array#fill().
 
 
 v0.20.31
 --------
 
-TextBuffer: 'hidden' option, .setHidden(), .getHidden(). Document TextInput Element now has the 'hidden' option for passwords
+TextBuffer: 'hidden' option, .setHidden(), .getHidden(). Document TextInput Element now has the 'hidden' option for passwords.
 
 
 v0.20.30
 --------
 
-TextBuffer: 'hidden' option, .setHidden(), .getHidden(). Document TextInput Element now has the 'hidden' option for passwords
+TextBuffer: 'hidden' option, .setHidden(), .getHidden(). Document TextInput Element now has the 'hidden' option for passwords.
 
 
 v0.20.29
@@ -92,7 +98,7 @@ Document: .attach()/.detach()/.destroy() bugfixes.
 v0.20.22
 --------
 
-Document: ENTER and KP_ENTER move to next TextInput in Forms
+Document: ENTER and KP_ENTER move to next TextInput in Forms.
 
 
 v0.20.21
