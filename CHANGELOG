@@ -1,4 +1,10 @@
 
+v0.21.7
+-------
+
+Document: Element#focusNextChild() and Element#focusPreviousChild() bugfix
+
+
 v0.21.6
 -------
 
