@@ -100,7 +100,7 @@ function onSubmit( buttonValue )
 
 
 
-document.focusNext() ;
+document.giveFocusTo( dropDownMenu ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key )

@@ -92,7 +92,7 @@ function onSubmit( buttonValue )
 
 
 
-document.focusNext() ;
+document.giveFocusTo( rowMenu ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
