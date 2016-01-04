@@ -1,4 +1,10 @@
 
+v0.22.0
+-------
+
+No more relying on Node.js core events, now using NextGenEvents for everything
+
+
 v0.21.8
 -------
 
