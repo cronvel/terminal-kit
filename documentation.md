@@ -121,7 +121,8 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [Editing the screen](#ref.editingScreen)
 	* [Input/Output](#ref.io)
 	* [Misc](#ref.misc)
-* Advanced methods
+* Advanced usages and methods
+	* [Real terminal access](#ref.realTerminal)
 	* [.fullscreen()](#ref.fullscreen)
 	* [.grabInput()](#ref.grabInput)
 	* [.getCursorLocation()](#ref.getCursorLocation)
@@ -357,6 +358,24 @@ We can do:
 ## Advanced methods of a **Terminal** instance
 
 Advanced methods are high-level library functions.
+
+
+
+<a name="ref.realTerminal"></a>
+### Getting the **REAL** terminal access
+
+When a program is piped, its standard input (STDIN) or its standard output (STDOUT) is longer connected to the actual terminal,
+but to an upstream or downstream program.
+
+Sometime this is the behavior you want, sometime not.
+
+The default terminal instance (`require( 'terminal-kit' ).terminal`) use STDIN and STDOUT as its input and output, so if the program
+is piped, it get its input and/or output from upstream and/or downstream program.
+
+However, one may want a direct access to the terminal even when piped.
+For that purpose, `termkit.tty.getInput()` and `termkit.tty.getOutput()` can be used instead of `process.stdin` and `process.stdout`,
+and passed to `termkit.createTerminal()`.
+There is another built-in terminal instance for that: `require( 'terminal-kit' ).realTerminal`.
 
 
 

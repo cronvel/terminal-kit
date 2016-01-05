@@ -1,4 +1,10 @@
 
+v0.22.1
+-------
+
+New: termkit.realTerminal -- like termkit.terminal but hijack pipes.
+
+
 v0.22.0
 -------
 
