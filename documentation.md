@@ -122,7 +122,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [Input/Output](#ref.io)
 	* [Misc](#ref.misc)
 * Advanced usages and methods
-	* [Real terminal access](#ref.realTerminal)
+	* [Real terminal access (e.g. escaping from pipe)](#ref.realTerminal)
 	* [.fullscreen()](#ref.fullscreen)
 	* [.grabInput()](#ref.grabInput)
 	* [.getCursorLocation()](#ref.getCursorLocation)
@@ -362,7 +362,7 @@ Advanced methods are high-level library functions.
 
 
 <a name="ref.realTerminal"></a>
-### Getting the **REAL** terminal access
+### Getting the **REAL** terminal access (e.g. escaping from pipe)
 
 When a program is piped, its standard input (STDIN) or its standard output (STDOUT) is longer connected to the actual terminal,
 but to an upstream or downstream program.
@@ -370,12 +370,32 @@ but to an upstream or downstream program.
 Sometime this is the behavior you want, sometime not.
 
 The default terminal instance (`require( 'terminal-kit' ).terminal`) use STDIN and STDOUT as its input and output, so if the program
-is piped, it get its input and/or output from upstream and/or downstream program.
+is piped, it get its input from the upstream program and/or send its output to the downstream program.
 
 However, one may want a direct access to the terminal even when piped.
+
 For that purpose, `termkit.tty.getInput()` and `termkit.tty.getOutput()` can be used instead of `process.stdin` and `process.stdout`,
 and passed to `termkit.createTerminal()`.
-There is another built-in terminal instance for that: `require( 'terminal-kit' ).realTerminal`.
+
+To ease this process even more, there is another built-in terminal instance for that: `require( 'terminal-kit' ).realTerminal`.
+
+Let's write this file (my-script.js):
+
+```js
+realTerm = require( "terminal-kit" ).realTerminal ;
+realTerm.blue( "Enter your name: " ) ;
+realTerm.inputField( function( error , name ) {
+	realTerm.green( "\nHello %s!\n" , name ) ;
+	process.exit() ;
+} ) ;
+```
+
+And then execute it from the command line using pipe: `someprogram | node my-script.js | someotherprogram`.
+
+The script will totally escape the pipes and will be able to run the same way it would without pipes.
+
+**Furthermore:** you can still receive and send things from STDIN and to STDOUT, so you can handle interactive stuff using
+the `realTerm` instance and receive from the first program, and write to the last program.
 
 
 
