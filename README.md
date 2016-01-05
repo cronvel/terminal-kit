@@ -122,7 +122,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [Input/Output](#ref.io)
 	* [Misc](#ref.misc)
 * Advanced usages and methods
-	* [Real terminal access (e.g. escaping from pipe)](#ref.realTerminal)
+	* [Real terminal access (e.g. escaping from pipes)](#ref.realTerminal)
 	* [.fullscreen()](#ref.fullscreen)
 	* [.grabInput()](#ref.grabInput)
 	* [.getCursorLocation()](#ref.getCursorLocation)
@@ -362,7 +362,7 @@ Advanced methods are high-level library functions.
 
 
 <a name="ref.realTerminal"></a>
-### Getting the **REAL** terminal access (e.g. escaping from pipe)
+### Getting the **REAL** terminal access (e.g. escaping from pipes)
 
 When a program is piped, its standard input (STDIN) or its standard output (STDOUT) is longer connected to the actual terminal,
 but to an upstream or downstream program.
