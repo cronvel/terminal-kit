@@ -364,7 +364,7 @@ Advanced methods are high-level library functions.
 <a name="ref.realTerminal"></a>
 ### Getting the **REAL** terminal access (e.g. escaping from pipes)
 
-When a program is piped, its standard input (STDIN) or its standard output (STDOUT) is longer connected to the actual terminal,
+When a program is piped, its standard input (STDIN) or its standard output (STDOUT) is no longer connected to the actual terminal,
 but to an upstream or downstream program.
 
 Sometime this is the behavior you want, sometime not.
@@ -375,7 +375,7 @@ is piped, it get its input from the upstream program and/or send its output to t
 However, one may want a direct access to the terminal even when piped.
 
 For that purpose, `termkit.tty.getInput()` and `termkit.tty.getOutput()` can be used instead of `process.stdin` and `process.stdout`,
-and passed to `termkit.createTerminal()`.
+and passed to [`termkit.createTerminal()`](#ref.createTerminal).
 
 To ease this process even more, there is another built-in terminal instance for that: `require( 'terminal-kit' ).realTerminal`.
 
@@ -390,7 +390,7 @@ realTerm.inputField( function( error , name ) {
 } ) ;
 ```
 
-And then execute it from the command line using pipe: `someprogram | node my-script.js | someotherprogram`.
+And then execute it from the command line using pipes: `someprogram | node my-script.js | someotherprogram`.
 
 The script will totally escape the pipes and will be able to run the same way it would without pipes.
 
