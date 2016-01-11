@@ -1,0 +1,9 @@
+
+
+* 2-bytes characters ARE NOT necessary full-width char, and 1-byte characters ARE NOT necessary half-width char.
+* So ScreenBuffer Char Size should be kept to 4 bytes.
+* Some flags should be used to detect full-width char: LEADING_FULLWIDTH and TRAILING_FULLWIDTH.
+* A full-width char is written down on two cell, it should have exactly the same data (style, color, etc) except the 
+	LEADING_FULLWIDTH for the first and the TRAILING_FULLWIDTH for the last
+* Replace Buffer#writeUInt32BE() by Buffer#writeInt32BE() because 128 << 24 = -2147483648 (signed)
+
