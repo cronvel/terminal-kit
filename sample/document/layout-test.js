@@ -30,8 +30,8 @@
 
 
 console.error( "\n\n\n\n\n\n\n\n" ) ;
-termkit = require( '../../lib/termkit.js' ) ;
-term = termkit.terminal ;
+var termkit = require( '../../lib/termkit.js' ) ;
+var term = termkit.terminal ;
 
 
 
