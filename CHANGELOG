@@ -1,4 +1,10 @@
 
+v0.23.1
+-------
+
+Upgrade string-kit from v0.4.0 to v0.4.1, fixing an issue with formatter count and detection
+
+
 v0.23.0
 -------
 
