@@ -25,6 +25,10 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
@@ -42,7 +46,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		term.fullscreen( false ) ;
 		
 		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() } , 100 ) ;
+		setTimeout( function() { process.exit() ; } , 100 ) ;
 	} 
 
 

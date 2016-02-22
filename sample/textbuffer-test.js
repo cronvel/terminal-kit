@@ -25,12 +25,16 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
 
-termkit = require( '../lib/termkit.js' ) ;
-term = termkit.terminal ;
+var termkit = require( '../lib/termkit.js' ) ;
+var term = termkit.terminal ;
 
 
 function terminate()
@@ -43,7 +47,7 @@ function terminate()
 		term.beep() ;
 		
 		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() } , 100 ) ;
+		setTimeout( function() { process.exit() ; } , 100 ) ;
 	} , 100 ) ;
 } 
 

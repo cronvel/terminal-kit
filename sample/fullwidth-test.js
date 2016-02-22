@@ -25,6 +25,10 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
@@ -34,7 +38,7 @@ var term = require( '../lib/termkit.js' ).terminal ;
 
 
 
-fwa = string.unicode.toFullWidth( '@' ) ;	// Get a full-width arobas
+var fwa = string.unicode.toFullWidth( '@' ) ;	// Get a full-width arobas
 
 
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict" ;
+
 var term = require( 'terminal-kit' ).terminal ;
 
 var items = [ 'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ] ;

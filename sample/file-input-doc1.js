@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict" ;
+
 var termkit = require( 'terminal-kit' ) ;
 var term = termkit.terminal ;
 

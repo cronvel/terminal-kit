@@ -25,6 +25,10 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
@@ -40,7 +44,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		term.grabInput( false ) ;
 		
 		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() } , 250 ) ;
+		setTimeout( function() { process.exit() ; } , 250 ) ;
 	}
 	
 	var i = 0 ;
@@ -59,7 +63,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			if ( i < 15 ) { i ++ ; getColors() ; }
 			else { terminate() ; }
 		} ) ;
-	} ;
+	}
 	
 	term.on( 'key' , function( name , matches , data ) {
 		

@@ -25,6 +25,10 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
@@ -36,9 +40,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		term.bold( '\n=== 256 colors register test ===\n\n' ) ;
 		
-		for ( i = 0 ; i <= 255 ; i ++ ) { if ( ! ( i % 70 ) ) term( '\n' ) ; term.color256( i , "*" ) ; }
+		for ( i = 0 ; i <= 255 ; i ++ ) { if ( ! ( i % 70 ) ) { term( '\n' ) ; } term.color256( i , "*" ) ; } // jshint ignore:line
 		term.styleReset( '\n' ) ;
-		for ( i = 0 ; i <= 255 ; i ++ ) { if ( ! ( i % 70 ) ) term( '\n' ) ; term.bgColor256( i , " " ) ; }
+		for ( i = 0 ; i <= 255 ; i ++ ) { if ( ! ( i % 70 ) ) { term( '\n' ) ; } term.bgColor256( i , " " ) ; } // jshint ignore:line
 		term.styleReset( '\n' ) ;
 			
 		

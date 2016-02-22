@@ -24,6 +24,10 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 /* global describe, it, before, after */
 

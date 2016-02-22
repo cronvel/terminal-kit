@@ -25,6 +25,8 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
 
 
 var fs = require( 'fs' ) ;
@@ -213,7 +215,7 @@ function nextPosition()
 
 
 
-frames = 0 ;
+var frames = 0 ;
 function draw()
 {
 	sprites.background.draw( { dst: viewport , tile: true } ) ;

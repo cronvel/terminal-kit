@@ -25,12 +25,16 @@
 	SOFTWARE.
 */
 
+"use strict" ;
+
+
+
 /* jshint unused:false */
 
 
 
-termkit = require( '../lib/termkit.js' ) ;
-term = termkit.terminal ;
+var termkit = require( '../lib/termkit.js' ) ;
+var term = termkit.terminal ;
 
 var moved = 0 ;
 
