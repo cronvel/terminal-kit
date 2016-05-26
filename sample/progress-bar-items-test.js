@@ -50,7 +50,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		if ( progress === undefined )
 		{
-			if ( Math.random() < 10.1 )
+			if ( Math.random() < 0.1 )
 			{
 				progress = 0 ;
 			}
