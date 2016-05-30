@@ -1,4 +1,10 @@
 
+v0.24.7
+-------
+
+Timeout issues fixed when CPU-bound/sync task kick in
+
+
 v0.24.6
 -------
 
