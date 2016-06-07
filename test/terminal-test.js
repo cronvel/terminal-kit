@@ -47,7 +47,7 @@ describe( "Find" , function() {
 
 
 describe( "Misc" , function() {
-	it( "" , function() {
+	it( "..." , function() {
 		expect( term ).to.be.an( termkit.Terminal ) ;
 	} ) ;
 } ) ;

@@ -2,7 +2,7 @@
 v0.24.8
 -------
 
-Minor fix in progressBar (bad size when undefined prgress/eta/item)
+Minor fix in progressBar (bad size when progress/eta/item is undefined)
 
 
 v0.24.7
