@@ -1,4 +1,10 @@
 
+v0.24.9
+-------
+
+Yet another fix to progressBar. Using async-kit's setSafeTimeout() instead of an internal one.
+
+
 v0.24.8
 -------
 
