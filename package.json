@@ -10,10 +10,10 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "async-kit": "^2.0.0",
+    "async-kit": "^2.1.1",
     "nextgen-events": "^0.5.13",
-    "string-kit": "^0.5.4",
-    "tree-kit": "^0.5.20"
+    "string-kit": "^0.5.7",
+    "tree-kit": "^0.5.21"
   },
   "devDependencies": {
     "expect.js": "^0.3.1",
