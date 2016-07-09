@@ -1,4 +1,5 @@
 
+![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)
 
 # Terminal Kit
 
