@@ -1,5 +1,5 @@
 
-![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)
+[![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/terminal-kit)
 
 # Terminal Kit
 
