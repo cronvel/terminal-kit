@@ -1,4 +1,10 @@
 
+v0.24.14
+--------
+
+Fix issue #12 (when the TERM env variable does not exist)
+
+
 v0.24.13
 --------
 
