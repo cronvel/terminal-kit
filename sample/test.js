@@ -35,7 +35,10 @@
 
 
 var term = require( '../lib/termkit.js' ).terminal ;
-	
+
+term.crlf( 'toto\ntata\ntiti\n' ) ;
+return ;
+
 /*
 term( 'Terminal name: %s\n' , term.appName ) ;
 term( 'Terminal app: %s\n' , term.app ) ;
