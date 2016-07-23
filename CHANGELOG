@@ -1,14 +1,9 @@
 
-v0.24.16
---------
+v0.24.15 - v0.24.16
+-------------------
 
-Better approach for CRLF (term.options.crlf = true)
-
-
-v0.24.15
---------
-
-term.crlf
+Force CRLF with `term.options.crlf = true`.
+Not official ATM.
 
 
 v0.24.14
