@@ -35,8 +35,8 @@
 
 
 var term = require( '../lib/termkit.js' ).terminal ;
-
-term.crlf( 'toto\ntata\ntiti\n' ) ;
+term.options.crlf = true ;
+term( 'toto\ntata\ntiti\n' ) ;
 return ;
 
 /*

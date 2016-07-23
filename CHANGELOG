@@ -1,4 +1,10 @@
 
+v0.24.16
+--------
+
+Better approach for CRLF (term.options.crlf = true)
+
+
 v0.24.15
 --------
 
