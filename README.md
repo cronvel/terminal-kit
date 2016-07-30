@@ -1,5 +1,6 @@
 
 [![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/terminal-kit)
+[![Codewake](https://www.codewake.com/badges/ask_question.svg)](https://www.codewake.com/p/terminal-kit)
 
 # Terminal Kit
 
