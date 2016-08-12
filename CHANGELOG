@@ -1,4 +1,10 @@
 
+v0.24.22
+--------
+
+Bugfix: ^ caret in inputField() now works
+
+
 v0.24.21
 --------
 
