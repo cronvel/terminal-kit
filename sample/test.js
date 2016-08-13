@@ -35,8 +35,7 @@
 
 
 var term = require( '../lib/termkit.js' ).terminal ;
-term.options.crlf = true ;
-term( 'toto\ntata\ntiti\n' ) ;
+term.markupOnly( 'one ^Btwo %I three\n' ) ;
 return ;
 
 /*

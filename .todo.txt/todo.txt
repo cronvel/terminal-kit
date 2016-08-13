@@ -13,3 +13,4 @@ mrxvt support: draw-test does not work @bug
 (A) document fileInput @doc
 (A) document .inputField() options 'minLength', 'default', 'style' and 'cancelable' @doc
 (A) document .inputField() option 'keyBindings' @doc
+(A) document .markupOnly @doc
