@@ -1,5 +1,5 @@
 
-[![Github Stars](https://img.shields.io/github/stars/cronvel/terminal-kit.svg?label=★)](https://github.com/cronvel/terminal-kit/stargazers)
+[![★](https://img.shields.io/github/stars/cronvel/terminal-kit.svg?label=❤)](https://github.com/cronvel/terminal-kit/stargazers)
 [![License](https://img.shields.io/github/license/cronvel/terminal-kit.svg)](https://github.com/cronvel/terminal-kit)
 [![Downloads](https://img.shields.io/npm/dm/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
 [![Version](https://img.shields.io/npm/v/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
