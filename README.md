@@ -631,6 +631,8 @@ It produces:
 	  and return the completed `string` (if no completion can be done, it should return the input string,
 	  if multiple candidate are possible, it should return an array of string), if **the function accepts 2 arguments**
 	  (checked using *function*.length), then **the auto-completer will be asynchronous**!
+	  Also note that if it is an array or the result of the function is an array, and if that array has a
+	  special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu.
 	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
 	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
@@ -748,6 +750,9 @@ term.inputField(
 It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)
+
+Also note that if the `autoComplete` options is an array or if it is a function whose output is an array, 
+a special property `prefix` (a string) can be set on it: this prefix will be prepended to the output of the auto complete menu.
 
 
 
@@ -1237,13 +1242,15 @@ This will give you the best compatibility possible, at the cost of a callback.
 
 
 <a name="ref.autoComplete"></a>
-### .autoComplete( array , startString , [returnAlternatives] )
+### .autoComplete( array , startString , [returnAlternatives] , [prefix] )
 
 * array `Array` of string, it is the list of completion candidates
 * startString `string` this is the input string to be completed
 * returnAlternatives `boolean` (default: false) when many candidates match the input, if *returnAlternatives* is set then
   the method is allowed to return an array containing all matching candidates, else the input string (*startString*) is
   returned unchanged
+* prefix `string` (optional) prepend that string to the response string, or add a `prefix` property to the response array:
+  when used in an `inputField()`, this cause this string to be prepended to the output of the auto-complete menu.
 
 This static method is used behind the scene by [.inputField()](#ref.inputField) when auto-completion mechanisms kick in.
 

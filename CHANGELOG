@@ -1,4 +1,10 @@
 
+v0.24.26
+--------
+
+termkit.autoComplete() now accept a fourth argument: 'prefix', useful to ease issue #13
+
+
 v0.24.25
 --------
 
