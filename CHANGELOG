@@ -1,4 +1,10 @@
 
+v0.24.28
+--------
+
+Replace the '&' in the package description by 'and' (because of a long running bug on npmjs.org)
+
+
 v0.24.27
 --------
 
