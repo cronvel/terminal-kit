@@ -1,4 +1,10 @@
 
+v0.25.0
+-------
+
+Breaking changes: engine node >= 4.5, because of node v6 'new Buffer' deprecation migration
+
+
 v0.24.30
 --------
 
