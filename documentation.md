@@ -133,6 +133,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 * Advanced usages and methods
 	* [Real terminal access (e.g. escaping from pipes)](#ref.realTerminal)
 	* [.fullscreen()](#ref.fullscreen)
+	* [.processExit()](#ref.processExit)
 	* [.grabInput()](#ref.grabInput)
 	* [.getCursorLocation()](#ref.getCursorLocation)
 	* [.getColor()](#ref.getColor)
