@@ -18,6 +18,7 @@ _static
 ##############################
 lib-cov
 lcov.info
+npm-debug.log.*
 *.seed
 *.log
 *.csv
