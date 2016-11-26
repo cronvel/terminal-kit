@@ -468,7 +468,7 @@ term.grabInput( { mouse: 'button' } ) ;
 
 term.on( 'key' , function( name , matches , data ) {
 	console.log( "'key' event:" , name ) ;
-	if ( key === 'CTRL_C' ) { terminate() ; }
+	if ( name === 'CTRL_C' ) { terminate() ; }
 } ) ;
 
 term.on( 'terminal' , function( name , data ) {
