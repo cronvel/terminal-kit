@@ -1,4 +1,10 @@
 
+v0.25.5
+-------
+
+A tool moved jshint from dev-dependency to dependency: fixing it now
+
+
 v0.25.4
 -------
 
