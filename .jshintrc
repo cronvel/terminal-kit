@@ -38,5 +38,6 @@
 	"maxparams" : 6, // {int} Max number of formal params allowed per function
 	"maxdepth" : 6, // {int} Max depth of nested blocks (within functions)
 	"asi" : false, // true: Tolerate Automatic Semicolon Insertion (no semicolons)
-	"boss" : false // true: Tolerate assignments where comparisons would be expected
+	"boss" : false, // true: Tolerate assignments where comparisons would be expected
+	"esversion": 6
 }
