@@ -1,4 +1,10 @@
 
+v0.26.1
+-------
+
+Bugfix: this was not returned when shutting down
+
+
 v0.26.0
 -------
 
