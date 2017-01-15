@@ -4,6 +4,7 @@
 [![Downloads](https://img.shields.io/npm/dm/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
 [![Version](https://img.shields.io/npm/v/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
 [![Codewake](https://www.codewake.com/badges/ask_question.svg)](https://www.codewake.com/p/terminal-kit)
+[![Known Vulnerabilities](https://snyk.io/test/github/cronvel/terminal-kit/badge.svg)](https://snyk.io/test/github/cronvel/terminal-kit)
 
 [![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/terminal-kit)
 
