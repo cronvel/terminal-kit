@@ -1,4 +1,10 @@
 
+v0.26.2
+-------
+
+Fixing TextBuffer#load()
+
+
 v0.26.1
 -------
 
