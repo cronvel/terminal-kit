@@ -54,7 +54,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				history : history ,
 				autoComplete: autoComplete ,
 				//autoCompleteMenu: true ,
-				//autoCompleteHint: true ,
+				autoCompleteHint: true ,
+				hintStyle: term.brightBlack.italic ,
 				//maxLength: 3
 			} , function( error , input ) {
 			
@@ -133,7 +134,5 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	//funkyCursor() ;
 	//funkyBackground() ;
 } ) ;
-
-
 
 
