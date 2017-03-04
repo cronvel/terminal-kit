@@ -20,7 +20,7 @@ term.inputField(
 	{
 		autoComplete: autoComplete ,
 		autoCompleteHint: true ,
-		tokenStyleHook: function( token , previousTokens , term , config ) {
+		tokenHook: function( token , previousTokens , term , config ) {
 			var previousText = previousTokens.join( ' ' ) ;
 			
 			switch ( token )

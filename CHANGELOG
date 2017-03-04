@@ -1,4 +1,10 @@
 
+v0.27.1
+-------
+
+inputField() token hilighting API fixed, all features of issue #19 are coded, documentation not updated ATM
+
+
 v0.27.0
 -------
 
