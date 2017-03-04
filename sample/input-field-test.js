@@ -53,7 +53,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		term.inputField( {
 				history : history ,
 				autoComplete: autoComplete ,
-				//autoCompleteMenu: true ,
+				autoCompleteMenu: true ,
 				autoCompleteHint: true ,
 				hintStyle: term.brightBlack.italic ,
 				//maxLength: 3

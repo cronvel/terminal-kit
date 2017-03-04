@@ -1,4 +1,10 @@
 
+v0.27.2
+-------
+
+inputField(): fixed a bug introduced in v0.27.0, autoCompleteMenu was not exiting without choosing an existing alternative
+
+
 v0.27.1
 -------
 
