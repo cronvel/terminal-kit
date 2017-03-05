@@ -581,7 +581,7 @@ We can specify the keys for *yes* and *no* by providing a string or an array of 
 
 It returns an object featuring some functions to control things during the input process:
 
-* abort(): abort the input process and do not even call the inputField()'s callback
+* abort(): abort the input process and do not even call the yesOrNo()'s callback
 
 
 
@@ -625,6 +625,12 @@ It produces:
 
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
+	* default `string` default input/placeholder
+	* cancelable `boolean` if true (default: false), it is cancelable by user using the ESC key (by default),
+	  thus will return null
+	* style `function` style used, default to `term()`
+	* maxLength `number` maximum length of the input
+	* minLength `number` minimum length of the input
 	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
 	* maxLength `number` (optional) the maximum length (in characters) of the user input
 	* autoComplete `Array` or `Function( inputString , [callback] )` (optional) an array of possible completion,
