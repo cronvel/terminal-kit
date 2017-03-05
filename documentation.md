@@ -626,9 +626,10 @@ It produces:
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
 	* default `string` default input/placeholder
-	* cancelable `boolean` if true (default: false), it is cancelable by user using the ESC key (by default),
+	* cancelable `boolean` if true (default: false), it is cancelable by user using the cancel key (default: ESC),
 	  thus will return null
-	* style `function` style used, default to `term()`
+	* style `function` style used, default to the terminal instance (no style)
+	* hintStyle `function` style used for hint (auto-completion preview), default to `terminal.brightBlack` (gray)
 	* maxLength `number` maximum length of the input
 	* minLength `number` minimum length of the input
 	* history `Array` (optional) an history array, so UP and DOWN keys move up and down in the history
@@ -644,6 +645,22 @@ It produces:
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
 	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
 	  that is used for the completion (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
+	* autoCompleteHint `boolean` if true (default: false) use the hintStyle to write the auto-completion preview
+	  at the right of the input
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string).
+	  Available actions are:
+	  	* submit: submit the input field (default: ENTER and KP_ENTER)
+	  	* cancel: cancel the input field (default: ESC, the input field should be cancelable)
+	  	* backDelete: delete one character backward (default: BACKSPACE)
+	  	* delete: delete one character (default: DELETE)
+	  	* backward: move the cursor one character backward (default: LEFT)
+	  	* forward: move the cursor one character forward (default: RIGHT)
+	  	* historyPrevious: use the previous history entry (default: UP)
+	  	* historyNext: use the next history entry (default: DOWN)
+	  	* startOfInput: move the cursor at the begining of input (default: HOME)
+	  	* endOfInput: move the cursor at the end of input (default: END)
+	  	* autoComplete: auto-complete the input (default: TAB)
+
 * callback( error , input )
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
