@@ -666,6 +666,9 @@ It produces:
 	  The config settings are always reset on new input, on new tokenization pass.
 	  The hook can return a *style* (`Function`, like the *style* option) that will be used to print that token.
 	  Used together, this can achieve syntax hilighting, as well as dynamic behavior suitable for a shell.
+	  Finally, it can return a string, styled or not, that will be displayed in place of that token,
+	  useful if the token should have multiple styles (but that string **MUST** contains the same number of
+	  printable character, or it would lead hazardous behavior).
 	* tokenResetHook `Function( term , config )` this is a hook called before the first token
 	* tokenRegExp `RegExp` this is the regex used to tokenize the input, by default a token is space-delimited,
 	  so "one two three" would be tokenized as [ "one" , "two" , "three" ].
