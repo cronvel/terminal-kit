@@ -1,4 +1,10 @@
 
+v0.28.0
+-------
+
+Breaking change: .inputField()'s tokenHook option has changed, the arguments of the function are now ( token , isEndOfInput , previousTokens , term , config ). See the doc. #19
+
+
 v0.27.4
 -------
 

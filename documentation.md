@@ -648,10 +648,13 @@ It produces:
 	* autoCompleteHint `boolean` if true (default: false) use the hintStyle to write the auto-completion preview
 	  at the right of the input
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string).
-	* tokenHook `Function( token , previousTokens , term , config )` this is a hook called for each token of the input,
-	  where:
+	* tokenHook `Function( token , isEndOfInput , previousTokens , term , config )` this is a hook called for each token
+	  of the input, where:
 	  	* token `String` is the current token
+                * isEndOfInput `boolean` true if this is the **last token and if it ends the input string**
+                  (e.g. it is possible for the last token to be followed by some blank char, in that case *isEndOfInput*
 	  	* previousTokens `Array` of `String` is a array containing all tokens before the current one
+                  would be false)
 	  	* term is a Terminal instance
 	  	* config `Object` is an object containing dynamic settings that can be altered by the hook, where:
 	  		* style `Function` style in use (see the *style* option)
@@ -1286,7 +1289,7 @@ This will give you the best compatibility possible, at the cost of a callback.
 
 
 <a name="ref.autoComplete"></a>
-### .autoComplete( array , startString , [returnAlternatives] , [prefix] )
+### .autoComplete( array , startString , [returnAlternatives] , [prefix] , [postfix] )
 
 * array `Array` of string, it is the list of completion candidates
 * startString `string` this is the input string to be completed
@@ -1295,6 +1298,8 @@ This will give you the best compatibility possible, at the cost of a callback.
   returned unchanged
 * prefix `string` (optional) prepend that string to the response string, or add a `prefix` property to the response array:
   when used in an `inputField()`, this cause this string to be prepended to the output of the auto-complete menu.
+* postfix `string` (optional) append that string to the response string, or add a `postfix` property to the response array:
+  when used in an `inputField()`, this cause this string to be appended to the output of the auto-complete menu.
 
 This static method is used behind the scene by [.inputField()](#ref.inputField) when auto-completion mechanisms kick in.
 
