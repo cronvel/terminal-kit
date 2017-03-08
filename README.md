@@ -653,8 +653,8 @@ It produces:
 	  	* token `String` is the current token
                 * isEndOfInput `boolean` true if this is the **last token and if it ends the input string**
                   (e.g. it is possible for the last token to be followed by some blank char, in that case *isEndOfInput*
-	  	* previousTokens `Array` of `String` is a array containing all tokens before the current one
                   would be false)
+	  	* previousTokens `Array` of `String` is a array containing all tokens before the current one
 	  	* term is a Terminal instance
 	  	* config `Object` is an object containing dynamic settings that can be altered by the hook, where:
 	  		* style `Function` style in use (see the *style* option)
