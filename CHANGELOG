@@ -2,7 +2,7 @@
 v0.28.2
 -------
 
-.inputField(): tokenHook() can return a string now. (part of issue #14)
+.inputField(): tokenHook() can return a string now. (part of issue #19)
 
 
 v0.28.1
