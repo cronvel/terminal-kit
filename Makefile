@@ -5,7 +5,7 @@
 
 # The first rule is the default rule, when invoking "make" without argument...
 # Build every buildable things
-all: install doc
+all: install
 
 # Just install things so it works, basicaly: it just performs a "npm install --production" ATM
 install: log/npm-install.log
@@ -21,9 +21,6 @@ lint: log/jshint.log
 
 # This run the Mocha BDD test, display it to STDOUT & save it to log/mocha.log
 unit: log/mocha.log
-
-# This build the doc and README.md
-doc: README.md
 
 # This publish to NPM and push to Github, if we are on master branch only
 publish: log/npm-publish.log log/github-push.log
@@ -49,10 +46,6 @@ log/jshint.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/term
 # Mocha BDD STDOUT test
 log/mocha.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js
 	${MOCHA} test/terminal-test.js -R spec | tee log/mocha.log ; exit $${PIPESTATUS[0]}
-
-# README
-README.md: doc/documentation.md
-	cat doc/documentation.md > README.md
 
 # Mocha Markdown BDD spec
 bdd-spec.md: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js test/terminal-test.js
@@ -88,7 +81,7 @@ log/npm-dev-install.log: package.json
 
 # Delete files, mostly log and non-versioned files
 clean-all:
-	rm -rf log/*.log README.md bdd-spec.md node_modules
+	rm -rf log/*.log bdd-spec.md node_modules
 
 # This will fail if we are not on master branch (grep exit 1 if nothing found)
 check-if-master-branch:

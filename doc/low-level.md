@@ -1,0 +1,220 @@
+
+## Terminal's Low-level and Basic *chainable* Methods
+
+This section is about low-level methods of `Terminal` instances.
+
+**NOTE:** In the following code sample, `term` is always a `Terminal` instance.
+
+Basic methods map low-level terminal capabilities.
+
+For all the functions below, additional arguments can be provided.
+
+If a boolean is provided, it will turn the feature *on* or *off*.
+For example `term.red( true )` turn all subsequent output in red, while `term.red( false )` disable red and go back
+to default color.
+
+Without arguments, it is always the same as *true*, e.g. `term.red()` do the same thing than `term.red()`.
+
+Some function cannot be turned off, they just perform an action.
+For example `term.reset()` reset the terminal, usually to its default.
+This is not reversible, thus `term.reset( false )` does nothing.
+
+If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the
+feature is turn *off*.
+That's it:  
+`term.red( 'Hello world!' )`  
+... is the same as:  
+`term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
+
+Also those string support a printf()-like formatting syntax.  
+So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."* in red.
+
+**New:** since *v0.16.x*, style markup are supported as a shorthand.
+Style markup are introduced by a caret `^` followed by another character.
+Colors are produced by the first letter of its name, e.g. red is produced with a `^r`, except black which is produced by `^k`.
+Other styles are produced with a symbol. For example `^_` switch to underline.
+To remove all styles, `^:` or `^ ` can be used.
+A style reset is always produced at the end of the string as soon as one style markup was used.
+
+Those two lines produce the same result:
+```js
+term( "My name is " ).red( "Jack" )( " and I'm " ).green( "32\n" ) ;
+term( "My name is ^rJack^ and I'm ^g32\n" ) ;
+```
+
+See [the full style markup reference](https://github.com/cronvel/string-kit#ref.format.markup) for details.
+
+
+
+All those functions are chainable, and their arguments can be combined.
+We can do:  
+`term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )`
+which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
+
+
+
+## Table of Contents
+
+* [Colors](#ref.colors)
+* [Styles](#ref.styles)
+* [Moving the cursor](#ref.movingCursor)
+* [Editing the screen](#ref.editingScreen)
+* [Input/Output](#ref.io)
+* [Misc](#ref.misc)
+
+
+
+<a name="ref.colors"></a>
+### Foreground colors
+
+* .defaultColor(): back to the default foreground color
+* .black(): ...
+* .red(): ...
+* .green(): ...
+* .yellow(): dark yellow, most of time brown or orange
+* .blue(): ...
+* .magenta(): ...
+* .cyan(): ...
+* .white(): ...
+* .brightBlack(): ...
+* .brightRed(): ...
+* .brightGreen(): ...
+* .brightYellow(): true yellow
+* .brightBlue(): ...
+* .brightMagenta(): ...
+* .brightCyan(): ...
+* .brightWhite(): ...
+* .color(register): choose between 16 colors using an 0..15 integer
+* .darkColor(register): choose between 8 regular (dark) colors using an 0..7 integer
+* .brightColor(register): choose between 8 bright colors using an 0..7 integer
+* .color256(register): if the terminal support 256 colors, it chooses between them using an 0..255 integer
+* .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the 
+	exact color if the terminal support 24 bits colors), *r,g,b* are in the 0..255 range
+* .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or
+	even the exact color if the terminal support 24 bits colors), *l* is in the 0..255 range
+
+
+
+### Background colors
+
+* .bgDefaultColor(): back to the default background color
+* .bgBlack(): ...
+* .bgRed(): ...
+* .bgGreen(): ...
+* .bgYellow(): dark yellow, most of time brown or orange
+* .bgBlue(): ...
+* .bgMagenta(): ...
+* .bgCyan(): ...
+* .bgWhite(): ...
+* .bgDarkColor(): ...
+* .bgBrightBlack(): ...
+* .bgBrightRed(): ...
+* .bgBrightGreen(): ...
+* .bgBrightYellow(): true yellow
+* .bgBrightBlue(): ...
+* .bgBrightMagenta(): ...
+* .bgBrightCyan(): ...
+* .bgColor(register): choose between 16 colors using an 0..15 integer
+* .bgBrightWhite(): choose between 8 regular (dark) colors using an 0..7 integer
+* .bgBrightColor(): choose between 8 bright colors using an 0..7 integer
+* .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
+* .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the
+	exact color if the terminal support 24 bits colors) as the background color, *r,g,b* are in the 0..255 range
+* .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or even
+	the exact color if the terminal support 24 bits colors) as the background color, *l* is in the 0..255 range
+
+
+
+<a name="ref.styles"></a>
+### Styles
+
+* .styleReset(): reset all styles and go back to default colors
+* .bold(): bold text
+* .dim(): faint color
+* .italic(): italic
+* .underline(): underline
+* .blink(): blink text, not widely supported
+* .inverse(): foreground and background color
+* .hidden(): invisible, but can be copy/paste'd
+* .strike(): strike through
+
+
+
+<a name="ref.movingCursor"></a>
+### Moving the Cursor
+
+* .saveCursor(): save cursor position
+* .restoreCursor(): restore a previously saved cursor position
+* .up(n): move the cursor 'n' chars up
+* .down(n): move the cursor 'n' chars down
+* .right(n): move the cursor 'n' chars right
+* .left(n): move the cursor 'n' chars left
+* .nextLine(n): move the cursor to beginning of the line, 'n' lines down
+* .previousLine(n): move the cursor to beginning of the line, 'n' lines up
+* .column(x): move the cursor to column x
+* .scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom, the absolute cursor position do not change (Linux Console don't support it)
+* .scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top, the absolute cursor position do not change (Linux Console don't support it)
+* .moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
+* .move(x,y): relative move of the cursor
+* .hideCursor(): hide/show the cursor
+
+
+
+<a name="ref.editingScreen"></a>
+### Editing the Screen
+
+* .clear(): clear the screen and move the cursor to the upper-left corner
+* .eraseDisplayBelow(): erase everything below the cursor
+* .eraseDisplayAbove(): erase everything above the cursor
+* .eraseDisplay(): erase everything
+* .eraseLineAfter(): erase current line after the cursor
+* .eraseLineBefore(): erase current line before the cursor
+* .eraseLine(): erase current line
+* .insertLine(n): insert n lines
+* .deleteLine(n): delete n lines
+* .insert(n): insert n char after (like the INSERT key)
+* .delete(n): delete n char after (like the DELETE key)
+* .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1)
+  followed by a .delete(1)
+* .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
+
+
+
+<a name="ref.io"></a>
+### Input/Output
+
+* .requestCursorLocation(): request the cursor location, a 'terminal' event will be fired when available
+* .requestScreenSize(): **DEPRECATED** request for screen size, a 'terminal' event will be fired when available,
+	**DO NOT USE**: use .width and .height instead, those properties are updated whenever a resize event is received
+* .requestColor(n): **rarely useful** request for color *n*, **DO NOT USE**: use high-level .getColor() instead
+* .applicationKeypad(): should allow keypad to send different code than 0..9 keys, not widely supported
+
+
+
+### Internal input/output (do not use directly, use grabInput() instead)
+
+* .mouseButton(): ask the terminal to send event when a mouse button is pressed, with the mouse cursor position
+* .mouseDrag(): ask the terminal to send event when a mouse button is pressed and when draging, with the mouse cursor position
+* .mouseMotion(): ask the terminal to send all mouse event, even mouse motion that occurs without buttons
+* .mouseSGR(): another mouse protocol that extend coordinate mapping (without it, it supports only 223 rows and columns)
+* .focusEvent(): ask the terminal to send event when it gains and loses focus, not widely supported
+
+
+
+<a name="ref.misc"></a>
+### Misc
+
+* .reset(): full reset of the terminal
+* .error(): it just set error to true so it will write to STDERR instead of STDOUT
+* .str(): do not output anything, instead return a string containing the sequences
+* .bell(): emit an audible bell
+* .noFormat(str): disable string formatting - useful when your string may contain `%` (e.g. user input) and you
+	don't want to escape them
+* .windowTitle(str): set the title of an xterm-compatible window to *str*
+* .setCursorColor(register): set the cursor color to one of the 256 *register*
+* .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
+* .setDefaultColorRgb(r,g,b): set the value of the default foreground color
+* .setDefaultBgColorRgb(): set the value of the default background color, this is the terminal window background
+
+
+
