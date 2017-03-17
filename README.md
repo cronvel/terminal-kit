@@ -28,7 +28,7 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 ## More Screenshot, PleaZe!
 
-[![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.gif)](doc/low-level.md)
+[![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.png)](doc/low-level.md)
 
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)](doc/high-level.md#ref.inputField)
 
