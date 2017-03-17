@@ -496,7 +496,7 @@ term.singleLineMenu( items , options , function( error , response ) {
 
 It produces:
 
-![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)
+![Single line menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)
 
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
 and the selected item using blue on green.
