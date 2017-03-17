@@ -40,6 +40,7 @@ This constructor has three argument signatures.
 	* xmax `integer` the maximum x-coordinate of the rectangle (included)
 	* ymin `integer` the minimum y-coordinate of the rectangle
 	* ymax `integer` the maximum y-coordinate of the rectangle (included)
+  
   or:	
 	* x `integer` the minimum x-coordinate of the rectangle
 	* y `integer` the minimum y-coordinate of the rectangle

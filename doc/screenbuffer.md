@@ -80,19 +80,20 @@ This creates a ScreenBuffer instance with the appropriate options.
 ### ScreenBuffer.createFromString( options , str )
 
 * options `Object`, where:
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags, passed to [.put()](#ref.ScreenBuffer.put))
-	* transparencyChar `string` a single character that is transparent
-	* transparencyType `integer` bit flags for the transparency char
+	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
+	  see: [the attribute object](#ref.ScreenBuffer.attributes))
+	* transparencyChar `string` (optional) a single character that will have get the transparency attribute
+	* transparencyType `integer` (optional, default: full transparency) bit flags for the transparency char
 * str `string` the source string
 
 This creates a ScreenBuffer instance from a string.
 The height and width of the *screenBuffer* is computed using respectively the number of lines and the length of the largest line.
 The string is written into the *screenBuffer* using the `attr` option.
-See [the attr object and flags](#ref.ScreenBuffer.attr) for details.
+See [the attr object and flags](#ref.ScreenBuffer.attributes) for details.
 
 If the `transparencyChar` option is set, this character will produce a transparent cell, or if `transparencyType` is specified,
 a partly transparent cell.
-See [the transparency flags](#ref.ScreenBuffer.transparency-flags) for details.
+See [the transparency flags](#ref.ScreenBuffer.attributes) for details.
 
 
 
@@ -136,7 +137,8 @@ This can be overriden when invoking *.draw()*.
 ### .fill( [options] )
 
 * options `Object` (optional), where:
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags, passed to [.put()](#ref.ScreenBuffer.put))
+	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
+	  see: [the attribute object](#ref.ScreenBuffer.attributes))
 	* char `string` a single character used to fill the buffer
 
 It fills the *screenBuffer* with the specified *char* and *attributes*.
@@ -156,7 +158,8 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 * options `Object`, where:
 	* x `integer` (optional) x-coordinate where to put the text, bypassing the cursor x-coordinate
 	* y `integer` (optional) y-coordinate where to put the text, bypassing the cursor y-coordinate
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags, passed to [.put()](#ref.ScreenBuffer.put))
+	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
+	  see: [the attribute object](#ref.ScreenBuffer.attributes))
 	* wrap `boolean` if true, text wrapping is enabled: when the cursor move beyond the last column, it is moved to the begining
 	  of the next line
 	* direction `string` the direction where the cursor move after each char, one of:
@@ -169,10 +172,10 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 	  allow more precise controle than the *direction* option
 	* dy `integer` y-coordinate increment after each character (default: 0),
 	  allow more precise controle than the *direction* option
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags, passed to [.put()](#ref.ScreenBuffer.put))
 * format `string` the string or the formated string to put into the *screenBuffer*
   (works just like any other `term( format , args... )`)
 * arg1 (optional) the first argument of the format
+* arg2...
 * ...
 
 It puts some text into the *screenBuffer*, using the provided *attributes*.
@@ -189,7 +192,7 @@ It puts some text into the *screenBuffer*, using the provided *attributes*.
 It gets the character and attributes of the cell the *screenBuffer*'s cursor is at, or the cell for the supplied x and y coordinate.
 It returns an object, where:
 * char `string` a single character string, the character at that cell
-* attr `Object` the attribute object for this cell
+* attr `Object` the attribute object for this cell, see: [the attribute object](#ref.ScreenBuffer.attributes)
 
 
 
@@ -203,6 +206,7 @@ It returns an object, where:
 	* height `integer` the height of the rectangle
 	* x `integer` (optional, default to the left-most x-coordinate) the minimum x-coordinate of the rectangle
 	* y `integer` (optional, default to the top-most y-coordinate) the minimum y-coordinate of the rectangle
+  
   or:
 	* xmin `integer` the minimum x-coordinate of the rectangle
 	* xmax `integer` the maximum x-coordinate of the rectangle (included)
