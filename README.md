@@ -26,7 +26,10 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 
 
-## More Screenshot, PleaZe!
+## Screenshot, PleaZe!
+
+This is a fraction of what Terminal-Kit can do, with only few lines.
+Click any image to see the documentation related to the feature!
 
 [![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.png)](doc/low-level.md)
 
