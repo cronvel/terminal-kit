@@ -13,7 +13,7 @@ Each cell of the rectangular area contains:
 * a blending mask (bit flags: foreground transparency, background transparency, character transparency
   and style transparency)
 
-They are two kind of *screenBuffer*s, depending on the write-destination:
+They are two kinds of *screenBuffers*, depending on the write-destination:
 
 * *screenBuffer* writing directly to the terminal
 * *screenBuffer* writing to another *screenBuffer*
@@ -38,8 +38,11 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	* [ScreenBuffer.object2attr()](#ref.ScreenBuffer.object2attr)
 	* [ScreenBuffer.loadSync()](#ref.ScreenBuffer.loadSync)
 
+* Properties:
+	* [.x](#ref.ScreenBuffer.xy)
+	* [.y](#ref.ScreenBuffer.xy)
+
 * Methods:
-	* [.saveSync()](#ref.ScreenBuffer.saveSync)
 	* [.fill()](#ref.ScreenBuffer.fill)
 	* [.clear()](#ref.ScreenBuffer.clear)
 	* [.put()](#ref.ScreenBuffer.put)
@@ -50,6 +53,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	* [.moveTo()](#ref.ScreenBuffer.moveTo)
 	* [.dumpChars()](#ref.ScreenBuffer.dumpChars)
 	* [.dump()](#ref.ScreenBuffer.dump)
+	* [.saveSync()](#ref.ScreenBuffer.saveSync)
 
 * [The Attribute Object](#ref.ScreenBuffer.attributes)
 
@@ -59,8 +63,8 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 ### ScreenBuffer.create( options )
 
 * options `Object`, where:
-	* width `integer` buffer width (default to dst.width)
-	* height `integer` buffer height (default to dst.height)
+	* width `integer` buffer width (default: dst.width)
+	* height `integer` buffer height (default: dst.height)
 	* dst: a `Terminal` or `ScreenBuffer` instance, the destination to write on
 	* x: `integer` (optional) default x-position in the dst
 	* y: `integer` (optional) default y-position in the dst
@@ -115,16 +119,16 @@ It returns the bit flags form of the attributes from its object form.
 
 * filepath `string` the path of a *screenBuffer* file to load
 
-This static method loads a *screenBuffer* file and returns a `ScreenBuffer` instance.
+This static method loads **synchronously** a *screenBuffer* file and returns a `ScreenBuffer` instance.
 
 
 
-<a name="ref.ScreenBuffer.saveSync"></a>
-### .saveSync( filepath )
+<a name="ref.ScreenBuffer.xy"></a>
+### .x , .y
 
-* filepath `string` the path of the file to write the *screenBuffer*
-
-This saves the *screenBuffer* into a file.
+Those properties are respectively the x and the y coordinate, in the *dst* (destination), where the *screenBuffer*
+should be drawed.
+This can be overriden when invoking *.draw()*.
 
 
 
@@ -215,10 +219,10 @@ With the four properties, it is possible to define where the current *screenBuff
 <a name="ref.ScreenBuffer.draw"></a>
 ### .draw( [options] )
 
-* options `Object` (optional) if provided, each defined option will overide the default behavior. Available options are:
-	* dst `Terminal` or `ScreenBuffer` (optional) overide the `screenBuffer.dst`
-	* x `integer` (optional) overide `screenBuffer.x`
-	* y `integer` (optional) overide `screenBuffer.y`
+* options `Object` (optional) if provided, each defined option will override the default behavior. Available options are:
+	* dst `Terminal` or `ScreenBuffer` (optional) override the `screenBuffer.dst`
+	* x `integer` (optional) override `screenBuffer.x`
+	* y `integer` (optional) override `screenBuffer.y`
 	* srcClipRect `Rect` (optional, default: the whole source region is used) the source clipping rectangle
 	* dstClipRect `Rect` (optional, default: the whole destination region is used) the destination clipping rectangle
 	* blending `boolean` (optional, default: false) if true blending (transparencies) is allowed, **it does not work if
@@ -241,8 +245,8 @@ or another `ScreenBuffer` instance.
 <a name="ref.ScreenBuffer.drawCursor"></a>
 ### .drawCursor( [options] )
 
-* options `Object` (optional) if provided, each defined option will overide the default behavior. Available options are:
-	* dst `Terminal` or `ScreenBuffer` (optional) overide the `screenBuffer.dst`
+* options `Object` (optional) if provided, each defined option will override the default behavior. Available options are:
+	* dst `Terminal` or `ScreenBuffer` (optional) override the `screenBuffer.dst`
 
 This draws the current *screenBuffer*'s cursor into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBuffer` instance.
@@ -275,6 +279,15 @@ Mostly useful for debugging purpose.
 
 Returns a string containing a dump of the *screenBuffer*, including attributes.
 Mostly useful for debugging purpose, but will likely gives you a headache.
+
+
+
+<a name="ref.ScreenBuffer.saveSync"></a>
+### .saveSync( filepath )
+
+* filepath `string` the path of the file to write the *screenBuffer*
+
+This saves **synchronously** the *screenBuffer* to a file.
 
 
 

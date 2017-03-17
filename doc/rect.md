@@ -59,33 +59,6 @@ This constructor has three argument signatures.
 
 
 <a name="ref.Rect.set"></a>
-### Rect#set( obj )
-
-* obj `Object`, it can contain either:
-	* xmin `integer` the minimum x-coordinate of the rectangle
-	* xmax `integer` the maximum x-coordinate of the rectangle (included)
-	* ymin `integer` the minimum y-coordinate of the rectangle
-	* ymax `integer` the maximum y-coordinate of the rectangle (included)
-
-This set the new positions and dimensions for the rectangle.
-
-
-
-<a name="ref.Rect.clip"></a>
-### Rect#clip( dstRect , [offsetX] , [offsetY] , [dstClipping] )
-
-* dstRect `Rect` the destination *Rect* instance
-* offsetX `integer` the x-offset of the source relative to the destination
-* offsetY `integer` the y-offset of the source relative to the destination
-* dstClipping `boolean` if true, the *dstRect* is clipped too (i.e. mutual clipping of *src* and *dst*)
-
-This clips the source *Rect* instance relative to the *dstRect*.
-
-Argument *offsetX* and *offsetY* are offsets of the source relative to the *dstRect* coordinate system, i.e. the position
-of the source rectangle inside the destination rectangle.
-
-
-
 <a name="ref.Rect.wrappingRect"></a>
 ### Rect.wrappingRect( params )
 
@@ -127,4 +100,31 @@ would not be clipped away, instead it would be copied on the left-side.
 ### Rect.wrapIterator()
 
 *Internal usage only, not part of the public API.*
+
+
+
+### .set( obj )
+
+* obj `Object`, it can contain either:
+	* xmin `integer` the minimum x-coordinate of the rectangle
+	* xmax `integer` the maximum x-coordinate of the rectangle (included)
+	* ymin `integer` the minimum y-coordinate of the rectangle
+	* ymax `integer` the maximum y-coordinate of the rectangle (included)
+
+This set the new positions and dimensions for the rectangle.
+
+
+
+<a name="ref.Rect.clip"></a>
+### .clip( dstRect , [offsetX] , [offsetY] , [dstClipping] )
+
+* dstRect `Rect` the destination *Rect* instance
+* offsetX `integer` the x-offset of the source relative to the destination
+* offsetY `integer` the y-offset of the source relative to the destination
+* dstClipping `boolean` if true, the *dstRect* is clipped too (i.e. mutual clipping of *src* and *dst*)
+
+This clips the source *Rect* instance relative to the *dstRect*.
+
+Argument *offsetX* and *offsetY* are offsets of the source relative to the *dstRect* coordinate system, i.e. the position
+of the source rectangle inside the destination rectangle.
 
