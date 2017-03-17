@@ -1,4 +1,6 @@
 
+
+<a name="top"></a>
 ## Terminal's Low-level and Basic *chainable* Methods
 
 This section is about low-level methods of `Terminal` instances.
@@ -56,6 +58,7 @@ which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in
 ## Table of Contents
 
 * [Colors](#ref.colors)
+* [Background Colors](#ref.bgColors)
 * [Styles](#ref.styles)
 * [Moving the cursor](#ref.movingCursor)
 * [Editing the screen](#ref.editingScreen)
@@ -95,6 +98,7 @@ which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in
 
 
 
+<a name="ref.bgColors"></a>
 ### Background colors
 
 * .bgDefaultColor(): back to the default background color
@@ -191,6 +195,7 @@ which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in
 
 
 
+<a name="ref.internal-io"></a>
 ### Internal input/output (do not use directly, use grabInput() instead)
 
 * .mouseButton(): ask the terminal to send event when a mouse button is pressed, with the mouse cursor position

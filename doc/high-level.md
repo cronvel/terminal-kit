@@ -1,4 +1,6 @@
 
+
+<a name="top"></a>
 ## Terminal's High-level and Advanced Methods
 
 This section is about high-level methods of `Terminal` instances.
@@ -385,7 +387,8 @@ It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)
 
-If we need our own auto-completer, we might take advantage of the built-in static method [termkit.autoComplete()](#ref.autoComplete).
+If we need our own auto-completer, we might take advantage of the built-in static method
+[termkit.autoComplete()](global-api.md#ref.autoComplete).
 
 Custom auto-completer can be asynchronous, if the function's *length* is **exactly 2**.
 

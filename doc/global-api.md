@@ -1,5 +1,6 @@
 
 
+<a name="top"></a>
 ## Global Terminal-Kit API: Methods of Module's Root
 
 This section is about the main-module methods.

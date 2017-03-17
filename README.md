@@ -53,19 +53,19 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
-* colors, 256 colors or even 24 bits colors, if the terminal supports it
-* styles (bold, underline, italic, and many more)
+* [colors, 256 colors or even 24 bits colors](doc/low-level.md#ref.colors), if the terminal supports it
+* [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)
 * style mixing
 * string formatting
 * short style markup
-* cursor positioning
-* keyboard input
+* [cursor positioning](doc/low-level.md#ref.movingCursor)
+* [keyboard input](doc/high-level.md#ref.grabInput)
 * mouse support (GPM is supported for the Linux Console)
-* terminal window title
-* input field
-* interactive 'yes or no'
-* screen & off-screen buffers (a concept similar to SDL's *Surface*)
-* event-driven
+* [terminal window title](doc/low-level.md#ref.misc)
+* [input field](doc/high-level.md#ref.inputField)
+* [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
+* [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
+* [event-driven](doc/events.md#top)
 * Platform: any xterm-compatible terminal, it has been tested successfully with:
 	* xterm
 	* gnome-terminal
@@ -125,6 +125,6 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 ```
 
 
-### [I want to READ THE DOC NOW!](doc/documentation.md)
+### [I want to READ THE DOC NOW!](doc/documentation.md#ref.TOC)
 
 

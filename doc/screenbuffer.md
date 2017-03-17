@@ -1,5 +1,6 @@
 
 
+<a name="top"></a>
 <a name="ref.ScreenBuffer"></a>
 ## The ScreenBuffer
 
@@ -201,7 +202,7 @@ It returns an object, where:
 ### .resize( fromRect )
 
 * fromRect `Object` or `Rect` the rectangle used to resize the buffer, if it is an object, it should contains properties
-  needed by the [`Rect`'s contructor](https://github.com/cronvel/terminal-kit/blob/master/doc/rect.md), namely either:
+  needed by the [`Rect`'s contructor](rect.md#ref.Rect.create), namely either:
 	* width `integer` the width of the rectangle
 	* height `integer` the height of the rectangle
 	* x `integer` (optional, default to the left-most x-coordinate) the minimum x-coordinate of the rectangle

@@ -28,6 +28,7 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 
 
+<a name="ref.quick"></a>
 ## Quick examples
 
 ```js
@@ -97,7 +98,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 <a name="ref.TOC"></a>
 ## Table of Contents
 
-* [Global Terminal-Kit API](global-api.md)
+* [Global Terminal-Kit API](global-api.md#top)
 	* [termkit.terminal: The Default Instance](global-api.md#ref.terminal)
 	* [termkit.realTerminal: Real Terminal Access (e.g. escaping from pipes)](global-api.md#ref.realTerminal)
 	* [termkit.createTerminal()](global-api.md#ref.createTerminal)
@@ -105,7 +106,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [termkit.getDetectedTerminal()](global-api.md#ref.getDetectedTerminal)
 	* [termkit.autoComplete()](global-api.md#ref.autoComplete)
 
-* [Terminal's Low-level and Basic *chainable* Methods](low-level.md)
+* [Terminal's Low-level and Basic *chainable* Methods](low-level.md#top)
 	* [Colors](low-level.md#ref.colors)
 	* [Styles](low-level.md#ref.styles)
 	* [Moving the cursor](low-level.md#ref.movingCursor)
@@ -113,7 +114,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [Input/Output](low-level.md#ref.io)
 	* [Misc](low-level.md#ref.misc)
 
-* [Terminal's High-level and Advanced Methods](high-level.md)
+* [Terminal's High-level and Advanced Methods](high-level.md#top)
 	* [.fullscreen()](high-level.md#ref.fullscreen)
 	* [.processExit()](high-level.md#ref.processExit)
 	* [.grabInput()](high-level.md#ref.grabInput)
@@ -128,13 +129,13 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.progressBar()](high-level.md#ref.progressBar)
 	* [.slowTyping()](high-level.md#ref.slowTyping)
 	
-* [Terminal's Events](events.md)
+* [Terminal's Events](events.md#top)
 	* ['resize'](events.md#ref.event.resize)
 	* ['key'](events.md#ref.event.key)
 	* ['terminal'](events.md#ref.event.terminal)
 	* ['mouse'](events.md#ref.event.mouse)
 
-* [ScreenBuffer](screenbuffer.md)
-* [Rect](rect.md)
+* [ScreenBuffer](screenbuffer.md#top)
+* [Rect](rect.md#top)
 
 

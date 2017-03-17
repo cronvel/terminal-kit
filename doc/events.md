@@ -1,5 +1,6 @@
 
 
+<a name="top"></a>
 ## Events
 
 Those events are fired on your `Terminal` instances.
