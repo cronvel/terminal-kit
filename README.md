@@ -28,13 +28,22 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 ## More Screenshot, PleaZe!
 
+[![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.gif)](doc/low-level.md)
+
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)](doc/high-level.md#ref.inputField)
+
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)](doc/high-level.md#ref.inputField)
+
 [![Single line menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)](doc/high-level.md#ref.singleLineMenu)
+
 [![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)](doc/high-level.md#ref.progressBar)
+
 [![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)](doc/high-level.md#ref.progressBar)
+
 [![Slow typing output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/slow-typing-doc1.gif)](doc/high-level.md#ref.slowTyping)
+
 [![Yes or no output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/yes-no-doc1.gif)](doc/high-level.md#ref.yesOrNo)
+
 [![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
 
 

@@ -106,12 +106,12 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [termkit.autoComplete()](global-api.md#ref.autoComplete)
 
 * [Terminal's Low-level and Basic *chainable* Methods](low-level.md)
-	* [Colors](basic.md#ref.colors)
-	* [Styles](basic.md#ref.styles)
-	* [Moving the cursor](basic.md#ref.movingCursor)
-	* [Editing the screen](basic.md#ref.editingScreen)
-	* [Input/Output](basic.md#ref.io)
-	* [Misc](basic.md#ref.misc)
+	* [Colors](low-level.md#ref.colors)
+	* [Styles](low-level.md#ref.styles)
+	* [Moving the cursor](low-level.md#ref.movingCursor)
+	* [Editing the screen](low-level.md#ref.editingScreen)
+	* [Input/Output](low-level.md#ref.io)
+	* [Misc](low-level.md#ref.misc)
 
 * [Terminal's High-level and Advanced Methods](high-level.md)
 	* [.fullscreen()](high-level.md#ref.fullscreen)
