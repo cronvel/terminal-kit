@@ -118,6 +118,21 @@ It returns an object, where:
 
 
 
+<a name="ref.ScreenBuffer.resize"></a>
+### ScreenBuffer#resize( [options] )
+
+* options `Object` (optional), where:
+	* x `integer` (optional) x-coordinate of the cell to get, bypassing the cursor x-coordinate
+	* y `integer` (optional) y-coordinate of the cell to get, bypassing the cursor y-coordinate
+
+It gets the character and attributes of the cell the *screenBuffer*'s cursor is at, or the cell for the supplied x and y coordinate.
+It returns an object, where:
+* char `string` a single character string, the character at that cell
+* attr `Object` the attribute object for this cell
+
+
+
+
 <a name="ref.ScreenBuffer.attr"></a>
 <a name="ref.ScreenBuffer.transparency-flags"></a>
 
