@@ -216,7 +216,7 @@ It returns an object, where:
 This resizes the *screenBuffer*.
 
 If only the *width* and the *height* is given, the *screenBuffer* will shrink/enlarge from its right-side and bottom-side.
-With the four properties, it is possible to define where the current *screenBuffer* area will land after the resize.
+With the four properties, it is possible to define where the current *screenBuffer* content will land after the resize.
 
 
 
@@ -224,7 +224,7 @@ With the four properties, it is possible to define where the current *screenBuff
 ### .draw( [options] )
 
 * options `Object` (optional) if provided, each defined option will override the default behavior. Available options are:
-	* dst `Terminal` or `ScreenBuffer` (optional) override the `screenBuffer.dst`
+	* dst `Terminal` or `ScreenBuffer` (optional) override `screenBuffer.dst`
 	* x `integer` (optional) override `screenBuffer.x`
 	* y `integer` (optional) override `screenBuffer.y`
 	* srcClipRect `Rect` (optional, default: the whole source region is used) the source clipping rectangle
@@ -238,8 +238,8 @@ With the four properties, it is possible to define where the current *screenBuff
 		* 'y': only wrap along the y-axis
 		* true, 'both': wrap along the x and y axis
 		* false: no wrapping
-	* tile `boolean` (optional, default: false) if true, the source will fill the destination entirely, using tiling: the source is repeated
-	  multiple times along the x and y axis.
+	* tile `boolean` (optional, default: false) if true, the source will fill the destination entirely using tiling:
+	  the source is repeated multiple times along the x and y axis.
 
 This draws the current *screenBuffer* into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBuffer` instance.
@@ -256,7 +256,8 @@ This draws the current *screenBuffer*'s cursor into its *dst* (destination), whi
 or another `ScreenBuffer` instance.
 *Drawing the cursor* means that the destination cursor is moved to the coordinate of the source cursor.
 
-This method is useful if the source is something that receive user input: the user must know where he is writing.
+This method is useful if the *screenBuffer* is (for example) a widget that receive user input: the user must know
+where he is writing.
 
 
 
@@ -266,14 +267,14 @@ This method is useful if the source is something that receive user input: the us
 * x `integer` new cursor x-coordinate
 * y `integer` new cursor y-coordinate
 
-It moves the *screenBuffer* cursor.
+It moves the *screenBuffer*'s cursor.
 
 
 
 <a name="ref.ScreenBuffer.dumpChars"></a>
 ### .dumpChars()
 
-Returns a string containing a dump of the *screenBuffer* characters.
+Returns a string containing a dump of the *screenBuffer*'s characters.
 Mostly useful for debugging purpose.
 
 
@@ -312,15 +313,15 @@ Available attributes are:
 * hidden `boolean`
 * strike `boolean`
 * transparency `boolean` if true, all transparencies are activated
-* fgTransparency `boolean` *foreground color transparency*, anything written with that attributes
-  will use the existing destination foreground color instead of its own foreground color
-* bgTransparency `boolean` *background color transparency*, anything written with that attributes
-  will use the existing destination background color instead of its own background color
-* styleTransparency `boolean` *style transparency*, anything written with that attributes
-  will use the existing destination style instead of its own style, styles cover the bold, dim, italic, underline,
-  blink, inverse, hidden and strike attributes
-* charTransparency `boolean` *character transparency*, anything written with that attributes
-  will use the existing destination characters instead of its own character
+* fgTransparency `boolean` *foreground color transparency*, anything drawed with that attribute
+  will use the existing destination's foreground color instead of its own foreground color
+* bgTransparency `boolean` *background color transparency*, anything drawed with that attribute
+  will use the existing destination's background color instead of its own background color
+* styleTransparency `boolean` *style transparency*, anything drawed with that attribute
+  will use the existing destination's style instead of its own style.
+  Styles cover the bold, dim, italic, underline, blink, inverse, hidden and strike attributes.
+* charTransparency `boolean` *character transparency*, anything drawed with that attribute
+  will use the existing destination's character instead of its own character
 
 Transparency can achieve some special FX, like making a colorful rectangle moving behind some text.
 
