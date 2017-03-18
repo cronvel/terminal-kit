@@ -2,8 +2,7 @@
 
 "use strict" ;
 
-var termkit = require( 'terminal-kit' ) ;
-var term = termkit.terminal ;
+var term = require( 'terminal-kit' ).terminal ;
 
 term( 'Choose a file: ' ) ;
 

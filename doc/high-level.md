@@ -26,6 +26,7 @@ create nice progress bars, or display some special effects.
 * [.setPalette()](#ref.setPalette)
 * [.yesOrNo()](#ref.yesOrNo)
 * [.inputField()](#ref.inputField)
+* [.fileInput()](#ref.fileInput)
 * [.singleLineMenu()](#ref.singleLineMenu)
 * [.progressBar()](#ref.progressBar)
 * [.slowTyping()](#ref.slowTyping)
@@ -358,7 +359,6 @@ It emits:
 * *ready*: when the input field is ready (rarely useful)
 
 
-
 Quick example, featuring *history* and *auto-completion*:
 
 ```js
@@ -435,6 +435,102 @@ It produces:
 
 Also note that if the `autoComplete` options is an array or if it is a function whose output is an array, 
 a special property `prefix` (a string) can be set on it: this prefix will be prepended to the output of the auto complete menu.
+
+Here an example featuring *tokenHook* to achive a very basic syntax hilighting:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term( 'shell> ' ) ;
+
+var autoComplete = [
+	'dnf install' ,
+	'dnf install nodejs' ,
+	'dnf search' ,
+	'sudo' ,
+	'sudo dnf install' ,
+	'sudo dnf install nodejs' ,
+	'sudo dnf search' ,
+] ;
+
+term.inputField(
+	{
+		autoComplete: autoComplete ,
+		autoCompleteHint: true ,
+		autoCompleteMenu: true ,
+		tokenHook: function( token , isEndOfInput , previousTokens , term , config ) {
+			var previousText = previousTokens.join( ' ' ) ;
+			
+			switch ( token )
+			{
+				case 'sudo' :
+					config.style = term.red ;
+					return previousTokens.length ? null : term.bold.red ;
+				case 'dnf' :
+					return previousText === '' || previousText === 'sudo' ?
+						term.brightMagenta : null ;
+				case 'install' :
+					config.style = term.brightBlue ;
+					config.hintStyle = term.brightBlack.italic ;
+					return previousText === 'dnf' || previousText === 'sudo dnf' ?
+						term.brightYellow : null ;
+				case 'search' :
+					config.style = term.brightBlue ;
+					return previousText === 'dnf' || previousText === 'sudo dnf' ?
+						term.brightCyan : null ;
+			}
+		}
+	} ,
+	function( error , input ) {
+		term.green( "\nYour command is: '%s'\n" , input ) ;
+		process.exit() ;
+	}
+) ;
+```
+
+It produces:
+
+![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc4.gif)
+
+
+
+<a name="ref.fileInput"></a>
+### .fileInput( [options] , callback )
+
+* options `Object` where:
+	* baseDir `string` (optional, default: process.cwd()) the base directory path
+	* ... [*as well as all .inputField() options*](#ref.inputField)
+* callback( error , input )
+	* error `mixed` truthy if an underlying error occurs
+	* input `string` the user input
+
+This is a variant of [*.inputField()*](#ref.inputField) that auto-complete file paths relative to the *baseDir* path.
+
+Example featuring the fileInput:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term( 'Choose a file: ' ) ;
+
+term.fileInput(
+	{ baseDir: '../' } ,
+	function( error , input ) {
+		if ( error )
+		{
+			term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+		}
+		else
+		{
+			term.green( "\nYour file is '%s'\n" , input ) ;
+		}
+		
+		process.exit() ;
+	}
+) ;
+```
+
+![File input output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/file-input-doc1.gif)
 
 
 

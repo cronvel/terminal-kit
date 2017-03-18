@@ -37,6 +37,10 @@ Click any image to see the documentation related to the feature!
 
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)](doc/high-level.md#ref.inputField)
 
+[![File input output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/file-input-doc1.gif)](doc/high-level.md#ref.fileInput)
+
+[![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc4.gif)](doc/high-level.md#ref.inputField)
+
 [![Single line menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)](doc/high-level.md#ref.singleLineMenu)
 
 [![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)](doc/high-level.md#ref.progressBar)
