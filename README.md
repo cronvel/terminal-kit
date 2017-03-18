@@ -11,16 +11,13 @@
 
 # Terminal Kit
 
-A full-blown terminal lib featuring: 256 colors, styles, keys & mouse handling, input field, interactive 'yes or no', 
-screen buffer, and many more...
+A full-blown terminal lib featuring: 256 colors, styles, keys & mouse handling, input field, progress bars, 
+screen buffer, text buffer, and many more...
 
 Whether you just need colors & styles, build a simple interactive command line tool or a complexe terminal application:
 this is the absolute terminal lib for Node.js!
 
 It does **NOT** depend on ncurses.
-
-* License: MIT
-* Current status: **really close to release!**
 
 Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.soulserv.net/tag/terminal/).
 
@@ -144,4 +141,6 @@ term.inputField(
 
 ### ♥♥ [I want to READ THE DOC NOW!](doc/documentation.md#ref.TOC) ♥♥
 
+
+#### License: MIT
 
