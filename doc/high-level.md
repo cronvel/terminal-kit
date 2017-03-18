@@ -433,6 +433,9 @@ It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc2.gif)
 
+**Note:** In this example, we created a simple file selector to demonstrate custom auto-completion in action.
+However, such simple file selectors already exists in the lib: see [*.fileInput()*](#ref.fileInput).
+
 Also note that if the `autoComplete` options is an array or if it is a function whose output is an array, 
 a special property `prefix` (a string) can be set on it: this prefix will be prepended to the output of the auto complete menu.
 
