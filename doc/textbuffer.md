@@ -57,3 +57,20 @@ This set the text content of the *textBuffer*.
 
 It reset both the *attr buffer* and the *misc buffer*.
 
+
+
+<a name="ref.TextBuffer.getHidden"></a>
+### .getHidden()
+
+It returns *true* if the *textBuffer* is in *hidden mode*.
+
+
+
+<a name="ref.TextBuffer.setHidden"></a>
+### .setHidden( state )
+
+* state `boolean` if true, it enables the *hidden mode*, else it disables it
+
+It set on or off the *hidden mode*.
+The *hidden mode* is useful if your *textBuffer* is holding things like password.
+
