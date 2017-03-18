@@ -68,13 +68,23 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 
 ## Table of Contents
 
-* [Colors](#ref.colors)
-* [Background Colors](#ref.bgColors)
-* [Styles](#ref.styles)
-* [Moving the cursor](#ref.movingCursor)
-* [Editing the screen](#ref.editingScreen)
-* [Input/Output](#ref.io)
-* [Misc](#ref.misc)
+* [Properties](#ref.properties)
+* Methods
+	* [Colors](#ref.colors)
+	* [Background Colors](#ref.bgColors)
+	* [Styles](#ref.styles)
+	* [Moving the cursor](#ref.movingCursor)
+	* [Editing the screen](#ref.editingScreen)
+	* [Input/Output](#ref.io)
+	* [Misc](#ref.misc)
+
+
+
+<a name="ref.properties"></a>
+### Properties
+
+* .width: the width of the terminal
+* .height: the height of the terminal
 
 
 
@@ -231,6 +241,4 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
 * .setDefaultColorRgb(r,g,b): set the value of the default foreground color
 * .setDefaultBgColorRgb(): set the value of the default background color, this is the terminal window background
-
-
 
