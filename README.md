@@ -64,13 +64,18 @@ Click any image to see the documentation related to the feature!
 * [keyboard input](doc/high-level.md#ref.grabInput)
 * [mouse support (GPM is supported for the Linux Console)](doc/high-level.md#ref.grabInput)
 * [input field](doc/high-level.md#ref.inputField)
+* [single line menu](doc/high-level.md#ref.singleLineMenu)
+* [progress bar](doc/high-level.md#ref.progressBar)
 * [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
 * [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
+* [change the terminal color palette](doc/high-level.md#setPalette)
 * [event-driven](doc/events.md#top)
-* Platform: any xterm-compatible terminal, it has been tested successfully with:
+* Platform: any xterm-compatible terminal.
+  Those terminals has been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
+	* iTerm
 	* Terminator
 	* xfce4-terminal
 	* Linux Console
@@ -123,9 +128,17 @@ term.moveTo( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
 // ... or even combined with other styles
 term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
+
+// Get some user input
+term.magenta( "Enter your name: " ) ;
+term.inputField(
+	function( error , input ) {
+		term.green( "\nYour name is '%s'\n" , input ) ;
+	}
+) ;
 ```
 
 
-### [I want to READ THE DOC NOW!](doc/documentation.md#ref.TOC)
+### ♥♥ [I want to READ THE DOC NOW!](doc/documentation.md#ref.TOC) ♥♥
 
 

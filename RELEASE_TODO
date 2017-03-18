@@ -5,7 +5,6 @@ Must have:
 	ScreenBuffer full-width chars bugfixes
 	TextBuffer full-width chars bugfixes
 	Extract ScreenBuffer loader/saver, one file per version
-	ScreenBuffer#put() behaviour: no wrap by default, clipping rather than putting things at the bounding limit
 	Inline fileInput documentation
 
 

@@ -69,7 +69,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	* dst: a `Terminal` or `ScreenBuffer` instance, the destination to write on
 	* x: `integer` (optional) default x-position in the dst
 	* y: `integer` (optional) default y-position in the dst
-	* wrap: `boolean` (optional, default: true) default wrapping behavior of [.put()](#ref.ScreenBuffer.put)
+	* wrap: `boolean` (optional, default: false) default wrapping behavior of [.put()](#ref.ScreenBuffer.put)
 	* noFill: `boolean` (optional, default: false) if true, the *screenBuffer* will not be filled with empty chars,
 	  i.e. it will not call [.fill()](#ref.ScreenBuffer.fill), useful for performance to avoid useless reset
 

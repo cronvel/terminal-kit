@@ -12,10 +12,12 @@ It does **NOT** depend on ncurses.
 
 * License: MIT
 * Current status: **really close to release!**
-* Platform: linux and any xterm-compatible terminal, it has been tested successfully with:
+* Platform: linux and any xterm-compatible terminal.
+  Those terminals has been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
+	* iTerm
 	* Terminator
 	* xfce4-terminal
 	* Linux Console
@@ -71,6 +73,14 @@ term.moveTo( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32 ) ;
 
 // ... or even combined with other styles
 term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
+
+// Get some user input
+term.magenta( "Enter your name: " ) ;
+term.inputField(
+    function( error , input ) {
+        term.green( "\nYour name is '%s'\n" , input ) ;
+    }
+) ;
 ```
 
 

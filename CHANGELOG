@@ -1,4 +1,10 @@
 
+v0.30.0
+-------
+
+Breaking change -- ScreenBuffer.create(): wrap is disabled by default. Documentation improvements.
+
+
 v0.29.0
 -------
 

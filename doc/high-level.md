@@ -178,7 +178,7 @@ and each color that was modified by the lib replace it.
 <a name="ref.setPalette"></a>
 ### .setPalette( palette )
 
-* palette either:
+* palette, is either:
 	* `Array` of 16 `Object` where:
 		* r `number` in the 0..255 range, the red value
 		* g `number` in the 0..255 range, the green value
@@ -186,7 +186,7 @@ and each color that was modified by the lib replace it.
 		* names `Array` of `string`, names for this color
 	* *OR* `string` one of the built-in palette (default, gnome, konsole, linux, solarized, vga, xterm)
 
-If the terminal support it, it will reset the 16-colors palette to the provided one.
+If the terminal supports it, it will reset the 16-colors palette to the provided one.
 
 
 
