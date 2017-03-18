@@ -55,13 +55,14 @@ Click any image to see the documentation related to the feature!
 
 * [colors, 256 colors or even 24 bits colors](doc/low-level.md#ref.colors), if the terminal supports it
 * [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)
-* style mixing
-* string formatting
-* short style markup
+* [style mixing](doc/low-level.md#ref.chainable)
+* [chainable](doc/low-level.md#ref.chainable)
+* [string formatting](doc/low-level.md#ref.string-formatting)
+* [short style markup](doc/low-level.md#ref.style-markup)
+* [terminal window title](doc/low-level.md#ref.misc)
 * [cursor positioning](doc/low-level.md#ref.movingCursor)
 * [keyboard input](doc/high-level.md#ref.grabInput)
-* mouse support (GPM is supported for the Linux Console)
-* [terminal window title](doc/low-level.md#ref.misc)
+* [mouse support (GPM is supported for the Linux Console)](doc/high-level.md#ref.grabInput)
 * [input field](doc/high-level.md#ref.inputField)
 * [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
 * [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)

@@ -1,4 +1,10 @@
 
+v0.29.0
+-------
+
+Breaking change: the long-time deprecated (since v0.16.0) 'SCREEN_RESIZE' sub-type of the 'terminal' event is dropped, in favor of the 'resize' event. Documentation improved.
+
+
 v0.28.4
 -------
 

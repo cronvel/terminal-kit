@@ -75,9 +75,11 @@ It helps quitting cleanly your application without leaving the terminal in a bad
 		  the terminal (e.g. you may consider it for script running over SSH)
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
 
-This function turns input grabbing on, keyboard entries will not be echoed, and every input will generate an event
+This function turns input grabbing on, key will not be echoed anymore, and every input will generate an event
 on the `term` object.
 
+Each key pressed will generate a [*key event*](events.md#ref.event.key) and mouse motion and button (if enabled)
+will generate a [*mouse event*](events.md#ref.event.mouse).
 
 Quick example:
 

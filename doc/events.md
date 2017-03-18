@@ -11,8 +11,8 @@ Those events are fired on your `Terminal` instances.
 
 * ['resize'](#ref.event.resize)
 * ['key'](#ref.event.key)
-* ['terminal'](#ref.event.terminal)
 * ['mouse'](#ref.event.mouse)
+* ['terminal'](#ref.event.terminal)
 	
 
 
@@ -77,18 +77,62 @@ And modifier on regular A-Z key:
     CTRL_C ALT_C CTRL_ALT_C ALT_SHIFT_C
     ...
 
-Sometime, a key matches multiple combination. For example CTRL-M on linux boxes is always the same as ENTER.
+Sometime, a key matches multiple combination.
+For example CTRL-M on linux boxes is always the same as ENTER.
 So the event will provide as the 'name' argument the most useful/common, here *ENTER*.
 However the 'matches' argument will contain `[ ENTER , CTRL_M ]`.
 
-Also notice that some terminal will support less keys. For example, the Linux Console does not support SHIFT/CTRL/ALT + Arrows keys,
-it will produce a normal arrow key.
+Also notice that some terminal will support less keys.
+For example, the Linux Console does not support SHIFT/CTRL/ALT + Arrows keys, it will produce a normal arrow key.
 There is no workaround here, the underlying keyboard driver simply does not support this.
 
 KP_* keys needs `applicationKeypad()`, e.g. without it KP_1 will report '1' or END.
 
 Some terminal does not support `applicationKeypad()` at all, sometime turning numlock off can works, sometime not,
-so it is nearly impossible to differentiate (for example) a KP_1 from an END, or a KP_7 from a HOME.
+so it is nearly impossible to differentiate (for example) a KP_1 from an END, or a KP_7 from a HOME:
+**dont rely too much on that!**
+
+If you have to use some of those less supported keys, either provide alternatives keys, or make key bindings configurable.
+
+
+
+<a name="ref.event.mouse"></a>
+### 'mouse' event ( name , data )
+
+* name `string` the name of the subtype of event
+* data `Object` provide the mouse coordinates and keyboard modifiers status, where:
+	* x `number` the row number where the mouse is
+	* y `number` the column number where the mouse is
+	* ctrl `boolean` true if the CTRL key is down or not
+	* alt `boolean` true if the ALT key is down or not
+	* shift `boolean` true if the SHIFT key is down or not
+
+Activated when grabInput() is called with the 'mouse' options, e.g. `{ mouse: 'button' }`, `{ mouse: 'drag' }` or `{ mouse: 'motion' }`.
+
+The argument 'name' can be:
+
+* MOUSE_LEFT_BUTTON_PRESSED: well... it is emitted when the left mouse button is pressed
+* MOUSE_LEFT_BUTTON_RELEASED: when this button is released
+* MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDLE_BUTTON_RELEASED: self explanatory
+* MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
+* MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
+* MOUSE_BUTTON_RELEASED: a button were released, however the terminal does not tell us which one
+* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is passed to grabInput(), every moves of the mouse will fire this event,
+  if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
+
+*Good* terminals will provide everything: which specific buttons was pressed, which was released, mouse wheel, motions...
+
+Some terminals will just report *MOUSE_BUTTON_RELEASED* for any button releases instead of the correct
+*MOUSE_LEFT_BUTTON_RELEASED* / *MOUSE_RIGHT_BUTTON_RELEASED* / *MOUSE_MIDDLE_BUTTON_RELEASED* / *MOUSE_OTHER_BUTTON_RELEASED*.
+
+Some terminals will never report *MOUSE_RIGHT_BUTTON_PRESSED* (e.g. *Gnome-Terminal*), instead it triggers
+the terminal's context menu.
+
+Some terminals will never report *MOUSE_MOTION*.
+By the way, **you can still get the mouse position** when a button is pressed (or released): the *data* argument still contains
+the x and y coordinates of the mouse when said event was fired.
+
+So your application should not rely too much on less supported features: it should always provide alternatives.
 
 
 
@@ -104,41 +148,10 @@ The argument 'name' can be:
 
 * CURSOR_LOCATION: it is emitted in response of a requestCursorLocation(), data contains 'x' & 'y', the coordinate of the cursor.
 
-* SCREEN_RESIZE: **DEPRECATED! Will be removed in the next non-patch version! Use the 'resize' event instead!**
-  Currently it is emitted when a terminal resizing is detected, most of time node.js will be notified of
-  screen resizing, and so this event will be emitted, data contains 'width' & 'height', the size of the screen in characters
-
 * SCREEN_SIZE: **rarely useful** it is emitted in response of a requestScreenSize(), data contains 'width' & 'height', the size of
   the screen in characters, and 'resized' (true/false) if the size has changed without node.js being notified
 
 * FOCUS_IN: it is emitted if the terminal gains focus (if supported by your terminal)
 
 * FOCUS_OUT: it is emitted if the terminal loses focus (if supported by your terminal)
-
-
-
-<a name="ref.event.mouse"></a>
-### 'mouse' event ( name , data )
-
-* name `string` the name of the subtype of event
-* data `Object` provide the mouse coordinates and keyboard modifiers status, where:
-	* x `number` the row number where the mouse is
-	* y `number` the column number where the mouse is
-	* ctrl `boolean` true if the CTRL key is down or not
-	* alt `boolean` true if the ALT key is down or not
-	* shift `boolean` true if the SHIFT key is down or not
-
-Activated when grabInput() is used with the 'mouse' options, e.g. `{ mouse: 'button' }`, `{ mouse: 'drag' }` or `{ mouse: 'motion' }`.
-
-The argument 'name' can be:
-
-* MOUSE_LEFT_BUTTON_PRESSED: well... it is emitted when the left mouse button is pressed
-* MOUSE_LEFT_BUTTON_RELEASED: when this button is released
-* MOUSE_RIGHT_BUTTON_PRESSED, MOUSE_RIGHT_BUTTON_RELEASED, MOUSE_MIDDLE_BUTTON_PRESSED, MOUSE_MIDDEL_BUTTON_RELEASED: self explanatory
-* MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
-* MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
-* MOUSE_BUTTON_RELEASED: a button were released, however the terminal does not tell us which one
-* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is passed to grabInput(), every moves of the mouse will fire this event,
-  if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
-
 

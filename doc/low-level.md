@@ -15,23 +15,41 @@ If a boolean is provided, it will turn the feature *on* or *off*.
 For example `term.red( true )` turn all subsequent output in red, while `term.red( false )` disable red and go back
 to default color.
 
-Without arguments, it is always the same as *true*, e.g. `term.red()` do the same thing than `term.red()`.
+Without arguments, it is always the same as *true*, e.g. `term.red()` do the same thing than `term.red( true )`.
 
 Some function cannot be turned off, they just perform an action.
 For example `term.reset()` reset the terminal, usually to its default.
 This is not reversible, thus `term.reset( false )` does nothing.
 
-If the additional argument is a string, then it will be sent to the output directly after turning *on* the feature... then the
-feature is turn *off*.
+If the additional argument is a string, then it will turn *on* the feature, output the string and finally turn *off* the feature.
 That's it:  
 `term.red( 'Hello world!' )`  
 ... is the same as:  
 `term.red( true ) ; term( 'Hello world!' ) ; term.red( false ) ;`.
 
-Also those string support a printf()-like formatting syntax.  
-So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *"My name is Jack, I'm 32."* in red.
+<a name="ref.chainable"></a>
+#### Style Mixing and Chainable
 
-**New:** since *v0.16.x*, style markup are supported as a shorthand.
+Also styles can be mixed, using a nice syntax: simply chain all style and color properties!
+This will output *“Hello world!”* in red, bold and italic, on a blue background:
+`term.red.bgBlue.bold.italic( 'Hello world!' )`  
+By the way, the order doesn't matter, so this is strictly equivalent:
+`term.bgBlue.italic.bold.red( 'Hello world!' )`  
+
+All the following functions are chainable, and their arguments can be combined.
+We can do:  
+`term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )`
+which will move the cursor to (1,1), then output *“My name is Jack, I'm 32.”* in red.
+
+<a name="ref.string-formatting"></a>
+#### String Formatting
+
+Also those string support a printf()-like formatting syntax.  
+So we can do `term.red( "My name is %s, I'm %d." , 'Jack' , 32 )` to output *“My name is Jack, I'm 32.”* in red.
+
+<a name="ref.style-markup"></a>
+#### Style Markup
+
 Style markup are introduced by a caret `^` followed by another character.
 Colors are produced by the first letter of its name, e.g. red is produced with a `^r`, except black which is produced by `^k`.
 Other styles are produced with a symbol. For example `^_` switch to underline.
@@ -45,13 +63,6 @@ term( "My name is ^rJack^ and I'm ^g32\n" ) ;
 ```
 
 See [the full style markup reference](https://github.com/cronvel/string-kit#ref.format.markup) for details.
-
-
-
-All those functions are chainable, and their arguments can be combined.
-We can do:  
-`term.moveTo.red( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  )`
-which will move the cursor to (1,1), then output *"My name is Jack, I'm 32."* in red.
 
 
 
