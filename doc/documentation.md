@@ -13,7 +13,7 @@ It does **NOT** depend on ncurses.
 * License: MIT
 * Current status: **really close to release!**
 * Platform: linux and any xterm-compatible terminal.
-  Those terminals has been successfully tested:
+  Those terminals have been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
@@ -146,6 +146,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* ['mouse'](events.md#ref.event.mouse)
 
 * [ScreenBuffer](screenbuffer.md#top)
+* [TextBuffer](textbuffer.md#top)
 * [Rect](rect.md#top)
 
 

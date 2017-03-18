@@ -71,7 +71,7 @@ Click any image to see the documentation related to the feature!
 * [change the terminal color palette](doc/high-level.md#setPalette)
 * [event-driven](doc/events.md#top)
 * Platform: any xterm-compatible terminal.
-  Those terminals has been successfully tested:
+  Those terminals have been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
