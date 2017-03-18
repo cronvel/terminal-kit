@@ -1,7 +1,6 @@
 
 Must have:
 
-	TextBuffer documentation
 	ScreenBuffer full-width chars bugfixes
 	TextBuffer full-width chars bugfixes
 	Extract ScreenBuffer loader/saver, one file per version

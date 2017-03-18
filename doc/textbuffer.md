@@ -57,6 +57,7 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 	* [.moveForward()](#ref.TextBuffer.moveForward)
 	* [.moveBackward()](#ref.TextBuffer.moveBackward)
 	* [.moveToEndOfLine()](#ref.TextBuffer.moveToEndOfLine)
+	* [.moveInBound()](#ref.TextBuffer.moveInBound)
 	* [.insert()](#ref.TextBuffer.insert)
 	* [.delete()](#ref.TextBuffer.delete)
 	* [.backDelete()](#ref.TextBuffer.backDelete)
@@ -349,6 +350,7 @@ It inserts the text at the current cursor position, with the given attributes.
 * n `integer` (optional, default: 1) the number of chars to delete
 
 It deletes *n* characters at the current cursor position.
+This is the action usually bound to the *delete* key.
 
 
 
@@ -358,6 +360,7 @@ It deletes *n* characters at the current cursor position.
 * n `integer` (optional, default: 1) the number of chars to delete
 
 It deletes *n* characters **backward** starting from the current cursor position.
+This is the action usually bound to the *backspace* key.
 
 
 
