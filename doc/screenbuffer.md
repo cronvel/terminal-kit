@@ -129,7 +129,7 @@ This static method loads **synchronously** a *screenBuffer* file and returns a `
 ### .x , .y
 
 Those properties are respectively the x and the y coordinate, in the *dst* (destination), where the *screenBuffer*
-should be drawed.
+should be drawn.
 This can be overriden when invoking *.draw()*.
 
 
@@ -251,14 +251,14 @@ or another `ScreenBuffer` instance.
 ### .drawCursor( [options] )
 
 * options `Object` (optional) if provided, each defined option will override the default behavior. Available options are:
-	* dst `Terminal` or `ScreenBuffer` (optional) override the `screenBuffer.dst`
+	* dst `Terminal` or `ScreenBuffer` (optional) override `screenBuffer.dst`
 
 This draws the current *screenBuffer*'s cursor into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBuffer` instance.
-*Drawing the cursor* means that the destination cursor is moved to the coordinate of the source cursor.
+*Drawing the cursor* means that the destination's cursor is moved to the coordinate of the source's cursor.
 
 This method is useful if the *screenBuffer* is (for example) a widget that receive user input: the user must know
-where he is writing.
+where he is typing.
 
 
 
@@ -314,14 +314,14 @@ Available attributes are:
 * hidden `boolean`
 * strike `boolean`
 * transparency `boolean` if true, all transparencies are activated
-* fgTransparency `boolean` *foreground color transparency*, anything drawed with that attribute
+* fgTransparency `boolean` *foreground color transparency*, anything drawn with that attribute
   will use the existing destination's foreground color instead of its own foreground color
-* bgTransparency `boolean` *background color transparency*, anything drawed with that attribute
+* bgTransparency `boolean` *background color transparency*, anything drawn with that attribute
   will use the existing destination's background color instead of its own background color
-* styleTransparency `boolean` *style transparency*, anything drawed with that attribute
+* styleTransparency `boolean` *style transparency*, anything drawn with that attribute
   will use the existing destination's style instead of its own style.
   Styles cover the bold, dim, italic, underline, blink, inverse, hidden and strike attributes.
-* charTransparency `boolean` *character transparency*, anything drawed with that attribute
+* charTransparency `boolean` *character transparency*, anything drawn with that attribute
   will use the existing destination's character instead of its own character
 
 Transparency can achieve some special FX, like making a colorful rectangle moving behind some text.
