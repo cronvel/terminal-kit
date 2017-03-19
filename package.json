@@ -30,6 +30,7 @@
   "keywords": [
     "terminal",
     "console",
+    "ansi",
     "xterm",
     "color",
     "256 colors",
@@ -40,6 +41,7 @@
     "gpm",
     "cursor",
     "menu",
+    "progress bar",
     "screenbuffer"
   ],
   "author": "Cédric Ronvel",

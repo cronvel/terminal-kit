@@ -42,7 +42,7 @@ Advanced methods are high-level library functions.
 <a name="ref.fullscreen"></a>
 ### .fullscreen( options )
 
-* options: true/false/object: if truthy it activate fullscreen mode, falsy return to normal mode,
+* options: true/false/object: if truthy it activates the fullscreen mode, if falsy it returns to normal mode,
   if it is an object it supports those properties:
 	* noAlternate `boolean` true if the alternate screen buffer should not be used
 
