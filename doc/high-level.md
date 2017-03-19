@@ -495,6 +495,9 @@ It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc4.gif)
 
+If you want to see an advanced usage of *inputField* in action, have a look to [ngsh](https://www.npmjs.com/package/ngsh),
+a node.js shell in early alpha stage, featuring auto-completion and syntax hilighting.
+
 
 
 <a name="ref.fileInput"></a>
