@@ -1,4 +1,10 @@
 
+v1.0.2
+------
+
+.grabInput( false ) bug fixed: it was not switching stdin back to pause mode
+
+
 v1.0.1
 ------
 
