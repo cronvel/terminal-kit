@@ -1,4 +1,10 @@
 
+v1.0.3
+------
+
+.grabInput() bug introduced by the fix at v1.0.2 fixed (misleading Node.js stream's flowing/pause mode behavior)
+
+
 v1.0.2
 ------
 
