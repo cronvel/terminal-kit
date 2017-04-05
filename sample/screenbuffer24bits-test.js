@@ -36,6 +36,18 @@
 var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
+
+var attr = termkit.ScreenBuffer24Bits.object2attr( {
+	r: 123 ,
+} ) ;
+
+console.log( "Attr:" , attr ) ;
+console.log( "Attr:" , termkit.ScreenBuffer24Bits.attr2object( attr ) ) ;
+
+
+return ;
+
+
 var moved = 0 ;
 
 //*
