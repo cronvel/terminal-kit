@@ -37,58 +37,35 @@ var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 
-var attr = termkit.ScreenBuffer24Bits.object2attr( {
-	r: 123 ,
-} ) ;
 
-console.log( "Attr:" , attr ) ;
-console.log( "Attr:" , termkit.ScreenBuffer24Bits.attr2object( attr ) ) ;
+term.clear() ;
 
+//var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: term.width , height: term.height } ) ;
+var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: 4 , height: 4 } ) ;
+screen.fill() ;
+screen.fill( { attr: {
+	bgR: 13 ,
+	bgG: 10 ,
+	bgB: 20
+} } ) ;
 
-return ;
+var buffer = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 2 , height: 2 } ) ;
 
+buffer.fill( { attr: {
+	bgR: 130 ,
+	bgG: 100 ,
+	bgB: 200
+} } ) ;
 
-var moved = 0 ;
+buffer.x = 1 ;
+buffer.y = 1 ;
 
-//*
-function moveRedraw()
-{
-	//buffer.drawChars() ;
-	buffer.draw() ;
-	buffer.x ++ ;
-	
-	buffer2.draw() ;
-	buffer2.x -- ;
-	
-	buffer3.x = Math.floor( Math.random() * 8 ) ;
-	buffer3.draw() ;
-	
-	if ( moved ++ < 20 ) { setTimeout( moveRedraw , 150 ) ; }
-	else
-	{
-		term.hideCursor( false ) ;
-		term.fullscreen( false ) ;
-	}
-}
-//*/
+//buffer.draw( { blending: true } ) ;
+buffer.draw() ;
+screen.draw() ;
 
-var buffer = termkit.ScreenBuffer24Bits.create( { dst: term , width: 8 , height: 8 } ) ; //.clear() ;
-buffer.put( { x: 3 , y: 2 , attr: { color: 'red' , bgColor: 'brightBlack' , underline: true } } , 'toto' ) ;
-buffer.put( { x: 4 , y: 5 , attr: { color: 'brightYellow' , bold: true } } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+term.styleReset() ;
+term.moveTo( 1 , 20 ) ;
 
-var buffer2 = termkit.ScreenBuffer24Bits.create( { dst: term , width: 3 , height: 1 , x: 70 , y: 3 } ) ; //.clear() ;
-buffer2.put( { x: 0 , y: 0 , attr: { color: 'yellow' } } , '<--' ) ;
-
-var buffer3 = termkit.ScreenBuffer24Bits.create( { dst: buffer , width: 3 , height: 3 , x: 2 , y: 6 } ) ; //.clear() ;
-buffer3.put( { x: 1 , y: 1 , attr: { color: 'brightMagenta' } } , '*' ) ;
-
-//buffer3.draw() ;
-//buffer.dump() ; return ;
-
-term.fullscreen() ;
-term.hideCursor() ;
-moveRedraw() ;
-
-
-
-
+//console.log( screen.buffer ) ;
+screen.dump() ;
