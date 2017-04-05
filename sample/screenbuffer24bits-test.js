@@ -40,8 +40,8 @@ var term = termkit.terminal ;
 
 term.clear() ;
 
-//var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: term.width , height: term.height } ) ;
-var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: 4 , height: 4 } ) ;
+var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: term.width , height: 20 } ) ;
+//var screen = termkit.ScreenBuffer24Bits.create( { dst: term , width: 4 , height: 4 } ) ;
 screen.fill() ;
 screen.fill( { attr: {
 	bgR: 13 ,
@@ -49,23 +49,49 @@ screen.fill( { attr: {
 	bgB: 20
 } } ) ;
 
-var buffer = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 2 , height: 2 } ) ;
+var buffer = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 12 , height: 6 } ) ;
 
 buffer.fill( { attr: {
 	bgR: 130 ,
 	bgG: 100 ,
-	bgB: 200
+	bgB: 200 ,
+	bgA: 125
 } } ) ;
 
-buffer.x = 1 ;
-buffer.y = 1 ;
+buffer.x = 8 ;
+buffer.y = 4 ;
 
-//buffer.draw( { blending: true } ) ;
-buffer.draw() ;
-screen.draw() ;
+var buffer2 = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 12 , height: 6 } ) ;
+
+buffer2.fill( { attr: {
+	bgR: 230 ,
+	bgG: 100 ,
+	bgB: 0 ,
+	bgA: 125
+} } ) ;
+
+buffer2.x = 12 ;
+buffer2.y = 8 ;
+
+var buffer3 = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 12 , height: 6 } ) ;
+
+buffer3.fill( { attr: {
+	bgR: 130 ,
+	bgG: 200 ,
+	bgB: 80 ,
+	bgA: 125
+} } ) ;
+
+buffer3.x = 16 ;
+buffer3.y = 5 ;
+
+buffer.draw( { blending: true } ) ;
+buffer3.draw( { blending: true } ) ;
+buffer2.draw( { blending: true } ) ;
+screen.draw( { delta: true } ) ;
 
 term.styleReset() ;
-term.moveTo( 1 , 20 ) ;
+term.moveTo( 1 , 21 ) ;
 
 //console.log( screen.buffer ) ;
-screen.dump() ;
+//console.log( screen.dump() ) ;
