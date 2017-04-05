@@ -1,4 +1,19 @@
 
+v1.0.5
+------
+
+24 bits colors are back:
+A couple of month ago (around nov 2016 and feb 2017), major terminals (gnome-terminal, Konsole, iTerm, ...)
+changed the behavior of the $COLORTERM environment variable (without much advertising, BTW...),
+and that totally messed up terminal detection.
+
+Instead of containing the terminal identifier, now it contains "truecolor" if the terminal supports true-color.
+Failing to find a terminal named "truecolor", Terminal-kit was falling back to "xterm".
+
+I noticed that just now. -_-'
+Fixed.
+
+
 v1.0.4
 ------
 

@@ -33,6 +33,13 @@
 
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
+	/*
+	var term = require( '../lib/termkit.js' ).terminal ;
+	term( 'Terminal name: %s\n' , term.appName ) ;
+	term( 'Terminal app ID: %s\n' , term.appId ) ;
+	term( 'Generic terminal: %s\n' , term.generic ) ;
+	term( 'Config file: %s\n' , term.termconfigFile ) ;
+	//*/
 	
 	var i , r , g , b ;
 	
