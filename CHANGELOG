@@ -1,4 +1,10 @@
 
+v1.0.5
+------
+
+24 bits colors are back: a couple of month ago, major terminals (gnome-terminal, Konsole, iTerm, ...) changed the behavior of the COLORTERM environment variable (without much advertising, BTW...): that totally messed up terminal detection. I notice that just now. -_-'
+
+
 v1.0.4
 ------
 
