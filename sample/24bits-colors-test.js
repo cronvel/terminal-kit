@@ -32,8 +32,8 @@
 /* jshint unused:false */
 
 
-require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
-	
+//require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
+	var term = require( '../lib/termkit.js' ).terminal ;
 	var i , r , g , b ;
 	
 	
@@ -69,5 +69,5 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	term.styleReset( '\n' ) ;
 	term( 'Reset...\n' ) ;
 	
-} ) ;
+//} ) ;
 
