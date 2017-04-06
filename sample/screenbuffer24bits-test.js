@@ -48,6 +48,16 @@ screen.fill( { attr: {
 	bgG: 10 ,
 	bgB: 20
 } } ) ;
+screen.fill( { attr: {
+	bgR: 255 ,
+	bgG: 255 ,
+	bgB: 255
+} } ) ;
+screen.fill( { attr: {
+	bgR: 127 ,
+	bgG: 127 ,
+	bgB: 127
+} } ) ;
 
 var buffer = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 12 , height: 6 } ) ;
 
@@ -85,9 +95,17 @@ buffer3.fill( { attr: {
 buffer3.x = 16 ;
 buffer3.y = 5 ;
 
-buffer.draw( { blending: true } ) ;
-buffer3.draw( { blending: true } ) ;
-buffer2.draw( { blending: true } ) ;
+var blendingOpt = {
+	//fn: termkit.ScreenBuffer24Bits.blendFn.multiply
+	//fn: termkit.ScreenBuffer24Bits.blendFn.screen
+	//fn: termkit.ScreenBuffer24Bits.blendFn.overlay
+	//fn: termkit.ScreenBuffer24Bits.blendFn.hardLight
+	fn: termkit.ScreenBuffer24Bits.blendFn.softLight
+} ;
+
+buffer.draw( { blending: blendingOpt } ) ;
+buffer3.draw( { blending: blendingOpt } ) ;
+buffer2.draw( { blending: blendingOpt } ) ;
 screen.draw( { delta: true } ) ;
 
 term.styleReset() ;
