@@ -52,7 +52,7 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
-*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 24-bit surfaces with composition
+*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition
 
 * [colors, 256 colors or even 24-bit colors](doc/low-level.md#ref.colors), if the terminal supports it
 * [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)

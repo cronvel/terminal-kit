@@ -1,8 +1,14 @@
 
+v1.1.1
+------
+
+Documentation fixed and improved on ScreenBuffer HD
+
+
 v1.1.0
 ------
 
-New: ScreenBufferHD, a 24-bit screen buffer with composition (issue #9)
+New: ScreenBufferHD, a 32-bit (RGBA) screen buffer with composition (issue #9).
 
 
 v1.0.5

@@ -8,7 +8,7 @@
 
 *This feature is still in beta/unstable version, it is not under the SemVer contract.*
 
-This is the 32-bit version of [the ScreenBuffer](screenbuffer.md#ref.ScreenBuffer), it subclasses it.
+This is the 32-bit (RGBA) version of [the ScreenBuffer](screenbuffer.md#ref.ScreenBuffer), it subclasses it.
 
 See the [the ScreenBuffer documentation](screenbuffer.md#ref.ScreenBuffer) for the common parts:
 **only HD specific features are listed here.**
@@ -41,11 +41,14 @@ When drawing to another surface, blending options can be given like *opacity* an
 	* [.draw()](#ref.ScreenBufferHD.draw)
 
 * [The Attribute Object](#ref.ScreenBufferHD.attributes)
+* [The Built-In Blend Functions](#ref.ScreenBufferHD.blendFn)
 
 
 
 <a name="ref.ScreenBufferHD.create"></a>
 ### ScreenBuffer.create( options )
+
+* blending `false` or `object`, see [.blending](#ref.ScreenBufferHD.blending)
 
 This creates a ScreenBufferHD instance with the appropriate options.
 
@@ -56,10 +59,22 @@ This creates a ScreenBufferHD instance with the appropriate options.
 
 Either `false` or an `object`, the is default value for [*.draw()*](#ref.ScreenBufferHD.draw)'s blending option.
 
+If it's an `object`, it has the following properties:
+* fn `function` (optional, default to `ScreenBufferHD.blendFn.normal`) it is the function used to blend rgb channels.
+  see the [built-in blend functions](#ref.ScreenBufferHD.blendFn)
+* opacity `number` (optional, default to `1`) this is the opacity of the surface, *alpha channel* is multiplied by this value
+* blendSrcFgWithDstBg `boolean` (optional, default to `false`), if:
+	* false: the **foreground** color of the source is blended with the **foreground** color of the destination
+	  to produce the new **foreground** color
+	* true: the **foreground** color of the source is blended with the **background** color of the destination
+	  to produce the new **foreground** color
+
 
 
 <a name="ref.ScreenBufferHD.draw"></a>
 ### .draw( [options] )
+
+* blending `false` or `object`, see [.blending](#ref.ScreenBufferHD.blending)
 
 This draws the current *screenBufferHD* into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBufferHD` instance.
@@ -94,4 +109,26 @@ Available attributes are:
   Styles cover the bold, dim, italic, underline, blink, inverse, hidden and strike attributes.
 * charTransparency `boolean` *character transparency*, anything drawn with that attribute
   will use the existing destination's character instead of its own character
+
+
+
+<a name="ref.ScreenBufferHD.blendFn"></a>
+### The Built-In Blend Functions
+
+`ScreenBufferHD.blendFn` is an object containing built-in blend functions.
+
+The result of those blend functions are **ALWAYS** alpha-mixed (using *alpha* and *opacity*) with the destination
+before writing it.
+
+* .normal: the source overwrite the destination
+* .multiply: the source and the destination are multiplied, producing in a darker image
+* .screen: this is the inverse of the *multiply* blending: the inverse of the source and the inverse of the destination
+  are multiplied, then inverted again, producing a brighter image
+* .overlay: it combines *multiply* and *screen* blend modes, the parts where the destination is light become lighter,
+  the parts where the destination is dark become darker
+* .hardLight: like *overlay* but swap source and destination, i.e. the parts where the source is light become lighter,
+  the parts where the source is dark become darker
+* .softLight: a softer version of *hardLight*
+
+See [Wikipedia blend modes page](https://en.wikipedia.org/wiki/Blend_modes) for details.
 
