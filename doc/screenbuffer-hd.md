@@ -79,6 +79,8 @@ If it's an `object`, it has the following properties:
 This draws the current *screenBufferHD* into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBufferHD` instance.
 
+Blending works only when drawing to another *screenBufferHD*.
+
 
 
 <a name="ref.ScreenBufferHD.attributes"></a>
@@ -131,4 +133,14 @@ before writing it.
 * .softLight: a softer version of *hardLight*
 
 See [Wikipedia blend modes page](https://en.wikipedia.org/wiki/Blend_modes) for details.
+
+You can provide your own blending function, it should be a `Function( src , dst )`, where:
+
+* src `integer` the source value for the channel, ranging from 0 to 255
+* dst `integer` the destination value for the channel, ranging from 0 to 255
+
+It should return an `integer` ranging from 0 to 255.
+
+**Note:** The function is called for each RGB channel, but not for the *alpha* channel which is always blended using
+the *screen* mode.
 

@@ -256,6 +256,8 @@ With the four properties, it is possible to define where the current *screenBuff
 This draws the current *screenBuffer* into its *dst* (destination), which is either a `Terminal`
 or another `ScreenBuffer` instance.
 
+Blending works only when drawing to another *screenBuffer*.
+
 
 
 <a name="ref.ScreenBuffer.drawCursor"></a>
