@@ -11,7 +11,7 @@
 This is the 32-bit version of [the ScreenBuffer](screenbuffer.md#ref.ScreenBuffer), it subclasses it.
 
 See the [the ScreenBuffer documentation](screenbuffer.md#ref.ScreenBuffer) for the common parts:
-only *HD* specific features are listed here.
+**only HD specific features are listed here.**
 
 A *screenBufferHD* is a buffer holding contents for a rectangular area.
 Each cell of the rectangular area contains:

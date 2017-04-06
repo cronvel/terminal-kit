@@ -52,7 +52,9 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
-* [colors, 256 colors or even 24 bits colors](doc/low-level.md#ref.colors), if the terminal supports it
+*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 24-bit surfaces with composition
+
+* [colors, 256 colors or even 24-bit colors](doc/low-level.md#ref.colors), if the terminal supports it
 * [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)
 * [style mixing](doc/low-level.md#ref.chainable)
 * [chainable](doc/low-level.md#ref.chainable)
