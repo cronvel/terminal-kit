@@ -8,8 +8,8 @@ A *screenBuffer* is a buffer holding contents for a rectangular area.
 Each cell of the rectangular area contains:
 
 * a character
-* a foreground color
-* a background color
+* a 8-bit foreground color
+* a 8-bit background color
 * a style (bit flags: bold, dim, italic, underline, blink, inverse, hidden, strike)
 * a blending mask (bit flags: foreground transparency, background transparency, character transparency
   and style transparency)
