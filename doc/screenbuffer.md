@@ -42,6 +42,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 * Properties:
 	* [.x](#ref.ScreenBuffer.xy)
 	* [.y](#ref.ScreenBuffer.xy)
+	* [.blending](#ref.ScreenBuffer.blending)
 
 * Methods:
 	* [.fill()](#ref.ScreenBuffer.fill)
@@ -66,11 +67,13 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 * options `Object`, where:
 	* width `integer` buffer width (default: dst.width)
 	* height `integer` buffer height (default: dst.height)
-	* dst: a `Terminal` or `ScreenBuffer` instance, the destination to write on
-	* x: `integer` (optional) default x-position in the dst
-	* y: `integer` (optional) default y-position in the dst
-	* wrap: `boolean` (optional, default: false) default wrapping behavior of [.put()](#ref.ScreenBuffer.put)
-	* noFill: `boolean` (optional, default: false) if true, the *screenBuffer* will not be filled with empty chars,
+	* dst: `Terminal` or `ScreenBuffer` instance, the destination to write on
+	* x `integer` (optional) default x-position in the dst
+	* y `integer` (optional) default y-position in the dst
+	* blending `boolean` (optional, default: false) default value for [.draw()](#ref.ScreenBuffer.draw)'s blending option,
+	  if true, blending is enabled (e.g. background transparency, char transparency, etc...)
+	* wrap `boolean` (optional, default: false) default wrapping behavior of [.put()](#ref.ScreenBuffer.put)
+	* noFill `boolean` (optional, default: false) if true, the *screenBuffer* will not be filled with empty chars,
 	  i.e. it will not call [.fill()](#ref.ScreenBuffer.fill), useful for performance to avoid useless reset
 
 This creates a ScreenBuffer instance with the appropriate options.
@@ -130,7 +133,15 @@ This static method loads **synchronously** a *screenBuffer* file and returns a `
 
 Those properties are respectively the x and the y coordinate, in the *dst* (destination), where the *screenBuffer*
 should be drawn.
-This can be overriden when invoking *.draw()*.
+This can be overriden when invoking [*.draw()*](#ref.ScreenBuffer.draw).
+
+
+
+<a name="ref.ScreenBuffer.blending"></a>
+### .blending
+
+A `boolean`, the is default value for [*.draw()*](#ref.ScreenBuffer.draw)'s blending option.
+If true, blending is enabled (e.g. background transparency, char transparency, etc).
 
 
 

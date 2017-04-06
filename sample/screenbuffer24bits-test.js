@@ -70,7 +70,7 @@ buffer2.fill( { attr: {
 	bgA: 125
 } } ) ;
 
-buffer2.x = 12 ;
+buffer2.x = 11 ;
 buffer2.y = 8 ;
 
 var buffer3 = termkit.ScreenBuffer24Bits.create( { dst: screen , width: 12 , height: 6 } ) ;
