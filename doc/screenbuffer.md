@@ -40,6 +40,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	* [ScreenBuffer.loadSync()](#ref.ScreenBuffer.loadSync)
 
 * Properties:
+	* [.dst](#ref.ScreenBuffer.dst)
 	* [.x](#ref.ScreenBuffer.xy)
 	* [.y](#ref.ScreenBuffer.xy)
 	* [.blending](#ref.ScreenBuffer.blending)
@@ -125,6 +126,13 @@ It returns the bit flags form of the attributes from its object form.
 * filepath `string` the path of a *screenBuffer* file to load
 
 This static method loads **synchronously** a *screenBuffer* file and returns a `ScreenBuffer` instance.
+
+
+
+<a name="ref.ScreenBuffer.dst"></a>
+### .dst
+
+This property contains a `Terminal` or `ScreenBuffer` instance, that is the destination to write on.
 
 
 

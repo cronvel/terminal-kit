@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "async-kit": "^2.2.3",
+    "get-pixels": "^3.3.0",
     "nextgen-events": "^0.9.8",
     "string-kit": "^0.5.15",
     "tree-kit": "^0.5.26"
