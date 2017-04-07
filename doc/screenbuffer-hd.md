@@ -32,7 +32,8 @@ When drawing to another surface, blending options can be given like *opacity* an
 ## Table of Contents
 
 * Static methods:
-	* [ScreenBuffer.create()](#ref.ScreenBufferHD.create)
+	* [ScreenBufferHD.create()](#ref.ScreenBufferHD.create)
+	* [ScreenBufferHD.loadImage()](#ref.ScreenBufferHD.loadImage)
 
 * Properties:
 	* [.blending](#ref.ScreenBufferHD.blending)
@@ -46,11 +47,52 @@ When drawing to another surface, blending options can be given like *opacity* an
 
 
 <a name="ref.ScreenBufferHD.create"></a>
-### ScreenBuffer.create( options )
+### ScreenBufferHD.create( options )
 
 * blending `false` or `object`, see [.blending](#ref.ScreenBufferHD.blending)
 
 This creates a ScreenBufferHD instance with the appropriate options.
+
+
+
+<a name="ref.ScreenBufferHD.loadImage"></a>
+### ScreenBufferHD.loadImage( url , callback )
+
+* url `string` the file path or URL of the image
+* callback `Function( error , image )` the callback, where:
+	* error: truthy if an error occured
+	* image `ScreenBufferHD` the *screenBuffer* of the image
+
+This creates a ScreenBufferHD from an image.
+Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.
+Only the first frame of *GIF* are used ATM.
+
+It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
+the upper half having a foreground color and the lower half having the background color.
+
+*Alpha channel* is correctly supported, also it is important to draw that image to another *screenBufferHD* for this
+to work as expected (remember: blending only works when drawing on another *screenBufferHD*).
+Moreover, the target buffer must have **consistent foreground and background color**, since all the area will be
+filled with `▀` characters.
+
+Something like that will do the trick:
+
+```js
+screen.fill( attr: {
+	// Both foreground and background must have the same color
+    r: 40 ,
+    g: 20 ,
+    b: 0 ,
+    bgR: 40 ,
+    bgG: 20 ,
+    bgB: 0
+} } ) ;
+
+image.draw( { dst: screen , blending: true } ) ;
+screen.draw() ;
+```
+
+There is a full example of an image viewer located here: `./sample/image-viewer.js` in the repository.
 
 
 
