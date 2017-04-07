@@ -25,6 +25,8 @@ Each cell of the rectangular area contains:
 When drawing to another surface, blending options can be given like *opacity* and the *blend function*
 (normal, screen, multiply, overlay, etc).
 
+It supports image loading.
+
 **Note:** *screenBufferHD* and *screenBuffer* are not compatible ATM, it is not possible to draw one into the other.
 
 
@@ -93,6 +95,10 @@ screen.draw() ;
 ```
 
 There is a full example of an image viewer located here: `./sample/image-viewer.js` in the repository.
+
+Result:
+
+![32-bit ScreenBuffer image loading](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)
 
 
 

@@ -12,7 +12,7 @@
 # Terminal Kit
 
 A full-blown terminal lib featuring: 256 colors, styles, keys & mouse handling, input field, progress bars, 
-screen buffer (including 32-bit composition), text buffer, and many more...
+screen buffer (including **32-bit composition** and **image loading**), text buffer, and many more...
 
 Whether you just need colors & styles, build a simple interactive command line tool or a complexe terminal application:
 this is the absolute terminal lib for Node.js!
@@ -48,11 +48,13 @@ Click any image to see the documentation related to the feature!
 
 [![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
 
+[![32-bit ScreenBuffer image loading](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/screenbuffer-hd.md#ref.ScreenBufferHD.loadImage)
+
 
 
 ## Key features
 
-*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition
+*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition and image loading
 
 * [colors, 256 colors or even 24-bit colors](doc/low-level.md#ref.colors), if the terminal supports it
 * [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)
