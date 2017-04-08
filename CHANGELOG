@@ -1,4 +1,10 @@
 
+v1.1.5
+------
+
+ScreenBufferHD.loadImage() minor bug fixed. Added a shrink options.
+
+
 v1.1.4
 ------
 

@@ -58,9 +58,14 @@ This creates a ScreenBufferHD instance with the appropriate options.
 
 
 <a name="ref.ScreenBufferHD.loadImage"></a>
-### ScreenBufferHD.loadImage( url , callback )
+### ScreenBufferHD.loadImage( url , [options] , callback )
 
 * url `string` the file path or URL of the image
+* options `object` (optional), where:
+	* shrink `object` (optional) if set, the image may be shrinked to conform to the max width and height.
+	  When shrinking, aspect ratio is always preserved. It has those properties:
+		* width `integer` the max width of the image
+		* height `integer` the max height of the image
 * callback `Function( error , image )` the callback, where:
 	* error: truthy if an error occured
 	* image `ScreenBufferHD` the *screenBuffer* of the image

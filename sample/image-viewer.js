@@ -37,7 +37,7 @@ var path = require( 'path' ) ;
 
 if ( process.argv.length <= 2 )
 {
-	term.magenta( "Usage is: ./%s <file-path>\n" , path.basename( process.argv[ 1 ] ) ) ;
+	term.magenta( "Usage is: ./%s <file-path> [rate]\n" , path.basename( process.argv[ 1 ] ) ) ;
 	process.exit( 1 ) ;
 }
 
@@ -54,54 +54,65 @@ var screen , image , filler = { attr: {
 
 
 
-termkit.ScreenBufferHD.loadImage( process.argv[ 2 ] , function( error , image_ ) {
-	
-	image = image_ ;
-	
-	if ( error )
-	{
-		term.red( "%E\n" , error ) ;
-		process.exit( 1 ) ;
-	}
-	
-	screen = termkit.ScreenBufferHD.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
-	screen.y = 2 ;
-	
-	image.dst = screen ;
-	
-	term.clear() ;
-	term.grabInput() ;
-	term.hideCursor() ;
+var url = process.argv[ 2 ] ;
+var rate = process.argv[ 3 ] || 1 ;
 
-	term.on( 'key' , function( key , matches , data ) {
+
+
+termkit.ScreenBufferHD.loadImage(
+	url ,
+	{ shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } } ,
+	function( error , image_ )
+	{
 		
-		switch ( key )
+		image = image_ ;
+		
+		if ( error )
 		{
-			case 'UP' :
-				image.y ++ ;
-				redraw() ;
-				break ;
-			case 'DOWN' :
-				image.y -- ;
-				redraw() ;
-				break ;
-			case 'LEFT' :
-				image.x ++ ;
-				redraw() ;
-				break ;
-			case 'RIGHT' :
-				image.x -- ;
-				redraw() ;
-				break ;
-			case 'CTRL_C' :
-				terminate() ;
-				break ;
+			term.red( "%E\n" , error ) ;
+			process.exit( 1 ) ;
 		}
-	} ) ;
-	
-	redraw() ;
-	term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   CTRL-C: quit" ) ;
-} ) ;
+		
+		screen = termkit.ScreenBufferHD.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
+		screen.y = 2 ;
+		
+		image.dst = screen ;
+		
+		term.clear() ;
+		term.grabInput() ;
+		term.hideCursor() ;
+
+		term.on( 'key' , function( key , matches , data ) {
+			
+			switch ( key )
+			{
+				case 'UP' :
+					image.y += term.height / 20 ;
+					redraw() ;
+					break ;
+				case 'DOWN' :
+					image.y -= term.height / 20 ;
+					redraw() ;
+					break ;
+				case 'LEFT' :
+					image.x += term.width / 20 ;
+					redraw() ;
+					break ;
+				case 'RIGHT' :
+					image.x -= term.width / 20 ;
+					redraw() ;
+					break ;
+				case 'q' :
+				case 'CTRL_C' :
+					terminate() ;
+					break ;
+			}
+		} ) ;
+		
+		redraw() ;
+		term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   Q/CTRL-C: quit" ) ;
+	}
+) ;
 
 
 
@@ -118,6 +129,8 @@ function terminate()
 {
 	term.hideCursor( false ) ;
 	//term.applicationKeypad( false ) ;
+	term.styleReset() ;
+	term.moveTo( term.width , term.height ) ;
 	term( '\n' ) ;
 	term.processExit() ;
 } 
