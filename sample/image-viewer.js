@@ -44,6 +44,10 @@ if ( process.argv.length <= 2 )
 
 
 var screen , image , filler = { attr: {
+	// 8-bit
+	color: 'black' ,
+	bgColor: 'black' ,
+	// 32-bit
 	r: 0 ,
 	g: 0 ,
 	b: 0 ,
@@ -54,17 +58,31 @@ var screen , image , filler = { attr: {
 
 
 
+var SB = termkit.ScreenBuffer ;
+//var SB = termkit.ScreenBufferHD ;
+
+
+
 var url = process.argv[ 2 ] ;
 var rate = process.argv[ 3 ] || 1 ;
 
 
-
-termkit.ScreenBufferHD.loadImage(
+term.writeImage(
 	url ,
 	{ shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } } ,
+	function() {}
+) ;
+
+return ;
+
+SB.loadImage(
+	url ,
+	{
+		terminal: term ,
+		shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } 
+	} ,
 	function( error , image_ )
 	{
-		
 		image = image_ ;
 		
 		if ( error )
@@ -73,7 +91,7 @@ termkit.ScreenBufferHD.loadImage(
 			process.exit( 1 ) ;
 		}
 		
-		screen = termkit.ScreenBufferHD.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
+		screen = SB.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
 		screen.y = 2 ;
 		
 		image.dst = screen ;
