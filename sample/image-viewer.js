@@ -58,8 +58,8 @@ var screen , image , filler = { attr: {
 
 
 
-var SB = termkit.ScreenBuffer ;
-//var SB = termkit.ScreenBufferHD ;
+//var SB = termkit.ScreenBuffer ;
+var SB = termkit.ScreenBufferHD ;
 
 
 
@@ -67,6 +67,7 @@ var url = process.argv[ 2 ] ;
 var rate = process.argv[ 3 ] || 1 ;
 
 
+/*
 term.writeImage(
 	url ,
 	{ shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } } ,
@@ -74,6 +75,7 @@ term.writeImage(
 ) ;
 
 return ;
+*/
 
 SB.loadImage(
 	url ,
