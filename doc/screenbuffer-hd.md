@@ -62,7 +62,7 @@ This creates a ScreenBufferHD instance with the appropriate options.
 
 * url `string` the file path or URL of the image
 * options `object` (optional), where:
-	* shrink `object` (optional) if set, the image may be shrinked to conform to the max width and height.
+	* shrink `object` (optional, but **recommanded**) if set, the image may be shrinked to conform to the max width and height.
 	  When shrinking, aspect ratio is always preserved. It has those properties:
 		* width `integer` the max width of the image
 		* height `integer` the max height of the image
@@ -77,7 +77,10 @@ Only the first frame of *GIF* are used ATM.
 It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
 the upper half having a foreground color and the lower half having the background color.
 
-*Alpha channel* is correctly supported, also it is important to draw that image to another *screenBufferHD* for this
+The *shrink* object option can be used to reduce the size of the image.
+It is suggested to set it to `{ width: term.width, height: term.height * 2 }` to avoid creating a 2000 lines image.
+
+The *alpha channel* is correctly supported, also it is important to draw that image to another *screenBufferHD* for this
 to work as expected (remember: blending only works when drawing on another *screenBufferHD*).
 Moreover, the target buffer must have **consistent foreground and background color**, since all the area will be
 filled with `▀` characters.
@@ -85,23 +88,33 @@ filled with `▀` characters.
 Something like that will do the trick:
 
 ```js
+var screen = ScreenBufferHD.create( { dst: term , noFill: true } ) ;
+
 screen.fill( attr: {
 	// Both foreground and background must have the same color
-    r: 40 ,
-    g: 20 ,
-    b: 0 ,
-    bgR: 40 ,
-    bgG: 20 ,
-    bgB: 0
+	r: 40 ,
+	g: 20 ,
+	b: 0 ,
+	bgR: 40 ,
+	bgG: 20 ,
+	bgB: 0
 } } ) ;
 
-image.draw( { dst: screen , blending: true } ) ;
-screen.draw() ;
+ScreenBufferHD.loadImage(
+	path_to_image ,
+	{ shrink: { width: term.width , height: term.height * 2 } } ,
+	function( error , image ) {
+		if ( error ) { throw error ; }	// Doh!
+		
+		image.draw( { dst: screen , blending: true } ) ;
+		screen.draw() ;
+    }
+) ;
 ```
 
 There is a full example of an image viewer located here: `./sample/image-viewer.js` in the repository.
 
-Result:
+Example of rendering:
 
 ![32-bit ScreenBuffer image loading](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)
 

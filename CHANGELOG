@@ -1,4 +1,10 @@
 
+v1.2.1
+------
+
+Documentation on Terminal#drawImage(), ScreenBuffer*#loadImage() and fixed some escape sequences for the linux console
+
+
 v1.2.0
 ------
 

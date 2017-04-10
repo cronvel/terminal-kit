@@ -35,6 +35,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 * Static methods:
 	* [ScreenBuffer.create()](#ref.ScreenBuffer.create)
 	* [ScreenBuffer.createFromString()](#ref.ScreenBuffer.createFromString)
+	* [ScreenBuffer.loadImage()](#ref.ScreenBuffer.loadImage)
 	* [ScreenBuffer.attr2object()](#ref.ScreenBuffer.attr2object)
 	* [ScreenBuffer.object2attr()](#ref.ScreenBuffer.object2attr)
 	* [ScreenBuffer.loadSync()](#ref.ScreenBuffer.loadSync)
@@ -99,6 +100,63 @@ See [the attr object and flags](#ref.ScreenBuffer.attributes) for details.
 If the `transparencyChar` option is set, this character will produce a transparent cell, or if `transparencyType` is specified,
 a partly transparent cell.
 See [the transparency flags](#ref.ScreenBuffer.attributes) for details.
+
+
+
+<a name="ref.ScreenBuffer.loadImage"></a>
+### ScreenBuffer.loadImage( url , [options] , callback )
+
+* url `string` the file path or URL of the image
+* options `object` (optional), where:
+	* term `Terminal` (optional, default to `termkit.terminal`) pass a *Terminal* instance, so the correct palette
+	  will be known when converting the *True Color* image into a 8-bit ScreenBuffer
+	* shrink `object` (optional, but **recommanded**) if set, the image may be shrinked to conform to the max width and height.
+	  When shrinking, aspect ratio is always preserved. It has those properties:
+		* width `integer` the max width of the image
+		* height `integer` the max height of the image
+* callback `Function( error , image )` the callback, where:
+	* error: truthy if an error occured
+	* image `ScreenBufferHD` the *screenBuffer* of the image
+
+This creates a ScreenBufferHD from an image.
+Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.
+Only the first frame of *GIF* are used ATM.
+
+It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
+the upper half having a foreground color and the lower half having the background color.
+
+The *shrink* object option can be used to reduce the size of the image.
+It is suggested to set it to `{ width: term.width, height: term.height * 2 }` to avoid creating a 2000 lines image.
+
+The *alpha channel* is correctly supported, also it is important to draw that image to another *screenBufferHD* for this
+to work as expected (remember: blending only works when drawing on another *screenBufferHD*).
+Moreover, the target buffer must have **consistent foreground and background color**, since all the area will be
+filled with `▀` characters.
+
+Something like that will do the trick:
+
+```js
+var screen = ScreenBuffer.create( { dst: term , noFill: true } ) ;
+
+screen.fill( attr: {
+	// Both foreground and background must have the same color
+	color: 0 ,
+	bgColor: 0
+} } ) ;
+
+ScreenBuffer.loadImage(
+	path_to_image ,
+	{ terminal: term , shrink: { width: term.width , height: term.height * 2 } } ,
+	function( error , image ) {
+		if ( error ) { throw error ; }	// Doh!
+		
+		image.draw( { dst: screen , blending: true } ) ;
+		screen.draw() ;
+    }
+) ;
+```
+
+There is a full example of an image viewer located here: `./sample/image-viewer.js` in the repository.
 
 
 

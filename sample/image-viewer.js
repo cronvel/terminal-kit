@@ -37,7 +37,8 @@ var path = require( 'path' ) ;
 
 if ( process.argv.length <= 2 )
 {
-	term.magenta( "Usage is: ./%s <file-path> [rate]\n" , path.basename( process.argv[ 1 ] ) ) ;
+	term.magenta( "Usage is: ./%s <file-path> [-m] [<max-scale>]\n" , path.basename( process.argv[ 1 ] ) ) ;
+	term.gray( "-m: load inside a ScreenBuffer and interactively move the image\n" , path.basename( process.argv[ 1 ] ) ) ;
 	process.exit( 1 ) ;
 }
 
@@ -58,30 +59,53 @@ var screen , image , filler = { attr: {
 
 
 
-//var SB = termkit.ScreenBuffer ;
-var SB = termkit.ScreenBufferHD ;
-
-
-
+var SB = term.support['24bitsColors'] ? termkit.ScreenBufferHD : termkit.ScreenBuffer ;
 var url = process.argv[ 2 ] ;
-var rate = process.argv[ 3 ] || 1 ;
+var move ;
+var maxScale ;
 
 
-/*
-term.writeImage(
-	url ,
-	{ shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } } ,
-	function() {}
-) ;
 
-return ;
-*/
+// Can't depend on minimist just for a sample code, so we had to parse the command line by ourself
+if ( process.argv[ 3 ] === '-m' )
+{
+	move = true ;
+	maxScale = process.argv[ 4 ] || 2 ;
+}
+else
+{
+	if ( process.argv[ 4 ] === '-m' )
+	{
+		move = true ;
+		maxScale = process.argv[ 3 ] || 2 ;
+	}
+	else
+	{
+		move = false ;
+		maxScale = process.argv[ 3 ] || 1 ;
+	}
+}
+
+
+
+if ( ! move )
+{
+	term.drawImage(
+		url ,
+		{ shrink: { width: term.width * maxScale , height: ( term.height - 1 ) * 2 * maxScale } } ,
+		function() {}
+	) ;
+
+	return ;
+}
+
+
 
 SB.loadImage(
 	url ,
 	{
 		terminal: term ,
-		shrink: { width: term.width * rate , height: ( term.height - 1 ) * 2 * rate } 
+		shrink: { width: term.width * maxScale , height: ( term.height - 1 ) * 2 * maxScale } 
 	} ,
 	function( error , image_ )
 	{

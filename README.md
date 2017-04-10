@@ -48,7 +48,7 @@ Click any image to see the documentation related to the feature!
 
 [![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
 
-[![32-bit ScreenBuffer image loading](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/screenbuffer-hd.md#ref.ScreenBufferHD.loadImage)
+[![Draw an image inside the terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/high-level.md#drawImage)
 
 
 
@@ -73,6 +73,7 @@ Click any image to see the documentation related to the feature!
 * [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
 * [text buffers](doc/textbuffer.md#top)
 * [change the terminal color palette](doc/high-level.md#setPalette)
+* [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#drawImage)
 * [event-driven](doc/events.md#top)
 * Platform: any xterm-compatible terminal.
   Those terminals have been successfully tested:

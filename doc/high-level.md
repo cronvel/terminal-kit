@@ -30,6 +30,7 @@ create nice progress bars, or display some special effects.
 * [.singleLineMenu()](#ref.singleLineMenu)
 * [.progressBar()](#ref.progressBar)
 * [.slowTyping()](#ref.slowTyping)
+* [.drawImage()](#ref.drawImage)
 	
 
 
@@ -809,4 +810,31 @@ It produces:
 
 ![Slow typing output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/slow-typing-doc1.gif)
 
+
+
+<a name="ref.drawImage"></a>
+### .drawImage( url , [options] , callback )
+
+* url `string` filepath or URL
+* options `object` of options, where:
+	* shrink `object` (optional, but **recommanded**) if set, the image may be shrinked to conform to the max width and height.
+	  When shrinking, aspect ratio is always preserved. It has those properties:
+		* width `integer` the max width of the image
+		* height `integer` the max height of the image
+* callback `Function( error )` that will be called on completion, where:
+	* error: truthy if an error occured
+
+This get an image (using a filepath or an URL) and draw it directly into the terminal.
+Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.
+Only the first frame of *GIF* are used ATM.
+
+It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
+the upper half having a foreground color and the lower half having the background color.
+
+The *shrink* object option can be used to reduce the size of the image.
+It is suggested to set it to `{ width: term.width, height: term.height * 2 }` to avoid creating a 2000 lines image.
+
+Example of rendering:
+
+![image in terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)
 
