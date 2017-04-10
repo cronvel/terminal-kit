@@ -48,7 +48,7 @@ Click any image to see the documentation related to the feature!
 
 [![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
 
-[![Draw an image inside the terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/high-level.md#drawImage)
+[![Draw an image inside the terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/high-level.md#ref.drawImage)
 
 
 
