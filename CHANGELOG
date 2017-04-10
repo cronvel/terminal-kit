@@ -1,18 +1,6 @@
 
-v1.2.3
-------
-
-Fixing a broken-link in the Documentation
-
-
-v1.2.2
-------
-
-Fixing a broken-link in the Documentation
-
-
-v1.2.1
-------
+v1.2.1 - v1.2.3
+---------------
 
 Documentation on Terminal#drawImage(), ScreenBuffer*#loadImage() and fixed some escape sequences for the linux console
 
