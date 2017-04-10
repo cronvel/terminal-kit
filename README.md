@@ -72,8 +72,8 @@ Click any image to see the documentation related to the feature!
 * [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
 * [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
 * [text buffers](doc/textbuffer.md#top)
-* [change the terminal color palette](doc/high-level.md#setPalette)
-* [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#drawImage)
+* [change the terminal color palette](doc/high-level.md#ref.setPalette)
+* [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#ref.drawImage)
 * [event-driven](doc/events.md#top)
 * Platform: any xterm-compatible terminal.
   Those terminals have been successfully tested:
