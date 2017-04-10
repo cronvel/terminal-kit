@@ -318,11 +318,13 @@ Special keys are supported by the input field:
 * ENTER, KP_ENTER: end the input process and return the current user input
 * DELETE: delete
 * BACKSPACE: backward delete
-* LEFT, RIGHT: move the cursor one character left or right
+* LEFT/RIGHT: move the cursor one character left/right
+* CTRL_LEFT/CTRL_RIGHT: move the cursor to the previous/next word
 * HOME: move the cursor at the beginning of the input field
 * END: move the cursor at the end of the input field
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
+* CTRL_U/CTRL_K: delete all characters before/after the cursor
 
 Additional keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
@@ -333,8 +335,12 @@ Available actions are:
 * cancel: cancel the input field (default: ESC, the input field should be cancelable)
 * backDelete: delete one character backward (default: BACKSPACE)
 * delete: delete one character (default: DELETE)
+* deleteAllBefore: delete all characters before the cursor (default: CTRL_U)
+* deleteAllAfter: delete all characters from the cursor to the end of input (default: DELETE)
 * backward: move the cursor one character backward (default: LEFT)
 * forward: move the cursor one character forward (default: RIGHT)
+* previousWord: move the cursor to the begining of the previous word (default: CTRL_LEFT)
+* nextWord: move the cursor to the end of the next word (default: CTRL_RIGHT)
 * historyPrevious: use the previous history entry (default: UP)
 * historyNext: use the next history entry (default: DOWN)
 * startOfInput: move the cursor at the begining of input (default: HOME)

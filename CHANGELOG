@@ -1,4 +1,18 @@
 
+v1.2.0
+------
+
+.inputField(): Ctrl-U/Ctrl-K delete all characters before/after (issue #21)
+
+
+v1.2.0
+------
+
+* .inputField(): Added support for Ctrl-Left/Ctrl-right moving to the previous/next word
+and support for Ctrl-U/Ctrl-K delete all characters before/after (issue #21)
+* 'gray' and 'bgGray' are now aliases of 'brightBlack' and 'bgBrightBlack' (issue #22)
+
+
 v1.1.5
 ------
 
