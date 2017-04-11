@@ -273,7 +273,9 @@ It produces:
 	  if multiple candidate are possible, it should return an array of string), if **the function accepts 2 arguments**
 	  (checked using *function*.length), then **the auto-completer will be asynchronous**!
 	  Also note that if it is an array or the result of the function is an array, and if that array has a
-	  special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu.
+	  special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu,
+	  and if it has the special property `postfix` (still a string), this will be appended to the output of the
+	  auto complete menu.
 	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
 	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
@@ -640,8 +642,17 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 	* barHeadChar `string` the char used for the bar, default to '>'
 	* maxRefreshTime `number` the maximum time between two refresh in ms, default to 500ms
 	* minRefreshTime `number` the minimum time between two refresh in ms, default to 100ms
+	* syncMode `boolean`
+		* when false (the default), the progressBar works asynchronously, every few milliseconds
+		  it is redrawn. Note that it will fail for CPU bound tasks, if the tasks do not let the event loop breathes
+		* when true, the *progressBar* works in synchronous mode: it only redraws itself synchronously in those cases:
+			* at startup when `progressBar()` is called
+			* each time `progressBar.startItem()` is called
+			* each time `progressBar.itemDone()` is called
+			* each time `progressBar.update()` is called
+			* each time `progressBar.resume()` is called
 
-It creates a nice progress bar and return a controller object to interact with it.
+It creates a nice progress bar and returns a controller object to interact with it.
 
 The controller provides those functions:
 

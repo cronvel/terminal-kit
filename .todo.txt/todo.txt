@@ -4,14 +4,5 @@ use the 'name' attribute of color, in colorScheme/ palette, something like accep
 (C) find why 24 bits colors test sucks so much in 16 colors terminal @bug
 try to find a way to disable terminal's word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
-(B) tests should be run with .getDetectedTerminal() AND default terminal, they all need to implement a CLI switch for that @code
 (E) terminfo support @code
-(C) document all the ScreenBuffer feature @doc
 (B) .inputField() has a bug with full-width chars @bug
-(B) ScreenBuffer char_size should be 2 bytes, punycode.ucs2.decode() is useless since bigger chars uses two cells @code
-(A) document inputField autoComplete returning an array with a prefix key @doc
-(A) document fileInput @doc
-(A) document .inputField() options 'minLength', 'default', 'style' and 'cancelable' @doc
-(A) document .inputField() option 'keyBindings' @doc
-(A) document .markupOnly @doc
-(A) document .progressBar() option 'syncMode'
