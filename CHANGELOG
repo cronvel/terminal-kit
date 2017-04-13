@@ -1,4 +1,10 @@
 
+v1.2.6
+------
+
+.inputField() fixed: now hints are removed on submit
+
+
 v1.2.5
 ------
 
