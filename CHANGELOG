@@ -1,11 +1,11 @@
 
-v1.2.12
--------
+v1.3.0
+------
 
-Fixed (again x2) a bug in the new markup feature
+New: term.colorRgbHex() and term.bgColorRgbHex()
 
 
-v1.2.8 - v1.2.11
+v1.2.8 - v1.2.12
 ----------------
 
 Markup reset string

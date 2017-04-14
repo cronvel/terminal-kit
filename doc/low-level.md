@@ -114,6 +114,8 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .color256(register): if the terminal support 256 colors, it chooses between them using an 0..255 integer
 * .colorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the 
 	exact color if the terminal support 24 bits colors), *r,g,b* are in the 0..255 range
+* .colorRgbHex(rgb): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the 
+	exact color if the terminal support 24 bits colors), where *rgb* is in the hex format, e.g. `#ef1234`
 * .colorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or
 	even the exact color if the terminal support 24 bits colors), *l* is in the 0..255 range
 
@@ -145,6 +147,9 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .bgColor256(register): if the terminal support 256 colors, it choose between them using an 0..255 integer
 * .bgColorRgb(r,g,b): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the
 	exact color if the terminal support 24 bits colors) as the background color, *r,g,b* are in the 0..255 range
+* .bgColorRgbHex(rgb): pick the closest match for an RGB value (from a 16 or 256 colors palette or even the
+	exact color if the terminal support 24 bits colors) as the background color,
+	where *rgb* is in the hex format, e.g. `#ef1234`
 * .bgColorGrayscale(l): pick the closest match for a grayscale value (from a 16 or 256 colors palette or even
 	the exact color if the terminal support 24 bits colors) as the background color, *l* is in the 0..255 range
 
