@@ -244,9 +244,17 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .markupOnly(str): disable string formatting but still interpret `^` markup
 * .cwd(uri): set the terminal Current Working Directory to *uri* (should start with *file://*)
 * .windowTitle(str): set the title of an xterm-compatible window to *str*
+* .iconName(str): set the icon name to *str*
 * .setCursorColor(register): set the cursor color to one of the 256 *register*
 * .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
-* .setDefaultColorRgb(r,g,b): set the value of the default foreground color
-* .setDefaultBgColorRgb(): set the value of the default background color, this is the terminal window background
+* .resetCursorColorRgb(): reset the cursor color to the terminal's default
+* .setDefaultColorRgb(r,g,b): set the default foreground color
+* .resetDefaultColorRgb(): reset the foreground color to the terminal's default
+* .setDefaultBgColorRgb(r,g,b): set the default background color, most of time the terminal window background
+* .resetDefaultBgColorRgb(): reset the background color to the terminal's default
+* .setHighlightBgColorRgb(r,g,b): set the highlight (selection) background color, replace the default behavior
+  which is to invert the foreground and background color on selection
+* .resetHighlightBgColorRgb(): reset the highlight (selection) background color, restore back the default behavior
+  which is to invert the foreground and background color on selection
 * .notify(title,text): (*gnome-terminal*) produce a notification **if the terminal is not the foreground window**
 

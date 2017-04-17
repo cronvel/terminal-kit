@@ -1,4 +1,10 @@
 
+v1.4.1
+------
+
+Fixed missing .reset*ColorRgb(), that reset anything set by .set*ColorRgb()
+
+
 v1.4.0
 ------
 
