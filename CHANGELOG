@@ -2,7 +2,9 @@
 v1.4.1
 ------
 
-Fixed missing .reset*ColorRgb(), that reset anything set by .set*ColorRgb()
+Fixed: missing term.reset*ColorRgb(), that reset anything set by term.set*ColorRgb().
+Fixed: term.windowTitle() now just set the window title, not the icon name anymore.
+Icon name can be set with term.iconName().
 
 
 v1.4.0
