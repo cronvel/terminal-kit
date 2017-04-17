@@ -1,4 +1,10 @@
 
+v1.4.0
+------
+
+New: term.cwd() and term.notify()
+
+
 v1.3.0
 ------
 
