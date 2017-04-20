@@ -206,6 +206,8 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .delete(n): delete n char after (like the DELETE key)
 * .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1)
   followed by a .delete(1)
+* .scrollUp(n): scroll up n lines, new lines are added at the bottom
+* .scrollDown(n): scroll down n lines, new lines are added at the top
 * .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
 
 

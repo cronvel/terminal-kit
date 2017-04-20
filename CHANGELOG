@@ -1,4 +1,10 @@
 
+v1.4.2
+------
+
+Fixed: missing .scrollUp() and .scrollDown() ANSI escape sequences are now included in the lib
+
+
 v1.4.1
 ------
 
