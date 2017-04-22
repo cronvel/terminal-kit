@@ -76,7 +76,7 @@ Click any image to see the documentation related to the feature!
 * [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#ref.drawImage)
 * [event-driven](doc/events.md#top)
 * Platform: any xterm-compatible terminal.
-  Those terminals have been successfully tested:
+  These terminals have been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
