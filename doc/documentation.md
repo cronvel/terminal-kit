@@ -12,7 +12,7 @@ It does **NOT** depend on ncurses.
 
 * License: MIT
 * Platform: linux and any xterm-compatible terminal.
-  Those terminals have been successfully tested:
+  These terminals have been successfully tested:
 	* xterm
 	* gnome-terminal
 	* Konsole
