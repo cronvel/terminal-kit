@@ -41,13 +41,15 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
 		] ;
 		
+		//items[ 1 ] = 'a very long menu entry! '.repeat( 8 ) ;
+		
 		var options = {
-			y: 1 ,
-			style: term.inverse ,
-			selectedStyle: term.dim.blue.bgGreen
+			//y: 1 ,
+			//style: term.inverse ,
+			//selectedStyle: term.dim.blue.bgGreen
 		} ;
 		
-		term.singleLineMenu( items , options , function( error , response ) {
+		term.singleColumnMenu( items , options , function( error , response ) {
 			
 			if ( error )
 			{
@@ -70,7 +72,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		setTimeout( function() { process.exit() ; } , 100 ) ;
 	}
 	
-	term.clear() ;
+	//term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 	menu() ; 
 } ) ;
