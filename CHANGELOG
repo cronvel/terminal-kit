@@ -1,4 +1,10 @@
 
+v1.5.4
+------
+
+.singleLineMenu() and .singleColumnMenu() now supports key bindings customization
+
+
 v1.5.3
 ------
 
