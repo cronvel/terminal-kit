@@ -1,4 +1,10 @@
 
+v1.5.3
+------
+
+Removed deprecated, undocumented and duplicated area mode for .inputField()
+
+
 v1.5.2
 ------
 
