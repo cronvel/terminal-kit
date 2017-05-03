@@ -1,4 +1,10 @@
 
+v1.5.2
+------
+
+Bugfixed .singleColumnMenu(), and correctly wordwrap menu items
+
+
 v1.5.1
 ------
 

@@ -41,10 +41,11 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
 		] ;
 		
-		items[ 1 ] = 'a very long menu entry! '.repeat( 8 ) ;
+		items[ 1 ] = 'a very looooooooooooooong menu entry! '.repeat( 8 ) ;
 		
 		var options = {
-			bigItems: true
+			//ellipsis: true ,
+			selectedLeftPad: '*' ,
 			//y: 1 ,
 			//style: term.inverse ,
 			//selectedStyle: term.dim.blue.bgGreen
