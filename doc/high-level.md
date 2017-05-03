@@ -282,7 +282,7 @@ It produces:
 	  that is used for the completion (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
 	* autoCompleteHint `boolean` if true (default: false) use the hintStyle to write the auto-completion preview
 	  at the right of the input
-	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string).
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* tokenHook `Function( token , isEndOfInput , previousTokens , term , config )` this is a hook called for each token
 	  of the input, where:
 	  	* token `String` is the current token
@@ -331,7 +331,7 @@ Special keys are supported by the input field:
 
 Additional keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
-All those key are customization through the *keyBindings* options.
+All those keys are customization through the *keyBindings* options.
 Available actions are:
 
 * submit: submit the input field (default: ENTER and KP_ENTER)
@@ -560,6 +560,7 @@ term.fileInput(
 	* previousPageHint `string` (default: ' « ') string indicator for a previous page
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
 * callback( error , response ), where:
 	* error `mixed` truthy if an underlying error occurs
@@ -573,12 +574,28 @@ term.fileInput(
 
 It creates an interactive menu that uses only a single line.
 
+**It supports the mouse if the mouse has been activated by [.grabInput()](#ref.grabInput)'s mouse option.**
+
 It features **paging** if items oversize the line length, and supports the following keys:
 
 * ENTER, KP_ENTER: end the process and return the currently selected menu item
 * LEFT, RIGHT: move and select the previous or the next item in the menu
-* UP, DOWN: go the previous or the next page of items (if paging is used)
+* SHIFT_TAB, TAB: cycle backward or forward and select the item
+* UP, DOWN: go to the previous or the next page of items (if paging is used)
 * HOME, END: move and select the first or the last item of the menu
+
+All those keys are customization through the *keyBindings* options.
+Available actions are:
+
+* submit: submit the menu (default: ENTER and KP_ENTER)
+* previous: move and select the previous item in the menu (default: LEFT)
+* next: move and select the next item in the menu (default: RIGHT)
+* cyclePrevious: cycle backward and select the item (default: SHIFT_TAB)
+* cycleNext: cycle forward and select the item (default: TAB)
+* previousPage: go to the previous page of items, if paging is used (default: UP)
+* nextPage: go to the next page of items, if paging is used (default: DOWN)
+* first: move and select the first item in the menu (default: HOME)
+* last: move and select the last item in the menu (default: END)
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
