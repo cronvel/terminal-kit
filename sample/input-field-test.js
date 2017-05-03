@@ -35,6 +35,8 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
+	term.grabInput( { mouse: 'motion' } ) ;
+	
 	var history = [
 		"OMG my name was supa long, so much long I can't remember what it is, can you believe that?" ,
 		'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob'
