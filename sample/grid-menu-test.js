@@ -35,6 +35,8 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
+	term.grabInput( { mouse: 'motion' } ) ;
+	
 	function menu()
 	{
 		var items = [
