@@ -331,7 +331,7 @@ Special keys are supported by the input field:
 
 Additional keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
 
-All those keys are customization through the *keyBindings* options.
+All those keys are customizable through the *keyBindings* options.
 Available actions are:
 
 * submit: submit the input field (default: ENTER and KP_ENTER)
@@ -584,7 +584,7 @@ It features **paging** if items oversize the line length, and supports the follo
 * UP, DOWN: go to the previous or the next page of items (if paging is used)
 * HOME, END: move and select the first or the last item of the menu
 
-All those keys are customization through the *keyBindings* options.
+All those keys are customizable through the *keyBindings* options.
 Available actions are:
 
 * submit: submit the menu (default: ENTER and KP_ENTER)
