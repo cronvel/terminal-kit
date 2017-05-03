@@ -38,13 +38,19 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	function menu()
 	{
 		var items = [
-			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
+			'a menu entry' ,
+			'another menu entry' ,
+			'still a menu entry' ,
+			'yet another menu entry' ,
+			'know what? a menu entry!' ,
+			'surprise! a menu entry!' ,
+			'dang! a menu entry!' ,
+			'double dang! a menu entry!' ,
+			'OMG! too much menu entries!' ,
+			'seriously: this is a menu entry!' ,
 		] ;
 		
-		items[ 1 ] = 'a very looooooooooooooong menu entry! '.repeat( 8 ) ;
-		
 		var options = {
-			//ellipsis: true ,
 			selectedLeftPad: '*' ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
 			//y: 1 ,
@@ -52,7 +58,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			//selectedStyle: term.dim.blue.bgGreen
 		} ;
 		
-		term.singleColumnMenu( items , options , function( error , response ) {
+		term.gridMenu( items , options , function( error , response ) {
 			
 			if ( error )
 			{
