@@ -47,8 +47,10 @@ Click any image to see the documentation related to the feature!
 [![Yes or no output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/yes-no-doc1.gif)](doc/high-level.md#ref.yesOrNo)
 
 [![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
+← Surfaces and Sprites
 
 [![Draw an image inside the terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/high-level.md#ref.drawImage)
+← Load and draw an image inside the terminal
 
 
 

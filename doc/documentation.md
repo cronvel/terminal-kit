@@ -136,6 +136,9 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.inputField()](high-level.md#ref.inputField)
 	* [.fileInput()](high-level.md#ref.fileInput)
 	* [.singleLineMenu()](high-level.md#ref.singleLineMenu)
+	* [.singleRowMenu()](high-level.md#ref.singleRowMenu)
+	* [.singleColumnMenu()](high-level.md#ref.singleColumnMenu)
+	* [.gridMenu()](high-level.md#ref.gridMenu)
 	* [.progressBar()](high-level.md#ref.progressBar)
 	* [.slowTyping()](high-level.md#ref.slowTyping)
 	

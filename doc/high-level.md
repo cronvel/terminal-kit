@@ -28,6 +28,9 @@ create nice progress bars, or display some special effects.
 * [.inputField()](#ref.inputField)
 * [.fileInput()](#ref.fileInput)
 * [.singleLineMenu()](#ref.singleLineMenu)
+* [.singleRowMenu()](#ref.singleRowMenu)
+* [.singleColumnMenu()](#ref.singleColumnMenu)
+* [.gridMenu()](#ref.gridMenu)
 * [.progressBar()](#ref.progressBar)
 * [.slowTyping()](#ref.slowTyping)
 * [.drawImage()](#ref.drawImage)
@@ -634,6 +637,116 @@ It produces:
 It creates a menu on the top of the terminal, with unselected items using inverted foreground/background colors,
 and the selected item using blue on green.
 When the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
+
+
+
+<a name="ref.singleRowMenu"></a>
+### .singleRowMenu( menuItems , [options] , callback )
+
+This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
+
+
+
+<a name="ref.singleColumnMenu"></a>
+### .singleColumnMenu( menuItems , [options] , callback )
+
+* menuItems `array` of menu item text
+* options `object` of options, where:
+	* y `number` the line where the menu will be displayed, default to the next line
+	* style `function` the style of unselected items, default to the current `term`
+	* selectedStyle `function` the style of the selected item, default to `term.inverse`
+	* leftPad `string` the text to put before a menu item, default to ' '
+	* selectedLeftPad `string` the text to put before a selected menu item, default to ' '
+	* oneLineItem `boolean` if true (default: false), big items do not span multiple lines, instead they are truncated
+	  and ended with an ellipsis char
+	* itemMaxWidth `number` the max width for an item, default to the terminal width
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
+	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
+* callback( error , response ), where:
+	* error `mixed` truthy if an underlying error occurs
+	* response `Object` where
+		* selectedIndex `number` the user-selected menu item index
+		* selectedText `string` the user-selected menu item text
+		* x `number` the x coordinate of the selected menu item (the first character)
+		* y `number` the y coordinate of the selected menu item
+		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
+		  the key that produced the exit
+
+It creates an interactive menu over multiple lines.
+
+**It supports the mouse if the mouse has been activated by [.grabInput()](#ref.grabInput)'s mouse option.**
+
+* ENTER, KP_ENTER: end the process and return the currently selected menu item
+* UP, DOWN: move and select the previous or the next item in the menu
+* SHIFT_TAB, TAB: cycle backward or forward and select the item
+* HOME, END: move and select the first or the last item of the menu
+
+All those keys are customizable through the *keyBindings* options.
+Available actions are:
+
+* submit: submit the menu (default: ENTER and KP_ENTER)
+* previous: move and select the previous item in the menu (default: UP)
+* next: move and select the next item in the menu (default: DOWN)
+* cyclePrevious: cycle backward and select the item (default: SHIFT_TAB)
+* cycleNext: cycle forward and select the item (default: TAB)
+* first: move and select the first item in the menu (default: HOME)
+* last: move and select the last item in the menu (default: END)
+
+If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
+does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
+
+
+
+<a name="ref.gridMenu"></a>
+### .gridMenu( menuItems , [options] , callback )
+
+* menuItems `array` of menu item text
+* options `object` of options, where:
+	* y `number` the line where the menu will be displayed, default to the next line
+	* style `function` the style of unselected items, default to the current `term`
+	* selectedStyle `function` the style of the selected item, default to `term.inverse`
+	* leftPad `string` the text to put before a menu item, default to ' '
+	* selectedLeftPad `string` the text to put before a selected menu item, default to ' '
+	* rightPad `string` the text to put after a menu item, default to ' '
+	* selectedRightPad `string` the text to put after a selected menu item, default to ' '
+	* itemMaxWidth `number` the max width for an item, default to the 1/3 of the terminal width
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
+	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
+* callback( error , response ), where:
+	* error `mixed` truthy if an underlying error occurs
+	* response `Object` where
+		* selectedIndex `number` the user-selected menu item index
+		* selectedText `string` the user-selected menu item text
+		* x `number` the x coordinate of the selected menu item (the first character)
+		* y `number` the y coordinate of the selected menu item
+		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
+		  the key that produced the exit
+
+It creates an interactive menu, items are organized in multiple rows and columns.
+
+**It supports the mouse if the mouse has been activated by [.grabInput()](#ref.grabInput)'s mouse option.**
+
+* ENTER, KP_ENTER: end the process and return the currently selected menu item
+* UP, DOWN: move and select the previous or the next item in the menu
+* LEFT, RIGHT: move and select the item on the left or on the right (previous or next column)
+* SHIFT_TAB, TAB: cycle backward or forward and select the item
+* HOME, END: move and select the first or the last item of the menu
+
+All those keys are customizable through the *keyBindings* options.
+Available actions are:
+
+* submit: submit the menu (default: ENTER and KP_ENTER)
+* previous: move and select the previous item in the menu (default: UP)
+* next: move and select the next item in the menu (default: DOWN)
+* previousColumn: move and select the item on the previous column/on the left (default: LEFT)
+* nextColumn: move and select the item on the next column/on the right (default: RIGHT)
+* cyclePrevious: cycle backward and select the item (default: SHIFT_TAB)
+* cycleNext: cycle forward and select the item (default: TAB)
+* first: move and select the first item in the menu (default: HOME)
+* last: move and select the last item in the menu (default: END)
+
+If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
+does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
 
 
 

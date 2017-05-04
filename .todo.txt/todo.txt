@@ -6,3 +6,4 @@ try to find a way to disable terminal's word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (E) terminfo support @code
 (B) .inputField() has a bug with full-width chars @bug
+(A) add examples and gif to .singleColumnMenu() and .gridMenu() @doc
