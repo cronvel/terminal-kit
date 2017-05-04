@@ -556,7 +556,7 @@ term.fileInput(
 ### .singleLineMenu( menuItems , [options] , callback )
 
 * menuItems `array` of menu item text
-* options `object` of options, where:
+* options `object` (optional) of options, where:
 	* y `number` the line where the menu will be displayed, default to the next line
 	* separator `string` (default: '  ') the string separating each menu item
 	* nextPageHint `string` (default: ' » ') string indicator for a next page
@@ -651,7 +651,7 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 ### .singleColumnMenu( menuItems , [options] , callback )
 
 * menuItems `array` of menu item text
-* options `object` of options, where:
+* options `object` (optional) of options, where:
 	* y `number` the line where the menu will be displayed, default to the next line
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
@@ -695,13 +695,45 @@ Available actions are:
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
 
+Example:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term.cyan( 'The hall is spacious. Someone lighted few chandeliers.\n' ) ;
+term.cyan( 'There are doorways south and west.\n' ) ;
+
+var items = [
+	'a. Go south' ,
+	'b. Go west' ,
+	'c. Go back to the street'
+] ;
+
+term.singleColumnMenu( items , function( error , response ) {
+	term( '\n' ).eraseLineAfter.green(
+		"#%s selected: %s (%s,%s)\n" ,
+		response.selectedIndex ,
+		response.selectedText ,
+		response.x ,
+		response.y
+	) ;
+	process.exit() ;
+} ) ;
+```
+
+It produces:
+
+![Single column menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-column-menu-doc1.gif)
+
+It creates a menu, when the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
+
 
 
 <a name="ref.gridMenu"></a>
 ### .gridMenu( menuItems , [options] , callback )
 
 * menuItems `array` of menu item text
-* options `object` of options, where:
+* options `object` (optional) of options, where:
 	* y `number` the line where the menu will be displayed, default to the next line
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
@@ -722,7 +754,7 @@ does not contain any property except 'unexpectedKey', that will contain the key 
 		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
 		  the key that produced the exit
 
-It creates an interactive menu, items are organized in multiple rows and columns.
+It creates an interactive menu, items are organized in multiple rows and columns, as a grid/table.
 
 **It supports the mouse if the mouse has been activated by [.grabInput()](#ref.grabInput)'s mouse option.**
 
@@ -747,6 +779,36 @@ Available actions are:
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
+
+Example:
+
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+var fs = require( 'fs' ) ;
+
+term.cyan( 'Choose a file:\n' ) ;
+
+var items = fs.readdirSync( process.cwd() ) ;
+
+term.gridMenu( items , function( error , response ) {
+	term( '\n' ).eraseLineAfter.green(
+		"#%s selected: %s (%s,%s)\n" ,
+		response.selectedIndex ,
+		response.selectedText ,
+		response.x ,
+		response.y
+	) ;
+	process.exit() ;
+} ) ;
+```
+
+It produces:
+
+![Grid menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/grid-menu-doc1.gif)
+
+It reads the current directory and creates a menu with all files and folder, displayed using a table layout.
+When the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
 
 
 

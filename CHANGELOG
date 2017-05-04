@@ -1,4 +1,10 @@
 
+v1.6.5
+------
+
+.singleColumnMenu() and .gridMenu(): fixed a minor bug (was adding one extra line when at the bottom of the terminal) and improved the documentation (example and screenshot)
+
+
 v1.6.4
 ------
 

@@ -38,6 +38,10 @@ Click any image to see the documentation related to the feature!
 
 [![Single line menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-line-menu-doc1.gif)](doc/high-level.md#ref.singleLineMenu)
 
+[![Single column menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/single-column-menu-doc1.gif)](doc/high-level.md#ref.singleColumnMenu)
+
+[![Grid menu output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/grid-menu-doc1.gif)](doc/high-level.md#ref.gridMenu)
+
 [![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc1.gif)](doc/high-level.md#ref.progressBar)
 
 [![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)](doc/high-level.md#ref.progressBar)
@@ -70,6 +74,8 @@ Click any image to see the documentation related to the feature!
 * [mouse support (GPM is supported for the Linux Console)](doc/high-level.md#ref.grabInput)
 * [input field](doc/high-level.md#ref.inputField)
 * [single line menu](doc/high-level.md#ref.singleLineMenu)
+* [single column menu](doc/high-level.md#ref.singleColumnMenu)
+* [grid/table menu](doc/high-level.md#ref.gridMenu)
 * [progress bar](doc/high-level.md#ref.progressBar)
 * [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
 * [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
