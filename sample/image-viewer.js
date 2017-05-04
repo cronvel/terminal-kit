@@ -126,24 +126,38 @@ SB.loadImage(
 		term.grabInput() ;
 		term.hideCursor() ;
 
-		term.on( 'key' , function( key , matches , data ) {
+		term.on( 'key' , ( key , matches , data ) => {
+			
+			var offset , stats ;
 			
 			switch ( key )
 			{
 				case 'UP' :
-					image.y += term.height / 20 ;
-					redraw() ;
+					offset = Math.round( term.height / 20 ) ;
+					screen.vScrollBuffer( - offset ) ;
+					image.y += offset ;
+					image.draw() ;
+					term.scrollDown( offset ) ;
+					stats = screen.draw( { delta: true } ) ;
+					//console.error( stats ) ;
 					break ;
 				case 'DOWN' :
-					image.y -= term.height / 20 ;
-					redraw() ;
+					offset = Math.round( term.height / 20 ) ;
+					screen.vScrollBuffer( offset ) ;
+					image.y += - offset ;
+					image.draw() ;
+					term.scrollUp( offset ) ;
+					stats = screen.draw( { delta: true } ) ;
+					//console.error( stats ) ;
 					break ;
 				case 'LEFT' :
-					image.x += term.width / 20 ;
+					offset = Math.round( term.width / 20 ) ;
+					image.x += offset ;
 					redraw() ;
 					break ;
 				case 'RIGHT' :
-					image.x -= term.width / 20 ;
+					offset = Math.round( term.width / 20 ) ;
+					image.x -= offset ;
 					redraw() ;
 					break ;
 				case 'q' :
@@ -155,6 +169,16 @@ SB.loadImage(
 		
 		redraw() ;
 		term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   Q/CTRL-C: quit" ) ;
+		term.scrollingRegion( 2 , term.height ) ;
+		
+		/*
+		// Tricks to make the last line (the one with instruction) to be redrawn on next draw()
+		screen.fill( {
+			start: screen.buffer.length - screen.width * screen.ITEM_SIZE ,
+			buffer: screen.lastBuffer ,
+			void: true
+		} ) ;
+		*/
 	}
 ) ;
 
@@ -162,9 +186,12 @@ SB.loadImage(
 
 function redraw()
 {
+	var stats ;
+	
 	screen.fill( filler ) ;
 	image.draw() ;
-	screen.draw( { delta: true } ) ;
+	stats = screen.draw( { delta: true } ) ;
+	//console.error( stats ) ;
 }
 
 
@@ -174,6 +201,7 @@ function terminate()
 	term.hideCursor( false ) ;
 	//term.applicationKeypad( false ) ;
 	term.styleReset() ;
+	term.resetScrollingRegion() ;
 	term.moveTo( term.width , term.height ) ;
 	term( '\n' ) ;
 	term.processExit() ;

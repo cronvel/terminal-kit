@@ -5,5 +5,5 @@ use the 'name' attribute of color, in colorScheme/ palette, something like accep
 try to find a way to disable terminal's word-wrap, if possible @r&d
 mrxvt support: draw-test does not work @bug
 (E) terminfo support @code
-x 2017-04-11 document all the ScreenBuffer feature @doc
 (B) .inputField() has a bug with full-width chars @bug
+x 2017-05-04 screenBuffer.scrollCache() or something like that, to optimize large vertical scrolling (first scroll using term.scrollUp() then update the screenBuffer cache)

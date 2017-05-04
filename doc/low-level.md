@@ -182,8 +182,10 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .nextLine(n): move the cursor to beginning of the line, 'n' lines down
 * .previousLine(n): move the cursor to beginning of the line, 'n' lines up
 * .column(x): move the cursor to column x
-* .scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom, the absolute cursor position do not change (Linux Console don't support it)
-* .scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top, the absolute cursor position do not change (Linux Console don't support it)
+* .scrollUp(n): scroll whole page up by 'n' lines, new lines are added at the bottom, the absolute cursor position do not change (Linux Console doesn't support it)
+* .scrollDown(n): scroll whole page down by 'n' lines, new lines are added at the top, the absolute cursor position do not change (Linux Console doesn't support it)
+* .scrollingRegion(top,bottom): limit all scrolling operations to the region between *top* and *bottom* line included (Linux Console doesn't support it)
+* .resetScrollingRegion(): reset the scrolling region: the whole screen would be affected by scrolling operation again (Linux Console doesn't support it)
 * .moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
 * .move(x,y): relative move of the cursor
 * .hideCursor(): hide/show the cursor

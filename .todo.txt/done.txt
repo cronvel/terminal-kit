@@ -37,3 +37,5 @@ x 2017-04-11 document .progressBar() option 'syncMode'
 x 2017-04-11 document fileInput @doc
 x 2017-04-11 document inputField autoComplete returning an array with a prefix key @doc
 x 2017-04-11 document all the ScreenBuffer feature @doc
+x 2017-05-04 add examples and gif to .singleColumnMenu() and .gridMenu() @doc
+x 2017-05-04 screenBuffer.scrollCache() or something like that, to optimize large vertical scrolling (first scroll using term.scrollUp() then update the screenBuffer cache)
