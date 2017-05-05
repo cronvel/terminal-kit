@@ -1,4 +1,10 @@
 
+v1.7.1
+------
+
+Image loader fixed: now the callback is optional
+
+
 v1.7.0
 ------
 

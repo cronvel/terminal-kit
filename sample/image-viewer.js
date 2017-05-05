@@ -38,7 +38,7 @@ var path = require( 'path' ) ;
 if ( process.argv.length <= 2 )
 {
 	term.magenta( "Usage is: ./%s <file-path> [-m] [<max-scale>]\n" , path.basename( process.argv[ 1 ] ) ) ;
-	term.gray( "-m: load inside a ScreenBuffer and interactively move the image\n" , path.basename( process.argv[ 1 ] ) ) ;
+	term.gray( "-m: load inside a ScreenBuffer and interactively move the image\n" ) ;
 	process.exit( 1 ) ;
 }
 
