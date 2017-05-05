@@ -1,4 +1,10 @@
 
+v1.6.8
+------
+
+Greatly improved image drawing performance, + more ScreenBuffer* optimizations
+
+
 v1.6.7
 ------
 
