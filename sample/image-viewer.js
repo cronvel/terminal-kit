@@ -90,12 +90,13 @@ else
 
 if ( ! move )
 {
-	term.drawImage(
-		url ,
-		{ shrink: { width: term.width * maxScale , height: ( term.height - 1 ) * 2 * maxScale } } ,
-		function() {}
-	) ;
-
+	term.drawImage( url , {
+		shrink: {
+			width: term.width * maxScale ,
+			height: ( term.height - 1 ) * 2 * maxScale
+		}
+	} ) ;
+	
 	return ;
 }
 
