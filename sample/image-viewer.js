@@ -134,20 +134,18 @@ SB.loadImage(
 			{
 				case 'UP' :
 					offset = Math.round( term.height / 20 ) ;
-					screen.vScrollBuffer( - offset ) ;
+					screen.vScroll( offset , true ) ;	// Perform term.scrollDown()
 					image.y += offset ;
 					image.draw() ;
-					term.scrollDown( offset ) ;
-					stats = screen.draw( { delta: true } ) ;
+					stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the top
 					//console.error( stats ) ;
 					break ;
 				case 'DOWN' :
 					offset = Math.round( term.height / 20 ) ;
-					screen.vScrollBuffer( offset ) ;
+					screen.vScroll( - offset , true ) ;	// Perform term.scrollUp()
 					image.y += - offset ;
 					image.draw() ;
-					term.scrollUp( offset ) ;
-					stats = screen.draw( { delta: true } ) ;
+					stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the bottom
 					//console.error( stats ) ;
 					break ;
 				case 'LEFT' :
@@ -169,16 +167,6 @@ SB.loadImage(
 		
 		redraw() ;
 		term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   Q/CTRL-C: quit" ) ;
-		term.scrollingRegion( 2 , term.height ) ;
-		
-		/*
-		// Tricks to make the last line (the one with instruction) to be redrawn on next draw()
-		screen.fill( {
-			start: screen.buffer.length - screen.width * screen.ITEM_SIZE ,
-			buffer: screen.lastBuffer ,
-			void: true
-		} ) ;
-		*/
 	}
 ) ;
 

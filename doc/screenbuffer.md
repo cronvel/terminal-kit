@@ -55,6 +55,7 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	* [.draw()](#ref.ScreenBuffer.draw)
 	* [.drawCursor()](#ref.ScreenBuffer.drawCursor)
 	* [.moveTo()](#ref.ScreenBuffer.moveTo)
+	* [.vScroll()](#ref.ScreenBuffer.vScroll)
 	* [.dumpChars()](#ref.ScreenBuffer.dumpChars)
 	* [.dump()](#ref.ScreenBuffer.dump)
 	* [.saveSync()](#ref.ScreenBuffer.saveSync)
@@ -348,6 +349,29 @@ where he is typing.
 * y `integer` new cursor y-coordinate
 
 It moves the *screenBuffer*'s cursor.
+
+
+
+<a name="ref.ScreenBuffer.vScroll"></a>
+### .vScroll( offset , [drawToTerminal] )
+
+* offset `integer` the vertical offset (the number of lines), positive values move the content toward crescent *y* coordinates,
+  thus move the content down, negative values move the content up.
+* drawToTerminal `boolean` (optional, default: false) if true **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance,
+  it will draw to the terminal, see details below.
+
+This scrolls the *screenBuffer*'s content vertically.
+
+If *drawToTerminal* option is set **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance, then the following happens:
+* the *dst terminal* is issued a *.scrollingRegion()* with the *screenBuffer* vertical bounds
+* the *dst terminal* is issued a *.scrollDown()* or a *.scrollUp()* depending on the offset sign
+* the internal buffer storing last draw's data is updated, so the next call to *.draw()* with the *delta* option on
+  will not redraw the region that has scrolled unless it has changed again
+* the *dst terminal* is issued a .resetScrollingRegion()
+
+This option has **one big limitation:** the *screenBuffer* should cover the whole terminal's width, because terminals
+only supports full-width scrolling region.
+Don't use this option for thinner *screenBuffers*.
 
 
 
