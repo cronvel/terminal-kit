@@ -1,4 +1,10 @@
 
+v1.8.0
+------
+
+Fixed spelling error in options of .singleColumnMenu() and .gridMenu()
+
+
 v1.7.2
 ------
 

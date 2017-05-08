@@ -53,7 +53,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		] ;
 		
 		var options = {
-			selectedLeftPad: '*' ,
+			selectedLeftPadding: '*' ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
 			//y: 1 ,
 			//style: term.inverse ,

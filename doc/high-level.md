@@ -655,8 +655,8 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	* y `number` the line where the menu will be displayed, default to the next line
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
-	* leftPad `string` the text to put before a menu item, default to ' '
-	* selectedLeftPad `string` the text to put before a selected menu item, default to ' '
+	* leftPadding `string` the text to put before a menu item, default to ' '
+	* selectedLeftPadding `string` the text to put before a selected menu item, default to ' '
 	* oneLineItem `boolean` if true (default: false), big items do not span multiple lines, instead they are truncated
 	  and ended with an ellipsis char
 	* itemMaxWidth `number` the max width for an item, default to the terminal width
@@ -737,10 +737,10 @@ It creates a menu, when the user press RETURN/ENTER, it displays the index, text
 	* y `number` the line where the menu will be displayed, default to the next line
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
-	* leftPad `string` the text to put before a menu item, default to ' '
-	* selectedLeftPad `string` the text to put before a selected menu item, default to ' '
-	* rightPad `string` the text to put after a menu item, default to ' '
-	* selectedRightPad `string` the text to put after a selected menu item, default to ' '
+	* leftPadding `string` the text to put before a menu item, default to ' '
+	* selectedLeftPadding `string` the text to put before a selected menu item, default to ' '
+	* rightPadding `string` the text to put after a menu item, default to ' '
+	* selectedRightPadding `string` the text to put after a selected menu item, default to ' '
 	* itemMaxWidth `number` the max width for an item, default to the 1/3 of the terminal width
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
