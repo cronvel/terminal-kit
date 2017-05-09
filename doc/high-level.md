@@ -657,6 +657,8 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
 	* leftPadding `string` the text to put before a menu item, default to ' '
 	* selectedLeftPadding `string` the text to put before a selected menu item, default to ' '
+	* extraLines `number` (default: 1) the number of lines to create (if needed) between the end of the menu
+	  and the bottom of the terminal
 	* oneLineItem `boolean` if true (default: false), big items do not span multiple lines, instead they are truncated
 	  and ended with an ellipsis char
 	* itemMaxWidth `number` the max width for an item, default to the terminal width
