@@ -1,4 +1,10 @@
 
+v1.8.2
+------
+
+.singleColumnMenu() fixed and improved, Terminal detection fixed and improved (fix #26)
+
+
 v1.8.1
 ------
 
