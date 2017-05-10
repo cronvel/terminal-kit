@@ -50,6 +50,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		var options = {
 			//ellipsis: true ,
 			selectedLeftPadding: '*' ,
+			extraLines: 2 ,
 			//continueOnSubmit: true ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
 			//y: 1 ,
