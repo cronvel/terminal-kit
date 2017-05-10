@@ -35,6 +35,8 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
+	var menu ;
+	
 	term.grabInput( { mouse: 'motion' } ) ;
 	
 	function menu()
@@ -48,13 +50,14 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		var options = {
 			//ellipsis: true ,
 			selectedLeftPadding: '*' ,
+			//continueOnSubmit: true ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
 			//y: 1 ,
 			//style: term.inverse ,
 			//selectedStyle: term.dim.blue.bgGreen
 		} ;
 		
-		term.singleColumnMenu( items , options , function( error , response ) {
+		menu = term.singleColumnMenu( items , options , function( error , response ) {
 			
 			if ( error )
 			{
@@ -63,10 +66,29 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				return ;
 			}
 			
-			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
+			term.green( "\n#%s %s: %s (%s,%s)\n" ,
+				response.selectedIndex ,
+				response.submitted ? 'submitted' : 'selected' ,
+				response.selectedText ,
+				response.x ,
+				response.y
+			) ;
+			
 			terminate() ;
 		} ) ;
 	}
+	
+	
+	
+	term.on( 'key' , ( name ) => {
+		
+		if ( name === 'CTRL_C' )
+		{
+			menu.stop() ;
+			term.green( 'CTRL-C received...\n' ) ;
+			terminate() ;
+		}
+	} ) ;
 	
 	
 	

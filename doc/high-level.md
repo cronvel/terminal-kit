@@ -655,20 +655,25 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	* y `number` the line where the menu will be displayed, default to the next line
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.inverse`
+	* submittedStyle `function` the style of the submitted item, default to `term.bgGray.bold`
 	* leftPadding `string` the text to put before a menu item, default to ' '
 	* selectedLeftPadding `string` the text to put before a selected menu item, default to ' '
+	* submittedLeftPadding `string` the text to put before a submitted menu item, default to ' '
 	* extraLines `number` (default: 1) the number of lines to create (if needed) between the end of the menu
 	  and the bottom of the terminal
 	* oneLineItem `boolean` if true (default: false), big items do not span multiple lines, instead they are truncated
 	  and ended with an ellipsis char
 	* itemMaxWidth `number` the max width for an item, default to the terminal width
+	* continueOnSubmit `boolean` if true, submit action do not end the menu
+	* selectedIndex `number` selected index at initialization (default: 0)
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
 * callback( error , response ), where:
 	* error `mixed` truthy if an underlying error occurs
-	* response `Object` where
+	* response `Object` where:
 		* selectedIndex `number` the user-selected menu item index
 		* selectedText `string` the user-selected menu item text
+		* submitted `boolean` if true, the `selectedIndex` was submitted (rarely false, except when stopped)
 		* x `number` the x coordinate of the selected menu item (the first character)
 		* y `number` the y coordinate of the selected menu item
 		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
