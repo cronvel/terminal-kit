@@ -63,7 +63,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			if ( error )
 			{
 				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
-				terminate() ;
+				term.processExit() ;
 				return ;
 			}
 			
@@ -75,13 +75,12 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				response.y
 			) ;
 			
-			terminate() ;
+			term.processExit() ;
 		} ) ;
 		
 		setTimeout( menu.pause.bind( menu ) , 1500 ) ;
 		setTimeout( menu.resume.bind( menu ) , 3000 ) ;
 	}
-	
 	
 	
 	term.on( 'key' , ( name ) => {
@@ -90,18 +89,10 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		{
 			menu.stop() ;
 			term.green( 'CTRL-C received...\n' ) ;
-			terminate() ;
+			term.processExit() ;
 		}
 	} ) ;
 	
-	
-	
-	function terminate()
-	{
-		term.grabInput( false ) ;
-		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() ; } , 100 ) ;
-	}
 	
 	//term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;

@@ -369,6 +369,7 @@ It returns an EventEmitter object featuring some functions to control things dur
 It emits:
 
 * *ready*: when the input field is ready (rarely useful)
+* *rebased*: when the input field has been rebased (rarely useful)
 
 
 Quick example, featuring *history* and *auto-completion*:

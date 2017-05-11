@@ -1,4 +1,10 @@
 
+v1.8.5
+------
+
+Lot of minor fixes (exit cleanup, menu, .getCursorLocation(), etc)
+
+
 v1.8.4
 ------
 
