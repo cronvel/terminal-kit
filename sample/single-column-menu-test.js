@@ -77,6 +77,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			
 			terminate() ;
 		} ) ;
+		
+		setTimeout( menu.pause.bind( menu ) , 1500 ) ;
+		setTimeout( menu.resume.bind( menu ) , 3000 ) ;
 	}
 	
 	
