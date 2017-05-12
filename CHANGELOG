@@ -2,7 +2,9 @@
 v1.8.6
 ------
 
-Fixed issue when leaving mouse motion grabbing (e.g.: when exiting using term.processExit()), added an async mode to .grabInput() necessary to accomplish this. Basically, there is a delay between turning off mouse grabbing and turning off raw mode
+Fixed issue when leaving mouse motion grabbing (e.g.: when exiting using term.processExit()),
+added an async mode to .grabInput() necessary to accomplish this.
+Basically, there is a delay between turning off mouse grabbing and turning off raw mode
 
 
 v1.8.5
@@ -56,7 +58,8 @@ Image loader fixed: now the callback is optional
 v1.7.0
 ------
 
-ScreenBuffer*#vScrollBuffer() is renamed ScreenBuffer*#vScroll(), is refactored, it manages dst terminal scrolling, and is now part of the public API
+ScreenBuffer*#vScrollBuffer() is renamed ScreenBuffer*#vScroll(), is refactored,
+it manages dst terminal scrolling, and is now part of the public API
 
 
 v1.6.8
@@ -74,13 +77,15 @@ Greatly improved the ScreenBufferHD performance
 v1.6.6
 ------
 
-Adding missing escape sequence to set/reset the scrolling region, new (private?) method ScreenBuffer*#vScrollBuffer(), image-viewer sample code improved, ScreenBuffer#fill() improved and fixed
+Adding missing escape sequence to set/reset the scrolling region, new (private?) method ScreenBuffer*#vScrollBuffer(),
+image-viewer sample code improved, ScreenBuffer#fill() improved and fixed
 
 
 v1.6.5
 ------
 
-.singleColumnMenu() and .gridMenu(): fixed a minor bug (was adding one extra line when at the bottom of the terminal) and improved the documentation (example and screenshot)
+.singleColumnMenu() and .gridMenu(): fixed a minor bug (was adding one extra line when at the bottom of the terminal)
+and improved the documentation (example and screenshot)
 
 
 v1.6.4
@@ -351,7 +356,9 @@ Breaking change -- ScreenBuffer.create(): wrap is disabled by default. Documenta
 v0.29.0
 -------
 
-Breaking change: the long-time deprecated (since v0.16.0) 'SCREEN_RESIZE' sub-type of the 'terminal' event is dropped, in favor of the 'resize' event. Documentation improved.
+Breaking change: the long-time deprecated (since v0.16.0) 'SCREEN_RESIZE' sub-type of the 'terminal' event is dropped,
+in favor of the 'resize' event.
+Documentation improved.
 
 
 v0.28.4
@@ -381,7 +388,8 @@ Typo in the doc
 v0.28.0
 -------
 
-Breaking change: .inputField()'s tokenHook option has changed, the arguments of the function are now ( token , isEndOfInput , previousTokens , term , config ). See the doc. #19
+Breaking change: .inputField()'s tokenHook option has changed, the arguments of the function
+are now ( token , isEndOfInput , previousTokens , term , config ). See the doc. #19
 
 
 v0.27.4
@@ -658,7 +666,8 @@ Upgrade string-kit from v0.4.0 to v0.4.1, fixing an issue with formatter count a
 v0.23.0
 -------
 
-Breaking change: now rely on string-kit v0.4.x (.format()), so '%[]' -like markup becomes '%[]F' and '%/F3/f -like markup becomes '%[f3]f
+Breaking change: now rely on string-kit v0.4.x (.format()), so '%[]' -like markup becomes '%[]F'
+and '%/F3/f -like markup becomes '%[f3]f
 
 
 v0.22.4 - v0.22.7
@@ -874,7 +883,8 @@ Document ColumnMenu is working!
 v0.20.10
 --------
 
-Document: Menu is now known as RowMenu. ColumnMenu is in progress. (Those features are not under semver yet - i.e. not documented yet, so no minor version bump for that).
+Document: Menu is now known as RowMenu. ColumnMenu is in progress.
+(Those features are not under semver yet - i.e. not documented yet, so no minor version bump for that).
 
 
 v0.20.9
