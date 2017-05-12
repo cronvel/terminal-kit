@@ -69,7 +69,7 @@ It helps quitting cleanly your application without leaving the terminal in a bad
 
 
 <a name="ref.grabInput"></a>
-### .grabInput( options )
+### .grabInput( options , [safeCallback] )
 
 * options: false/true/Object, *false* disable input grabbing, *true* or an Object turn it on,
   if it is an Object then those properties are supported:
@@ -79,6 +79,9 @@ It helps quitting cleanly your application without leaving the terminal in a bad
 		* 'motion': report button-event and all motion-event, use it only when needed, many escape sequences are sent from
 		  the terminal (e.g. you may consider it for script running over SSH)
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
+* safeCallback `Function` (optional), when set and when *options* is set to `false`, it turns *.grabInput()*
+  into an async function, the *safeCallback* is called when input grabbing is safely turned off, avoiding extra junks to
+  be echoed when the terminal left the raw mode. It is mostly useful after grabbing mouse motion.
 
 This function turns input grabbing on, key will not be echoed anymore, and every input will generate an event
 on the `term` object.

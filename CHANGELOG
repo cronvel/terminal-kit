@@ -1,4 +1,10 @@
 
+v1.8.6
+------
+
+Fixed issue when leaving mouse motion grabbing (e.g.: when exiting using term.processExit()), added an async mode to .grabInput() necessary to accomplish this. Basically, there is a delay between turning off mouse grabbing and turning off raw mode
+
+
 v1.8.5
 ------
 
