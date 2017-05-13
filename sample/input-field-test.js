@@ -53,6 +53,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		term.green( 'Please enter your name: ' ) ;
 		
 		term.inputField( {
+				//y: term.height , x: 1 ,
 				history : history ,
 				autoComplete: autoComplete ,
 				autoCompleteMenu: true ,
