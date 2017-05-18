@@ -1,4 +1,10 @@
 
+v1.8.11
+-------
+
+Fixed #29 (ndarray should be listed as direct dependency, so it would not break when node_modules/ is not flat)
+
+
 v1.8.10
 -------
 
