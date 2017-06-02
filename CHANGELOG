@@ -1,4 +1,10 @@
 
+v1.8.13
+-------
+
+Fixed Ctrl-U/Ctrl-K redraw issues when hint are turned off #21
+
+
 v1.8.12
 -------
 
