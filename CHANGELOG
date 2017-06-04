@@ -4,7 +4,7 @@ v1.10.0
 
 ScreenBuffer/ScreenBufferHD:
 * support for terminal default BG/FG color (#30), this works through the new attr options: 'defaultColor'
-  and 'bgDefaultColor'
+  and 'bgDefaultColor', this is the default options for .fill() and at ScreenBuffer/ScreenBufferHD creation
 * support for full transparency in the terminal blitter (BTW partial transparency is not possible, since we can't
   access terminal cells)
 
