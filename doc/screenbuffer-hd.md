@@ -159,10 +159,12 @@ Available attributes are:
 * g `integer` the green channel of the foreground color (ranging from 0 to 255)
 * b `integer` the blue channel of the foreground color (ranging from 0 to 255)
 * a `integer` the alpha channel of the foreground color (ranging from 0 to 255)
+* defaultColor `boolean` if true, set the foreground color to the default terminal foreground color
 * bgR `integer` the red channel of the background color (ranging from 0 to 255)
 * bgG `integer` the green channel of the background color (ranging from 0 to 255)
 * bgB `integer` the blue channel of the background color (ranging from 0 to 255)
 * bgA `integer` the alpha channel of the background color (ranging from 0 to 255)
+* bgDefaultColor `boolean` if true, set the background color to the default terminal background color
 * bold `boolean`
 * dim `boolean`
 * italic `boolean`

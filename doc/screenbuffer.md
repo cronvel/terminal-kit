@@ -407,7 +407,9 @@ An attributes object contains attributes to style cells.
 Available attributes are:
 
 * color `integer` or `string` the foreground color index (ranging from 0 to 255) or the color name
+* defaultColor `boolean` if true, set the foreground color to the default terminal foreground color
 * bgColor `integer` or `string` the background color index (ranging from 0 to 255) or the color name
+* bgDefaultColor `boolean` if true, set the background color to the default terminal background color
 * bold `boolean`
 * dim `boolean`
 * italic `boolean`
