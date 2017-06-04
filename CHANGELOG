@@ -1,4 +1,10 @@
 
+v1.10.0
+-------
+
+ScreenBuffer/ScreenBufferHD: support for terminal default BG/FG color (#30) ; support for full transparency in the terminal blitter
+
+
 v1.9.0
 ------
 
