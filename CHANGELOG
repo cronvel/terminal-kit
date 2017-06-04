@@ -1,4 +1,10 @@
 
+v1.9.0
+------
+
+.inputField(): Cherry-picking (and improving) from @samizdatco PR: adding Ctrl-W/Alt-D to produce delete previous/next word (#21)
+
+
 v1.8.13
 -------
 
