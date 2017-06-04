@@ -87,6 +87,7 @@ function terminate()
 function createBackground()
 {
 	sprites.background = ScreenBuffer.create( { width: viewport.width * 4 , height: viewport.height } ) ;
+	sprites.background.fill( { attr: { bgColor: 'black' } } )
 	
 	sprites.planet = ScreenBuffer.createFromChars(
 		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
@@ -117,7 +118,7 @@ function createBackgroundTrails( nTrails )
 			sprites.background.put( {
 				x: ( x + j ) % sprites.background.width ,
 				y: y ,
-				attr: { color: 8 }
+				attr: { color: 8 , bgColor: 0 }
 			} , '-' ) ;
 		}
 	}
@@ -139,7 +140,7 @@ function createBackgroundStars( nStars )
 		sprites.background.put( {
 			x: x ,
 			y: y ,
-			attr: { color: c }
+			attr: { color: c , bgColor: 0 }
 		} , char ) ;
 	}
 }
