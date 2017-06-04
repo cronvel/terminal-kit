@@ -308,8 +308,8 @@ With the four properties, it is possible to define where the current *screenBuff
 	* y `integer` (optional) override `screenBuffer.y`
 	* srcClipRect `Rect` (optional, default: the whole source region is used) the source clipping rectangle
 	* dstClipRect `Rect` (optional, default: the whole destination region is used) the destination clipping rectangle
-	* blending `boolean` (optional, default: false) if true blending (transparencies) is allowed, **it does not work if
-	  dst is a terminal**, it only works when drawing to another *screenBuffer*
+	* blending `boolean` (optional, default: false) if true blending (transparencies) is allowed,
+	  also **if dst is a terminal, partial transparency does not work**
 	* delta `boolean` (optional, default: false) if true and if the destination is a **terminal**, only the cells that have changed since
 	  the last draw will be updated: **it will keep performance of terminal application high**
 	* wrap `boolean` or `string` (optional, default: false) if set, wrapping will be enabled, it can be set to:

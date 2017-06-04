@@ -60,7 +60,7 @@ function init( callback )
 		createSpaceship() ;
 		
 		//term.fullscreen() ;
-		term.moveTo.eraseLine.bgWhite.green( 1 , 1 , 'Arrow keys: move the ship - CTRL-C: Quit\n' ) ;
+		term.moveTo.eraseLine.bgWhite.green( 1 , 1 , 'Arrow keys: move the ship - Q/Ctrl-C: Quit\n' ) ;
 		term.hideCursor() ;
 		term.grabInput() ;
 		term.on( 'key' , inputs ) ;
@@ -86,12 +86,21 @@ function terminate()
 
 function createBackground()
 {
-	sprites.background = ScreenBuffer.create( { width: viewport.width * 4 , height: viewport.height } ) ;
+	sprites.background = ScreenBuffer.create( {
+		width: viewport.width * 4 ,
+		height: viewport.height ,
+		noFill: true
+	} ) ;
 	
+	sprites.background.fill( { attr: { color: 'white' , bgColor: 'black' } } ) ;
+	//sprites.background.fill( { attr: { defaultColor: true , bgDefaultColor: true } } ) ;
+	
+	/*
 	sprites.planet = ScreenBuffer.createFromChars(
 		{ attr: { color: 'yellow' , bold: false } , transparencyChar: ' ' } ,
 		fs.readFileSync( __dirname + '/data/saturn.txt' )
 	) ;
+	//*/
 	
 	sprites.planet = ScreenBuffer.loadSync( __dirname + '/data/saturn.sbuf' ) ;
 	
@@ -200,6 +209,7 @@ function inputs( key )
 		case 'RIGHT' :
 			sprites.spaceship.x ++ ;
 			break ;
+		case 'q':
 		case 'CTRL_C':
 			terminate() ;
 			break ;
@@ -216,14 +226,16 @@ function nextPosition()
 
 
 var frames = 0 ;
+
 function draw()
 {
 	sprites.background.draw( { dst: viewport , tile: true } ) ;
 	sprites.spaceship.draw( { dst: viewport , blending: true , wrap: 'both' } ) ;
-	var stats = viewport.draw( { delta: true } ) ;
+	//var stats = viewport.draw( { delta: true } ) ;
+	var stats = viewport.draw() ;
 	
 	term.moveTo.eraseLine.bgWhite.green( 1 , 1 ,
-		'Arrow keys: move the ship - CTRL-C: Quit - Redraw stats: %d cells, %d moves, %d attrs, %d writes\n' ,
+		'Arrow keys: move the ship - Q/Ctrl-C: Quit - Redraw stats: %d cells, %d moves, %d attrs, %d writes\n' ,
 		stats.cells , stats.moves , stats.attrs , stats.writes
 	) ;
 	
