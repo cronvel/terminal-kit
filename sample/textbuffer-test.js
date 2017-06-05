@@ -37,6 +37,11 @@ var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 
+
+var isHd = process.argv[ 2 ] === 'hd' ;
+
+
+
 function terminate()
 {
 	setTimeout( function() {
@@ -54,31 +59,50 @@ function terminate()
 
 
 term.fullscreen() ;
-term.moveTo( 1 , 1 ).bgWhite.blue( 'Welcome to Neon!   ' ).bgWhite.green( 'CTRL-C to quit' ) ;
+term.moveTo( 1 , 1 ).bgWhite.blue( 'Welcome to Neon!   ' ).bgWhite.green( 'Ctrl-C to quit' ) ;
 term.grabInput() ;
 
 
 
-var attrs = [
-	termkit.ScreenBuffer.DEFAULT_ATTR ,
-	{ color: 'red', bgColor: 'black' } ,
-	{ color: 'green', bgColor: 'black' } ,
-	{ color: 'blue', bgColor: 'black' } ,
-	{ color: 'red', bgColor: 'black' , bold: true , italic: true } ,
-	{ color: 'red', bgColor: 'yellow' } ,
-] ;
+var attrs , emptyAttrs , attrsIndex = 0 , emptyAttrsIndex = 0 ;
 
-var attrsIndex = 0 ;
-
-var emptyAttrs = [
-	{ bgColor: 'yellow' } ,
-	{ bgColor: 'brightYellow' } ,
-	{ bgColor: 'red' } ,
-	{ bgColor: 'blue' } ,
-	termkit.ScreenBuffer.DEFAULT_ATTR ,
-] ;
-
-var emptyAttrsIndex = 0 ;
+if ( isHd )
+{
+	attrs = [
+		termkit.ScreenBufferHD.DEFAULT_ATTR ,
+		{ r: 200 , g: 50 , b: 50 , bgR: 0 , bgG: 0 , bgB: 0 } ,
+		{ r: 230 , g: 70 , b: 70 , bgR: 0 , bgG: 0 , bgB: 0 } ,
+		{ r: 200 , g: 50 , b: 50 , bgR: 0 , bgG: 0 , bgB: 70 , bold: true , italic: true } ,
+		{ r: 30 , g: 170 , b: 170 , bgR: 70 , bgG: 0 , bgB: 0 } ,
+	] ;
+	
+	emptyAttrs = [
+		{ bgR: 200 , bgG: 200 , bgB: 0 } ,
+		{ bgR: 250 , bgG: 250 , bgB: 0 } ,
+		{ bgR: 230 , bgG: 10 , bgB: 0 } ,
+		{ bgR: 0 , bgG: 10 , bgB: 230 } ,
+		termkit.ScreenBufferHD.DEFAULT_ATTR ,
+	] ;
+}
+else
+{
+	attrs = [
+		termkit.ScreenBuffer.DEFAULT_ATTR ,
+		{ color: 'red', bgColor: 'black' } ,
+		{ color: 'green', bgColor: 'black' } ,
+		{ color: 'blue', bgColor: 'black' } ,
+		{ color: 'red', bgColor: 'black' , bold: true , italic: true } ,
+		{ color: 'red', bgColor: 'yellow' } ,
+	] ;
+	
+	emptyAttrs = [
+		{ bgColor: 'yellow' } ,
+		{ bgColor: 'brightYellow' } ,
+		{ bgColor: 'red' } ,
+		{ bgColor: 'blue' } ,
+		termkit.ScreenBuffer.DEFAULT_ATTR ,
+	] ;
+}
 
 
 
@@ -102,6 +126,7 @@ term.on( 'key' , function( key , matches , data ) {
 			case 'CTRL_B' :
 				emptyAttrsIndex = ( emptyAttrsIndex + 1 ) % emptyAttrs.length ;
 				tbuf.setEmptyCellAttr( emptyAttrs[ emptyAttrsIndex ] ) ;
+				draw = drawCursor = true ;
 				break ;
 			case 'UP' :
 				tbuf.move( 0 , -1 ) ;
@@ -163,9 +188,16 @@ term.on( 'key' , function( key , matches , data ) {
 
 
 
+var sbuf ;
 
-
-var sbuf = termkit.ScreenBuffer.create( { dst: term , width: 20 , height: 8 , x: 2 , y: 2 } ) ;
+if ( isHd )
+{
+	sbuf = termkit.ScreenBufferHD.create( { dst: term , width: 20 , height: 8 , x: 2 , y: 2 } ) ;
+}
+else
+{
+	sbuf = termkit.ScreenBuffer.create( { dst: term , width: 20 , height: 8 , x: 2 , y: 2 } ) ;
+}
 
 var tbuf = termkit.TextBuffer.create( { dst: sbuf } ) ;
 tbuf.setEmptyCellAttr( emptyAttrs[ emptyAttrsIndex ] ) ;
