@@ -1,4 +1,10 @@
 
+v1.10.1
+-------
+
+ScreenBuffer*: Fixing bugs in the new default fg/bg color feature
+
+
 v1.10.0
 -------
 
