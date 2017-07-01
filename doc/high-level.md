@@ -845,6 +845,9 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 	* barHeadChar `string` the char used for the bar, default to '>'
 	* maxRefreshTime `number` the maximum time between two refresh in ms, default to 500ms
 	* minRefreshTime `number` the minimum time between two refresh in ms, default to 100ms
+	* inline `boolean`
+		* when false (the default), the progressBar is locked in-place, it always redraws itself on the same place
+		* when true, the progressBar is redrawn on the beginning of the current line
 	* syncMode `boolean`
 		* when false (the default), the progressBar works asynchronously, every few milliseconds
 		  it is redrawn. Note that it will fail for CPU bound tasks, if the tasks do not let the event loop breathes

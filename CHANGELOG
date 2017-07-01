@@ -1,4 +1,10 @@
 
+v1.11.0
+-------
+
+New: .progressBar() now supports option 'inline', so it redraws itself at the begining of the current line instead of being locked in-place (fix issue #36)
+
+
 v1.10.2
 -------
 

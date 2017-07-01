@@ -102,6 +102,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		percent: true ,
 		eta: true ,
 		title: 'Analysing files:' ,
+		//inline: true ,
 		/*
 		barStyle: term.brightGreen.bold ,
 		barBracketStyle: term.brightWhite ,
