@@ -365,9 +365,11 @@ It returns an EventEmitter object featuring some functions to control things dur
 * redraw(): redraw the input field, useful if you had echo'ed something that can mess it
 * hide(): hide the input field, it still records keystrokes
 * show(): show the input field again
-* rebase(): rebase the input field to the current cursor position. Please note: it does NOT erase the previously entered
+* rebase( [x] , [y] ): rebase the input field to the current cursor position. Please note: it does NOT erase the previously entered
   text, you have to use hide() before. It works this way because you may want to modify the screen in between, and
   it needs some I/O with the terminal to works accordingly.
+  If *x* and *y* are given, it use those coordinates instead of an internal asynchronous call to .getCursorLocation(),
+  so it makes *.rebase()* synchronous.
 
 It emits:
 
