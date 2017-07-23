@@ -355,6 +355,8 @@ Available actions are:
 * startOfInput: move the cursor at the begining of input (default: HOME)
 * endOfInput: move the cursor at the end of input (default: END)
 * autoComplete: auto-complete the input (default: TAB)
+* meta: if bound to ESCAPE, allows for two-key combos like ESC-D to generate an ALT_D 
+  (useful for terminals that do not have a modifier key assigned to alt/meta)
 
 It returns an EventEmitter object featuring some functions to control things during the input process:
 
