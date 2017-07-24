@@ -1,4 +1,10 @@
 
+v1.11.2
+-------
+
+New: .inputField() now supports a meta key binding (PR #40 by samizdatco)
+
+
 v1.11.1
 -------
 
