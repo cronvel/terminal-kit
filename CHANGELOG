@@ -2,8 +2,9 @@
 v1.12.0
 -------
 
-New: term.bar() -- it creates a bar representing the value
-
+* New: term.bar() -- it creates a bar representing the value, it uses unicode to improve the precision
+* Undocumented spChars.enlargingBlocks and spChars.growingBlocks fixed: now index 0 is for whitespace like it should,
+  all other characters are shifted.
 
 v1.11.2
 -------

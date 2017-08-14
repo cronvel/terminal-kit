@@ -1008,7 +1008,7 @@ It creates a progress bar and start and finish task with a random time, then qui
 * options `object` of options, all of them are **OPTIONAL**, where:
 	* innerSize: `integer` inner width of the bar (default: 5)
 
-It displays a bar representing the value.
+It displays a bar representing the value, it use unicode characters to improve the precision.
 
 
 
