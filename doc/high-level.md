@@ -1006,9 +1006,11 @@ It creates a progress bar and start and finish task with a random time, then qui
 
 * value `number` a number between 0 and 1
 * options `object` of options, all of them are **OPTIONAL**, where:
-	* innerSize: `integer` inner width of the bar (default: 5)
+	* innerSize: `integer` inner width of the bar in characters (default: 10)
+	* barStyle `function` the style of the bar, default to term.blue
 
-It displays a bar representing the value, it use unicode characters to improve the precision.
+It displays a bar representing the value.
+It uses unicode characters to improve the precision.
 
 
 
