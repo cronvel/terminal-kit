@@ -32,6 +32,7 @@ create nice progress bars, or display some special effects.
 * [.singleColumnMenu()](#ref.singleColumnMenu)
 * [.gridMenu()](#ref.gridMenu)
 * [.progressBar()](#ref.progressBar)
+* [.bar()](#ref.bar)
 * [.slowTyping()](#ref.slowTyping)
 * [.drawImage()](#ref.drawImage)
 	
@@ -997,6 +998,17 @@ It produces:
 ![Progress bar output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/progress-bar-doc2.gif)
 
 It creates a progress bar and start and finish task with a random time, then quit when everything is done.
+
+
+
+<a name="ref.bar"></a>
+### .bar( value , [options] )
+
+* value `number` a number between 0 and 1
+* options `object` of options, all of them are **OPTIONAL**, where:
+	* innerSize: `integer` inner width of the bar (default: 5)
+
+It displays a bar representing the value.
 
 
 
