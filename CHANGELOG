@@ -1,4 +1,10 @@
 
+v1.12.3
+-------
+
+Documentation improved (issue #42), more color utilities and term.bindArgs() (both beta/undocumented)
+
+
 v1.12.2
 -------
 

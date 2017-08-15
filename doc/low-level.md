@@ -241,7 +241,11 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 
 * .reset(): full reset of the terminal
 * .error(): it just set error to true so it will write to STDERR instead of STDOUT
-* .str(): do not output anything, instead return a string containing the sequences
+  E.g.: `term.error.red( 'Got error %E' , myError )` will output to *STDERR*  the error inspection of `myError`,
+  preceded by *'Got error '*, all in red.
+* .str(): do not output anything, instead return a string containing the sequences.
+  E.g.: `var myString = term.str.blue( 'BLUE' )` will write in `myString` a string containing the escape code for blue,
+  the text *'BLUE'* and the style-reset escape sequence
 * .bell(): emit an audible bell
 * .noFormat(str): disable all string formatting and markup, output *str* without interpreting it - useful when your
   string may contain `%` and `^` (e.g. user input) and you don't want to escape them

@@ -140,6 +140,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.singleColumnMenu()](high-level.md#ref.singleColumnMenu)
 	* [.gridMenu()](high-level.md#ref.gridMenu)
 	* [.progressBar()](high-level.md#ref.progressBar)
+	* [.bar()](high-level.md#ref.bar)
 	* [.slowTyping()](high-level.md#ref.slowTyping)
 	
 * [Terminal's Events](events.md#top)
