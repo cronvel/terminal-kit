@@ -1,4 +1,10 @@
 
+v1.13.2
+-------
+
+New: termkit.escapeSequenceRegex and termkit.stripEscapeSequences()
+
+
 v1.13.1
 -------
 
