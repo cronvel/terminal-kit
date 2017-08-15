@@ -199,6 +199,7 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .eraseDisplayBelow(): erase everything below the cursor
 * .eraseDisplayAbove(): erase everything above the cursor
 * .eraseDisplay(): erase everything
+* .eraseScrollback(): erase the *history* lines, a.k.a. the *saved line* or the *scrollback buffer*
 * .eraseLineAfter(): erase current line after the cursor
 * .eraseLineBefore(): erase current line before the cursor
 * .eraseLine(): erase current line
@@ -265,4 +266,9 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .resetHighlightBgColorRgb(): reset the highlight (selection) background color, restore back the default behavior
   which is to invert the foreground and background color on selection
 * .notify(title,text): (*gnome-terminal*) produce a notification **if the terminal is not the foreground window**
+* .bindArgs(...): since it is not possible to use *.bind()* on Terminal-kit's chainable function, this is a replacement.
+  When used, instead of doing anything, it just returns a function. A common use-case is for high-level methods that
+  require a styling function, e.g.: `term.bar( 0.26 , { barStyle: term.red } )`. But if we want to use *truecolor*,
+  we have to do: `term.bar( 0.26 , { barStyle: term.colorRgbHex.bindArgs( '#650fbe' ) } )`.
+  
 

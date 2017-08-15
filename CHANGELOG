@@ -1,4 +1,10 @@
 
+v1.13.1
+-------
+
+New: .eraseScrollback() -- erase the scrollback buffer, a.k.a. saved line, .bindArgs() is now documented thus under the semver contract
+
+
 v1.13.0
 -------
 
