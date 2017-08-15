@@ -35,8 +35,6 @@
 
 
 var term = require( '../lib/termkit.js' ).terminal ;
-term.markupOnly( 'one ^Btwo %I three\n' ) ;
-return ;
 
 /*
 term( 'Terminal name: %s\n' , term.appName ) ;

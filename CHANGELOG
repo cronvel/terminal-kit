@@ -1,4 +1,10 @@
 
+v1.13.0
+-------
+
+New: term.bindArgs() refacto, it is now a regular chainable method, returned bounded function is chainable as well. Too much chainable refacto, so this is a SEMVER minor.
+
+
 v1.12.3
 -------
 
