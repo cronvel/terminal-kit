@@ -14,37 +14,40 @@ Documentation improvements
 v1.13.5
 -------
 
-.stripEscapeSequences(), .stringWidth() and .truncateString() are now documentated and part of the semver contract
+.stripEscapeSequences(), .stringWidth() and .truncateString() are now documentated and part of the SemVer contract
 
 
 v1.13.4
 -------
 
-API fixed: .stringTruncate() -> .truncateString()
+Unstable API fixed: termkit.stringTruncate() -> termkit.truncateString()
 
 
 v1.13.3
 -------
 
-String-kit dependency upgraded. Utilities: string width, truncate
+String-kit dependency upgraded.
+Utilities: termkit.stringWidth(), termkit.stringTruncate().
 
 
 v1.13.2
 -------
 
-New: termkit.escapeSequenceRegex and termkit.stripEscapeSequences()
+New: termkit.stripEscapeSequences()
 
 
 v1.13.1
 -------
 
-New: .eraseScrollback() -- erase the scrollback buffer, a.k.a. saved line, .bindArgs() is now documented thus under the semver contract
+New: term.eraseScrollback() -- erase the scrollback buffer, a.k.a. saved line.
+term.bindArgs() is now documented thus under the SemVer contract
 
 
 v1.13.0
 -------
 
-New: term.bindArgs() refacto, it is now a regular chainable method, returned bounded function is chainable as well. Too much chainable refacto, so this is a SEMVER minor.
+New: term.bindArgs() refacto, it is now a regular chainable method, returned bounded function is chainable as well.
+Too much chainable refacto, so this is a SemVer minor.
 
 
 v1.12.3
@@ -71,6 +74,7 @@ v1.12.0
 * New: term.bar() -- it creates a bar representing the value, it uses unicode to improve the precision
 * Undocumented spChars.enlargingBlocks and spChars.growingBlocks fixed: now index 0 is for whitespace like it should,
   all other characters are shifted.
+
 
 v1.11.2
 -------
