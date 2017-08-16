@@ -1,4 +1,10 @@
 
+v1.13.4
+-------
+
+API fixed: .stringTruncate() -> .truncateString()
+
+
 v1.13.3
 -------
 
