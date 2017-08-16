@@ -4,9 +4,7 @@
 <a name="ref.ScreenBufferHD"></a>
 ## The ScreenBuffer HD
 
-![unstable](unstable.png)
-
-*This feature is still in beta/unstable version, it is not under the SemVer contract.*
+*This feature is still in beta, but its API is considered stable/backward compatible.*
 
 This is the 32-bit (RGBA) version of [the ScreenBuffer](screenbuffer.md#ref.ScreenBuffer), it subclasses it.
 

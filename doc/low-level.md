@@ -242,7 +242,7 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 <a name="ref.operating-system"></a>
 ### Operating System
 
-* .cwd(uri): set the terminal Current Working Directory to *uri* (should start with *file://*)
+* .cwd(uri): set the terminal's Current Working Directory to *uri* (should start with *file://*)
 * .windowTitle(str): set the title of an xterm-compatible window to *str*
 * .iconName(str): set the icon name to *str*
 * .notify(title,text): (*gnome-terminal*) produce a notification **if the terminal is not the foreground window**

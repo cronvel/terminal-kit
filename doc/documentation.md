@@ -155,7 +155,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* ['mouse'](events.md#ref.event.mouse)
 
 * [ScreenBuffer](screenbuffer.md#top)
-* *New* [ScreenBuffer HD (*beta*)](screenbuffer-hd.md#top)
+* *New* [ScreenBuffer HD](screenbuffer-hd.md#top)
 * [TextBuffer](textbuffer.md#top)
 * [Rect](rect.md#top)
 
