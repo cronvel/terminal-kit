@@ -1,4 +1,10 @@
 
+v1.13.3
+-------
+
+String-kit dependency upgraded. Utilities: string width, truncate
+
+
 v1.13.2
 -------
 
