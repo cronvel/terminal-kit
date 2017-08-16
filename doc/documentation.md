@@ -124,6 +124,8 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [Moving the cursor](low-level.md#ref.movingCursor)
 	* [Editing the screen](low-level.md#ref.editingScreen)
 	* [Input/Output](low-level.md#ref.io)
+	* [Operating System](low-level.md#ref.operating-system)
+	* [Modifiers](low-level.md#ref.modifiers)
 	* [Misc](low-level.md#ref.misc)
 
 * [Terminal's High-level and Advanced Methods](high-level.md#top)

@@ -76,6 +76,8 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 	* [Moving the cursor](#ref.movingCursor)
 	* [Editing the screen](#ref.editingScreen)
 	* [Input/Output](#ref.io)
+	* [Operating System](#ref.operating-system)
+	* [Modifiers](#ref.modifiers)
 	* [Misc](#ref.misc)
 
 
@@ -237,23 +239,40 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 
 
 
-<a name="ref.misc"></a>
-### Misc
+<a name="ref.operating-system"></a>
+### Operating System
 
-* .reset(): full reset of the terminal
-* .error(): it just set error to true so it will write to STDERR instead of STDOUT
+* .cwd(uri): set the terminal Current Working Directory to *uri* (should start with *file://*)
+* .windowTitle(str): set the title of an xterm-compatible window to *str*
+* .iconName(str): set the icon name to *str*
+* .notify(title,text): (*gnome-terminal*) produce a notification **if the terminal is not the foreground window**
+
+
+
+<a name="ref.modifiers"></a>
+### Modifiers
+
+* .error(): it will write to STDERR instead of STDOUT
   E.g.: `term.error.red( 'Got error %E' , myError )` will output to *STDERR*  the error inspection of `myError`,
   preceded by *'Got error '*, all in red.
 * .str(): do not output anything, instead return a string containing the sequences.
   E.g.: `var myString = term.str.blue( 'BLUE' )` will write in `myString` a string containing the escape code for blue,
   the text *'BLUE'* and the style-reset escape sequence
-* .bell(): emit an audible bell
 * .noFormat(str): disable all string formatting and markup, output *str* without interpreting it - useful when your
   string may contain `%` and `^` (e.g. user input) and you don't want to escape them
 * .markupOnly(str): disable string formatting but still interpret `^` markup
-* .cwd(uri): set the terminal Current Working Directory to *uri* (should start with *file://*)
-* .windowTitle(str): set the title of an xterm-compatible window to *str*
-* .iconName(str): set the icon name to *str*
+* .bindArgs(...): since it is not possible to use *.bind()* on Terminal-kit's chainable functions, this is a replacement.
+  When used, instead of doing anything, it just returns a function. A common use-case is for high-level methods that
+  require a styling function, e.g.: `term.bar( 0.26 , { barStyle: term.red } )`.
+  If we want to use *truecolor*, we have to do: `term.bar( 0.26 , { barStyle: term.colorRgbHex.bindArgs( '#650fbe' ) } )`.
+
+
+
+<a name="ref.misc"></a>
+### Misc
+
+* .reset(): full reset of the terminal
+* .bell(): emit an audible bell
 * .setCursorColor(register): set the cursor color to one of the 256 *register*
 * .setCursorColorRgb(r,g,b): set the cursor color to a custom RGB value
 * .resetCursorColorRgb(): reset the cursor color to the terminal's default
@@ -265,10 +284,4 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
   which is to invert the foreground and background color on selection
 * .resetHighlightBgColorRgb(): reset the highlight (selection) background color, restore back the default behavior
   which is to invert the foreground and background color on selection
-* .notify(title,text): (*gnome-terminal*) produce a notification **if the terminal is not the foreground window**
-* .bindArgs(...): since it is not possible to use *.bind()* on Terminal-kit's chainable function, this is a replacement.
-  When used, instead of doing anything, it just returns a function. A common use-case is for high-level methods that
-  require a styling function, e.g.: `term.bar( 0.26 , { barStyle: term.red } )`. But if we want to use *truecolor*,
-  we have to do: `term.bar( 0.26 , { barStyle: term.colorRgbHex.bindArgs( '#650fbe' ) } )`.
   
-
