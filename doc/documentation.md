@@ -114,6 +114,9 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [termkit.getParentTerminalInfo()](global-api.md#ref.getParentTerminalInfo)
 	* [termkit.getDetectedTerminal()](global-api.md#ref.getDetectedTerminal)
 	* [termkit.autoComplete()](global-api.md#ref.autoComplete)
+	* [termkit.stripEscapeSequences()](global-api.md#ref.stripEscapeSequences)
+	* [termkit.stringWidth()](global-api.md#ref.stringWidth)
+	* [termkit.truncateString()](global-api.md#ref.truncateString)
 
 * [Terminal's Low-level and Basic *chainable* Methods](low-level.md#top)
 	* [Colors](low-level.md#ref.colors)

@@ -1,4 +1,10 @@
 
+v1.13.5
+-------
+
+.stripEscapeSequences(), .stringWidth() and .truncateString() are now documentated and part of the semver contract
+
+
 v1.13.4
 -------
 

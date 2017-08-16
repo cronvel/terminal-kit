@@ -17,6 +17,9 @@ This section is about the main-module methods.
 * [termkit.getParentTerminalInfo()](#ref.getParentTerminalInfo)
 * [termkit.getDetectedTerminal()](#ref.getDetectedTerminal)
 * [termkit.autoComplete()](#ref.autoComplete)
+* [termkit.stripEscapeSequences()](#ref.stripEscapeSequences)
+* [termkit.stringWidth()](#ref.stringWidth)
+* [termkit.truncateString()](#ref.truncateString)
 
 
 
@@ -173,4 +176,36 @@ auto-completers might take advantage of this method for its final pass, after co
 
 [This is an example](high-level.md#ref.example.autoComplete) of its usage.
 
+
+
+<a name="ref.stripEscapeSequences"></a>
+### .stripEscapeSequences( str )
+
+* str `string` the input string
+
+This method takes an input string and returns it without any terminal escape sequences.
+
+
+
+<a name="ref.stringWidth"></a>
+### .stringWidth( str )
+
+* str `string` the input string
+
+This method returns the **terminal-aware width** of a string, i.e. the width of the string as displayed on the terminal.
+It takes care of:
+* escape sequences: they do not generate any width
+* full-width characters: unicode characters that are displayed using two *cells* on the terminal (e.g.: asian characters)
+
+
+
+<a name="ref.truncateString"></a>
+### .truncateString( str , maxWidth )
+
+* str `string` the input string
+* maxWidth `number` the max width of the output string
+
+This method takes a string and returns it eventually truncated if its width was greater than *maxWidth*.
+This method is **terminal-aware**: it does not truncate the string in the middle of an escape sequence,
+and the *width* is computed the same way than [.stringWidth()](#ref.stringWidth) does.
 
