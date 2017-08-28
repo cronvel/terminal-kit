@@ -55,6 +55,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		var options = {
 			selectedLeftPadding: '*' ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
+			//x: 4 ,
+			//itemMaxWidth: 20 ,
 			//y: 1 ,
 			//style: term.inverse ,
 			//selectedStyle: term.dim.blue.bgGreen
