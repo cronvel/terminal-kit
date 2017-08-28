@@ -191,6 +191,11 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .moveTo(x,y): move the cursor to the (x,y) coordinate (1,1 is the upper-left corner)
 * .move(x,y): relative move of the cursor
 * .hideCursor(): hide/show the cursor
+* .tabSet(): set a new tab stop at the current cursor position
+* .tabClear(): clear the tab stop at the current cursor position
+* .tabClearAll(): clear all tab stops
+* .forwardTab(n): move the cursor to the next tabulation 'n' times
+* .backwardTab(n): move the cursor to the previous tabulation 'n' times
 
 
 
