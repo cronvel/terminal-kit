@@ -265,6 +265,8 @@ It produces:
 
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
+	* echoChar `string` or `true` if set, all characters are replaced by this one (useful for password fields),
+	  if true, it is replaced by a dot: •
 	* default `string` default input/placeholder
 	* cancelable `boolean` if true (default: false), it is cancelable by user using the cancel key (default: ESC),
 	  thus will return null

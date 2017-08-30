@@ -1,4 +1,10 @@
 
+v1.13.10
+--------
+
+.inputField(): new option echoChar (issue #45) ; + fixed few redraw bug
+
+
 v1.13.9
 -------
 

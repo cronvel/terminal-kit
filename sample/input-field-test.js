@@ -54,11 +54,14 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		term.inputField( {
 				//y: term.height , x: 1 ,
-				history : history ,
+				//echoChar: '*' ,
+				//*
+				history: history ,
 				autoComplete: autoComplete ,
 				autoCompleteMenu: true ,
 				autoCompleteHint: true ,
 				hintStyle: term.brightBlack.italic ,
+				//*/
 				//maxLength: 3
 			} , function( error , input ) {
 			
