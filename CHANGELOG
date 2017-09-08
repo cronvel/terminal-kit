@@ -1,4 +1,10 @@
 
+v1.13.11
+--------
+
+Mitigated an issue with terminal detection on Windows
+
+
 v1.13.10
 --------
 
