@@ -1,4 +1,10 @@
 
+v1.13.12
+--------
+
+New method: .eraseArea() -- a handy higher level method that erases a rectangular area on the screen (#51)
+
+
 v1.13.11
 --------
 

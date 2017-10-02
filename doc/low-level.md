@@ -210,6 +210,7 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .eraseLineAfter(): erase current line after the cursor
 * .eraseLineBefore(): erase current line before the cursor
 * .eraseLine(): erase current line
+* .eraseArea(x,y,[width],[height]): a handy higher level method that erases a rectangular area on the screen
 * .insertLine(n): insert n lines
 * .deleteLine(n): delete n lines
 * .insert(n): insert n char after (like the INSERT key)
