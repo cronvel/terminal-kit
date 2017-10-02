@@ -269,7 +269,7 @@ It produces:
 	  if true, it is replaced by a dot: •
 	* default `string` default input/placeholder
 	* cancelable `boolean` if true (default: false), it is cancelable by user using the cancel key (default: ESC),
-	  thus will return null
+	  thus will return `undefined`.
 	* style `Function` style used, default to the terminal instance (no style)
 	* hintStyle `Function` style used for hint (auto-completion preview), default to `terminal.brightBlack` (gray)
 	* maxLength `number` maximum length of the input
@@ -291,7 +291,7 @@ It produces:
 	  that is used for the completion (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')
 	* autoCompleteHint `boolean` if true (default: false) use the hintStyle to write the auto-completion preview
 	  at the right of the input
-	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
+	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string). See below for the list of available actions.
 	* tokenHook `Function( token , isEndOfInput , previousTokens , term , config )` this is a hook called for each token
 	  of the input, where:
 	  	* token `String` is the current token
