@@ -213,7 +213,7 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .eraseArea(x,y,[width],[height]): a handy higher level method that erases a rectangular area on the screen
 * .insertLine(n): insert n lines
 * .deleteLine(n): delete n lines
-* .insert(n): insert n char after (like the INSERT key)
+* .insert(n): insert n char after (like the INSERT key). The inserted characters are empty ones (equivalent to spaces).
 * .delete(n): delete n char after (like the DELETE key)
 * .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1)
   followed by a .delete(1)
