@@ -87,6 +87,8 @@ the `realTerm` instance and receive from the first program, and write to the las
 	  lib/termconfig/ directory of the lib)
 	* appName `string` just an informative field
 	* processSigwinch `boolean` (default: false) true if the terminal can use the SIGWINCH signal to detect resizing
+	* preferProcessSigwinch `boolean` (default: false) true if the terminal MUST use the SIGWINCH signal to detect resizing
+		(by the way, it turns processSigwinch on). It is useful on some Windows system.
 
 This method creates a new terminal interface.
 

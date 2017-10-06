@@ -126,5 +126,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		console.log( "'unknown' event, buffer:" , buffer ) ;
 	} ) ;
 
+	term.on( 'resize' , function( width , height ) {
+		console.log( "'resize' event, new width and height:" , width , height ) ;
+	} ) ;
+
 } ) ;
 

@@ -1,4 +1,10 @@
 
+v1.13.13
+--------
+
+Try to fix terminal resizing detection on windows (#54)
+
+
 v1.13.12
 --------
 
