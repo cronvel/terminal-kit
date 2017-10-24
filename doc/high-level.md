@@ -268,6 +268,8 @@ It produces:
 	* echoChar `string` or `true` if set, all characters are replaced by this one (useful for password fields),
 	  if true, it is replaced by a dot: •
 	* default `string` default input/placeholder
+	* cursorPosition `integer` (default: -1, end of input) set the cursor position/offset in the input,
+	  negative value starts from the end
 	* cancelable `boolean` if true (default: false), it is cancelable by user using the cancel key (default: ESC),
 	  thus will return `undefined`.
 	* style `Function` style used, default to the terminal instance (no style)
@@ -367,6 +369,8 @@ It returns an EventEmitter object featuring some functions to control things dur
 * stop(): stop the input process now, call the inputField()'s callback (same behavior than a regular 'ENTER' key pressed)
 * getInput(): get the current input string
 * getPosition(): return an object containing 'x' and 'y' properties, the coordinates where the input field starts
+* getCursorPosition(): return the cursor position/offset in the input
+* setCursorPosition( offset ): set the cursor position/offset in the input
 * redraw(): redraw the input field, useful if you had echo'ed something that can mess it
 * hide(): hide the input field, it still records keystrokes
 * show(): show the input field again

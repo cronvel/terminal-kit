@@ -52,10 +52,12 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	{
 		term.green( 'Please enter your name: ' ) ;
 		
-		term.inputField( {
+		var field = term.inputField( {
 				//y: term.height , x: 1 ,
 				//echoChar: '*' ,
 				//*
+				//default: 'mkdir ""' ,
+				//cursorPosition: -2 ,
 				history: history ,
 				autoComplete: autoComplete ,
 				autoCompleteMenu: true ,
@@ -84,6 +86,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 				terminate() ;
 			}
 		} ) ;
+		
+		//setTimeout( () => field.setCursorPosition( 3 ) , 1000 ) ;
+		//setTimeout( () => console.log( '\npos:' , field.getCursorPosition() ) , 1000 ) ;
 	}
 	
 	

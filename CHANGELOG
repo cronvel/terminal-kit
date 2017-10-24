@@ -1,4 +1,10 @@
 
+v1.14.0
+-------
+
+.inputField(): now it is possible to get/set cursor position at instantiation using a new 'cursorPosition' option, and real-time using the returned object to get/set the cursor position with the methods getCursorPosition() and setCursorPosition() (issue #56)
+
+
 v1.13.13
 --------
 
