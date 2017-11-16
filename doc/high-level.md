@@ -679,8 +679,8 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	* oneLineItem `boolean` if true (default: false), big items do not span multiple lines, instead they are truncated
 	  and ended with an ellipsis char
 	* itemMaxWidth `number` the max width for an item, default to the terminal width
-	* continueOnSubmit `boolean` if true, submit action do not end the menu, the callback argument is ignored,
-	  the 'submit' event should be listened instead.
+	* continueOnSubmit `boolean` if true, the submit action does not end the menu, the callback argument is ignored.
+	  The 'submit' event should be listened instead.
 	* selectedIndex `number` selected index at initialization (default: 0)
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
