@@ -11,3 +11,5 @@ OK	Turn Forms into a Element of Elements
 OK	Layout should be a Element, and...
 OK	... and each leaf boxes' ScreenBuffer should be Elements too
 OK	Full redraw of the whole document
+
+	Use Bobbox as the box-model manager
