@@ -1,4 +1,10 @@
 
+v1.15.0
+-------
+
+Moved from JSHint to ESLint, updated coding style
+
+
 v1.14.3
 -------
 
