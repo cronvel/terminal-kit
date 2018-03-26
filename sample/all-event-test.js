@@ -29,12 +29,8 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //var term = require( '../lib/termkit.js' ).terminal ;
-require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
+require( '../lib/termkit.js' ).getDetectedTerminal( ( error , term ) => {
 
 
 	function terminate()
@@ -64,7 +60,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	var mouseMode = 1 ;
 	
-	term.on( 'key' , function( name , matches , data ) {
+	term.on( 'key' , ( name , matches , data ) => {
 		
 		console.log(
 			"'key' event:" ,
@@ -114,19 +110,19 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		}
 	} ) ;
 
-	term.on( 'terminal' , function( name , data ) {
+	term.on( 'terminal' , ( name , data ) => {
 		console.log( "'terminal' event:" , name , data ) ;
 	} ) ;
 	
-	term.on( 'mouse' , function( name , data ) {
+	term.on( 'mouse' , ( name , data ) => {
 		console.log( "'mouse' event:" , name , data ) ;
 	} ) ;
 
-	term.on( 'unknown' , function( buffer ) {
+	term.on( 'unknown' , ( buffer ) => {
 		console.log( "'unknown' event, buffer:" , buffer ) ;
 	} ) ;
 
-	term.on( 'resize' , function( width , height ) {
+	term.on( 'resize' , ( width , height ) => {
 		console.log( "'resize' event, new width and height:" , width , height ) ;
 	} ) ;
 
