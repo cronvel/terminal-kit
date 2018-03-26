@@ -1,4 +1,10 @@
 
+v1.15.1
+-------
+
+PR #68 - Use stdout columns/rows properties for terminal size
+
+
 v1.15.0
 -------
 

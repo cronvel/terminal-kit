@@ -29,10 +29,10 @@
 
 
 
-process.stdout.on( 'resize' , () => { console.log( "process.stdout 'resize'" ) ; } ) ;
-process.on( 'SIGWINCH' , () => { console.log( "process 'SIGWINCH'" ) ; } ) ;
-setTimeout( () => console.log( 'exit' ) , 10000 ) ;
-return ;
+//process.stdout.on( 'resize' , () => { console.log( "process.stdout 'resize'" ) ; } ) ;
+//process.on( 'SIGWINCH' , () => { console.log( "process 'SIGWINCH'" ) ; } ) ;
+//setTimeout( () => console.log( 'exit' ) , 10000 ) ;
+//return ;
 
 
 var term = require( '..' ).terminal ;
