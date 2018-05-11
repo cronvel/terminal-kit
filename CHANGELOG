@@ -1,4 +1,10 @@
 
+v1.15.2
+-------
+
+To solve 'npm audit' issues, I now use my own fork of the 'get-pixels' module, with everything not related to Terminal-kit pruned (it removes lot of packages)
+
+
 v1.15.1
 -------
 
