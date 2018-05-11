@@ -13,8 +13,8 @@
     "async-kit": "^2.2.3",
     "get-pixels": "^3.3.0",
     "ndarray": "^1.0.18",
-    "nextgen-events": "^0.11.2",
-    "string-kit": "^0.6.9",
+    "nextgen-events": "^0.14.4",
+    "string-kit": "^0.6.15",
     "tree-kit": "^0.5.26"
   },
   "devDependencies": {
