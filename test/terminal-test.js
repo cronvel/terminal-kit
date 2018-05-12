@@ -28,20 +28,13 @@
 
 
 
-/* jshint unused:false */
-/* global describe, it, before, after */
-
-
-
-var expect = require( 'expect.js' ) ;
-
 var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 
 
 describe( "Find" , function() {
-	it( "how to test a terminal lib with Mocha..." ) ;
+	it( "how to test a terminal lib with Tea-Time/Mocha..." ) ;
 } ) ;
 
 
