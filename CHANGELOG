@@ -1,27 +1,15 @@
 
-v1.15.5
--------
+v1.15.5 - v1.15.4
+-----------------
 
-Dependencies
-
-
-v1.15.4
--------
-
-Removed 'expect.js' dev dependency
-
-
-v1.15.3
--------
-
-clean up
+Dependencies cleaned up.
 
 
 v1.15.2
 -------
 
 To solve 'npm audit' issues, I now use my own fork of the 'get-pixels' module, with everything not related to Terminal-kit
-pruned (it removes lot of packages)
+pruned (it removes a lot of packages).
 
 
 v1.15.1
