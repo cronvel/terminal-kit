@@ -1,4 +1,10 @@
 
+v1.15.6
+-------
+
+Bugfix: do not clean up when not inside a TTY
+
+
 v1.15.5 - v1.15.4
 -----------------
 
