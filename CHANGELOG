@@ -1,8 +1,17 @@
 
+v1.16.1
+-------
+
+Documentation updated for new options 'isTTY' and 'isSSH' of termkit.createTerminal()
+
+
 v1.16.0
 -------
 
-Fixed: avoid sending escape sequences when the output is not a TTY (probably piping or redirecting to a file), this is a bugfix and should theorically be a SEMVER PATCH, but since it could affect people actually wanting to write terminal's escape sequences inside a file, I will be flagged as a SEMVER MINOR
+Fixed: avoid sending escape sequences when the output is not a TTY (probably piping or redirecting to a file).
+
+Note: this is a bugfix and should theorically be a SEMVER PATCH, but since it could affect people actually wanting to write
+terminal's escape sequences inside a file/pipe, it will be flagged as a SEMVER MINOR.
 
 
 v1.15.6

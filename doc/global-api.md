@@ -86,6 +86,8 @@ the `realTerm` instance and receive from the first program, and write to the las
 	* appId `string` specific terminal application's identifier (available ID's are files basename found in the
 	  lib/termconfig/ directory of the lib)
 	* appName `string` just an informative field
+	* isTTY `boolean` true (the default) if the terminal is a TTY
+	* isSSH `boolean` (default: false) true if the terminal is a SSH terminal (the app and the terminal are not on the same computer)
 	* processSigwinch `boolean` (default: false) true if the terminal can use the SIGWINCH signal to detect resizing
 	* preferProcessSigwinch `boolean` (default: false) true if the terminal MUST use the SIGWINCH signal to detect resizing
 		(by the way, it turns processSigwinch on). It is useful on some Windows system.
