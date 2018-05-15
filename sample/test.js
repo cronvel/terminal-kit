@@ -35,6 +35,7 @@
 
 
 var term = require( '../lib/termkit.js' ).terminal ;
+//var term = require( '../lib/termkit.js' ).realTerminal ;
 
 /*
 term( 'Terminal name: %s\n' , term.appName ) ;
@@ -45,6 +46,7 @@ term.down( 3 , "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 
 process.exit() ;
 */
 
+term( 'term.isTTY: %I\n' , term.isTTY ) ;
 term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
 term( term.esc.blue.on + 'Blue' + term.esc.blue.off ) ;
 term( 'normal' ) ;
