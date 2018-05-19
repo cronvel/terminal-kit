@@ -1,4 +1,10 @@
 
+v1.17.0
+-------
+
+New: word-wrapping (EXPERIMENTAL/UNSTABLE API -- NEED DOC) using term.wrap() / term.wrapColumn()
+
+
 v1.16.1
 -------
 
