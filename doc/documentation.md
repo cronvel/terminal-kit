@@ -137,6 +137,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.setColor()](high-level.md#ref.setColor)
 	* [.getPalette()](high-level.md#ref.getPalette)
 	* [.setPalette()](high-level.md#ref.setPalette)
+	* [.wrapColumn()](high-level.md#ref.wrapColumn)
 	* [.yesOrNo()](high-level.md#ref.yesOrNo)
 	* [.inputField()](high-level.md#ref.inputField)
 	* [.fileInput()](high-level.md#ref.fileInput)

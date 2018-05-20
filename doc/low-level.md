@@ -267,6 +267,8 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
 * .noFormat(str): disable all string formatting and markup, output *str* without interpreting it - useful when your
   string may contain `%` and `^` (e.g. user input) and you don't want to escape them
 * .markupOnly(str): disable string formatting but still interpret `^` markup
+* .wrap(str): enable word wrapping, and support continuing text. By default it wraps using the full terminal width,
+  but it can be configurable. See [.wrapColumn()](high-level.md#ref.wrapColumn) for configuration and behavior details.
 * .bindArgs(...): since it is not possible to use *.bind()* on Terminal-kit's chainable functions, this is a replacement.
   When used, instead of doing anything, it just returns a function. A common use-case is for high-level methods that
   require a styling function, e.g.: `term.bar( 0.26 , { barStyle: term.red } )`.

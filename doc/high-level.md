@@ -24,6 +24,7 @@ create nice progress bars, or display some special effects.
 * [.setColor()](#ref.setColor)
 * [.getPalette()](#ref.getPalette)
 * [.setPalette()](#ref.setPalette)
+* [.wrapColumn()](#ref.wrapColumn)
 * [.yesOrNo()](#ref.yesOrNo)
 * [.inputField()](#ref.inputField)
 * [.fileInput()](#ref.fileInput)
@@ -196,6 +197,47 @@ and each color that was modified by the lib replace it.
 	* *OR* `string` one of the built-in palette (default, gnome, konsole, linux, solarized, vga, xterm)
 
 If the terminal supports it, it will reset the 16-colors palette to the provided one.
+
+
+
+<a name="ref.wrapColumn"></a>
+### .wrapColumn() / .wrapColumn( [options] ) / .wrapColumn( [x] , width )
+
+* options `Object` where:
+	* width `integer` or `null` the width of the column, or `null` for the terminal's width
+	* x `integer` the x-coordinate of the left side of the column
+	* offset `integer` the offset of the next/first line (used for continuing text)
+
+This method change the behavior of the [.wrap modifier](low-level.md#ref.modifiers).
+It defines the column setup used for word-wrapping.
+
+Calling `.wrapColumn()` without argument simply reset the offset value.
+It is useful since issuing multiple `term.wrap( "some text" )` would continue the text one after the other.
+That would stop that *continuation* behavior.
+
+All call to `.wrapColumn()`, with or without arguments, reset the offset, except if the user defines its own value.
+
+The offset is also reset everytime some text is written without the *wrap* mode turned *on*.
+
+Examples:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+// Word-wrap this along the full terminal width
+term.wrap.yellow( 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish' ) ;
+
+// Word-wrap this inside a column starting at x=10 with a width of 25 terminal cells
+term.wrapColumn( { x: 10 , width: 25 } ) ;
+term.wrap.green( 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish' ) ;
+
+// This reset the offset
+term( '\n' ) ;
+//term.wrapColumn() could be used as well, but the next text would overwrite the last line
+
+// Text continuation: the second text start at the end of line of the first text
+term.wrap.blue( '^GP^re^Yr^um^Mi^bs^bs^ci^ro^mn^ is ' )
+term.wrap.red( 'hereby granted' ) ;
+```
 
 
 
