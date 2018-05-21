@@ -24,12 +24,13 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 
 ## Screenshot, PleaZe!
 
-This is a fraction of what Terminal-Kit can do, with only few lines.
+This is a fraction of what Terminal-Kit can do, with only few lines of code.
 Click any image to see the documentation related to the feature!
 
 [![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.png)](doc/low-level.md)
 
 [![Word-wrapping](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/wordwrap-doc1.png)](doc/high-level.md#ref.wrapColumn)
+← Word-wrapping
 
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)](doc/high-level.md#ref.inputField)
 
