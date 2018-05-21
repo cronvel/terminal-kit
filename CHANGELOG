@@ -1,4 +1,10 @@
 
+v1.17.4
+-------
+
+Many bugs on non-TTY output are now fixed ; minor .wrap() bugs fixed ; documentation improved on .wrap()/.wrapColumn()
+
+
 v1.17.3
 -------
 

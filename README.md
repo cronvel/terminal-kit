@@ -29,6 +29,8 @@ Click any image to see the documentation related to the feature!
 
 [![Styles output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/style-doc1.png)](doc/low-level.md)
 
+[![Word-wrapping](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/wordwrap-doc1.png)](doc/high-level.md#ref.wrapColumn)
+
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)](doc/high-level.md#ref.inputField)
 
 [![File input output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/file-input-doc1.gif)](doc/high-level.md#ref.fileInput)
@@ -60,6 +62,7 @@ Click any image to see the documentation related to the feature!
 ## Key features
 
 *New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column
+
 *New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition and image loading
 
 * [colors, 256 colors or even 24-bit colors](doc/low-level.md#ref.colors), if the terminal supports it

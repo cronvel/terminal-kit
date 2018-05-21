@@ -206,16 +206,17 @@ If the terminal supports it, it will reset the 16-colors palette to the provided
 * options `Object` where:
 	* width `integer` or `null` the width of the column, or `null` for the terminal's width
 	* x `integer` the x-coordinate of the left side of the column
-	* offset `integer` the offset of the next/first line (used for continuing text)
+	* continue `boolean` true if it would continue a previous output (mostly for insternal lib usage)
+	* offset `integer` the offset of the next/first line (used for continuing text, mostly for insternal lib usage)
 
 This method change the behavior of the [.wrap modifier](low-level.md#ref.modifiers).
 It defines the column setup used for word-wrapping.
 
-Calling `.wrapColumn()` without argument simply reset the offset value.
+Calling `.wrapColumn()` without argument simply reset the `continue` and `offset` value.
 It is useful since issuing multiple `term.wrap( "some text" )` would continue the text one after the other.
 That would stop that *continuation* behavior.
 
-All call to `.wrapColumn()`, with or without arguments, reset the offset, except if the user defines its own value.
+Any call to `.wrapColumn()`, with or without arguments, reset the offset, except if the user defines its own value.
 
 The offset is also reset everytime some text is written without the *wrap* mode turned *on*.
 
@@ -238,6 +239,10 @@ term( '\n' ) ;
 term.wrap.blue( '^GP^re^Yr^um^Mi^bs^bs^ci^ro^mn^ is ' )
 term.wrap.red( 'hereby granted' ) ;
 ```
+
+It produces:
+
+![Word-wrapping](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/wordwrap-doc1.png)
 
 
 
