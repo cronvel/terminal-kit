@@ -1,4 +1,10 @@
 
+v1.17.3
+-------
+
+Fixed .wrap()'s auto-width for x > 1
+
+
 v1.17.2
 -------
 
