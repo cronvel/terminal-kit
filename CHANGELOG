@@ -1,4 +1,10 @@
 
+v1.17.6
+-------
+
+.singleColumnMenu() now has a .cancel() method exposed on the returned controller ; Dependencies upgraded
+
+
 v1.17.5
 -------
 
