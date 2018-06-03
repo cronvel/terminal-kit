@@ -29,13 +29,9 @@
 
 
 
-/* jshint unused:false */
-
-
-
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
-	term.grabInput( { mouse: 'motion' } ) ;
+	term.grabInput() ;
 	
 	var history = [
 		"OMG my name was supa long, so much long I can't remember what it is, can you believe that?" ,

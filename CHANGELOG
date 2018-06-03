@@ -1,4 +1,10 @@
 
+v1.17.7
+-------
+
+Fix .inputField() behavior with full-width chars (#70)
+
+
 v1.17.6
 -------
 
