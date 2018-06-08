@@ -1,8 +1,14 @@
 
+v1.17.9
+-------
+
+.singleColumnMenu() with escape sequences in menu item improved: various minor fixes and now detect style reset (#68)
+
+
 v1.17.8
 -------
 
-.singleLineMenu() with long entry and escape sequences fixed (#68)
+.singleColumnMenu() with long entry and escape sequences fixed (#68)
 
 
 v1.17.7
