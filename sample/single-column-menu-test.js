@@ -45,7 +45,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
 		] ;
 		
-		items[ 1 ] = 'a very looooooooooooooong menu entry! '.repeat( 8 ) ;
+		items.push( 'a very looooooooooooooong menu entry! '.repeat( 8 ) ) ;
+		items.push( term.str( '^ra ^cvery ^glo^boo^yooo^moooooo^/ooong^ ^cmenu ^Yentry ^_with escape sequences! ' ).repeat( 8 ) ) ;
 		
 		var options = {
 			//ellipsis: true ,
