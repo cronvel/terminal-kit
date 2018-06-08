@@ -1,4 +1,10 @@
 
+v1.17.10
+--------
+
+.singleLineMenu(): added all improvements made to .singleColumnMenu() (full-width chars and escape sequence aware, see #68)
+
+
 v1.17.9
 -------
 

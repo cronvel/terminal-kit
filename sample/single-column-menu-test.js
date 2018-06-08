@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	var menu ;

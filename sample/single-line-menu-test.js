@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	term.grabInput( { mouse: 'motion' } ) ;
@@ -40,7 +36,11 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	function menu()
 	{
 		var items = [
-			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
+			'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' ,
+			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ,
+			term.str( '^RR^Ya^Gi^Cn^Bb^Mow^ Warrior' ) ,
+			'汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字' ,
+			'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字'
 		] ;
 		
 		var options = {
