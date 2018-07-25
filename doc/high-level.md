@@ -81,7 +81,7 @@ It helps quitting cleanly your application without leaving the terminal in a bad
 		* 'motion': report button-event and all motion-event, use it only when needed, many escape sequences are sent from
 		  the terminal (e.g. you may consider it for script running over SSH)
 	* focus: true/false: if defined and true, focus event will be reported (if your terminal support it - *xterm* does)
-* safe `boolean` (optional), when set and when *options* is set to `false`, it turns *.grabInput()*
+* safe `boolean` (optional), when set and when *options* is set to `false`,
   it returns a promise that resolve when input grabbing is safely turned off, avoiding extra junks to
   be echoed when the terminal left the raw mode. It is mostly useful after grabbing mouse motion.
 
@@ -96,8 +96,7 @@ Quick example:
 ```js
 var term = require( 'terminal-kit' ).terminal ;
 
-function terminate()
-{
+function terminate() {
 	term.grabInput( false ) ;
 	setTimeout( function() { process.exit() } , 100 ) ;
 }
@@ -124,22 +123,24 @@ term.on( 'mouse' , function( name , data ) {
 
 
 <a name="ref.getCursorLocation"></a>
-### .getCursorLocation( callback )
+### .getCursorLocation( [callback] )
 
-* callback( error , x , y )
+* callback( error , x , y ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* x `integer` the x coordinate of the cursor
 	* y `integer` the y coordinate of the cursor
 
 Get the cursor location.
 
+Without a callback, it returns a Promise that resolve to an object with a *x* and *y* properties.
+
 
 
 <a name="ref.getColor"></a>
-### .getColor( register , callback )
+### .getColor( register , [callback] )
 
 * register `number` the register number in the 0..255 range
-* callback( error , rgb )
+* callback( error , rgb ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* rgb `Object` where:
 		* r `number` in the 0..255 range, the red value
@@ -147,6 +148,8 @@ Get the cursor location.
 		* b `number` in the 0..255 range, the blue value
 
 Get the RGB values of a color register.
+
+Without a callback, it returns a Promise that resolve to that same *rgb* object.
 
 
 
@@ -168,9 +171,9 @@ Set the RGB values for a color indexed by the integer *register*.
 
 
 <a name="ref.getPalette"></a>
-### .getPalette( register , callback )
+### .getPalette( register , [callback] )
 
-* callback( error , palette )
+* callback( error , palette ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* palette `Array` of 16 `Object` where:
 		* r `number` in the 0..255 range, the red value
@@ -182,6 +185,8 @@ Request from the terminal the 16-colors palette in use.
 
 If the terminal does not support the feature, then the default palette for this terminal is provided,
 and each color that was modified by the lib replace it.
+
+Without a callback, it returns a Promise that resolve to that same *palette* array.
 
 
 
@@ -247,14 +252,14 @@ It produces:
 
 
 <a name="ref.yesOrNo"></a>
-### .yesOrNo( [options] , callback )
+### .yesOrNo( [options] , [callback] )
 
 * options `Object` where:
 	* yes `string` or `Array` contains a key code or an array of key code that will trigger the yes
 	* no `string` or `Array` contains a key code or an array of key code that will trigger the 
 	* echoYes `String` contains what to write on yes, default 'yes'
 	* echoNo `String` contains what to write on no, default 'no'
-* callback( error , result )
+* callback( error , result ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* result `boolean` true for 'yes' or false for 'no'
 
@@ -269,6 +274,7 @@ We can specify the keys for *yes* and *no* by providing a string or an array of 
 It returns an object featuring some functions to control things during the input process:
 
 * abort(): abort the input process and do not even call the yesOrNo()'s callback
+* **promise**: without a callback argument, this will be a promise that resolve with the result value
 
 
 
@@ -277,21 +283,18 @@ Quick example:
 ```js
 var term = require( 'terminal-kit' ).terminal ;
 
-function question()
-{
+function question() {
 	term( 'Do you like javascript? [Y|n]\n' ) ;
 	
 	// Exit on y and ENTER key
 	// Ask again on n
 	term.yesOrNo( { yes: [ 'y' , 'ENTER' ] , no: [ 'n' ] } , function( error , result ) {
 	
-		if ( result )
-		{
+		if ( result ) {
 			term.green( "'Yes' detected! Good bye!\n" ) ;
 			process.exit() ;
 		}
-		else
-		{
+		else {
 			term.red( "'No' detected, are you sure?\n" ) ;
 			question() ;
 		}
@@ -308,7 +311,7 @@ It produces:
 
 
 <a name="ref.inputField"></a>
-### .inputField( [options] , callback )
+### .inputField( [options] , [callback] )
 
 * options `Object` where:
 	* echo `boolean` if true (the default), input are displayed on the terminal
@@ -330,6 +333,7 @@ It produces:
 	  and return the completed `string` (if no completion can be done, it should return the input string,
 	  if multiple candidate are possible, it should return an array of string), if **the function accepts 2 arguments**
 	  (checked using *function*.length), then **the auto-completer will be asynchronous**!
+	  If it does not accept a callback but returns a *thenable* (Promise-like), it will be **asynchronous** too.
 	  Also note that if it is an array or the result of the function is an array, and if that array has a
 	  special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu,
 	  and if it has the special property `postfix` (still a string), this will be appended to the output of the
@@ -365,7 +369,7 @@ It produces:
 	* tokenResetHook `Function( term , config )` this is a hook called before the first token
 	* tokenRegExp `RegExp` this is the regex used to tokenize the input, by default a token is space-delimited,
 	  so "one two three" would be tokenized as [ "one" , "two" , "three" ].
-* callback( error , input )
+* callback( error , input ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
 
@@ -426,6 +430,7 @@ It returns an EventEmitter object featuring some functions to control things dur
   it needs some I/O with the terminal to works accordingly.
   If *x* and *y* are given, it use those coordinates instead of an internal asynchronous call to .getCursorLocation(),
   so it makes *.rebase()* synchronous.
+* **promise**: without a callback argument, this will be a promise that resolve with the *input* string
 
 It emits:
 
@@ -462,6 +467,27 @@ term.inputField(
 It produces:
 
 ![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)
+
+The same, with **Promise**:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
+
+var autoComplete = [
+	'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
+	'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
+	'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' ,
+	'Harry Truman' , 'Franklin Roosevelt'
+] ;
+
+term( 'Please enter your name: ' ) ;
+
+var input = await term.inputField( { history: history , autoComplete: autoComplete , autoCompleteMenu: true } ).promise ;
+
+term.green( "\nYour name is '%s'\n" , input ) ;
+process.exit() ;
+```
 
 If we need our own auto-completer, we might take advantage of the built-in static method
 [termkit.autoComplete()](global-api.md#ref.autoComplete).
@@ -575,16 +601,18 @@ a node.js shell in early alpha stage, featuring auto-completion and syntax hilig
 
 
 <a name="ref.fileInput"></a>
-### .fileInput( [options] , callback )
+### .fileInput( [options] , [callback] )
 
 * options `Object` where:
 	* baseDir `string` (optional, default: process.cwd()) the base directory path
 	* ... [*as well as all .inputField() options*](#ref.inputField)
-* callback( error , input )
+* callback( error , input ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
 
 This is a variant of [*.inputField()*](#ref.inputField) that auto-complete file paths relative to the *baseDir* path.
+
+Without a callback, it returns a promise that resolve to the *input*.
 
 Example featuring the fileInput:
 
@@ -615,7 +643,7 @@ term.fileInput(
 
 
 <a name="ref.singleLineMenu"></a>
-### .singleLineMenu( menuItems , [options] , callback )
+### .singleLineMenu( menuItems , [options] , [callback] )
 
 * menuItems `array` of menu item text
 * options `object` (optional) of options, where:
@@ -627,7 +655,7 @@ term.fileInput(
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
-* callback( error , response ), where:
+* callback( error , response ) (optional), where:
 	* error `mixed` truthy if an underlying error occurs
 	* response `Object` where
 		* selectedIndex `number` the user-selected menu item index
@@ -664,6 +692,9 @@ Available actions are:
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
+
+It returns an object with those properties:
+* **promise**: without a callback argument, this will be a promise that resolve with the *response* object.
 
 Example:
 
@@ -703,14 +734,14 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 
 
 <a name="ref.singleRowMenu"></a>
-### .singleRowMenu( menuItems , [options] , callback )
+### .singleRowMenu( menuItems , [options] , [callback] )
 
 This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 
 
 
 <a name="ref.singleColumnMenu"></a>
-### .singleColumnMenu( menuItems , [options] , callback )
+### .singleColumnMenu( menuItems , [options] , [callback] )
 
 * menuItems `array` of menu item text
 * options `object` (optional) of options, where:
@@ -731,7 +762,7 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	* selectedIndex `number` selected index at initialization (default: 0)
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
-* callback( error , response ), where:
+* callback( error , response ) (optional), where:
 	* error `mixed` truthy if an underlying error occurs
 	* response `Object` where:
 		* selectedIndex `number` the user-selected menu item index
@@ -764,6 +795,9 @@ Available actions are:
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
+
+It returns an object with those properties:
+* **promise**: without a callback argument, this will be a promise that resolve with the *response* object.
 
 Example:
 
@@ -800,7 +834,7 @@ It creates a menu, when the user press RETURN/ENTER, it displays the index, text
 
 
 <a name="ref.gridMenu"></a>
-### .gridMenu( menuItems , [options] , callback )
+### .gridMenu( menuItems , [options] , [callback] )
 
 * menuItems `array` of menu item text
 * options `object` (optional) of options, where:
@@ -816,7 +850,7 @@ It creates a menu, when the user press RETURN/ENTER, it displays the index, text
 	* itemMaxWidth `number` the max width for an item, default to the 1/3 of the terminal width or of the specified width option
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
-* callback( error , response ), where:
+* callback( error , response ) (optional), where:
 	* error `mixed` truthy if an underlying error occurs
 	* response `Object` where
 		* selectedIndex `number` the user-selected menu item index
@@ -851,6 +885,9 @@ Available actions are:
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
+
+It returns an object with those properties:
+* **promise**: without a callback argument, this will be a promise that resolve with the *response* object.
 
 Example:
 
@@ -1071,7 +1108,7 @@ It uses unicode characters to improve the precision.
 
 
 <a name="ref.slowTyping"></a>
-### .slowTyping( str , [options] , callback )
+### .slowTyping( str , [options] , [callback] )
 
 * str `string` the text to display
 * options `object` of options, where:
@@ -1081,9 +1118,11 @@ It uses unicode characters to improve the precision.
 	* delay `number` average delay before printing the next char, default to 150 ms
 	* flashDelay `number` fixed delay before the `flashStyle` of the last printed char is replaced by the regular `style`,
 		default to 100 ms
-* callback `function` that will be called on completion
+* callback `function` (optional) that will be called on completion
 
 It outputs some text with an old-fashioned slow-typing effect.
+
+Without a callback, it returns a promise that resolve on completion.
 
 Example:
 
@@ -1104,7 +1143,7 @@ It produces:
 
 
 <a name="ref.drawImage"></a>
-### .drawImage( url , [options] , callback )
+### .drawImage( url , [options] , [callback] )
 
 * url `string` filepath or URL
 * options `object` of options, where:
@@ -1112,8 +1151,10 @@ It produces:
 	  When shrinking, aspect ratio is always preserved. It has those properties:
 		* width `integer` the max width of the image
 		* height `integer` the max height of the image
-* callback `Function( error )` that will be called on completion, where:
+* callback `Function( error )` (optional) that will be called on completion, where:
 	* error: truthy if an error occured
+
+Without a callback, it returns a promise that resolve on completion.
 
 This get an image (using a filepath or an URL) and draw it directly into the terminal.
 Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.

@@ -13,10 +13,10 @@ OK	fileInput
 OK	slowTyping
 OK	yesOrNo
 OK	gridMenu
-	ScreenBuffer#loadImage()
-	inputField's autoCompleter
-	scan code for more candidates
-	doc
+OK	ScreenBuffer#loadImage()
+OK	inputField's autoCompleter
+OK	scan code for more candidates
+OK	doc
 
 
 

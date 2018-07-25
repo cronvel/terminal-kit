@@ -62,6 +62,8 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
+*New:* Promises can be used instead of callback everywhere.
+
 *New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column
 
 *New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition and image loading

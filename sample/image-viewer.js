@@ -102,75 +102,66 @@ if ( ! move )
 
 
 
-SB.loadImage(
-	url ,
-	{
-		terminal: term ,
-		shrink: { width: term.width * maxScale , height: ( term.height - 1 ) * 2 * maxScale } 
-	} ,
-	function( error , image_ )
-	{
-		image = image_ ;
-		
-		if ( error )
+async function loadImage() {
+	image = await SB.loadImage(
+		url ,
 		{
-			term.red( "%E\n" , error ) ;
-			process.exit( 1 ) ;
+			terminal: term ,
+			shrink: { width: term.width * maxScale , height: ( term.height - 1 ) * 2 * maxScale } 
 		}
-		
-		screen = SB.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
-		screen.y = 2 ;
-		
-		image.dst = screen ;
-		
-		term.clear() ;
-		term.grabInput() ;
-		term.hideCursor() ;
+	) ;
+	
+	screen = SB.create( { dst: term , height: term.height - 1 , noFill: true } ) ;
+	screen.y = 2 ;
+	
+	image.dst = screen ;
+	
+	term.clear() ;
+	term.grabInput() ;
+	term.hideCursor() ;
 
-		term.on( 'key' , ( key , matches , data ) => {
-			
-			var offset , stats ;
-			
-			switch ( key )
-			{
-				case 'UP' :
-					offset = Math.round( term.height / 20 ) ;
-					screen.vScroll( offset , true ) ;	// Perform term.scrollDown()
-					image.y += offset ;
-					image.draw() ;
-					stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the top
-					//console.error( stats ) ;
-					break ;
-				case 'DOWN' :
-					offset = Math.round( term.height / 20 ) ;
-					screen.vScroll( - offset , true ) ;	// Perform term.scrollUp()
-					image.y += - offset ;
-					image.draw() ;
-					stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the bottom
-					//console.error( stats ) ;
-					break ;
-				case 'LEFT' :
-					offset = Math.round( term.width / 20 ) ;
-					image.x += offset ;
-					redraw() ;
-					break ;
-				case 'RIGHT' :
-					offset = Math.round( term.width / 20 ) ;
-					image.x -= offset ;
-					redraw() ;
-					break ;
-				case 'q' :
-				case 'CTRL_C' :
-					terminate() ;
-					break ;
-			}
-		} ) ;
+	term.on( 'key' , ( key , matches , data ) => {
 		
-		redraw() ;
-		term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   Q/CTRL-C: quit" ) ;
-	}
-) ;
-
+		var offset , stats ;
+		
+		switch ( key )
+		{
+			case 'UP' :
+				offset = Math.round( term.height / 20 ) ;
+				screen.vScroll( offset , true ) ;	// Perform term.scrollDown()
+				image.y += offset ;
+				image.draw() ;
+				stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the top
+				//console.error( stats ) ;
+				break ;
+			case 'DOWN' :
+				offset = Math.round( term.height / 20 ) ;
+				screen.vScroll( - offset , true ) ;	// Perform term.scrollUp()
+				image.y += - offset ;
+				image.draw() ;
+				stats = screen.draw( { delta: true } ) ;	// This only redraws new lines on the bottom
+				//console.error( stats ) ;
+				break ;
+			case 'LEFT' :
+				offset = Math.round( term.width / 20 ) ;
+				image.x += offset ;
+				redraw() ;
+				break ;
+			case 'RIGHT' :
+				offset = Math.round( term.width / 20 ) ;
+				image.x -= offset ;
+				redraw() ;
+				break ;
+			case 'q' :
+			case 'CTRL_C' :
+				terminate() ;
+				break ;
+		}
+	} ) ;
+	
+	redraw() ;
+	term.moveTo( 1 , 1 ).bgWhite.blue.eraseLineAfter( "Arrows keys: move   Q/CTRL-C: quit" ) ;
+}
 
 
 function redraw()
@@ -195,4 +186,8 @@ function terminate()
 	term( '\n' ) ;
 	term.processExit() ;
 } 
+
+
+
+loadImage() ;
 

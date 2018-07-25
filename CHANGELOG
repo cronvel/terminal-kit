@@ -1,14 +1,21 @@
 
+v1.19.1
+-------
+
+.inputField() now support promise returning function for its 'autoComplete' option ; All promise API are now documented (#18)
+
+
 v1.19.0
 -------
 
-Almost features now have a Promise variant (#18)
+Almost all features now have a Promise variant (#18).
+Still not documented.
 
 
 v1.18.0
 -------
 
-Add promises to some API
+Add promises to some API (#18).
 
 
 v1.17.13
