@@ -35,15 +35,28 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term.grabInput( { mouse: 'motion' } ) ;
 	
-	function menu()
-	{
-		var items = [
-			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
-		] ;
+	term.on( 'key' , ( name ) => {
 		
-		items.push( 'a very looooooooooooooong menu entry! '.repeat( 8 ) ) ;
-		items.push( term.str( '^ra ^cvery ^glo^boo^yooo^moooooo^/ooong^ ^cmenu ^Yentry ^_with escape sequences! ' ).repeat( 8 ) ) ;
-		
+		if ( name === 'CTRL_C' )
+		{
+			menu.stop() ;
+			term.green( 'CTRL-C received...\n' ) ;
+			term.processExit() ;
+		}
+	} ) ;
+	
+
+
+	var items = [
+		'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help'
+	] ;
+	
+	items.push( 'a very looooooooooooooong menu entry! '.repeat( 8 ) ) ;
+	items.push( term.str( '^ra ^cvery ^glo^boo^yooo^moooooo^/ooong^ ^cmenu ^Yentry ^_with escape sequences! ' ).repeat( 8 ) ) ;
+	
+
+
+	function menu() {
 		var options = {
 			//ellipsis: true ,
 			selectedLeftPadding: '*' ,
@@ -79,21 +92,40 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		setTimeout( menu.resume.bind( menu ) , 3000 ) ;
 	}
 	
+
 	
-	term.on( 'key' , ( name ) => {
+	async function asyncMenu() {
+		var options = {
+			//ellipsis: true ,
+			selectedLeftPadding: '*' ,
+			extraLines: 2 ,
+			//continueOnSubmit: true ,
+			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
+			//y: 1 ,
+			//style: term.inverse ,
+			//selectedStyle: term.dim.blue.bgGreen
+		} ;
 		
-		if ( name === 'CTRL_C' )
-		{
-			menu.stop() ;
-			term.green( 'CTRL-C received...\n' ) ;
-			term.processExit() ;
-		}
-	} ) ;
+		var response = await term.singleColumnMenu( items , options ).promise ;
+		
+		term.green( "\n#%s %s: %s (%s,%s)\n" ,
+			response.selectedIndex ,
+			response.submitted ? 'submitted' : 'selected' ,
+			response.selectedText ,
+			response.x ,
+			response.y
+		) ;
+		
+		term.processExit() ;
+	}
+	
 	
 	
 	//term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
-	menu() ; 
+
+	//menu() ; 
+	asyncMenu() ; 
 } ) ;
 
 

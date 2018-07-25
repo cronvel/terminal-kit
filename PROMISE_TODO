@@ -5,8 +5,16 @@ OK	singleColumnMenu
 OK	getCursorLocation
 OK	getColor
 OK	getPalette
-OK	grabInput safeCallback
-	drawImage
+OK	grabInput safe
+OK	drawImage
+OK	getParentTerminalInfo
+OK	getDetectedTerminal
+OK	fileInput
+OK	slowTyping
+OK	yesOrNo
+OK	gridMenu
+	ScreenBuffer#loadImage()
+	inputField's autoCompleter
 	scan code for more candidates
 	doc
 

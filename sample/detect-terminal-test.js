@@ -36,41 +36,37 @@
 var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
-term.green( '\n== Environment variable ==\n\n' ) ;
-term( '$TERM: %s\n' , process.env.TERM ) ;
-term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
-term( '$VTE_VERSION: %s\n' , process.env.VTE_VERSION ) ;
-term( '\n' ) ;
+async function detect() {
+	term.green( '\n== Environment variable ==\n\n' ) ;
+	term( '$TERM: %s\n' , process.env.TERM ) ;
+	term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
+	term( '$VTE_VERSION: %s\n' , process.env.VTE_VERSION ) ;
+	term( '\n' ) ;
 
 
 
-term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
-term( '.guessTerminal(): %J\n' , termkit.guessTerminal() ) ;
-term( 'Terminal name: %s\n' , term.appName ) ;
-term( 'Terminal app ID: %s\n' , term.appId ) ;
-term( 'Generic terminal: %s\n' , term.generic ) ;
-term( 'Config file: %s\n' , term.termconfigFile ) ;
-term( '\n' ) ;
+	term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
+	term( '.guessTerminal(): %J\n' , termkit.guessTerminal() ) ;
+	term( 'Terminal name: %s\n' , term.appName ) ;
+	term( 'Terminal app ID: %s\n' , term.appId ) ;
+	term( 'Generic terminal: %s\n' , term.generic ) ;
+	term( 'Config file: %s\n' , term.termconfigFile ) ;
+	term( '\n' ) ;
 
 
 
-term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
-termkit.getParentTerminalInfo( function( error , info ) {
+	term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
+	var info = await termkit.getParentTerminalInfo( info ) ;
 	
-	if ( error ) { term( '.getParentTerminalInfo() %s\n' , error ) ; }
-	else { term( '.getParentTerminalInfo(): %J\n' , info ) ; }
+	term( '.getParentTerminalInfo(): %J\n' , info ) ;
 	
-	termkit.getDetectedTerminal( function( error , term ) {
-		
-		if ( error ) { console.log( 'Error:' , error ) ; return ; }
-		
-		term( 'Terminal name: %s\n' , term.appName ) ;
-		term( 'Terminal app ID: %s\n' , term.appId ) ;
-		term( 'Generic terminal: %s\n' , term.generic ) ;
-		term( 'Config file: %s\n' , term.termconfigFile ) ;
-		term( '\n' ) ;
-	} ) ;
-} ) ;
+	var newTerm = await termkit.getDetectedTerminal() ;
+	
+	term( 'Terminal name: %s\n' , newTerm.appName ) ;
+	term( 'Terminal app ID: %s\n' , newTerm.appId ) ;
+	term( 'Generic terminal: %s\n' , newTerm.generic ) ;
+	term( 'Config file: %s\n' , newTerm.termconfigFile ) ;
+	term( '\n' ) ;
+}
 
-
-
+detect() ;

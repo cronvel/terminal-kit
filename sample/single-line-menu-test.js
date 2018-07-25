@@ -33,16 +33,16 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	term.grabInput( { mouse: 'motion' } ) ;
 	
+	var items = [
+		'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' ,
+		'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ,
+		term.str( '^RR^Ya^Gi^Cn^Bb^Mow^ Warrior' ) ,
+		'汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字' ,
+		'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字'
+	] ;
+	
 	function menu()
 	{
-		var items = [
-			'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' ,
-			'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ,
-			term.str( '^RR^Ya^Gi^Cn^Bb^Mow^ Warrior' ) ,
-			'汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字' ,
-			'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字'
-		] ;
-		
 		var options = {
 			y: 1 ,
 			style: term.inverse ,
@@ -65,6 +65,21 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	
 	
+	async function asyncMenu()
+	{
+		var options = {
+			y: 1 ,
+			style: term.inverse ,
+			selectedStyle: term.dim.blue.bgGreen
+		} ;
+		
+		var response = await term.singleLineMenu( items , options ).promise ;
+		term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
+		terminate() ;
+	}
+	
+	
+	
 	function terminate()
 	{
 		term.grabInput( false ) ;
@@ -74,7 +89,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
-	menu() ; 
+
+	//menu() ; 
+	asyncMenu() ; 
 } ) ;
 
 

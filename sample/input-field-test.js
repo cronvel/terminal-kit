@@ -44,8 +44,15 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt'
 	] ;
 	
-	function question()
-	{
+	term.on( 'key' , function( key ) {
+		if ( key === 'CTRL_C' )
+		{
+			term.green( 'CTRL-C detected...\n' ) ;
+			terminate() ;
+		}
+	} ) ;
+	
+	function question() {
 		term.green( 'Please enter your name: ' ) ;
 		
 		var field = term.inputField( {
@@ -75,22 +82,35 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			}
 		} ) ;
 		
-		term.on( 'key' , function( key ) {
-			if ( key === 'CTRL_C' )
-			{
-				term.green( 'CTRL-C detected...\n' ) ;
-				terminate() ;
-			}
-		} ) ;
-		
 		//setTimeout( () => field.setCursorPosition( 3 ) , 1000 ) ;
 		//setTimeout( () => console.log( '\npos:' , field.getCursorPosition() ) , 1000 ) ;
 	}
 	
+	async function asyncQuestion() {
+		term.green( 'Please enter your name: ' ) ;
+		
+		var input = await term.inputField( {
+			//y: term.height , x: 1 ,
+			//echoChar: '*' ,
+			//*
+			//default: 'mkdir ""' ,
+			//cursorPosition: -2 ,
+			history: history ,
+			autoComplete: autoComplete ,
+			autoCompleteMenu: true ,
+			autoCompleteHint: true ,
+			hintStyle: term.brightBlack.italic ,
+			//*/
+			//maxLength: 3
+		} ).promise ;
+
+		term.green( "\nYour name is '%s'\n" , input ) ;
+		terminate() ;
+	}
 	
 	
-	function funkyCursor()
-	{
+	
+	function funkyCursor() {
 		//*
 		term.setCursorColorRgb(
 			Math.floor( 30 + Math.random() * 200 ) ,
@@ -111,8 +131,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	
 	
-	function funkyBackground()
-	{
+	function funkyBackground() {
 		term.setDefaultBgColorRgb(
 			Math.floor( 0 + Math.random() * 100 ) ,
 			Math.floor( 0 + Math.random() * 100 ) ,
@@ -128,16 +147,14 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	
 	
 	
-	function terminate()
-	{
-		term.grabInput( false ) ;
-		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() ; } , 100 ) ;
+	function terminate() {
+		term.processExit() ;
 	}
 	
 	
 	term.bold.cyan( 'Input field test, type something and hit the ENTER key...\n' ) ;
-	question() ; 
+	//question() ; 
+	asyncQuestion() ; 
 	//funkyCursor() ;
 	//funkyBackground() ;
 } ) ;
