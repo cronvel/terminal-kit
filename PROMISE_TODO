@@ -4,7 +4,9 @@ OK	singleLineMenu
 OK	singleColumnMenu
 OK	getCursorLocation
 OK	getColor
-	getPalette
+OK	getPalette
+OK	grabInput safeCallback
+	drawImage
 	scan code for more candidates
 	doc
 
