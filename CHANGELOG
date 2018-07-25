@@ -2,7 +2,8 @@
 v1.19.1
 -------
 
-.inputField() now support promise returning function for its 'autoComplete' option ; All promise API are now documented (#18)
+.inputField() now support promise returning function for its 'autoComplete' option.
+All promise API are now documented (#18).
 
 
 v1.19.0

@@ -132,7 +132,7 @@ term.on( 'mouse' , function( name , data ) {
 
 Get the cursor location.
 
-Without a callback, it returns a Promise that resolve to an object with a *x* and *y* properties.
+Without a callback argument, it returns a Promise that resolve to an object with a *x* and *y* properties.
 
 
 
@@ -149,7 +149,7 @@ Without a callback, it returns a Promise that resolve to an object with a *x* an
 
 Get the RGB values of a color register.
 
-Without a callback, it returns a Promise that resolve to that same *rgb* object.
+Without a callback argument, it returns a Promise that resolve to that same *rgb* object.
 
 
 
@@ -186,7 +186,7 @@ Request from the terminal the 16-colors palette in use.
 If the terminal does not support the feature, then the default palette for this terminal is provided,
 and each color that was modified by the lib replace it.
 
-Without a callback, it returns a Promise that resolve to that same *palette* array.
+Without a callback argument, it returns a Promise that resolve to that same *palette* array.
 
 
 
@@ -483,7 +483,9 @@ var autoComplete = [
 
 term( 'Please enter your name: ' ) ;
 
-var input = await term.inputField( { history: history , autoComplete: autoComplete , autoCompleteMenu: true } ).promise ;
+var input = await term.inputField(
+	{ history: history , autoComplete: autoComplete , autoCompleteMenu: true }
+).promise ;
 
 term.green( "\nYour name is '%s'\n" , input ) ;
 process.exit() ;
@@ -612,7 +614,7 @@ a node.js shell in early alpha stage, featuring auto-completion and syntax hilig
 
 This is a variant of [*.inputField()*](#ref.inputField) that auto-complete file paths relative to the *baseDir* path.
 
-Without a callback, it returns a promise that resolve to the *input*.
+Without a callback argument, it returns a promise that resolve to the *input*.
 
 Example featuring the fileInput:
 
@@ -1122,7 +1124,7 @@ It uses unicode characters to improve the precision.
 
 It outputs some text with an old-fashioned slow-typing effect.
 
-Without a callback, it returns a promise that resolve on completion.
+Without a callback argument, it returns a promise that resolve on completion.
 
 Example:
 
@@ -1154,7 +1156,7 @@ It produces:
 * callback `Function( error )` (optional) that will be called on completion, where:
 	* error: truthy if an error occured
 
-Without a callback, it returns a promise that resolve on completion.
+Without a callback argument, it returns a promise that resolve on completion.
 
 This get an image (using a filepath or an URL) and draw it directly into the terminal.
 Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.
