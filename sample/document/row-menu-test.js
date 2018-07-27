@@ -45,7 +45,7 @@ var document = term.createDocument() ;
 
 
 
-var rowMenu = termkit.RowMenu.create( {
+var rowMenu = new termkit.RowMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,

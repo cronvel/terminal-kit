@@ -47,7 +47,7 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var text = termkit.Text.create( {
+var text = new termkit.Text( {
 	parent: document ,
 	content: "Responsive terminal layout! Try resizing your terminal! ;)" ,
 	attr: {
@@ -57,7 +57,7 @@ var text = termkit.Text.create( {
 	}
 } ) ;
 
-var layout = termkit.Layout.create( {
+var layout = new termkit.Layout( {
 	parent: document ,
 	boxChars: 'double' ,
 	layout: {
@@ -91,31 +91,31 @@ term.hideCursor() ;
 //layout.draw() ;
 //layout.setAutoResize( true ) ;
 
-termkit.Text.create( {
+new termkit.Text( {
 	parent: document.elements.percent ,
 	content: 'Percent sized box' ,
 	attr: { color: 'red' }
 } ) ;
 
-termkit.Text.create( {
+new termkit.Text( {
 	parent: document.elements.auto ,
 	content: 'Auto sized box' ,
 	attr: { color: 'green' , italic: true }
 } ) ;
 
-termkit.Text.create( {
+new termkit.Text( {
 	parent: document.elements.auto2 ,
 	content: 'Auto sized box' ,
 	attr: { color: 'yellow' , italic: true }
 } ) ;
 
-termkit.Text.create( {
+new termkit.Text( {
 	parent: document.elements.fixed ,
 	content: 'Fixed size box' ,
 	attr: { color: 'cyan' , bold: true }
 } ) ;
 
-termkit.Text.create( {
+new termkit.Text( {
 	parent: document.elements.fixed2 ,
 	content: 'Fixed size box' ,
 	attr: { color: 'magenta' , bold: true }

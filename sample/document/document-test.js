@@ -45,7 +45,7 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var button1 = termkit.Button.create( {
+var button1 = new termkit.Button( {
 	parent: document ,
 	content: '> bob' ,
 	value: 'bob' ,
@@ -53,7 +53,7 @@ var button1 = termkit.Button.create( {
 	y: 10 ,
 } ) ;
 
-var button2 = termkit.Button.create( {
+var button2 = new termkit.Button( {
 	parent: document ,
 	content: '> bill' ,
 	value: 'bill' ,
@@ -61,7 +61,7 @@ var button2 = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-var textInput1 = termkit.TextInput.create( {
+var textInput1 = new termkit.TextInput( {
 	parent: document ,
 	label: 'First name: ' ,
 	x: 5 ,
@@ -69,7 +69,7 @@ var textInput1 = termkit.TextInput.create( {
 	width: 30 ,
 } ) ;
 
-var textInput2 = termkit.TextInput.create( {
+var textInput2 = new termkit.TextInput( {
 	parent: document ,
 	label: 'Last name: ' ,
 	x: 15 ,
@@ -77,7 +77,7 @@ var textInput2 = termkit.TextInput.create( {
 	width: 30 ,
 } ) ;
 
-var container1 = termkit.Container.create( {
+var container1 = new termkit.Container( {
 	parent: document ,
 	x: 50 ,
 	y: 8 ,
@@ -88,7 +88,7 @@ var container1 = termkit.Container.create( {
 
 //container1.inputDst.fill( { char: ' ' , attr: { bgColor: 'yellow' } } ) ;
 
-var button3 = termkit.Button.create( {
+var button3 = new termkit.Button( {
 	parent: container1 ,
 	content: '> jack' ,
 	value: 'jack' ,

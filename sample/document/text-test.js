@@ -45,7 +45,7 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var text1 = termkit.Text.create( {
+var text1 = new termkit.Text( {
 	parent: document ,
 	content: 'Hello!' ,
 	attr: { color: 'magenta' } ,
@@ -53,7 +53,7 @@ var text1 = termkit.Text.create( {
 	y: 2 ,
 } ) ;
 
-var container1 = termkit.Container.create( {
+var container1 = new termkit.Container( {
 	parent: document ,
 	x: 50 ,
 	y: 8 ,
@@ -62,7 +62,7 @@ var container1 = termkit.Container.create( {
 	backgroundAttr: { bgColor: 'yellow' } ,
 } ) ;
 
-var text2 = termkit.Text.create( {
+var text2 = new termkit.Text( {
 	parent: container1 ,
 	content: 'World!\nWorld!\nW...' ,
 	attr: { color: 'blue' } ,

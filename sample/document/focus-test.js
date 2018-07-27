@@ -45,7 +45,7 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var A = termkit.Button.create( {
+var A = new termkit.Button( {
 	parent: document ,
 	content: '<A>' ,
 	value: 'A' ,
@@ -53,7 +53,7 @@ var A = termkit.Button.create( {
 	y: 0 ,
 } ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: A ,
 	content: '<1>' ,
 	value: '1' ,
@@ -61,7 +61,7 @@ termkit.Button.create( {
 	y: 0 ,
 } ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: A ,
 	content: '<2>' ,
 	value: '2' ,
@@ -69,7 +69,7 @@ termkit.Button.create( {
 	y: 2 ,
 } ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: A ,
 	content: '<3>' ,
 	value: '3' ,
@@ -77,7 +77,7 @@ termkit.Button.create( {
 	y: 4 ,
 } ) ;
 
-var B = termkit.Button.create( {
+var B = new termkit.Button( {
 	parent: document ,
 	content: '<B>' ,
 	value: 'B' ,
@@ -85,7 +85,7 @@ var B = termkit.Button.create( {
 	y: 6 ,
 } ) ;
 
-var sub = termkit.Button.create( {
+var sub = new termkit.Button( {
 	parent: B ,
 	content: '<1>' ,
 	value: '1' ,
@@ -93,7 +93,7 @@ var sub = termkit.Button.create( {
 	y: 6 ,
 } ) ;
 
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub ,
 		content: '<...>' ,
 		value: '...' ,
@@ -101,7 +101,7 @@ var sub = termkit.Button.create( {
 		y: 6 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub ,
 		content: '<...>' ,
 		value: '...' ,
@@ -109,7 +109,7 @@ var sub = termkit.Button.create( {
 		y: 6 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub ,
 		content: '<...>' ,
 		value: '...' ,
@@ -117,7 +117,7 @@ var sub = termkit.Button.create( {
 		y: 6 ,
 	} ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: B ,
 	content: '<2>' ,
 	value: '2' ,
@@ -125,7 +125,7 @@ termkit.Button.create( {
 	y: 8 ,
 } ) ;
 
-var sub2 = termkit.Button.create( {
+var sub2 = new termkit.Button( {
 	parent: B ,
 	content: '<3>' ,
 	value: '3' ,
@@ -133,7 +133,7 @@ var sub2 = termkit.Button.create( {
 	y: 10 ,
 } ) ;
 
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub2 ,
 		content: '<...>' ,
 		value: '...' ,
@@ -141,7 +141,7 @@ var sub2 = termkit.Button.create( {
 		y: 10 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub2 ,
 		content: '<...>' ,
 		value: '...' ,
@@ -149,7 +149,7 @@ var sub2 = termkit.Button.create( {
 		y: 10 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub2 ,
 		content: '<...>' ,
 		value: '...' ,
@@ -157,7 +157,7 @@ var sub2 = termkit.Button.create( {
 		y: 10 ,
 	} ) ;
 
-var C = termkit.Button.create( {
+var C = new termkit.Button( {
 	parent: document ,
 	content: '<A>' ,
 	value: 'A' ,
@@ -165,7 +165,7 @@ var C = termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: C ,
 	content: '<1>' ,
 	value: '1' ,
@@ -173,7 +173,7 @@ termkit.Button.create( {
 	y: 12 ,
 } ) ;
 
-termkit.Button.create( {
+new termkit.Button( {
 	parent: C ,
 	content: '<2>' ,
 	value: '2' ,
@@ -181,7 +181,7 @@ termkit.Button.create( {
 	y: 14 ,
 } ) ;
 
-var sub3 = termkit.Button.create( {
+var sub3 = new termkit.Button( {
 	parent: C ,
 	content: '<3>' ,
 	value: '3' ,
@@ -189,7 +189,7 @@ var sub3 = termkit.Button.create( {
 	y: 16 ,
 } ) ;
 
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub3 ,
 		content: '<...>' ,
 		value: '...' ,
@@ -197,7 +197,7 @@ var sub3 = termkit.Button.create( {
 		y: 16 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub3 ,
 		content: '<...>' ,
 		value: '...' ,
@@ -205,7 +205,7 @@ var sub3 = termkit.Button.create( {
 		y: 16 ,
 	} ) ;
 	
-	termkit.Button.create( {
+	new termkit.Button( {
 		parent: sub3 ,
 		content: '<...>' ,
 		value: '...' ,

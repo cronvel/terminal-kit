@@ -45,7 +45,7 @@ var document = term.createDocument() ;
 
 
 
-var columnMenu = termkit.ColumnMenu.create( {
+var columnMenu = new termkit.ColumnMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 5 ,

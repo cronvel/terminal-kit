@@ -45,7 +45,7 @@ var document = term.createDocument() ;
 
 
 
-var dropDownMenu = termkit.DropDownMenu.create( {
+var dropDownMenu = new termkit.DropDownMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
