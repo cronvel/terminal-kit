@@ -60,9 +60,10 @@ async function test() {
 }
 
 async function test2() {
+	//term( "Menu\n" ) ;
+	
 	var columnMenu = await term.createInlineElement( termkit.ColumnMenu , {
-		x: 0 ,
-		y: 5 ,
+		//x: 0 , y: 5 ,
 		//width: 50 ,
 		items: [
 			{
