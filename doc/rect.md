@@ -17,15 +17,15 @@ They have read-only properties:
 
 
 
-<a name="ref.Rect.create"></a>
-### Rect.create()
+<a name="ref.Rect.new"></a>
+### new Rect()
 
 This creates a `Rect` instance.
 This constructor has three argument signatures.
 
 
 
-#### Rect.create( xmin , xmax , ymin , ymax )
+#### new Rect( xmin , xmax , ymin , ymax )
 
 * xmin `integer` the minimum x-coordinate of the rectangle
 * xmax `integer` the maximum x-coordinate of the rectangle (included)
@@ -34,7 +34,7 @@ This constructor has three argument signatures.
 
 
 
-#### Rect.create( obj )
+#### new Rect( obj )
 
 * obj `Object`, it can contain either:
 	* xmin `integer` the minimum x-coordinate of the rectangle
@@ -50,7 +50,7 @@ This constructor has three argument signatures.
 
 
 
-#### Rect.create( src )
+#### new Rect( src )
 
 * src: the source to create a *rect* from, it can be:
 	* a `Rect` instance
@@ -60,7 +60,13 @@ This constructor has three argument signatures.
 
 
 
-<a name="ref.Rect.set"></a>
+<a name="ref.Rect.create"></a>
+### Rect.create()
+
+DEPRECATED, use [new Rect()](#ref.Rect.new) instead.
+
+
+
 <a name="ref.Rect.wrappingRect"></a>
 ### Rect.wrappingRect( params )
 
@@ -105,6 +111,7 @@ would not be clipped away, instead it would be copied on the left-side.
 
 
 
+<a name="ref.Rect.set"></a>
 ### .set( obj )
 
 * obj `Object`, it can contain either:

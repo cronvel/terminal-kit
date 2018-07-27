@@ -32,7 +32,8 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 
 ## Table of Contents
 
-* Static methods:
+* Constructor and static methods:
+	* [ScreenBuffer()](#ref.ScreenBuffer.new)
 	* [ScreenBuffer.create()](#ref.ScreenBuffer.create)
 	* [ScreenBuffer.createFromString()](#ref.ScreenBuffer.createFromString)
 	* [ScreenBuffer.loadImage()](#ref.ScreenBuffer.loadImage)
@@ -64,8 +65,8 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 
 
 
-<a name="ref.ScreenBuffer.create"></a>
-### ScreenBuffer.create( options )
+<a name="ref.ScreenBuffer.new"></a>
+### new ScreenBuffer( options )
 
 * options `Object`, where:
 	* width `integer` buffer width (default: dst.width)
@@ -80,6 +81,13 @@ In that case, the *screenBuffer* will always try to minimize the amount of termi
 	  i.e. it will not call [.fill()](#ref.ScreenBuffer.fill), useful for performance to avoid useless reset
 
 This creates a ScreenBuffer instance with the appropriate options.
+
+
+
+<a name="ref.ScreenBuffer.create"></a>
+### ScreenBuffer.create( options )
+
+DEPRECATED, use [new ScreenBuffer()](#ref.ScreenBuffer.new) instead.
 
 
 
@@ -137,7 +145,7 @@ filled with `▀` characters.
 Something like that will do the trick:
 
 ```js
-var screen = ScreenBuffer.create( { dst: term , noFill: true } ) ;
+var screen = new ScreenBuffer( { dst: term , noFill: true } ) ;
 
 screen.fill( attr: {
 	// Both foreground and background must have the same color
@@ -280,7 +288,7 @@ It returns an object, where:
 ### .resize( fromRect )
 
 * fromRect `Object` or `Rect` the rectangle used to resize the buffer, if it is an object, it should contains properties
-  needed by the [`Rect`'s contructor](rect.md#ref.Rect.create), namely either:
+  needed by the [`Rect`'s contructor](rect.md#ref.Rect.new), namely either:
 	* width `integer` the width of the rectangle
 	* height `integer` the height of the rectangle
 	* x `integer` (optional, default to the left-most x-coordinate) the minimum x-coordinate of the rectangle

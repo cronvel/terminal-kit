@@ -31,7 +31,8 @@ It supports image loading.
 
 ## Table of Contents
 
-* Static methods:
+* Constructor and static methods:
+	* [new ScreenBufferHD()](#ref.ScreenBufferHD.new)
 	* [ScreenBufferHD.create()](#ref.ScreenBufferHD.create)
 	* [ScreenBufferHD.loadImage()](#ref.ScreenBufferHD.loadImage)
 
@@ -46,12 +47,19 @@ It supports image loading.
 
 
 
-<a name="ref.ScreenBufferHD.create"></a>
-### ScreenBufferHD.create( options )
+<a name="ref.ScreenBufferHD.new"></a>
+### new ScreenBufferHD( options )
 
 * blending `false` or `object`, see [.blending](#ref.ScreenBufferHD.blending)
 
 This creates a ScreenBufferHD instance with the appropriate options.
+
+
+
+<a name="ref.ScreenBufferHD.create"></a>
+### ScreenBufferHD.create( options )
+
+DEPRECATED, use [new ScreenBufferHD()](#ref.ScreenBufferHD.new) instead.
 
 
 
@@ -86,7 +94,7 @@ filled with `▀` characters.
 Something like that will do the trick:
 
 ```js
-var screen = ScreenBufferHD.create( { dst: term , noFill: true } ) ;
+var screen = new ScreenBufferHD( { dst: term , noFill: true } ) ;
 
 screen.fill( attr: {
 	// Both foreground and background must have the same color

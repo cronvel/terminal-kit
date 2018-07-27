@@ -26,7 +26,8 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 
 ## Table of Contents
 
-* Static methods:
+* Constructor and static methods:
+	* [TextBuffer()](#ref.TextBuffer.new)
 	* [TextBuffer.create()](#ref.TextBuffer.create)
 
 * Properties:
@@ -71,8 +72,8 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 
 
 
-<a name="ref.TextBuffer.create"></a>
-### TextBuffer.create( options )
+<a name="ref.TextBuffer.new"></a>
+### new TextBuffer( options )
 
 * options `Object`, where:
 	* dst: `ScreenBuffer` the destination to write on
@@ -86,6 +87,13 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 	* wrap: `boolean` (optional, default: false) set the wrapping behavior
 
 This creates a TextBuffer instance with the appropriate options.
+
+
+
+<a name="ref.TextBuffer.create"></a>
+### TextBuffer.create( options )
+
+DEPRECATED, use [new TextBuffer()](#ref.TextBuffer.new) instead.
 
 
 
