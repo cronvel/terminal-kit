@@ -33,7 +33,7 @@ var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 
-term.clear() ;
+//term.clear() ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
