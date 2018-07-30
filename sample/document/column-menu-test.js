@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
@@ -56,7 +52,8 @@ var columnMenu = new termkit.ColumnMenu( {
 			value: 'file'
 		} ,
 		{
-			content: 'Edit' ,
+			content: '^REdit' ,
+			markup: true ,
 			value: 'edit'
 		} ,
 		{

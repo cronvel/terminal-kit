@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
@@ -64,7 +60,8 @@ var rowMenu = new termkit.RowMenu( {
 			value: 'view'
 		} ,
 		{
-			content: 'History' ,
+			content: '^rHistory' ,
+			markup: true ,
 			value: 'history'
 		} ,
 		{
