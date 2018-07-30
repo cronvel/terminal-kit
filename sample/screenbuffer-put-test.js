@@ -41,14 +41,28 @@ term.clear() ;
 
 var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 } ) ; //.clear() ;
 
+/*
 buffer.put( {
 		x: 3 ,
 		y: 2 ,
 		//wrap: true ,
-		attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
+		//attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
 	} ,
 	'0123456789'
 ) ;
+//*/
+
+//*
+buffer.put( {
+		x: 0 ,
+		y: 2 ,
+		markup: true ,
+		//wrap: true ,
+		//attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
+	} ,
+	'0^b1^#^R2^y3^+^#^c4^/5^+6789'
+) ;
+//*/
 
 buffer.draw() ;
 
