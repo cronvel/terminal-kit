@@ -1,0 +1,3 @@
+
+* Optimization: when drawing upward, if possible, only redraw a Rect, not the whole buffer.
+  The child pass the Rect of the modified area, the parent try to redraw only inside this Rect, and pass that Rect to its parent, and so on...

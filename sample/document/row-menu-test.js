@@ -29,7 +29,6 @@
 
 
 
-//console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
@@ -45,6 +44,8 @@ var rowMenu = new termkit.RowMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
+	//buttonSpacing: 3 ,
+	//justify: true ,
 	//width: 50 ,
 	items: [
 		{
@@ -60,11 +61,12 @@ var rowMenu = new termkit.RowMenu( {
 			value: 'view'
 		} ,
 		{
-			content: '^rHistory' ,
-			markup: true ,
+			//content: 'History' ,
+			content: '^rHistory' , markup: true ,
 			value: 'history'
 		} ,
 		{
+			//blurAttr: { color: 204 , bgColor: 77 } ,
 			content: 'Bookmarks' ,
 			value: 'bookmarks'
 		} ,
@@ -83,8 +85,7 @@ var rowMenu = new termkit.RowMenu( {
 
 rowMenu.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue )
-{
+function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
@@ -95,9 +96,8 @@ function onSubmit( buttonValue )
 
 document.giveFocusTo( rowMenu ) ;
 
-term.on( 'key' , function( key ) {
-	switch( key )
-	{
+term.on( 'key' , key => {
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
@@ -107,6 +107,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 

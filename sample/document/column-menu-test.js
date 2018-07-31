@@ -52,8 +52,8 @@ var columnMenu = new termkit.ColumnMenu( {
 			value: 'file'
 		} ,
 		{
-			content: '^REdit' ,
-			markup: true ,
+			//content: 'Edit' ,
+			content: '^REdit' , markup: true ,
 			value: 'edit'
 		} ,
 		{
