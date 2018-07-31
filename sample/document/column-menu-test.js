@@ -46,8 +46,9 @@ var columnMenu = new termkit.ColumnMenu( {
 	x: 0 ,
 	y: 5 ,
 	//width: 50 ,
-	blurLeftPadding: ' ' ,
-	focusLeftPadding: '> ' ,
+	blurLeftPadding: '  ' ,
+	focusLeftPadding: '^R> ' ,
+	paddingHasMarkup: true ,
 	items: [
 		{
 			content: 'File' ,
