@@ -45,7 +45,7 @@ var columnMenu = new termkit.ColumnMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 5 ,
-	//width: 50 ,
+	width: 50 ,
 	blurLeftPadding: '  ' ,
 	focusLeftPadding: '^R> ' ,
 	paddingHasMarkup: true ,
@@ -78,6 +78,15 @@ var columnMenu = new termkit.ColumnMenu( {
 		{
 			content: 'Help' ,
 			value: 'help'
+		} ,
+		{
+			content: 'Disabled button' ,
+			disabled: true ,
+			value: 'disabled'
+		} ,
+		{
+			content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
+			value: 'very long'
 		} ,
 	]
 } ) ;
