@@ -31,7 +31,7 @@
 
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
-	var menu ;
+	var menu_ ;
 	
 	term.grabInput( { mouse: 'motion' } ) ;
 	
@@ -39,7 +39,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		if ( name === 'CTRL_C' )
 		{
-			menu.stop() ;
+			if ( menu_ ) { menu_.stop() ; }
 			term.green( 'CTRL-C received...\n' ) ;
 			term.processExit() ;
 		}
@@ -68,7 +68,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			//selectedStyle: term.dim.blue.bgGreen
 		} ;
 		
-		menu = term.singleColumnMenu( items , options , function( error , response ) {
+		menu_ = term.singleColumnMenu( items , options , function( error , response ) {
 			
 			if ( error )
 			{
@@ -88,8 +88,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			term.processExit() ;
 		} ) ;
 		
-		setTimeout( menu.pause.bind( menu ) , 1500 ) ;
-		setTimeout( menu.resume.bind( menu ) , 3000 ) ;
+		setTimeout( menu_.pause.bind( menu_ ) , 1500 ) ;
+		setTimeout( menu_.resume.bind( menu_ ) , 3000 ) ;
 	}
 	
 
@@ -99,6 +99,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			//ellipsis: true ,
 			selectedLeftPadding: '*' ,
 			extraLines: 2 ,
+			unsubmittableIndexes: [ false , true ] ,
 			//continueOnSubmit: true ,
 			//keyBindings: { ENTER: 'submit' , UP: 'previous' , p: 'previous' , DOWN: 'next' , n: 'next' } ,
 			//y: 1 ,

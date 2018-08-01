@@ -45,10 +45,12 @@ var columnMenu = new termkit.ColumnMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 5 ,
-	width: 50 ,
+	width: 20 ,
 	blurLeftPadding: '  ' ,
 	focusLeftPadding: '^R> ' ,
+	disabledLeftPadding: '  ' ,
 	paddingHasMarkup: true ,
+	multiLineItems: true ,
 	items: [
 		{
 			content: 'File' ,
@@ -85,8 +87,13 @@ var columnMenu = new termkit.ColumnMenu( {
 			value: 'disabled'
 		} ,
 		{
-			content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
+			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
+			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
 			value: 'very long'
+		} ,
+		{
+			content: 'Not long' ,
+			value: 'not long'
 		} ,
 	]
 } ) ;

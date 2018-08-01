@@ -91,7 +91,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		var input = await term.inputField( {
 			//y: term.height , x: 1 ,
-			echoChar: '*' ,
+			//echoChar: '*' ,
 			//*
 			//default: 'mkdir ""' ,
 			//cursorPosition: -2 ,

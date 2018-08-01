@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
