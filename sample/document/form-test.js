@@ -53,6 +53,7 @@ var form = new termkit.Form( {
 		{
 			key: 'login' ,
 			label: 'Login: ' ,
+			content: 'login@bob.net' ,
 			validator: { type: 'string' }
 		} ,
 		{
