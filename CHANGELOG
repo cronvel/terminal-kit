@@ -1,4 +1,10 @@
 
+v1.21.0
+-------
+
+New: lazy-load everything except core submodule
+
+
 v1.20.0
 -------
 

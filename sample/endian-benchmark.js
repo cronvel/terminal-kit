@@ -81,12 +81,13 @@ function test( method )
 
 
 test( 'writeUInt32BE' ) ;
-test( 'writeUInt32BE' ) ;
 test( 'writeUInt32LE' ) ;
-test( 'writeUInt32LE' ) ;
-test( 'writeInt32BE' ) ;
 test( 'writeInt32BE' ) ;
 test( 'writeInt32LE' ) ;
+
+test( 'writeUInt32BE' ) ;
+test( 'writeUInt32LE' ) ;
+test( 'writeInt32BE' ) ;
 test( 'writeInt32LE' ) ;
 
 
