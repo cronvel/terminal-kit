@@ -94,11 +94,11 @@ var form = new termkit.Form( {
 
 form.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue , values )
+function onSubmit( value )
 {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s %J\n' , buttonValue , values ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %J\n' , value ) ;
 	term.restoreCursor() ;
 }
 
