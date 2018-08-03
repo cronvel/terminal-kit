@@ -41,7 +41,7 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var text1 = new termkit.Text( {
+var text1 = new termkit.TextBox( {
 	parent: document ,
 	content: 'Hello!' ,
 	attr: { color: 'magenta' } ,
@@ -58,7 +58,7 @@ var container1 = new termkit.Container( {
 	backgroundAttr: { bgColor: 'yellow' } ,
 } ) ;
 
-var text2 = new termkit.Text( {
+var text2 = new termkit.TextBox( {
 	parent: container1 ,
 	content: 'World!\nWorld!\nW...' ,
 	attr: { color: 'blue' } ,
