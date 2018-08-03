@@ -1,16 +1,16 @@
 
-* Text should be splitted in 2 class, one on top of TextBuffer (let's call it TextArea), one without (Text)
-* Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs to do,
-  only interactivity should be moved to Button
-* TextArea could be used for dynamic text, or user input text, over multiple lines
-* Eventually some state-machine could be plugged to TextArea for automatic styling (e.g. markdown, syntax highlighter)
-* TextArea would support viewport (scrolling)
-* TextInput's label should not rely on TextBuffer, instead it should use Text
-* TextInput's input should rely on TextArea
-* TextInput should implement almost all of inline .inputField() feature
+OK	Text should be splitted in 2 class, one on top of TextBuffer (let's call it TextBox), one without (Text)
+OK	Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs to do,
+		only interactivity should be moved to Button
+	TextBox could be used for dynamic text, or user input text, over multiple lines
+	Eventually some state-machine could be plugged to TextBox for automatic styling (e.g. markdown, syntax highlighter)
+	TextBox would support viewport (scrolling)
+	TextInput's label should not rely on TextBuffer, instead it should use Text
+	TextInput's input should rely on TextBox
+	TextInput should implement almost all of inline .inputField() feature
 
-* content/value uniformization
+	content/value uniformization
 
-* Optimization: when drawing upward, if possible, only redraw a Rect, not the whole buffer.
-  The child pass the Rect of the modified area, the parent try to redraw only inside this Rect, and pass that Rect to its parent, and so on...
+	Optimization: when drawing upward, if possible, only redraw a Rect, not the whole buffer.
+		The child pass the Rect of the modified area, the parent try to redraw only inside this Rect, and pass that Rect to its parent, and so on...
 

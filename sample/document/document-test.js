@@ -45,6 +45,13 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
+var text = new termkit.Text( {
+	parent: document ,
+	content: 'Some text' ,
+	x: 40 ,
+	y: 2 ,
+} ) ;
+
 var button1 = new termkit.Button( {
 	parent: document ,
 	content: '> bob' ,
