@@ -36,9 +36,7 @@ var term = termkit.terminal ;
 
 term.clear() ;
 
-var document = term.createDocument( {
-//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
-} ) ;
+var document = term.createDocument() ;
 
 var textInput = new termkit.TextInput( {
 	parent: document ,
