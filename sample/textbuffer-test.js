@@ -118,6 +118,11 @@ term.on( 'key' , ( key , matches , data ) => {
 	}
 	else {
 		switch ( key ) {
+			case 'CTRL_K' :
+				term.saveCursor() ;
+				term.moveTo.styleReset.eraseLine.eraseDisplayBelow( 1 , 12 , 'Current: %Y\n%Y\n%Y' , tbuf.getText() , tbuf.textBuffer , tbuf.attrBuffer ) ;
+				term.restoreCursor() ;
+				break ;
 			case 'CTRL_S' :
 				attrsIndex = ( attrsIndex + 1 ) % attrs.length ;
 				break ;
@@ -162,6 +167,10 @@ term.on( 'key' , ( key , matches , data ) => {
 				break ;
 			case 'BACKSPACE' :
 				tbuf.backDelete( 1 ) ;
+				draw = drawCursor = true ;
+				break ;
+			case 'TAB' :
+				tbuf.insert( '\t' , attrs[ attrsIndex ] ) ;
 				draw = drawCursor = true ;
 				break ;
 			case 'CTRL_C' :
