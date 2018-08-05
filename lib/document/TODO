@@ -1,7 +1,7 @@
 
 OK	Text should be splitted in 2 class, one on top of TextBuffer (let's call it TextBox), one without (Text)
-OK	Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs to do,
-		only interactivity should be moved to Button
+OK	Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs do,
+		only interactivity code should be moved to Button
 	TextBox could be used for dynamic text, or user input text, over multiple lines
 	Eventually some state-machine could be plugged to TextBox for automatic styling (e.g. markdown, syntax highlighter)
 	TextBox would support viewport (scrolling)
@@ -9,7 +9,7 @@ OK	TextInput's label should not rely on TextBuffer, instead it should use Text
 ?	TextInput's input should rely on TextBox --> not sure if it really should
 	TextInput should implement almost all of inline .inputField() feature
 
-?	TextBuffer: Maybe refacto TextBuffer, using only one array of array of object: {char,attr,misc}
+OK	TextBuffer: refacto of TextBuffer, using only one array of array of object: {char,filler,attr,misc}
 
 OK	content/value uniformization: content relate to what is displayed, value to what we got (forms, etc)
 
