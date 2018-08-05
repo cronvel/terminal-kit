@@ -120,7 +120,7 @@ term.on( 'key' , ( key , matches , data ) => {
 		switch ( key ) {
 			case 'CTRL_K' :
 				term.saveCursor() ;
-				term.moveTo.styleReset.eraseLine.eraseDisplayBelow( 1 , 12 , 'Current: %Y\n%Y\n%Y' , tbuf.getText() , tbuf.textBuffer , tbuf.attrBuffer ) ;
+				term.moveTo.styleReset.eraseLine.eraseDisplayBelow( 1 , 12 , 'Current: %Y\n%Y' , tbuf.getText() , tbuf.buffer.map( line => line.map( cell => JSON.stringify( cell ) ) ) ) ;
 				term.restoreCursor() ;
 				break ;
 			case 'CTRL_S' :
