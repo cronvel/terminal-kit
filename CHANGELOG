@@ -2,7 +2,18 @@
 v1.25.0
 -------
 
-Fix ScreenBuffer, so default fg/bg colors are... well... the default. (instead of black background) ; New: TextBox and EditableTextBox ; TextInput now rely on EditableTextBox ; TextBuffer#drawCursor() fixed
+Compatibility WARNING:
+Fix ScreenBuffer, so default fg/bg colors are... well... the default. (instead of black background)
+This behavior was a bug, but it may change existing app, especially when the terminal 'default' background color
+is different from the color register 0, and the app forgot to initialize the screenBuffer with
+a background color (many terminals use color 0 or 7 as the default for background, some like Gnome-Terminal have a special
+color for that).
+So before 1.25, when unspecified, the background color was 'black' (color register 0, it was a bug),
+starting from 1.25, when unspecified, the background color is 'default' (the terminal default).
+
+New: TextBox and EditableTextBox
+TextInput now rely on EditableTextBox
+TextBuffer#drawCursor() fixed
 
 
 v1.24.1

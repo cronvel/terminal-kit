@@ -170,20 +170,22 @@ There is a full example of an image viewer located here: `./sample/image-viewer.
 
 
 <a name="ref.ScreenBuffer.attr2object"></a>
-### ScreenBuffer.attr2object( attrFlags )
+### ScreenBuffer.attr2object( attrFlags ) / .attr2object( attrFlags )
 
 * attrFlags `integer` attributes in the bit flags form
 
 It returns the object form of the attributes from its bit flags form.
+It exists both as a static method and as an instance method.
 
 
 
 <a name="ref.ScreenBuffer.object2attr"></a>
-### ScreenBuffer.object2attr( attrObject )
+### ScreenBuffer.object2attr( attrObject ) / .object2attr( attrObject )
 
 * attrObject `Object` attributes in the object form
 
 It returns the bit flags form of the attributes from its object form.
+It exists both as a static method and as an instance method.
 
 
 
