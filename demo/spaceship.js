@@ -126,7 +126,7 @@ function createBackgroundTrails( nTrails )
 			sprites.background.put( {
 				x: ( x + j ) % sprites.background.width ,
 				y: y ,
-				attr: { color: 'grey' , bgColor: 'black' }
+				attr: { color: 'gray' , bgColor: 'black' }
 			} , '-' ) ;
 		}
 	}

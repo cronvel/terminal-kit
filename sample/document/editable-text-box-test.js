@@ -41,10 +41,10 @@ var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var textBox = new termkit.TextBox( {
+var textBox = new termkit.EditableTextBox( {
 	parent: document ,
-	content: 'Hello!' ,
-	attr: { color: 'magenta' } ,
+	content: 'Hello! ' ,
+	attr: { bgColor: 'gray' } ,
 	//hidden: true ,
 	x: 10 ,
 	y: 2 ,
@@ -52,6 +52,7 @@ var textBox = new termkit.TextBox( {
 	height: 10
 } ) ;
 
+document.giveFocusTo( textBox ) ;
 
 term.on( 'key' , function( key ) {
 	
@@ -63,20 +64,6 @@ term.on( 'key' , function( key ) {
 			term.styleReset() ;
 			term.clear() ;
 			process.exit() ;
-			break ;
-		
-		case 'ENTER' :
-		case 'KP_ENTER' :
-			textBox.setContent( textBox.getContent() + '\n' ) ;
-			break ;
-		
-		case 'BACKSPACE' :
-		case 'DELETE' :
-			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
-			break ;
-		
-		default :
-			textBox.setContent( textBox.getContent() + key ) ;
 			break ;
 	}
 } ) ;

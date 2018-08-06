@@ -8,6 +8,7 @@ OK	Button should inherit from Text, most of Button code should move to Text, sin
 OK	TextInput's label should not rely on TextBuffer, instead it should use Text
 ?	TextInput's input should rely on TextBox --> not sure if it really should
 	TextInput should implement almost all of inline .inputField() feature
+	*Menu should suport pagination
 
 OK	TextBuffer: refacto of TextBuffer, using only one array of array of object: {char,filler,attr,misc}
 
