@@ -1,12 +1,13 @@
 
 OK	Text should be splitted in 2 class, one on top of TextBuffer (let's call it TextBox), one without (Text)
-OK	Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs do,
+OK	Button should inherit from Text, most of Button code should move to Text, since it basically do exactly what Text needs to do,
 		only interactivity code should be moved to Button
-	TextBox could be used for dynamic text, or user input text, over multiple lines
+OK	TextBox could be used for dynamic text over multiple lines, it must be understood as the TextBuffer widget
 	Eventually some state-machine could be plugged to TextBox for automatic styling (e.g. markdown, syntax highlighter)
-	TextBox would support viewport (scrolling)
+	TextBox should support scrolling
+OK	EditableTextBox is a dynamic interactive TextBox, a TextBuffer widget with input handling
 OK	TextInput's label should not rely on TextBuffer, instead it should use Text
-?	TextInput's input should rely on TextBox --> not sure if it really should
+OK	TextInput's input should rely on EditableTextBox
 	TextInput should implement almost all of inline .inputField() feature
 	*Menu should suport pagination
 

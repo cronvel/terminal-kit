@@ -1,4 +1,10 @@
 
+v1.25.0
+-------
+
+Fix ScreenBuffer, so default fg/bg colors are... well... the default. (instead of black background) ; New: TextBox and EditableTextBox ; TextInput now rely on EditableTextBox ; TextBuffer#drawCursor() fixed
+
+
 v1.24.1
 -------
 
