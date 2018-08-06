@@ -7,7 +7,7 @@
 	{ "r": 178, "g": 24, "b": 178, "names": [ "magenta" ] } ,
 	{ "r": 24, "g": 178, "b": 178, "names": [ "cyan" ] } ,
 	{ "r": 178, "g": 178, "b": 178, "names": [ "white" ] } ,
-	{ "r": 104, "g": 104, "b": 104, "names": [ "brightBlack" , "gray"] } ,
+	{ "r": 104, "g": 104, "b": 104, "names": [ "brightBlack" , "gray" , "grey" ] } ,
 	{ "r": 255, "g": 84, "b": 84, "names": [ "brightRed" ] } ,
 	{ "r": 84, "g": 255, "b": 84, "names": [ "brightGreen" ] } ,
 	{ "r": 255, "g": 255, "b": 84, "names": [ "brightYellow" ] } ,

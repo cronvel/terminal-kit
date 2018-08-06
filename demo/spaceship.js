@@ -126,7 +126,7 @@ function createBackgroundTrails( nTrails )
 			sprites.background.put( {
 				x: ( x + j ) % sprites.background.width ,
 				y: y ,
-				attr: { color: 8 }
+				attr: { color: 'grey' , bgColor: 'black' }
 			} , '-' ) ;
 		}
 	}
@@ -148,7 +148,7 @@ function createBackgroundStars( nStars )
 		sprites.background.put( {
 			x: x ,
 			y: y ,
-			attr: { color: c }
+			attr: { color: c , bgColor: 'black' }
 		} , char ) ;
 	}
 }
