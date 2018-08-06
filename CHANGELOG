@@ -1,4 +1,11 @@
 
+v1.26.0
+-------
+
+TextBuffer now supports the text-machine module (state machine)
+TextBox/EditableTextBox constructor now support the 'stateMachine' option
+
+
 v1.25.0
 -------
 

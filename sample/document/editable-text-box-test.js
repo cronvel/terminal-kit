@@ -29,27 +29,45 @@
 
 
 
-//console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
-
-
 term.clear() ;
+
+
 
 var document = term.createDocument( {
 //	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
+
+
+var placeHolder = 'console.log( "Hello world!" ) ;' ;
+
+try {
+	var StateMachine = require( 'text-machine' ) ;
+
+	var stateMachine = new StateMachine( {
+		program: require( 'text-machine/sample/javascript.js' ) ,
+		api: termkit.TextBuffer.TextMachineApi
+	} ) ;
+}
+catch( error ) {
+	placeHolder = 'Try to:\n"npm install text-machine"\n... to enjoy a mini demo of\na Javascript syntax highlighter!' ;
+}
+
+
+
 var textBox = new termkit.EditableTextBox( {
 	parent: document ,
-	content: 'Hello! ' ,
+	content: placeHolder ,
 	attr: { bgColor: 'gray' } ,
 	//hidden: true ,
 	x: 10 ,
 	y: 2 ,
-	width: 30 ,
-	height: 10
+	width: 50 ,
+	height: 20 ,
+	stateMachine: stateMachine
 } ) ;
 
 document.giveFocusTo( textBox ) ;
