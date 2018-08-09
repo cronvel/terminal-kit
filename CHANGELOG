@@ -1,4 +1,10 @@
 
+v1.26.1
+-------
+
+If present, loads the original 'get-pixels' instead of '@cronvel/get-pixels'
+
+
 v1.26.0
 -------
 
