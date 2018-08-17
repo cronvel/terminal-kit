@@ -83,6 +83,15 @@ term.on( 'key' , function( key ) {
 			term.clear() ;
 			process.exit() ;
 			break ;
+		
+		case 'CTRL_K' :
+			term.saveCursor() ;
+			term.moveTo( 1 , 25 ) ;
+			term.styleReset() ;
+			term.eraseDisplayBelow() ;
+			term( "Content: %s" , textBox.getContent().replace( /\n/g , '\\n' ).replace( /\t/g , '\\t' ) ) ;
+			term.restoreCursor() ;
+			break ;
 	}
 } ) ;
 

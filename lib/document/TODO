@@ -12,7 +12,8 @@ OK	TextInput's input should rely on EditableTextBox
 	TextInput should implement almost all of inline .inputField() features
 	ColumnMenu/RowMenu should suport pagination
 
-OK	TextBuffer: refacto of TextBuffer, using only one array of array of object: {char,filler,attr,misc}
+OK	TextBuffer: refacto, using only one array of array of object: {char,filler,attr,misc}
+	TextBuffer: refacto, '\n' should be kept at the end of each line (with the 'filler' flag on?), to differentiate user's new-lines from line-wrapper's new lines
 
 OK	content/value uniformization: content relate to what is displayed, value to what we got (forms, etc)
 
