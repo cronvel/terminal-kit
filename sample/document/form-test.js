@@ -49,11 +49,13 @@ var form = new termkit.Form( {
 	x: 10 ,
 	y: 10 ,
 	width: 40 ,
-	textInputs: [
+	inputs: [
 		{
 			key: 'login' ,
 			label: 'Login: ' ,
 			content: 'login@bob.net' ,
+			
+			// Validators are not yet implemented
 			validator: { type: 'string' }
 		} ,
 		{
@@ -76,6 +78,12 @@ var form = new termkit.Form( {
 		{
 			key: 'age' ,
 			label: 'age: ' ,
+			validator: { type: 'string' }
+		} ,
+		{
+			key: 'comment' ,
+			label: 'comment: ' ,
+			height: 3 ,
 			validator: { type: 'string' }
 		} ,
 	] ,
