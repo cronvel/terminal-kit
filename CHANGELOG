@@ -1,4 +1,11 @@
 
+v1.26.2
+-------
+
+Important String-kit dependency fixed (format %I %Y and %E had bug)
+Document model: fix focus cycling with Form
+
+
 v1.26.1
 -------
 

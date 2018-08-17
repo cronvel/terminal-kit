@@ -8,7 +8,8 @@ OK	Eventually some state-machine could be plugged to TextBox for automatic styli
 OK	EditableTextBox is a dynamic interactive TextBox, a TextBuffer widget with input handling
 OK	TextInput's label should not rely on TextBuffer, instead it should use Text
 OK	TextInput's input should rely on EditableTextBox
-	TextInput should implement almost all of inline .inputField() feature
+	TextInput should support multiline EditableTextBox
+	TextInput should implement almost all of inline .inputField() features
 	ColumnMenu/RowMenu should suport pagination
 
 OK	TextBuffer: refacto of TextBuffer, using only one array of array of object: {char,filler,attr,misc}
