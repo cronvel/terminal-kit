@@ -92,6 +92,11 @@ term.on( 'key' , function( key ) {
 			term( "Content: %s" , textBox.getContent().replace( /\n/g , '\\n' ).replace( /\t/g , '\\t' ) ) ;
 			term.restoreCursor() ;
 			break ;
+		
+		case 'CTRL_W' :
+			textBox.textBuffer.wrapLines( 20 ) ;
+			textBox.draw() ;
+			break ;
 	}
 } ) ;
 
