@@ -1,4 +1,10 @@
 
+v1.26.3
+-------
+
+Add the 'cancelable' option for .singleLineMenu() and .singleColumnMenu()
+
+
 v1.26.2
 -------
 
