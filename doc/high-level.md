@@ -656,6 +656,7 @@ term.fileInput(
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
+	* cancelable `boolean` if ESCAPE is pressed, it exits, calling the callback with undefined values
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
 * callback( error , response ) (optional), where:
 	* error `mixed` truthy if an underlying error occurs
@@ -664,6 +665,7 @@ term.fileInput(
 		* selectedText `string` the user-selected menu item text
 		* x `number` the x coordinate of the selected menu item (the first character)
 		* y `number` the y coordinate of the selected menu item (same coordinate for all items since it's a single line menu)
+		* canceled `true` when 'cancelable' option is set and the ESCAPE key is pressed
 		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
 		  the key that produced the exit
 
@@ -678,6 +680,7 @@ It features **paging** if items oversize the line length, and supports the follo
 * SHIFT_TAB, TAB: cycle backward or forward and select the item
 * UP, DOWN: go to the previous or the next page of items (if paging is used)
 * HOME, END: move and select the first or the last item of the menu
+* ESCAPE: exit from the menu, if the 'cancelable' option is set
 
 All those keys are customizable through the *keyBindings* options.
 Available actions are:
@@ -691,6 +694,7 @@ Available actions are:
 * nextPage: go to the next page of items, if paging is used (default: DOWN)
 * first: move and select the first item in the menu (default: HOME)
 * last: move and select the last item in the menu (default: END)
+* escape: exit from the menu, if the 'cancelable' option is set (default: ESCAPE)
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
@@ -763,6 +767,7 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 	  The 'submit' event should be listened instead.
 	* selectedIndex `number` selected index at initialization (default: 0)
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
+	* cancelable `boolean` if ESCAPE is pressed, it exits, calling the callback with undefined values
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
 * callback( error , response ) (optional), where:
 	* error `mixed` truthy if an underlying error occurs
@@ -772,6 +777,7 @@ This is an alias of [.singleLineMenu()](#ref.singleLineMenu).
 		* submitted `boolean` if true, the `selectedIndex` was submitted (rarely false, except when stopped)
 		* x `number` the x coordinate of the selected menu item (the first character)
 		* y `number` the y coordinate of the selected menu item
+		* canceled `true` when 'cancelable' option is set and the ESCAPE key is pressed
 		* unexpectedKey `string` when 'exitOnUnexpectedKey' option is set and an unexpected key is pressed, this contains
 		  the key that produced the exit
 
@@ -783,6 +789,7 @@ It creates an interactive menu over multiple lines.
 * UP, DOWN: move and select the previous or the next item in the menu
 * SHIFT_TAB, TAB: cycle backward or forward and select the item
 * HOME, END: move and select the first or the last item of the menu
+* ESCAPE: exit from the menu, if the 'cancelable' option is set
 
 All those keys are customizable through the *keyBindings* options.
 Available actions are:
@@ -794,6 +801,7 @@ Available actions are:
 * cycleNext: cycle forward and select the item (default: TAB)
 * first: move and select the first item in the menu (default: HOME)
 * last: move and select the last item in the menu (default: END)
+* escape: exit from the menu, if the 'cancelable' option is set (default: ESCAPE)
 
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
