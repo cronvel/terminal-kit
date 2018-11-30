@@ -1,4 +1,10 @@
 
+v1.26.6
+-------
+
+Report bad escape sequence entry and continue anyway
+
+
 v1.26.5
 -------
 
