@@ -992,6 +992,8 @@ The controller provides those functions:
 
 * resume(): resume a previously stopped progress bar, it will be redrawn again
 
+* reset(): reset the progress bar, removing progress value, items done, time elapsed and so on...
+
 
 
 Example of a progress bar using fake progress values:

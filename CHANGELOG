@@ -1,4 +1,10 @@
 
+v1.26.8
+-------
+
+A progress bar controler now has a .reset() method #77
+
+
 v1.26.7
 -------
 
