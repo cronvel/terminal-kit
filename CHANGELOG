@@ -1,4 +1,10 @@
 
+v1.26.9
+-------
+
+Emergency fix: xregexp does not work as of v4.2.2
+
+
 v1.26.8
 -------
 
