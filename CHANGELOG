@@ -1,4 +1,10 @@
 
+v1.26.11
+--------
+
+Fix the doc, add a notice about .drawImage() and HTTP URL (#83)
+
+
 v1.26.10
 --------
 

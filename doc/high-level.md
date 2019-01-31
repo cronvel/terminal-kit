@@ -1157,7 +1157,7 @@ It produces:
 <a name="ref.drawImage"></a>
 ### .drawImage( url , [options] , [callback] )
 
-* url `string` filepath or URL
+* url `string` filepath, or URL if the original `get-pixels` module is intalled
 * options `object` of options, where:
 	* shrink `object` (optional, but **recommanded**) if set, the image may be shrinked to conform to the max width and height.
 	  When shrinking, aspect ratio is always preserved. It has those properties:
@@ -1171,6 +1171,11 @@ Without a callback argument, it returns a promise that resolve on completion.
 This get an image (using a filepath or an URL) and draw it directly into the terminal.
 Support all format supported by [get-pixels](#https://www.npmjs.com/package/get-pixels), namely *PNG*, *JPEG* and *GIF*.
 Only the first frame of *GIF* are used ATM.
+
+**NOTE:** Terminal Kit does not support loading over HTTP **out of the box**.
+Terminal Kit aims to have a good balance between features and lightweight, and loading images over HTTP adds tons of dependencies,
+which of course are only useful in very rare use-cases.
+If you need such feature, **just add the original** `get-pixels` **module**, it has precedence over the `get-pixels` fork which has HTTP support striped.
 
 It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
 the upper half having a foreground color and the lower half having the background color.
