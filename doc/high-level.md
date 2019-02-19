@@ -436,6 +436,7 @@ It emits:
 
 * *ready*: when the input field is ready (rarely useful)
 * *rebased*: when the input field has been rebased (rarely useful)
+* *highlight*: when an underlying auto-complete single-line-menu emit an 'hightlight' event, it is re-emitted by the input-field
 
 
 Quick example, featuring *history* and *auto-completion*:
@@ -699,8 +700,15 @@ Available actions are:
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
 
-It returns an object with those properties:
+It returns an EventEmitter object with those properties:
+
 * **promise**: without a callback argument, this will be a promise that resolve with the *response* object.
+
+It emits:
+
+* *highlight*: every-time the hightlighted menu item changes, this event is emitted, with an object as its unique argument:
+	* highlightedIndex: the index of the highlighted item
+	* highlightedText: the text of the highlighted item
 
 Example:
 
@@ -806,8 +814,15 @@ Available actions are:
 If the 'exitOnUnexpectedKey' option is set, any other keys will exit the menu, the callback's *response* argument
 does not contain any property except 'unexpectedKey', that will contain the key having triggered the exit.
 
-It returns an object with those properties:
+It returns an EventEmitter object with those properties:
+
 * **promise**: without a callback argument, this will be a promise that resolve with the *response* object.
+
+It emits:
+
+* *highlight*: every-time the hightlighted menu item changes, this event is emitted, with an object as its unique argument:
+	* highlightedIndex: the index of the highlighted item
+	* highlightedText: the text of the highlighted item
 
 Example:
 

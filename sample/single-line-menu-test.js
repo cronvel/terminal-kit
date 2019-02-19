@@ -49,7 +49,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			selectedStyle: term.dim.blue.bgGreen
 		} ;
 		
-		term.singleLineMenu( items , options , function( error , response ) {
+		var menu_ = term.singleLineMenu( items , options , function( error , response ) {
 			
 			if ( error )
 			{
@@ -61,6 +61,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
 			terminate() ;
 		} ) ;
+		
+		//menu_.on( 'highlight' , eventData => console.error( 'eventData:' , eventData ) ) ;
 	}
 	
 	
@@ -90,8 +92,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 
-	//menu() ; 
-	asyncMenu() ; 
+	menu() ; 
+	//asyncMenu() ; 
 } ) ;
 
 

@@ -88,6 +88,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			term.processExit() ;
 		} ) ;
 		
+		//menu_.on( 'highlight' , eventData => console.error( 'eventData:' , eventData ) ) ;
+		
 		setTimeout( menu_.pause.bind( menu_ ) , 1500 ) ;
 		setTimeout( menu_.resume.bind( menu_ ) , 3000 ) ;
 	}
@@ -125,8 +127,8 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	//term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 
-	//menu() ; 
-	asyncMenu() ; 
+	menu() ; 
+	//asyncMenu() ; 
 } ) ;
 
 
