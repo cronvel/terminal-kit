@@ -1175,7 +1175,8 @@ Only the first frame of *GIF* are used ATM.
 **NOTE:** Terminal Kit does not support loading over HTTP **out of the box**.
 Terminal Kit aims to have a good balance between features and lightweight, and loading images over HTTP adds tons of dependencies,
 which of course are only useful in very rare use-cases.
-If you need such feature, **just add the original** `get-pixels` **module**, it has precedence over the `get-pixels` fork which has HTTP support striped.
+If you need such feature, **just add the original get-pixels module** (`npm install get-pixels`), it has precedence
+over the *get-pixels* fork which has HTTP support striped.
 
 It uses the *upper half block* UTF-8 character (▀) to double the height resolution and produces the correct aspect ratio:
 the upper half having a foreground color and the lower half having the background color.
