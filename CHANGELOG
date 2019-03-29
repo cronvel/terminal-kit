@@ -1,4 +1,10 @@
 
+v1.27.2
+-------
+
+Dependencies upgraded, CHANGELOG edited (missing Node engine v8.10+ requirement informations #86)
+
+
 v1.27.1
 -------
 
