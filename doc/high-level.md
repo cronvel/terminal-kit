@@ -1172,7 +1172,7 @@ It produces:
 <a name="ref.drawImage"></a>
 ### .drawImage( url , [options] , [callback] )
 
-* url `string` filepath, or URL if the original `get-pixels` module is intalled
+* url `string` filepath, or URL if the original `get-pixels` module is installed
 * options `object` of options, where:
 	* shrink `object` (optional, but **recommanded**) if set, the image may be shrinked to conform to the max width and height.
 	  When shrinking, aspect ratio is always preserved. It has those properties:
