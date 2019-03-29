@@ -1,4 +1,10 @@
 
+v1.27.1
+-------
+
+Dependencies upgraded, CHANGELOG edited (missing Node engine v8.10+ requirement informations #86)
+
+
 v1.27.0
 -------
 
@@ -50,7 +56,11 @@ Dependencies upgraded
 v1.26.4
 -------
 
-Dependencies
+Important notice: Node engine v8.10.0 Dubnium LTS is now required, but still it's not a minor semver because it's a fix:
+the lib uses async functions since v1.19.0 and thus won't load on Node v6, therefore the strict engine limitation
+should have been done on v1.19.0. This update just make thing clear. Sorry about that.
+
+Dependencies upgraded.
 
 
 v1.26.3
@@ -153,6 +163,8 @@ All promise API are now documented (#18).
 
 v1.19.0
 -------
+
+Breaking change: Node engine v8+ is now mandatory because of async functions, but I forgot to update the package.json until Terminal-kit@1.26.4.
 
 Almost all features now have a Promise variant (#18).
 Still not documented.
