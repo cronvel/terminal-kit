@@ -77,4 +77,5 @@ term.restoreCursor() ;
 var toto = term.str.red( 'toto' ) ;
 console.log( '\nconsole.log(toto):' , toto ) ;
 
+term.bgColor( 'red' , 'some red?' ) ;
 term( '\n' ) ;

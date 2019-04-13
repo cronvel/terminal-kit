@@ -1,4 +1,10 @@
 
+v1.28.0
+-------
+
+New: now term.color() and term.bgColor() accepts color names (#87)
+
+
 v1.27.3
 -------
 
