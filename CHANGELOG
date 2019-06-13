@@ -1,4 +1,10 @@
 
+v1.28.1
+-------
+
+Fixing .singleLineMenu() 'highlight' event to correctly report the highlight index (#90)
+
+
 v1.28.0
 -------
 

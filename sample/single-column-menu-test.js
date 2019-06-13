@@ -88,7 +88,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			term.processExit() ;
 		} ) ;
 		
-		//menu_.on( 'highlight' , eventData => console.error( 'eventData:' , eventData ) ) ;
+		//menu_.on( 'highlight' , eventData => console.error( '\neventData:' , eventData ) ) ;
 		
 		setTimeout( menu_.pause.bind( menu_ ) , 1500 ) ;
 		setTimeout( menu_.resume.bind( menu_ ) , 3000 ) ;

@@ -62,7 +62,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 			terminate() ;
 		} ) ;
 		
-		//menu_.on( 'highlight' , eventData => console.error( 'eventData:' , eventData ) ) ;
+		//menu_.on( 'highlight' , eventData => console.error( '\neventData:' , eventData ) ) ;
 	}
 	
 	

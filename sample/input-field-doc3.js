@@ -32,8 +32,7 @@ var fs = require( 'fs' ) ;
 var termkit = require( 'terminal-kit' ) ;
 var term = termkit.terminal ;
 
-var autoCompleter = function autoCompleter( inputString , callback )
-{  
+var autoCompleter = function autoCompleter( inputString , callback ) {
     var index = inputString.lastIndexOf( ' ' ) ;
     var prefix = inputString.slice( 0 , index + 1 ) ;
     inputString = inputString.slice( index + 1 ) ;
