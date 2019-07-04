@@ -656,6 +656,7 @@ term.fileInput(
 	* previousPageHint `string` (default: ' « ') string indicator for a previous page
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
+	* selectedIndex `number` selected index at initialization (default: 0)
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* cancelable `boolean` if ESCAPE is pressed, it exits, calling the callback with undefined values
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values
