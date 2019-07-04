@@ -1,4 +1,10 @@
 
+v1.28.3
+-------
+
+New: .singleLineMenu() has the 'selectedIndex' option just like .singleColumnMenu() (#93)
+
+
 v1.28.2
 -------
 
