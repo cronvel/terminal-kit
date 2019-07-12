@@ -1,4 +1,10 @@
 
+v1.28.5
+-------
+
+Document model: DropDownMenu now can have submittable top button (buttons from the row menu)
+
+
 v1.28.4
 -------
 

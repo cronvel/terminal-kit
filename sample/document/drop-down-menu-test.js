@@ -87,6 +87,11 @@ var dropDownMenu = new termkit.DropDownMenu( {
 				{ content: 'About' , value: 'about' } ,
 			]
 		} ,
+		{
+			content: 'topSubmit' ,
+			value: 'topSubmit' ,
+			topSubmit: true
+		} ,
 	]
 } ) ;
 
@@ -118,6 +123,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 
