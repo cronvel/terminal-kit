@@ -1,4 +1,10 @@
 
+v1.28.6
+-------
+
+Document model: now 'click' and 'hover' events are emitted on the first leaf Element that has a listener for either 'click' or 'hover'
+
+
 v1.28.5
 -------
 
