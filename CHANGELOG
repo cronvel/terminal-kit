@@ -1,4 +1,10 @@
 
+v1.28.7
+-------
+
+Document model: DropDownMenu has ENTER/KP_ENTER key to submit top-level buttons (since it can be submittable now)
+
+
 v1.28.6
 -------
 
