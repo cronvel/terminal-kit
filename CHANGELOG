@@ -1,4 +1,10 @@
 
+v1.28.4
+-------
+
+Document model: TextInput now correctly set content/value on creation
+
+
 v1.28.3
 -------
 
