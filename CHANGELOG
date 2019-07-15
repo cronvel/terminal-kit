@@ -1,4 +1,11 @@
 
+v1.28.10
+--------
+
+Document model: now support those new events: 'clickOut', 'leave', 'enter'
+DropDownMenu disappear on clicked out
+
+
 v1.28.9
 -------
 
