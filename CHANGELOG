@@ -1,4 +1,10 @@
 
+v1.28.8
+-------
+
+New: document model's RowMenu now have 'buttonSeparator' and 'buttonSeparatorAttr' options
+
+
 v1.28.7
 -------
 
