@@ -92,6 +92,12 @@ var dropDownMenu = new termkit.DropDownMenu( {
 			value: 'topSubmit' ,
 			topSubmit: true
 		} ,
+		{
+			content: 'escapeSubmit' ,
+			value: 'escapeSubmit' ,
+			topSubmit: true ,
+			shortcuts: 'ESCAPE'
+		}
 	]
 } ) ;
 
