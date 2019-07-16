@@ -1,4 +1,10 @@
 
+v1.28.14
+--------
+
+Document Model: now Document emit 'key' events only when no default nor shortcut prevailed
+
+
 v1.28.13
 --------
 
