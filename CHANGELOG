@@ -1,4 +1,11 @@
 
+v1.28.12
+--------
+
+Document Model: improved ColumnMenu pagination
+Button now have an 'internalRole' property
+
+
 v1.28.11
 --------
 
