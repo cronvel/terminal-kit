@@ -1,4 +1,11 @@
 
+v1.28.16
+--------
+
+New methods for TextBuffer: .moveToEndOfWord() and .moveToStartOfWord()
+Document model: EditableTextBox and widget using it now supports moving from word to word using CTRL+LEFT/RIGHT
+
+
 v1.28.15
 --------
 
