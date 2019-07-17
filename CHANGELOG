@@ -1,4 +1,11 @@
 
+v1.28.15
+--------
+
+Document model: better behavior of multi-line text-input in forms
+dependencies upgraded
+
+
 v1.28.14
 --------
 

@@ -1,6 +1,6 @@
 {
   "name": "terminal-kit",
-  "version": "1.28.14",
+  "version": "1.28.15",
   "description": "256 colors, keys and mouse, input field, progress bars, screen buffer (including 32-bit composition and image loading), text buffer, and many more... Whether you just need colors and styles, build a simple interactive command line tool or a complexe terminal app: this is the absolute terminal lib for Node.js!",
   "main": "lib/termkit.js",
   "directories": {
@@ -14,8 +14,8 @@
     "lazyness": "^1.1.1",
     "ndarray": "^1.0.18",
     "nextgen-events": "^1.1.1",
-    "seventh": "^0.7.23",
-    "string-kit": "^0.9.6",
+    "seventh": "^0.7.24",
+    "string-kit": "^0.9.9",
     "tree-kit": "^0.6.1"
   },
   "devDependencies": {},
