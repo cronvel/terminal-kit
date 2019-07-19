@@ -61,8 +61,8 @@ var form = new termkit.Form( {
 		{
 			key: 'password' ,
 			label: 'Password: ' ,
-			hidden: true ,
-			//textAttr: { bgColor: 'blue' , hidden: true } ,
+			hiddenContent: true ,
+			//textAttr: { bgColor: 'blue' , hiddenContent: true } ,
 			validator: { type: 'string' }
 		} ,
 		{
