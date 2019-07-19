@@ -1,4 +1,10 @@
 
+v1.28.17
+--------
+
+Document model -- new: zIndex, drawing and detecting click is now z-aware
+
+
 v1.28.16
 --------
 
