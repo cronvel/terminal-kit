@@ -74,6 +74,8 @@ function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 23 , 'Select value: %s\n' , selectList.value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Select .getValue(): %s\n' , selectList.getValue() ) ;
 	term.restoreCursor() ;
 }
 

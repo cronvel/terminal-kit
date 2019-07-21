@@ -81,6 +81,15 @@ var form = new termkit.Form( {
 			validator: { type: 'string' }
 		} ,
 		{
+			key: 'type' ,
+			label: 'type: ' ,
+			type: 'select' ,
+			items: [
+				{ content: 'one' , value: 1 } ,
+				{ content: 'two' , value: 2 }
+			]
+		} ,
+		{
 			key: 'comment' ,
 			label: 'comment: ' ,
 			height: 3 ,

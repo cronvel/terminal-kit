@@ -57,7 +57,12 @@ textInput = new termkit.LabeledInput( {
 	x: 5 ,
 	y: 10 ,
 	width: 30 ,
-	type: 'select'
+	type: 'select' ,
+	items: [
+		{ content: 'Todo' , value: 'todo' } ,
+		{ content: 'In progress' , value: 'in-progress' } ,
+		{ content: 'Done' , value: 'done' }
+	]
 } ) ;
 //*/
 
