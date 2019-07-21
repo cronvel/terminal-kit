@@ -38,13 +38,28 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var textInput = new termkit.TextInput( {
+var textInput ;
+
+/*
+textInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'name: ' ,
 	x: 5 ,
 	y: 10 ,
 	width: 30 ,
 } ) ;
+//*/
+
+//*
+textInput = new termkit.LabeledInput( {
+	parent: document ,
+	label: 'name: ' ,
+	x: 5 ,
+	y: 10 ,
+	width: 30 ,
+	type: 'select'
+} ) ;
+//*/
 
 textInput.on( 'submit' , onSubmit ) ;
 
