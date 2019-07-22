@@ -1,4 +1,10 @@
 
+v1.28.20
+--------
+
+Fix .inputField() delete and backDelete bug under 'alwaysRedraw' behavior, e.g. when a tokenHook is provided (issue #79, replace PR #94)
+
+
 v1.28.19
 --------
 
