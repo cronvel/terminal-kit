@@ -1,4 +1,10 @@
 
+v1.28.21
+--------
+
+Document model -- Hidden element fixed to not interfere with any click or mouse motion, or whatever, SelectList dimension fixed, Form: support for SelectList added
+
+
 v1.28.20
 --------
 

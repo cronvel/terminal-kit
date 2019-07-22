@@ -38,10 +38,10 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var textInput ;
+var labeledInput ;
 
 /*
-textInput = new termkit.LabeledInput( {
+labeledInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'name: ' ,
 	x: 5 ,
@@ -51,7 +51,7 @@ textInput = new termkit.LabeledInput( {
 //*/
 
 //*
-textInput = new termkit.LabeledInput( {
+labeledInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'name: ' ,
 	x: 5 ,
@@ -66,7 +66,7 @@ textInput = new termkit.LabeledInput( {
 } ) ;
 //*/
 
-textInput.on( 'submit' , onSubmit ) ;
+labeledInput.on( 'submit' , onSubmit ) ;
 
 function onSubmit( value )
 {
