@@ -1,4 +1,10 @@
 
+v1.28.24
+--------
+
+TextBuffer: fixing the .setText() bug that stripped newLines (wasn't affecting display, only once .getText() is called)
+
+
 v1.28.23
 --------
 

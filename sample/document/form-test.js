@@ -93,6 +93,7 @@ var form = new termkit.Form( {
 		{
 			key: 'comment' ,
 			label: 'comment: ' ,
+			content: 'multi\nline\ncontent' ,
 			height: 3 ,
 			validator: { type: 'string' }
 		} ,
@@ -117,7 +118,7 @@ function onSubmit( value )
 {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %J\n' , value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Submitted: %J\n' , value ) ;
 	term.restoreCursor() ;
 }
 
