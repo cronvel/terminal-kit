@@ -87,7 +87,20 @@ var form = new termkit.Form( {
 			//value: 2 ,
 			items: [
 				{ content: 'one' , value: 1 } ,
-				{ content: 'two' , value: 2 }
+				{ content: 'two' , value: 2 } ,
+				{ content: 'three' , value: 3 } ,
+				{ content: 'four' , value: 4 }
+			]
+		} ,
+		{
+			key: 'type2' ,
+			label: 'type: ' ,
+			type: 'select' ,
+			value: 2 ,
+			items: [
+				{ content: 'un' , value: 1 } ,
+				{ content: 'deux' , value: 2 } ,
+				{ content: 'trois' , value: 3 }
 			]
 		} ,
 		{
