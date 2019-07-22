@@ -1,4 +1,10 @@
 
+v1.28.22
+--------
+
+Document model -- SelectList: initial value and .setValue() are fixed
+
+
 v1.28.21
 --------
 

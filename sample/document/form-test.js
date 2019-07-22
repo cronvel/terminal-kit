@@ -84,6 +84,7 @@ var form = new termkit.Form( {
 			key: 'type' ,
 			label: 'type: ' ,
 			type: 'select' ,
+			//value: 2 ,
 			items: [
 				{ content: 'one' , value: 1 } ,
 				{ content: 'two' , value: 2 }

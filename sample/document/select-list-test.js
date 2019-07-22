@@ -49,6 +49,7 @@ var selectList = new termkit.SelectList( {
 	//width: 50 ,
 	content: 'list' ,
 	value: 'list value' ,
+	//value: 'done' ,
 	master: { content: 'Select' } ,
 	items: [
 		{
