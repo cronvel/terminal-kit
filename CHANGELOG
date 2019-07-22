@@ -1,4 +1,10 @@
 
+v1.28.23
+--------
+
+Document model -- Form: fix regression, multi-line text input are possible again
+
+
 v1.28.22
 --------
 
