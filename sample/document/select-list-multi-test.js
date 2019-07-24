@@ -50,7 +50,7 @@ var selectListMulti = new termkit.SelectListMulti( {
 	content: 'list' ,
 	value: [ 'done' , 'todo' ] ,
 	//value: { done: true , todo: true } ,
-	master: { content: 'Select' } ,
+	//master: { content: 'Select' } ,
 	items: [
 		{
 			content: 'Todo' ,

@@ -1,4 +1,10 @@
 
+v1.28.30
+--------
+
+Document model -- SelectList* now options.content is a shortcut for options.master.content
+
+
 v1.28.29
 --------
 
