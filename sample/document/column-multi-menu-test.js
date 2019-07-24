@@ -40,12 +40,12 @@ var document = term.createDocument() ;
 
 
 
-var columnMenu = new termkit.ColumnMenu( {
+var columnMultiMenu = new termkit.ColumnMultiMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 5 ,
 	width: 20 ,
-	pageMaxHeight: 5 ,
+	//pageMaxHeight: 5 ,
 	blurLeftPadding: '  ' ,
 	focusLeftPadding: '^R> ' ,
 	disabledLeftPadding: '  ' ,
@@ -54,64 +54,64 @@ var columnMenu = new termkit.ColumnMenu( {
 	items: [
 		{
 			content: 'File' ,
-			value: 'file'
+			key: 'file'
 		} ,
 		{
 			//content: 'Edit' ,
 			content: '^REdit' , markup: true ,
-			value: 'edit'
+			key: 'edit'
 		} ,
 		{
 			content: 'View' ,
-			value: 'view'
+			key: 'view'
 		} ,
 		{
 			content: 'History' ,
-			value: 'history'
+			key: 'history'
 		} ,
 		{
 			content: 'Bookmarks' ,
-			value: 'bookmarks'
+			key: 'bookmarks'
 		} ,
 		{
 			content: 'Tools' ,
-			value: 'tools'
+			key: 'tools'
 		} ,
 		{
 			content: 'Help' ,
-			value: 'help'
+			key: 'help'
 		} ,
 		{
 			content: 'Disabled button' ,
 			disabled: true ,
-			value: 'disabled'
+			key: 'disabled'
 		} ,
 		{
 			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
 			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
-			value: 'very long'
+			key: 'very long'
 		} ,
 		{
 			content: 'Not long' ,
-			value: 'not long'
+			key: 'not long'
 		} ,
 	]
 } ) ;
 
 
 
-columnMenu.on( 'submit' , onSubmit ) ;
+columnMultiMenu.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %J\n' , buttonValue ) ;
 	term.restoreCursor() ;
 }
 
 
 
-document.giveFocusTo( columnMenu ) ;
+document.giveFocusTo( columnMultiMenu ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
