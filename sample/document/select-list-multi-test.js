@@ -29,7 +29,7 @@
 
 
 
-var termkit = require( '../..' ) ;
+var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
 
 
@@ -40,82 +40,52 @@ var document = term.createDocument() ;
 
 
 
-var columnMultiMenu = new termkit.ColumnMultiMenu( {
+var selectListMulti = new termkit.SelectListMulti( {
 	parent: document ,
-	x: 0 ,
-	y: 5 ,
-	width: 20 ,
-	//pageMaxHeight: 5 ,
-	blurLeftPadding: '  ' ,
-	focusLeftPadding: '^R> ' ,
-	disabledLeftPadding: '  ' ,
-	paddingHasMarkup: true ,
-	multiLineItems: true ,
+	x: 10 ,
+	y: 10 ,
+	//buttonSpacing: 3 ,
+	//justify: true ,
+	//width: 50 ,
+	content: 'list' ,
+	value: [ 'done' , 'todo' ] ,
+	//value: { done: true , todo: true } ,
+	master: { content: 'Select' } ,
 	items: [
 		{
-			content: 'File' ,
-			key: 'file'
+			content: 'Todo' ,
+			key: 'todo'
 		} ,
 		{
-			//content: 'Edit' ,
-			content: '^REdit' , markup: true ,
-			key: 'edit'
+			content: 'In Progress' ,
+			key: 'in-progress'
 		} ,
 		{
-			content: 'View' ,
-			key: 'view'
-		} ,
-		{
-			content: 'History' ,
-			key: 'history'
-		} ,
-		{
-			content: 'Bookmarks' ,
-			key: 'bookmarks'
-		} ,
-		{
-			content: 'Tools' ,
-			key: 'tools'
-		} ,
-		{
-			content: 'Help' ,
-			key: 'help'
-		} ,
-		{
-			content: 'Disabled button' ,
-			disabled: true ,
-			key: 'disabled'
-		} ,
-		{
-			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
-			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
-			key: 'very long'
-		} ,
-		{
-			content: 'Not long' ,
-			key: 'not long'
-		} ,
+			content: 'Done' ,
+			key: 'done'
+		}
 	]
 } ) ;
 
 
 
-columnMultiMenu.on( 'submit' , onSubmit ) ;
+selectListMulti.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue ) {
+var counter = 0 ;
+
+function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %J\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J\n' , counter ++ , value ) ;
 	term.restoreCursor() ;
 }
 
 
 
-document.giveFocusTo( columnMultiMenu ) ;
+document.giveFocusTo( selectListMulti ) ;
 
-term.on( 'key' , function( key ) {
-	switch( key )
-	{
+term.on( 'key' , key => {
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
