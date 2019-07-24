@@ -81,10 +81,10 @@ var form = new termkit.Form( {
 			validator: { type: 'string' }
 		} ,
 		{
-			key: 'type' ,
-			label: 'type: ' ,
+			key: 'v1' ,
+			label: 'v1: ' ,
 			type: 'select' ,
-			//value: 2 ,
+			value: 2 ,
 			items: [
 				{ content: 'one' , value: 1 } ,
 				{ content: 'two' , value: 2 } ,
@@ -93,14 +93,14 @@ var form = new termkit.Form( {
 			]
 		} ,
 		{
-			key: 'type2' ,
-			label: 'type: ' ,
-			type: 'select' ,
-			value: 2 ,
+			key: 'v2' ,
+			label: 'v2: ' ,
+			type: 'selectMulti' ,
+			//value: 2 ,
 			items: [
-				{ content: 'un' , value: 1 } ,
-				{ content: 'deux' , value: 2 } ,
-				{ content: 'trois' , value: 3 }
+				{ content: 'un' , key: 'un' } ,
+				{ content: 'deux' , key: 'deux' } ,
+				{ content: 'trois' , key: 'trois' }
 			]
 		} ,
 		{
