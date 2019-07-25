@@ -42,18 +42,27 @@ var document = term.createDocument( {
 
 var button1 = new termkit.Button( {
 	parent: document ,
-	content: '> button#2' ,
-	value: 'b2' ,
+	content: '> button#1' ,
+	value: 'b1' ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
 
 var button2 = new termkit.Button( {
 	parent: document ,
-	content: '> button#1' ,
-	value: 'b1' ,
+	content: '> button#2' ,
+	value: 'b2' ,
 	x: 13 ,
 	y: 12 ,
+	keyBindings: {
+		ENTER: 'submit' ,
+		CTRL_UP: 'submit' ,
+		CTRL_DOWN: 'submit'
+	} ,
+	actionKeyBindings: {
+		CTRL_UP: 'up' ,
+		CTRL_DOWN: 'down'
+	}
 } ) ;
 
 var toggleButton1 = new termkit.ToggleButton( {
@@ -86,17 +95,17 @@ toggleButton1.on( 'submit' , onSubmit ) ;
 toggleButton2.on( 'toggle' , onToggle ) ;
 toggleButton2.on( 'submit' , onSubmit ) ;
 
-function onSubmit( value )
-{
+var counter = 0 ;
+
+function onSubmit( value , action ) {
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %J\n' , value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J , action: %J\n' , counter ++ , value , action ) ;
 	term.restoreCursor() ;
 }
 
-function onToggle( value )
-{
+function onToggle( value ) {
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Toggled: %J\n' , value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Toggled #%i: %J\n' , counter ++ , value ) ;
 	term.restoreCursor() ;
 }
 

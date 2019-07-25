@@ -51,6 +51,15 @@ var columnMenu = new termkit.ColumnMenu( {
 	disabledLeftPadding: '  ' ,
 	paddingHasMarkup: true ,
 	multiLineItems: true ,
+	buttonKeyBindings: {
+		ENTER: 'submit' ,
+		CTRL_UP: 'submit' ,
+		CTRL_DOWN: 'submit'
+	} ,
+	buttonActionKeyBindings: {
+		CTRL_UP: 'up' ,
+		CTRL_DOWN: 'down'
+	} ,
 	items: [
 		{
 			content: 'File' ,
@@ -102,10 +111,12 @@ var columnMenu = new termkit.ColumnMenu( {
 
 columnMenu.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue ) {
+var counter = 0 ;
+
+function onSubmit( buttonValue , action ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %s %s\n' , counter ++ , buttonValue , action ) ;
 	term.restoreCursor() ;
 }
 
