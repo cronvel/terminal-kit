@@ -1,4 +1,10 @@
 
+v1.28.36
+--------
+
+Document model -- New: BaseMenu now has a .focusValue() method that give focus to the element having that value
+
+
 v1.28.35
 --------
 

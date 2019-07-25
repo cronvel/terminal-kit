@@ -122,7 +122,8 @@ function onSubmit( buttonValue , action ) {
 
 
 
-document.giveFocusTo( columnMenu ) ;
+//document.giveFocusTo( columnMenu ) ;
+columnMenu.focusValue( 'edit' ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key )
