@@ -43,7 +43,8 @@ var document = term.createDocument( {
 
 var textBox = new termkit.TextBox( {
 	parent: document ,
-	content: 'Hello!' ,
+	content: '^#^MHe^:^bll^#^Ro!' ,
+	contentHasMarkup: true ,
 	attr: { color: 'magenta' } ,
 	//hidden: true ,
 	x: 10 ,
