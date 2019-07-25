@@ -33,14 +33,19 @@ var term = termkit.terminal ;
 
 
 
-describe( "Find" , function() {
-	it( "how to test a terminal lib with Tea-Time/Mocha..." ) ;
+describe( "Find" , () => {
+	it( "how to test a terminal lib with Tea-Time..." ) ;
 } ) ;
 
 
 
-describe( "String width" , function() {
-	it( ".truncateString()" , function() {
+describe( "String width" , () => {
+
+	it( ".markupWidth()" , () => {
+		expect( termkit.markupWidth( '^CBook^Ymark^Rs' ) ).to.be( 9 ) ;
+	} ) ;
+	
+	it( ".truncateString()" , () => {
 		expect( termkit.truncateString( '$za' , 2 ) ).to.be( '$z' ) ;
 		expect( termkit.truncateString( '$za' , 3 ) ).to.be( '$za' ) ;
 		expect( termkit.truncateString( '$za' , 4 ) ).to.be( '$za' ) ;
@@ -66,8 +71,9 @@ describe( "String width" , function() {
 
 
 
-describe( "Misc" , function() {
-	it( "Auto-instance" , function() {
+describe( "Misc" , () => {
+	it( "Auto-instance" , () => {
 		expect( term ).to.be.an( termkit.Terminal ) ;
 	} ) ;
 } ) ;
+
