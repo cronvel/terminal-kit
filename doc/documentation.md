@@ -149,6 +149,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [.bar()](high-level.md#ref.bar)
 	* [.slowTyping()](high-level.md#ref.slowTyping)
 	
+* [Markup](markup.md#top)
 * [Terminal's Events](events.md#top)
 	* ['resize'](events.md#ref.event.resize)
 	* ['key'](events.md#ref.event.key)

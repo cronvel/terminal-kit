@@ -57,6 +57,8 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 	* [.moveRight()](#ref.TextBuffer.moveRight)
 	* [.moveForward()](#ref.TextBuffer.moveForward)
 	* [.moveBackward()](#ref.TextBuffer.moveBackward)
+	* [.moveToStartOfWord()](#ref.TextBuffer.moveToStartOfWord)
+	* [.moveToEndOfWord()](#ref.TextBuffer.moveToEndOfWord)
 	* [.moveToEndOfLine()](#ref.TextBuffer.moveToEndOfLine)
 	* [.moveInBound()](#ref.TextBuffer.moveInBound)
 	* [.insert()](#ref.TextBuffer.insert)
@@ -114,13 +116,16 @@ It extracts and returns the text content of the *textBuffer*.
 
 
 <a name="ref.TextBuffer.setText"></a>
-### .setText( text )
+### .setText( text , markup )
 
 * text `string` the text content
+* markup `boolean` true if the text contains markup that should be interpreted
 
 This set the text content of the *textBuffer*.
 
-It reset both the *attr buffer* and the *misc buffer*.
+It reset both the *attr buffer* (or set it to the correct attribute if there is markup) and the *misc buffer*.
+
+For the *markup* option, see also [the full style markup reference](markup.md#top).
 
 
 
@@ -322,6 +327,20 @@ It always skips *null cells*.
 that are not part of the actual text content.
 
 If *justSkipNullCells* is set, it does not move backward unless the cursor is over a *null cell*.
+
+
+
+<a name="ref.TextBuffer.moveToStartOfWord"></a>
+### .moveToStartOfWord()
+
+It moves the *textBuffer*'s cursor to the start of the current word.
+
+
+
+<a name="ref.TextBuffer.moveToEndOfWord"></a>
+### .moveToEndOfWord()
+
+It moves the *textBuffer*'s cursor to the end of the current word.
 
 
 

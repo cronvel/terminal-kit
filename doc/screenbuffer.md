@@ -247,6 +247,7 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 * options `Object`, where:
 	* x `integer` (optional) x-coordinate where to put the text, bypassing the cursor x-coordinate
 	* y `integer` (optional) y-coordinate where to put the text, bypassing the cursor y-coordinate
+	* markup `boolean` true if the text contains markup that should be interpreted
 	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
 	  see: [the attribute object](#ref.ScreenBuffer.attributes))
 	* wrap `boolean` if true, text wrapping is enabled: when the cursor move beyond the last column, it is moved to the begining
@@ -268,6 +269,8 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 * ...
 
 It puts some text into the *screenBuffer*, using the provided *attributes*.
+
+For the *markup* option, see also [the full style markup reference](markup.md#top).
 
 
 

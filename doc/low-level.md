@@ -62,7 +62,7 @@ term( "My name is " ).red( "Jack" )( " and I'm " ).green( "32\n" ) ;
 term( "My name is ^rJack^ and I'm ^g32\n" ) ;
 ```
 
-See [the full style markup reference](https://github.com/cronvel/string-kit#ref.format.markup) for details.
+See [the full style markup reference](markup.md#top) for details.
 
 
 
@@ -266,7 +266,7 @@ See [the full style markup reference](https://github.com/cronvel/string-kit#ref.
   the text *'BLUE'* and the style-reset escape sequence
 * .noFormat(str): disable all string formatting and markup, output *str* without interpreting it - useful when your
   string may contain `%` and `^` (e.g. user input) and you don't want to escape them
-* .markupOnly(str): disable string formatting but still interpret `^` markup
+* .markupOnly(str): disable string formatting but still interpret `^` [markup](markup.md#top) for details.
 * .wrap(str): enable word wrapping, and support continuing text. By default it wraps using the full terminal width,
   but it can be configurable. See [.wrapColumn()](high-level.md#ref.wrapColumn) for configuration and behavior details.
 * .bindArgs(...): since it is not possible to use *.bind()* on Terminal-kit's chainable functions, this is a replacement.

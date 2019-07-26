@@ -1,4 +1,11 @@
 
+v1.28.37
+--------
+
+Fix ScreenBufferHD#put() regression: 'markup' option is working again
+update the doc to add a list of supported markup
+
+
 v1.28.36
 --------
 

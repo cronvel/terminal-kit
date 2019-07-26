@@ -7,7 +7,7 @@ Those events are fired on your `Terminal` instances.
 
 
 
-# Table of Contents
+## Table of Contents
 
 * ['resize'](#ref.event.resize)
 * ['key'](#ref.event.key)
