@@ -159,8 +159,8 @@ var sub2 = new termkit.Button( {
 
 var C = new termkit.Button( {
 	parent: document ,
-	content: '<A>' ,
-	value: 'A' ,
+	content: '<C>' ,
+	value: 'C' ,
 	x: 0 ,
 	y: 12 ,
 } ) ;

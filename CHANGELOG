@@ -1,4 +1,10 @@
 
+v1.28.38
+--------
+
+Document model -- fixed Document#focusNext() regression, refacto of ScreenBuffer#put() to work with the new factorized markup parser
+
+
 v1.28.37
 --------
 

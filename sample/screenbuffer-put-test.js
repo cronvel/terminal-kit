@@ -29,11 +29,7 @@
 
 
 
-/* jshint unused:false */
-
-
-
-var termkit = require( '../lib/termkit.js' ) ;
+var termkit = require( '..' ) ;
 var term = termkit.terminal ;
 
 

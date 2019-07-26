@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 var tree = require( 'tree-kit' ) ;
 var termkit = require( '../lib/termkit.js' ) ;
 var term = termkit.terminal ;

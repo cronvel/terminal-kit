@@ -29,7 +29,7 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
+var termkit = require( '../..' ) ;
 var term = termkit.terminal ;
 
 
@@ -38,7 +38,7 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var textInput = new termkit.TextInput( {
+var labeledInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'comment: ' ,
 	x: 5 ,
@@ -48,7 +48,7 @@ var textInput = new termkit.TextInput( {
 	allowNewLine: true
 } ) ;
 
-textInput.on( 'submit' , onSubmit ) ;
+labeledInput.on( 'submit' , onSubmit ) ;
 
 function onSubmit( value )
 {
