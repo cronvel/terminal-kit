@@ -57,7 +57,7 @@ buffer.put( {
 		x: 0 ,
 		y: 2 ,
 		markup: true ,
-		//wrap: true ,
+		wrap: true ,
 		//attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
 	} ,
 	'0^b1^#^R2^y3^+^#^c4^/5^+6789'
