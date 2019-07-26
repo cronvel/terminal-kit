@@ -1,4 +1,10 @@
 
+v1.28.39
+--------
+
+Fixed ScreenBuffer#put() regression ('reset' markup should reset to the provided 'attr' option, if any)
+
+
 v1.28.38
 --------
 
