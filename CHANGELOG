@@ -1,8 +1,14 @@
 
+v1.28.42
+--------
+
+Fixed markup's parameters pollution (markup + TextBuffer)
+
+
 v1.28.41
 --------
 
-Add some 256 colors name (grayscale)
+Add some 256-color names (grayscale)
 
 
 v1.28.40
