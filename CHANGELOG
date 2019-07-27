@@ -1,4 +1,10 @@
 
+v1.28.40
+--------
+
+Document model -- New ColumnMenu* attr option: 'buttonEvenBlurAttr', that match only even entries
+
+
 v1.28.39
 --------
 
