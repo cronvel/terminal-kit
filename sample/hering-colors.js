@@ -29,10 +29,13 @@
 
 
 
+// https://fr.wikipedia.org/wiki/Cercle_chromatique#Hering
+
+// Cool lib to manipulate colors: https://github.com/gka/chroma.js
+
 const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
-// https://fr.wikipedia.org/wiki/Cercle_chromatique#Hering
 // 4 primary colors
 const colors = {
 	// Primary red
