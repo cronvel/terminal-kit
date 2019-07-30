@@ -1,4 +1,10 @@
 
+v1.29.0
+-------
+
+New: 24 bits Palette for the ScreenBuffer, complex markup for using new colorscheme/color name of the Palette
+
+
 v1.28.42
 --------
 

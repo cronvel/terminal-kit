@@ -79,6 +79,7 @@ var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 , x
 
 buffer.fill( { attr: { bgColor: '@yellow~--' } } ) ;
 buffer.put( { x:1 , y:1 , markup: true } , '^[fg:*crimson,bg:*pink]BOB' ) ;
+buffer.put( { x:3 , y:3 , attr: { bgColor: 241 } } , 'BOB' ) ;
 term.saveCursor() ;
 buffer.draw() ;
 term.restoreCursor() ;

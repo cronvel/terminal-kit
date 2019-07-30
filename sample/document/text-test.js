@@ -29,38 +29,35 @@
 
 
 
-var termkit = require( '..' ) ;
+var termkit = require( '../..' ) ;
 var term = termkit.terminal ;
+
 
 
 term.clear() ;
 
-var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 , palette: new termkit.Palette() } ) ; //.clear() ;
+var document = term.createDocument( {
+	palette: new termkit.Palette()
+} ) ;
 
-/*
-buffer.put( {
-		x: 3 ,
-		y: 2 ,
-		//wrap: true ,
-		//attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
-	} ,
-	'0123456789'
-) ;
-//*/
+var text = new termkit.Text( {
+	parent: document ,
+	content: '^[fg:*royal-blue]A simple text' ,
+	contentHasMarkup: true ,
+	x: 10 ,
+	y: 10 ,
+} ) ;
 
-//*
-buffer.put( {
-		x: 0 ,
-		y: 2 ,
-		markup: true ,
-		wrap: true ,
-		//attr: { color: 'red' , bgColor: 'brightBlack' , underline: true }
-	} ,
-	'0^b1^#^R2^y3^+^#^c4^/5^+67^[bg:*pink]89'
-) ;
-//*/
-
-buffer.draw() ;
-
-term( '\n' ) ;
+term.on( 'key' , function( key ) {
+	switch( key )
+	{
+		case 'CTRL_C' :
+			term.grabInput( false ) ;
+			term.hideCursor( false ) ;
+			term.styleReset() ;
+			term.clear() ;
+			process.exit() ;
+			break ;
+	}
+} ) ;
 

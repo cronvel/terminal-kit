@@ -68,7 +68,7 @@ var button2 = new termkit.Button( {
 	y: 12 ,
 } ) ;
 
-var textInput1 = new termkit.TextInput( {
+var textInput1 = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'First name: ' ,
 	x: 5 ,
@@ -76,7 +76,7 @@ var textInput1 = new termkit.TextInput( {
 	width: 30 ,
 } ) ;
 
-var textInput2 = new termkit.TextInput( {
+var textInput2 = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'Last name: ' ,
 	x: 15 ,

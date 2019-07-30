@@ -80,7 +80,7 @@ var columnMenu = new termkit.ColumnMenu( {
 			value: 'history'
 		} ,
 		{
-			content: '^[fg:royal-blue]Bookmarks' ,
+			content: '^[fg:*royal-blue]Bookmarks' ,
 			markup: true ,
 			value: 'bookmarks'
 		} ,

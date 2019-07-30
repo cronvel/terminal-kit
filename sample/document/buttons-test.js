@@ -37,12 +37,15 @@ var term = termkit.terminal ;
 term.clear() ;
 
 var document = term.createDocument( {
-//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
+	palette: new termkit.Palette()
+	//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
 var button1 = new termkit.Button( {
 	parent: document ,
-	content: '> button#1' ,
+	//content: '> button#1' ,
+	content: '> ^[fg:*royal-blue]button#1' ,
+	contentHasMarkup: true ,
 	value: 'b1' ,
 	x: 10 ,
 	y: 10 ,

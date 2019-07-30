@@ -38,14 +38,19 @@ var term = termkit.terminal ;
 term.clear() ;
 
 var document = term.createDocument( {
-//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
+	palette: new termkit.Palette()
+	//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
 var textBox = new termkit.TextBox( {
 	parent: document ,
-	content: '^#^MHe^:^bll^#^Ro!' ,
+	//content: '^#^MHe^:^bll^#^Ro!' ,
+	content: '^[fg:*royal-blue]royal!' ,
+	//content: 'royal!' ,
 	contentHasMarkup: true ,
-	attr: { color: 'magenta' } ,
+	//attr: { color: 'magenta' } ,
+	//attr: { color: 241 } ,
+	//attr: { color: '*royal-blue' } ,
 	//hidden: true ,
 	x: 10 ,
 	y: 2 ,
