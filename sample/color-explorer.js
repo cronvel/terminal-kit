@@ -65,7 +65,7 @@ const mine = {
 	yellow: '#f4e500' ,
 	chartreuse: '#8cbb26' ,
 	green: '#25ad28' ,
-	turquoise: '#1bc190' ,
+	turquoise: '#1bc17d' ,
 	cyan: '#0dc0cd' ,
 	blue: '#2a60b0' ,
 	indigo: '#3b3ba2' ,
@@ -229,12 +229,48 @@ term( '\n' ) ;
 
 
 
+term.bold( '\n\n=== Palette Class tests  ===\n\n' ) ;
+
 const Palette = require( '../lib/Palette.js' ) ;
 
 var palette = new Palette() ;
-palette.generateAdaptive() ;
+palette.generate() ;
 
+for ( i = 0 ; i < 16 ; i ++ ) {
+	if ( i % 8 === 0 ) { term.styleReset( '\n' ) ; }
+	term.raw( palette.bgEscape[ i ] + '  ' ) ;
+}
 
+term.styleReset( '\n' ) ;
+for ( i = 16 ; i < 232 ; i ++ ) {
+	if ( ( i - 16 ) % 12 === 0 ) { term.styleReset( '\n' ) ; }
+	if ( ( i - 16 ) % 72 === 0 ) { term.styleReset( '\n' ) ; }
+	term.raw( palette.bgEscape[ i ] + '  ' ) ;
+}
+
+term.styleReset( '\n\n' ) ;
+for ( i = 232 ; i < 245 ; i ++ ) {
+	term.raw( palette.bgEscape[ i ] + '  ' ) ;
+}
+
+term.styleReset( '\n\n' ) ;
+for ( i = 245 ; i < 256 ; i ++ ) {
+	term.raw( palette.bgEscape[ i ] + '  ' ) ;
+}
+
+term.styleReset( '\n' ) ;
+
+//term.raw( palette.bgEscape[ register ] + '  ' ) ;
+
+var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 , x: term.width - 10 , y: 10 , palette: palette } ) ;
+
+buffer.fill( { attr: { bgColor: '@yellow~--' } } ) ;
+buffer.put( { x:1 , y:1 , markup: true } , '^[fg:*crimson,bg:*light-pink]BOB' ) ;
+term.saveCursor() ;
+buffer.draw() ;
+term.restoreCursor() ;
+
+//console.log( palette.colorIndex ) ;
 
 // Reset before exiting...
 
