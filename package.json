@@ -16,7 +16,7 @@
     "ndarray": "^1.0.18",
     "nextgen-events": "^1.1.1",
     "seventh": "^0.7.24",
-    "string-kit": "^0.9.9",
+    "string-kit": "^0.9.10",
     "tree-kit": "^0.6.1"
   },
   "devDependencies": {},
