@@ -36,7 +36,7 @@ var term = termkit.terminal ;
 
 term.clear() ;
 
-var document = term.createDocument() ;
+var document = term.createDocument( { palette: new termkit.Palette() } ) ;
 
 
 
@@ -80,7 +80,8 @@ var columnMenu = new termkit.ColumnMenu( {
 			value: 'history'
 		} ,
 		{
-			content: 'Bookmarks' ,
+			content: '^[fg:royal-blue]Bookmarks' ,
+			markup: true ,
 			value: 'bookmarks'
 		} ,
 		{
