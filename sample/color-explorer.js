@@ -94,6 +94,94 @@ function saturationStep( color , adjustment ) {
 	return color.set( 'hcl.c' , s ) ;
 }
 
+const FIX_STEP = 1.1 ;
+
+function clStep( color , cAdjust , lAdjust , fixRgb = true ) {
+	var c , l , rgb , avg , sortedChannels , preserveLOverC ;
+	
+	if ( ! cAdjust && ! lAdjust ) { return color ; }
+	
+	c = color.get( 'hcl.c' ) ;
+	l = color.get( 'hcl.l' ) ;
+	
+	/*
+	c += c * cAdjust / 3 ;
+	l += l * lAdjust / 4 ;
+	//*/
+	
+	c *= ( cAdjust > 0 ? 1.6 : 1.5 ) ** cAdjust ;
+	l *= ( lAdjust > 0 ? 1.2 : 1.35 ) ** lAdjust ;
+	
+	color = color.set( 'hcl.c' , c ).set( 'hcl.l' , l ) ;
+	
+	if ( ! fixRgb || ! color.clipped ) { return color ; }
+	
+	// RGB is clipped and should be fixed
+	// The most critical part is when the hue get changed, since it's arguably the most important information
+	// Lightness is somewhat important too, but less than hue a bit more than the Chroma
+	// Chroma will be preserved if the adjustement is greater on it than on lightness
+
+	//preserveLOverC = Math.abs( lAdjust ) >= Math.abs( cAdjust ) ;
+	preserveLOverC = Math.abs( lAdjust ) >= cAdjust ;
+	
+	for ( ;; ) {
+		// color.clipped is not reliable since integer rounding counts as clipping...
+		rgb = color._rgb._unclipped ;
+		rgb.length = 3 ;
+		
+		if ( rgb.every( channel => channel > -5 && channel < 260 ) ) { return color ; }
+		
+		sortedChannels = [ ... rgb ].sort() ;
+		
+		//console.log( "Clipped!" , rgb , color.rgb() ) ;
+		
+		if ( sortedChannels[ 2 ] >= 256 ) {
+			// Clipping will affect hue!
+			avg = ( sortedChannels[ 0 ] + sortedChannels[ 1 ] + sortedChannels[ 2 ] ) / 3 ;
+			
+			if ( preserveLOverC ) {
+				// Desaturate a bit and retry
+				c = color.get( 'hcl.c' ) ;
+				c /= FIX_STEP ;
+				color = color.set( 'hcl.c' , c ) ;
+			}
+			else {
+				// Darken a bit and retry
+				l = color.get( 'hcl.l' ) ;
+				l /= FIX_STEP ;
+				color = color.set( 'hcl.l' , l ) ;
+			}
+			
+			// It was too bright anyway, let it be clipped
+			if ( avg > 255 ) { return color ; }
+		}
+		else if ( sortedChannels[ 1 ] < 0 ) {
+			// Clipping will affect hue!
+			avg = ( sortedChannels[ 0 ] + sortedChannels[ 1 ] + sortedChannels[ 2 ] ) / 3 ;
+
+			if ( preserveLOverC ) {
+				// Desaturate a bit and retry
+				c = color.get( 'hcl.c' ) ;
+				c /= FIX_STEP ;
+				color = color.set( 'hcl.c' , c ) ;
+			}
+			else {
+				// Lighten a bit and retry
+				l = color.get( 'hcl.l' ) ;
+				l *= FIX_STEP ;
+				color = color.set( 'hcl.l' , l ) ;
+			}
+
+			// It was too dark anyway, let it be clipped
+			if ( avg < 0 ) { return color ; }
+		}
+		else {
+			// This clipping (lowest channel below 0) will not affect hue, only lightness, let it be clipped
+			return color ;
+		}
+	}
+}
+
 
 
 term.bold( '\n\n=== Itten/mine 12 colors palette ===\n\n' ) ;
@@ -101,14 +189,15 @@ term.bold( '\n\n=== Itten/mine 12 colors palette ===\n\n' ) ;
 //scale = Object.keys( itten ).map( color => termkit.chroma( itten[ color ] ) ) ;
 scale = Object.keys( mine ).map( color => termkit.chroma( mine[ color ] ) ) ;
 
-for ( z = 0 ; z >= -2 ; z -- ) {
+for ( z = 3 ; z >= -2 ; z -- ) {
 	term( "Saturation: %i\n" , z ) ;
 
 	for ( j = 2 ; j >= -3 ; j -- ) {
 		term( j >= 0 ? " %i " : "%i " , j ) ;
 		for ( i = 0 ; i < 12 ; i ++ ) {
 			//[r,g,b] = saturationStep( lightnessStep( scale[ i ] , j ) , z ).rgb() ;
-			[r,g,b] = lightnessStep( saturationStep( scale[ i ] , z ) , j ).rgb() ;
+			//[r,g,b] = lightnessStep( saturationStep( scale[ i ] , z ) , j ).rgb() ;
+			[r,g,b] = clStep( scale[ i ] , z , j ).rgb() ;
 			term.bgColorRgb( r , g , b , '  ' ) ;
 		}
 
@@ -126,6 +215,24 @@ for ( i = 0 ; i < 12 ; i ++ ) {
 	term.bgColorRgb( r , g , b , '  ' ) ;
 }
 
+
+
+term.bold( '\n\n=== Auto grayscale colors palette (Lab) ===\n\n' ) ;
+
+for ( i = 0 ; i <= 10 ; i ++ ) {
+	[r,g,b] = termkit.chroma.hcl( 0 , 0 , 10 * i ).rgb() ;
+	term.bgColorRgb( r , g , b , '  ' ) ;
+	//console.log( [r,g,b] ) ;
+}
+
+term( '\n' ) ;
+
+
+
+const Palette = require( '../lib/Palette.js' ) ;
+
+var palette = new Palette() ;
+palette.generateAdaptive() ;
 
 
 
