@@ -1,8 +1,16 @@
 
+v1.29.1
+-------
+
+Palette now has a 256-colors fallback
+ANSI colors are available in complex markup
+
+
 v1.29.0
 -------
 
 New: 24 bits Palette for the ScreenBuffer, complex markup for using new colorscheme/color name of the Palette
+Lot of bug related to markup fixed (width, wordwrap, ...)
 
 
 v1.28.42

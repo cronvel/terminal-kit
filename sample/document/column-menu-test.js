@@ -51,7 +51,7 @@ var columnMenu = new termkit.ColumnMenu( {
 	disabledLeftPadding: '  ' ,
 	paddingHasMarkup: true ,
 	multiLineItems: true ,
-	buttonEvenBlurAttr: { bgColor: 'gray' , color: 'white' , bold: true } ,
+	buttonEvenBlurAttr: { bgColor: '@dark-gray' , color: 'white' , bold: true } ,
 	buttonKeyBindings: {
 		ENTER: 'submit' ,
 		CTRL_UP: 'submit' ,
