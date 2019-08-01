@@ -1,4 +1,10 @@
 
+v1.29.2
+-------
+
+Fix a TextBuffer bug in .setText() when markup is on
+
+
 v1.29.1
 -------
 
