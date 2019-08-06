@@ -30,31 +30,48 @@
 
 
 const string = require( 'string-kit' ) ;
-const term = require( '../lib/termkit.js' ).terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
+const SB = termkit.ScreenBufferHD ;
 const Promise = require( 'seventh' ) ;
 
 
 
 async function test() {
 	var fwa = string.unicode.toFullWidth( '@' ) ;	// Get a full-width arobas
-
+	var fwz = string.unicode.toFullWidth( '0' ) ;	// Get a full-width arobas
+	
 	term.clear() ;
-	term.moveTo( 1 , 1 , fwa ) ;
-	term.moveTo( 2 , 2 , fwa ) ;
-	term.moveTo( 3 , 3 , fwa ) ;
+	
+	var buffer = SB.create( { dst: term , width: 4 , height: 5 } ) ;
+	var buffer2 = SB.create( { dst: buffer , width: 4 , height: 5 } ) ;
+	
+	//buffer.draw( { delta: true } ) ;
+	
+	var attr = { r:255,g:255,b:255,a:255 , bgR:0,bgG:0,bgB:0,bgA:255} ;
+	buffer.put( { x: 0 , y: 0 , attr } , fwa.repeat( 2 ) ) ;
+	buffer.put( { x: 0 , y: 1 , attr } , fwa.repeat( 2 ) ) ;
+	buffer.put( { x: 1 , y: 1 , attr } , fwa ) ;
+	buffer.put( { x: 0 , y: 2 , attr } , fwa.repeat( 2 ) ) ;
+	buffer.put( { x: 1 , y: 2 , attr } , '!' ) ;
+	buffer.put( { x: 0 , y: 3 , attr } , fwa.repeat( 2 ) ) ;
+	buffer.put( { x: 2 , y: 3 , attr } , '!' ) ;
+	buffer.put( { x: 3 , y: 4 , attr } , fwa ) ;
 
-	term.moveTo( 4 , 4 , fwa ) ;
-	await Promise.resolveTimeout( 1000 ) ;
-	term.moveTo( 5 , 4 , '!' ) ;
+	buffer.draw( { delta: false } ) ;
+	term( '\n' ) ;
+	term.moveTo.styleReset( 1 , 8 , '%s' , buffer.dump() ) ;
+	return ;
+	//await Promise.resolveTimeout( 1000 ) ;
 
-	term.moveTo( 5 , 5 , fwa ) ;
-	await Promise.resolveTimeout( 1000 ) ;
-	term.moveTo( 6 , 5 , '!' ) ;
+	buffer.x = 10 ;
+	buffer2.put( { x: 0 , y: 0 } , fwz ) ;
+	buffer2.x = 1 ;
 
-
-	term.moveTo( 1 , 10 ) ;
-	term( 'Full-width arobas length: %i\n' , fwa.length ) ;
-	term( 'Full-width arobas unicode.isFullWidth(): %s\n' , string.unicode.isFullWidth( fwa ) ) ;
+	//buffer.draw( { delta: false } ) ;
+	buffer2.draw( { blending: true } ) ;
+	buffer.draw( { delta: false } ) ;
+	term.moveTo( 1 , 16 , '%s' , buffer.dump() ) ;
 }
 
 test() ;
