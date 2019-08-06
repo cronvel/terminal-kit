@@ -38,6 +38,7 @@ const Promise = require( 'seventh' ) ;
 
 
 async function test() {
+	var attr  ;
 	var fwa = string.unicode.toFullWidth( '@' ) ;	// Get a full-width arobas
 	var fwz = string.unicode.toFullWidth( '0' ) ;	// Get a full-width arobas
 	
@@ -48,7 +49,7 @@ async function test() {
 	
 	//buffer.draw( { delta: true } ) ;
 	
-	var attr = { r:255,g:255,b:255,a:255 , bgR:0,bgG:0,bgB:0,bgA:255} ;
+	//attr = { r:255,g:155,b:155,a:255 , bgR:0,bgG:50,bgB:0,bgA:255} ;
 	buffer.put( { x: 0 , y: 0 , attr } , fwa.repeat( 2 ) ) ;
 	buffer.put( { x: 0 , y: 1 , attr } , fwa.repeat( 2 ) ) ;
 	buffer.put( { x: 1 , y: 1 , attr } , fwa ) ;
@@ -61,17 +62,17 @@ async function test() {
 	buffer.draw( { delta: false } ) ;
 	term( '\n' ) ;
 	term.moveTo.styleReset( 1 , 8 , '%s' , buffer.dump() ) ;
-	return ;
+	//return ;
 	//await Promise.resolveTimeout( 1000 ) ;
 
 	buffer.x = 10 ;
-	buffer2.put( { x: 0 , y: 0 } , fwz ) ;
+	buffer2.put( { x: 0 , y: 0 , attr } , fwz ) ;
 	buffer2.x = 1 ;
 
 	//buffer.draw( { delta: false } ) ;
 	buffer2.draw( { blending: true } ) ;
 	buffer.draw( { delta: false } ) ;
-	term.moveTo( 1 , 16 , '%s' , buffer.dump() ) ;
+	term.moveTo.styleReset( 1 , 16 , '%s' , buffer.dump() ) ;
 }
 
 test() ;
