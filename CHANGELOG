@@ -1,4 +1,11 @@
 
+v1.30.0
+-------
+
+Finally ScreenBuffer* support fullwidth char
+WARNING: ScreenBufferHD breaking changes (beta API - not under SemVer) support for *defaultColor is dropped because it is not compatible with alpha channel and blending, attributes changed: now colors channel are inside color, and bgColor is consistent, allowing to pass similar (standard) color object to both the foreground and background
+
+
 v1.29.3
 -------
 

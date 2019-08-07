@@ -35,8 +35,7 @@ var path = require( 'path' ) ;
 
 
 
-if ( process.argv.length <= 2 )
-{
+if ( process.argv.length <= 2 ) {
 	term.magenta( "Usage is: ./%s <file-path> [-m] [<max-scale>]\n" , path.basename( process.argv[ 1 ] ) ) ;
 	term.gray( "-m: load inside a ScreenBuffer and interactively move the image\n" ) ;
 	process.exit( 1 ) ;
@@ -44,43 +43,36 @@ if ( process.argv.length <= 2 )
 
 
 
-var screen , image , filler = { attr: {
-	// 8-bit
-	color: 'black' ,
-	bgColor: 'black' ,
-	// 32-bit
-	r: 0 ,
-	g: 0 ,
-	b: 0 ,
-	bgR: 0 ,
-	bgG: 0 ,
-	bgB: 0 ,
-} } ;
-
-
-
-var SB = term.support['24bitsColors'] ? termkit.ScreenBufferHD : termkit.ScreenBuffer ;
-var url = process.argv[ 2 ] ;
-var move ;
-var maxScale ;
-
+var screen , image , filler , move , maxScale , SB ,
+	url = process.argv[ 2 ] ;
+	
+if ( term.support['24bitsColors'] ) {
+	SB = termkit.ScreenBufferHD ;
+	filler = { attr: {
+		color: { r: 0 , g: 0 , b: 0 } ,
+		bgColor: { r: 0 , g: 0 , b: 0 }
+	} } ;
+}
+else {
+	SB = termkit.ScreenBuffer ;
+	filler = { attr: {
+		color: 'black' ,
+		bgColor: 'black' ,
+	} } ;
+}
 
 
 // Can't depend on minimist just for a sample code, so we had to parse the command line by ourself
-if ( process.argv[ 3 ] === '-m' )
-{
+if ( process.argv[ 3 ] === '-m' ) {
 	move = true ;
 	maxScale = process.argv[ 4 ] || 2 ;
 }
-else
-{
-	if ( process.argv[ 4 ] === '-m' )
-	{
+else {
+	if ( process.argv[ 4 ] === '-m' ) {
 		move = true ;
 		maxScale = process.argv[ 3 ] || 2 ;
 	}
-	else
-	{
+	else {
 		move = false ;
 		maxScale = process.argv[ 3 ] || 1 ;
 	}
@@ -88,8 +80,7 @@ else
 
 
 
-if ( ! move )
-{
+if ( ! move ) {
 	term.drawImage( url , {
 		shrink: {
 			width: term.width * maxScale ,
@@ -124,8 +115,7 @@ async function loadImage() {
 		
 		var offset , stats ;
 		
-		switch ( key )
-		{
+		switch ( key ) {
 			case 'UP' :
 				offset = Math.round( term.height / 20 ) ;
 				screen.vScroll( offset , true ) ;	// Perform term.scrollDown()
@@ -164,8 +154,7 @@ async function loadImage() {
 }
 
 
-function redraw()
-{
+function redraw() {
 	var stats ;
 	
 	screen.fill( filler ) ;
@@ -176,8 +165,7 @@ function redraw()
 
 
 
-function terminate()
-{
+function terminate() {
 	term.hideCursor( false ) ;
 	//term.applicationKeypad( false ) ;
 	term.styleReset() ;

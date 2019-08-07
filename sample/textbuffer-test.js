@@ -63,24 +63,24 @@ if ( isHd ) {
 	attrs = [
 		termkit.ScreenBufferHD.DEFAULT_ATTR ,
 		{
-			r: 200 , g: 50 , b: 50 , bgR: 0 , bgG: 0 , bgB: 0
+			color: { r: 200 , g: 50 , b: 50 } , bgColor: { r: 0 , g: 0 , b: 0 }
 		} ,
 		{
-			r: 230 , g: 70 , b: 70 , bgR: 0 , bgG: 0 , bgB: 0
+			color: { r: 230 , g: 70 , b: 70 } , bgColor: { r: 0 , g: 0 , b: 0 }
 		} ,
 		{
-			r: 200 , g: 50 , b: 50 , bgR: 0 , bgG: 0 , bgB: 70 , bold: true , italic: true
+			color: { r: 200 , g: 50 , b: 50 } , bgColor: { r: 0 , g: 0 , b: 70 } , bold: true , italic: true
 		} ,
 		{
-			r: 30 , g: 170 , b: 170 , bgR: 70 , bgG: 0 , bgB: 0
+			color: { r: 30 , g: 170 , b: 170 } , bgColor: { r: 70 , g: 0 , b: 0 }
 		}
 	] ;
 
 	emptyAttrs = [
-		{ bgR: 200 , bgG: 200 , bgB: 0 } ,
-		{ bgR: 250 , bgG: 250 , bgB: 0 } ,
-		{ bgR: 230 , bgG: 10 , bgB: 0 } ,
-		{ bgR: 0 , bgG: 10 , bgB: 230 } ,
+		{ bgColor: { r: 200 , g: 200 , b: 0 } } ,
+		{ bgColor: { r: 250 , g: 250 , b: 0 } } ,
+		{ bgColor: { r: 230 , g: 10 , b: 0 } } ,
+		{ bgColor: { r: 0 , g: 10 , b: 230 } } ,
 		termkit.ScreenBufferHD.DEFAULT_ATTR
 	] ;
 }

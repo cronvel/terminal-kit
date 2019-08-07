@@ -41,56 +41,56 @@ var screen = termkit.ScreenBufferHD.create( { dst: term , width: 60 , height: 20
 
 var clear ;
 
-clear = { attr: {
-	bgR: 127 ,
-	bgG: 127 ,
-	bgB: 127
-} } ;
-clear = { attr: {
-	bgR: 255 ,
-	bgG: 255 ,
-	bgB: 255
-} } ;
-clear = { attr: {
-	bgR: 13 ,
-	bgG: 10 ,
-	bgB: 20
-} } ;
+clear = { attr: { bgColor: {
+	r: 127 ,
+	g: 127 ,
+	b: 127
+} } } ;
+clear = { attr: { bgColor: {
+	r: 255 ,
+	g: 255 ,
+	b: 255
+} } } ;
+clear = { attr: { bgColor: {
+	r: 13 ,
+	g: 10 ,
+	b: 20
+} } } ;
 
 screen.fill( clear ) ;
 
 var blue = termkit.ScreenBufferHD.create( { dst: screen , width: 12 , height: 6 } ) ;
 
-blue.fill( { attr: {
-	bgR: 130 ,
-	bgG: 100 ,
-	bgB: 200 ,
-	bgA: 125
-} } ) ;
+blue.fill( { attr: { bgColor: {
+	r: 130 ,
+	g: 100 ,
+	b: 200 ,
+	a: 125
+} } } ) ;
 
 blue.x = 8 ;
 blue.y = 4 ;
 
 var red = termkit.ScreenBufferHD.create( { dst: screen , width: 12 , height: 6 } ) ;
 
-red.fill( { attr: {
-	bgR: 230 ,
-	bgG: 100 ,
-	bgB: 0 ,
-	bgA: 125
-} } ) ;
+red.fill( { attr: { bgColor: {
+	r: 230 ,
+	g: 100 ,
+	b: 0 ,
+	a: 125
+} } } ) ;
 
 red.x = 11 ;
 red.y = 18 ;
 
 var green = termkit.ScreenBufferHD.create( { dst: screen , width: 12 , height: 6 } ) ;
 
-green.fill( { attr: {
-	bgR: 130 ,
-	bgG: 200 ,
-	bgB: 80 ,
-	bgA: 125
-} } ) ;
+green.fill( { attr: { bgColor: {
+	r: 130 ,
+	g: 200 ,
+	b: 80 ,
+	a: 125
+} } } ) ;
 
 green.x = 26 ;
 green.y = 5 ;
@@ -112,8 +112,7 @@ var blueBlending = tree.extend( { own: true } , {} , blendingOpt ) ;
 
 var moved = 0 ;
 
-function moveRedraw()
-{
+function moveRedraw() {
 	green.x -- ;
 	red.y -= 0.5 ;
 	redBlending.opacity += ( moved % 11 - 5 ) / 40 ;
@@ -129,12 +128,10 @@ function moveRedraw()
 	
 	screen.draw( { delta: true } ) ;
 	
-	if ( ++ moved <= 35 )
-	{
+	if ( ++ moved <= 35 ) {
 		setTimeout( moveRedraw , 80 ) ;
 	}
-	else
-	{
+	else {
 		term.hideCursor( false ) ;
 		term.fullscreen( false ) ;
 		term.styleReset() ;

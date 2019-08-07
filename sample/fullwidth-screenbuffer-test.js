@@ -49,7 +49,7 @@ async function test() {
 	
 	//buffer.draw( { delta: true } ) ;
 	
-	//attr = { r:255,g:155,b:155,a:255 , bgR:0,bgG:50,bgB:0,bgA:255} ;
+	//attr = { color: { r:255,g:155,b:155,a:255 } , bgColor: { r:0,g:50,b:0,a:255} } ;
 	buffer.put( { x: 0 , y: 0 , attr } , fwa.repeat( 2 ) ) ;
 	buffer.put( { x: 0 , y: 1 , attr } , fwa.repeat( 2 ) ) ;
 	buffer.put( { x: 1 , y: 1 , attr } , fwa ) ;

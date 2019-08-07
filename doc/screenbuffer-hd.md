@@ -98,12 +98,16 @@ var screen = new ScreenBufferHD( { dst: term , noFill: true } ) ;
 
 screen.fill( attr: {
 	// Both foreground and background must have the same color
-	r: 40 ,
-	g: 20 ,
-	b: 0 ,
-	bgR: 40 ,
-	bgG: 20 ,
-	bgB: 0
+	color: {
+		r: 40 ,
+		g: 20 ,
+		b: 0
+	} ,
+	bgColor: {
+		r: 40 ,
+		g: 20 ,
+		b: 0
+	}
 } } ) ;
 
 ScreenBufferHD.loadImage(
@@ -161,16 +165,16 @@ Blending works only when drawing to another *screenBufferHD*.
 An attributes object contains attributes to style cells.
 Available attributes are:
 
-* r `integer` the red channel of the foreground color (ranging from 0 to 255)
-* g `integer` the green channel of the foreground color (ranging from 0 to 255)
-* b `integer` the blue channel of the foreground color (ranging from 0 to 255)
-* a `integer` the alpha channel of the foreground color (ranging from 0 to 255)
-* defaultColor `boolean` if true, set the foreground color to the default terminal foreground color
-* bgR `integer` the red channel of the background color (ranging from 0 to 255)
-* bgG `integer` the green channel of the background color (ranging from 0 to 255)
-* bgB `integer` the blue channel of the background color (ranging from 0 to 255)
-* bgA `integer` the alpha channel of the background color (ranging from 0 to 255)
-* bgDefaultColor `boolean` if true, set the background color to the default terminal background color
+* color `object` the foreground color, where:
+	* r `integer` the red channel of the foreground color (ranging from 0 to 255)
+	* g `integer` the green channel of the foreground color (ranging from 0 to 255)
+	* b `integer` the blue channel of the foreground color (ranging from 0 to 255)
+	* a `integer` the alpha channel of the foreground color (ranging from 0 to 255)
+* bgColor `object` the background color, where:
+	* r `integer` the red channel of the background color (ranging from 0 to 255)
+	* g `integer` the green channel of the background color (ranging from 0 to 255)
+	* b `integer` the blue channel of the background color (ranging from 0 to 255)
+	* a `integer` the alpha channel of the background color (ranging from 0 to 255)
 * bold `boolean`
 * dim `boolean`
 * italic `boolean`
