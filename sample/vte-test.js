@@ -29,9 +29,17 @@
 
 
 
-var term = require( '../lib/termkit.js' ).terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
 
-process.stdin.on( 'data' , function( data ) {
-	term.red( data.toString() ) ;
-} ) ;
+
+
+async function test() {
+	term.clear() ;
+	
+	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , inputTest: process.stdin } ) ;
+	vte.run( 'sh' ) ;
+}
+
+test() ;
 
