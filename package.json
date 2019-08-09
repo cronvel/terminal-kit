@@ -15,7 +15,7 @@
     "lazyness": "^1.1.1",
     "ndarray": "^1.0.18",
     "nextgen-events": "^1.1.1",
-    "seventh": "^0.7.24",
+    "seventh": "^0.7.28",
     "string-kit": "^0.9.10",
     "tree-kit": "^0.6.1"
   },

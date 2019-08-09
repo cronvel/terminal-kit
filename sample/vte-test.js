@@ -36,9 +36,13 @@ const term = termkit.terminal ;
 
 async function test() {
 	term.clear() ;
+	term.grabInput( { mouse: 'motion' , focus: true } ) ;
+	term.on( 'key' , key => {
+		if ( key === 'CTRL_C' ) { process.exit() ; }
+	} ) ;
 	
-	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , inputTest: process.stdin } ) ;
-	vte.run( 'ls' ) ;
+	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , eventInput: term } ) ;
+	vte.run( process.argv[ 2 ] || 'ls' , process.argv.slice( 3 ) ) ;
 }
 
 test() ;
