@@ -31,14 +31,33 @@
 
 const termkit = require( '..' ) ;
 const term = termkit.terminal ;
+const Promise = require( 'seventh' ) ;
 
 
 
 async function test() {
 	term.clear() ;
+
+	var buffer = termkit.ScreenBuffer.create( { dst: term , width: 4 , height: 4 } ) ; //.clear() ;
+
+	buffer.put( { x: 0 , y: 0 } , 'abcd' ) ;
+	buffer.put( { x: 0 , y: 1 } , 'efgh' ) ;
+	buffer.put( { x: 0 , y: 2 } , 'ijkl' ) ;
+	buffer.put( { x: 0 , y: 3 } , 'mnop' ) ;
+	buffer.draw() ;
 	
-	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , inputTest: process.stdin } ) ;
-	vte.run( 'ls' ) ;
+	await Promise.resolveTimeout( 500 ) ;
+	buffer.vScroll( -1 , true ) ;
+	buffer.put( { x: 0 , y: 3 } , 'qrst' ) ;
+	buffer.draw() ;
+	await Promise.resolveTimeout( 500 ) ;
+	buffer.vScroll( -1 , true ) ;
+	buffer.put( { x: 0 , y: 3 } , 'uvwx' ) ;
+	buffer.draw() ;
+	await Promise.resolveTimeout( 500 ) ;
+	buffer.draw() ;
+
+	term.moveTo( 1 , 8 , '\n' ) ;
 }
 
 test() ;
