@@ -9,6 +9,7 @@
 *.js.gz
 .spellcast
 build
+log
 _build
 _templates
 _static
