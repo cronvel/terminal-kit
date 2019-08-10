@@ -25,11 +25,20 @@
 	SOFTWARE.
 */
 
-var term = require( '../' ).terminal ;
+"use strict" ;
 
-term.notify( 'Bob' , 'Bill' ) ;
-setTimeout( () => {
-	term.notify( 'Bob' , 'Bill' ) ;
-	setTimeout( () => null , 1000 ) ;
-} , 1000 ) ;
 
+
+const term = require( '..' ).terminal ;
+const Promise = require( 'seventh' ) ;
+
+
+
+async function test() {
+	term( 'About to send a notification in 2 seconds...\nIn Gnome/gnome-terminal, you should switch to another window/workspace to see a system notification\n' ) ;
+	await Promise.resolveTimeout( 2000 ) ;
+	term.notify( 'This is a notification title' , 'This is the notification text' ) ;
+	await Promise.resolveTimeout( 2000 ) ;
+}
+
+test() ;

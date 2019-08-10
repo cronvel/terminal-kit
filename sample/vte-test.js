@@ -36,12 +36,15 @@ const term = termkit.terminal ;
 
 async function test() {
 	term.clear() ;
+	term.green( "Your virtual terminal is below:" ) ;
+	
 	term.grabInput( { mouse: 'motion' , focus: true } ) ;
+	
 	term.on( 'key' , key => {
-		if ( key === 'CTRL_C' ) { process.exit() ; }
+		if ( key === 'CTRL_C' ) { term.clear() ; process.exit() ; }
 	} ) ;
 	
-	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , eventInput: term } ) ;
+	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , x: 5 , y: 3 , eventInput: term } ) ;
 	vte.run( process.argv[ 2 ] || 'ls' , process.argv.slice( 3 ) ) ;
 }
 
