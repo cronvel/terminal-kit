@@ -70,7 +70,7 @@ term.up( 4 ).red( 'up ' ).cyan( 4 ) ;
 term.moveTo( 1 , 1 ).blue( 'origin' ) ;
 term.move( 0 , 0 ).bold.cyan( '(0;0)' ) ;
 term.move( 5 , 5 ).bold.brightYellow( '(+5;+5)' ) ;
-term.move( -2 , -5 ) ; term.bold.brightGreen( '(-2;-5)' ) ;
+term.move( -2 , -3 ) ; term.bold.brightGreen( '(-2;-3)' ) ;
 term.moveTo.cyan( 1 , 2 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 term.restoreCursor() ;
 
