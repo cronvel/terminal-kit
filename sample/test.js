@@ -34,8 +34,8 @@
 
 
 
-var term = require( '../lib/termkit.js' ).terminal ;
-//var term = require( '../lib/termkit.js' ).realTerminal ;
+var term = require( '..' ).terminal ;
+//var term = require( '..' ).realTerminal ;
 
 /*
 term( 'Terminal name: %s\n' , term.appName ) ;
