@@ -226,11 +226,14 @@ If true, blending is enabled (e.g. background transparency, char transparency, e
 ### .fill( [options] )
 
 * options `Object` (optional), where:
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
-	  see: [the attribute object](#ref.ScreenBuffer.attributes))
-	* char `string` a single character used to fill the buffer
+	* attr `Object` or `integer` (optional) attributes of the chars (attribute object or bit flags,
+	  see: [the attribute object](#ref.ScreenBuffer.attributes)) (default to the default attributes)
+	* char `string` (optional) a single character used to fill the buffer (default: the space character)
+	* region: `Object` or `Rect` (optional), a [`Rect` compliant object](rect.md#ref.Rect.new) defining the region to fill
+	  (default: fill the whole ScreenBuffer)
 
 It fills the *screenBuffer* with the specified *char* and *attributes*.
+If the *region* is specified, then only that *region* will be filled.
 
 
 

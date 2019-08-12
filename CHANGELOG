@@ -1,4 +1,10 @@
 
+v1.31.0
+-------
+
+New: ScreenBuffer#fill() now supports a 'region' option, when specified only that region will be filled
+
+
 v1.30.0
 -------
 
