@@ -29,22 +29,20 @@
 
 
 
-/* jshint unused:false */
-/* global describe, it, before, after */
+const term = require( '..' ).terminal ;
+//const term = require( '..' ).realTerminal ;
 
-
-
-var term = require( '..' ).terminal ;
-//var term = require( '..' ).realTerminal ;
-
-/*
-term( 'Terminal name: %s\n' , term.appName ) ;
-term( 'Terminal app: %s\n' , term.app ) ;
-term( 'Terminal generic: %s\n' , term.generic ) ;
-term( 'Config file: %s\n' , term.termconfigFile ) ;
-term.down( 3 , "123" ).previousLine()( "456" ).nextLine( 2 , "789" ).column( 20 , '20th col' ).down( 3 , '\n' ).hideCursor( false ) ;
+//*
+term.clear() ;
+term.moveTo( 1 , 1 ) ;
+term( 'abcde\nfghij\nklmno\npqrst\nuvwxy\n' ) ;
+term.moveTo( 3 , 3 ) ;
+//term.inverse()( '!\r' ) ;
+//term.eraseDisplayAbove() ;
+//term( '!' ) ;
+term.moveTo( 1 , 8 ) ;
 process.exit() ;
-*/
+//*/
 
 term( 'term.isTTY: %I\n' , term.isTTY ) ;
 term( 'a\n' )( 'true\n' )( 'warrior\n' ) ;
