@@ -37,6 +37,8 @@ term.clear() ;
 term.moveTo( 1 , 1 ) ;
 term( 'abcde\nfghij\nklmno\npqrst\nuvwxy\n' ) ;
 term.moveTo( 3 , 3 ) ;
+term.delete() ;
+//term.backDelete() ;
 //term.inverse()( '!\r' ) ;
 //term.eraseDisplayAbove() ;
 //term( '!' ) ;

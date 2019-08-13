@@ -29,33 +29,34 @@
 
 
 
-const term = require( '..' ).terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
+const Promise = require( 'seventh' ) ;
 
-//term.clear() ;
 
-term.scrollingRegion( 1 , 20 ) ;
 
-/*
-term.moveTo( 1 , term.height ).inverse( 'bottom line' ) ;
-term.saveCursor() ;
-term.scrollingRegion( 10 , term.height - 1 ) ;
-term.restoreCursor() ;
-//*/
+async function test() {
+	term.clear() ;
 
-var count = 0 ;
+	var delta = true ;
+	var buffer = termkit.ScreenBuffer.create( { dst: term , width: 6 , height: 6 } ) ;
 
-function print()
-{
-	term.eraseLineAfter() ;
-	term( '#%i\n' , count ) ;
-	//if ( count > 52 && count < 70 ) { term( '\n' ) ; } else { term( '#%i\n' , count ) ; }
+	buffer.put( { x: 0 , y: 0 } , '*abcd*' ) ;
+	buffer.put( { x: 0 , y: 1 } , '*efgh*' ) ;
+	buffer.put( { x: 0 , y: 2 } , '*ijkl*' ) ;
+	buffer.put( { x: 0 , y: 3 } , '*mnop*' ) ;
+	buffer.put( { x: 0 , y: 4 } , '*qrst*' ) ;
+	buffer.put( { x: 0 , y: 5 } , '*uvwx*' ) ;
+	buffer.draw( { delta } ) ;
 	
-	if ( count === 30 ) { term.moveTo( 1 , 25 ) ; }
-	if ( count === 60 ) { term.moveTo( 1 , 1 ) ; }
-	
-	if ( count ++ < 100 ) { setTimeout( print , 100 ) ; }
-	else { term.resetScrollingRegion() ; }
+	await Promise.resolveTimeout( 500 ) ;
+	buffer.copyRegion( { xmin: 0 , xmax: 2 , ymin: 0 , ymax: 2 } , { xmin: 3 , xmax: 5 , ymin: 2 , ymax: 4 } ) ;
+	buffer.draw( { delta } ) ;
+	await Promise.resolveTimeout( 500 ) ;
+	buffer.draw( { delta } ) ;
+
+	term.moveTo( 1 , 8 , '\n' ) ;
 }
 
-print() ;
+test() ;
 
