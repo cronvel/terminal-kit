@@ -38,24 +38,28 @@ const Promise = require( 'seventh' ) ;
 async function test() {
 	term.clear() ;
 
+	var delta = true ,
+		scrollingYmin = 1 ,
+		scrollingYmax = 2 ;
+	
 	var buffer = termkit.ScreenBuffer.create( { dst: term , width: 4 , height: 4 } ) ; //.clear() ;
 
 	buffer.put( { x: 0 , y: 0 } , 'abcd' ) ;
 	buffer.put( { x: 0 , y: 1 } , 'efgh' ) ;
 	buffer.put( { x: 0 , y: 2 } , 'ijkl' ) ;
 	buffer.put( { x: 0 , y: 3 } , 'mnop' ) ;
-	buffer.draw() ;
+	buffer.draw( { delta } ) ;
 	
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.vScroll( -1 , true ) ;
-	buffer.put( { x: 0 , y: 3 } , 'qrst' ) ;
-	buffer.draw() ;
+	buffer.vScroll( -1 , undefined , scrollingYmin , scrollingYmax , true ) ;
+	buffer.put( { x: 0 , y: scrollingYmax } , 'qrst' ) ;
+	buffer.draw( { delta } ) ;
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.vScroll( -1 , true ) ;
-	buffer.put( { x: 0 , y: 3 } , 'uvwx' ) ;
-	buffer.draw() ;
+	buffer.vScroll( -1 , undefined , scrollingYmin , scrollingYmax , true ) ;
+	buffer.put( { x: 0 , y: scrollingYmax } , 'uvwx' ) ;
+	buffer.draw( { delta } ) ;
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.draw() ;
+	buffer.draw( { delta } ) ;
 
 	term.moveTo( 1 , 8 , '\n' ) ;
 }

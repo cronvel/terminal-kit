@@ -369,25 +369,29 @@ It moves the *screenBuffer*'s cursor.
 
 
 <a name="ref.ScreenBuffer.vScroll"></a>
-### .vScroll( offset , [drawToTerminal] )
+### .vScroll( lineOffset , [attr] , [ymin] , [ymax] , [scrollTerminal] ) *or* .vScroll( offset , [scrollTerminal] ) 
 
-* offset `integer` the vertical offset (the number of lines), positive values move the content toward crescent *y* coordinates,
+* lineOffset `integer` the vertical offset (the number of lines), positive values move the content toward crescent *y* coordinates,
   thus move the content down, negative values move the content up.
-* drawToTerminal `boolean` (optional, default: false) if true **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance,
-  it will draw to the terminal, see details below.
+* attr `Object` or `integer` attributes of inserted empty lines (attribute object or bit flags,
+  see: [the attribute object](#ref.ScreenBuffer.attributes))
+* scrollTerminal `boolean` (optional, default: false) if true **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance,
+  it will scroll the underlying terminal, see details below.
 
 This scrolls the *screenBuffer*'s content vertically.
 
-If *drawToTerminal* option is set **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance, then the following happens:
+If *scrollTerminal* option is set **AND** if the *screenBuffer*'s *dst* is a *Terminal* instance, then the following happens:
 * the *dst terminal* is issued a *.scrollingRegion()* with the *screenBuffer* vertical bounds
-* the *dst terminal* is issued a *.scrollDown()* or a *.scrollUp()* depending on the offset sign
+* the *dst terminal* is issued a *.scrollDown()* or a *.scrollUp()* depending on the lineOffset sign
 * the internal buffer storing last draw's data is updated, so the next call to *.draw()* with the *delta* option on
   will not redraw the region that has scrolled unless it has changed again
 * the *dst terminal* is issued a .resetScrollingRegion()
 
 This option has **one big limitation:** the *screenBuffer* should cover the whole terminal's width, because terminals
 only supports full-width scrolling region.
-Don't use this option for thinner *screenBuffers*.
+You *may* avoid using this option for thinner *screenBuffers*, because things lying to the left or to the right would be scrolled too.
+
+Also note that it doesn't *draw* the *screenBuffer* to the terminal, but it the internal delta is maintained properly.
 
 
 

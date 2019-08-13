@@ -29,10 +29,7 @@
 
 
 
-/* jshint unused:false */
-
-
-var term = require( '../lib/termkit.js' ).terminal ;
+const term = require( '..' ).terminal ;
 
 //term.clear() ;
 
@@ -50,7 +47,9 @@ var count = 0 ;
 function print()
 {
 	term.eraseLineAfter() ;
+	if ( count > 52 && count < 70 ) { term( '\n' ) ; } else {
 	term( '#%i\n' , count ) ;
+	}
 	
 	if ( count === 30 ) { term.moveTo( 1 , 25 ) ; }
 	if ( count === 60 ) { term.moveTo( 1 , 1 ) ; }

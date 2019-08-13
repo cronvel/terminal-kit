@@ -42,26 +42,11 @@ var realTerm ;
 console.log( "tty.getPath():" , termkit.tty.getPath() ) ;
 
 
-/*
-var guessed = termkit.guessTerminal() ;
-var input = termkit.tty.getInput() ;
-var output = termkit.tty.getOutput() ;
-
-realTerm = termkit.createTerminal( {
-	stdin: input ,
-	stdout: output ,
-	stderr: process.stderr ,
-	generic: process.env.TERM.toLowerCase() ,
-	appId: guessed.safe ? guessed.appId : undefined ,
-	//  appName: guessed.safe ? guessed.appName : undefined ,
-	processSigwinch: true
-	// couldTTY: true
-} ) ;
-//*/ realTerm = termkit.realTerminal ;
+realTerm = termkit.realTerminal ;
 
 
-term.red( "STDOUT!\n" ) ;
-realTerm.red( "TTY OUT!\n" ) ;
+term.red( "STDOUT! size: %ix%i\n" , term.width , term.height ) ;
+realTerm.red( "TTY OUT! size: %ix%i\n" , term.width , term.height ) ;
 
 /*
 term.blue( "Enter your name: " ) ;
