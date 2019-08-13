@@ -50,7 +50,9 @@ async function test() {
 	buffer.draw( { delta } ) ;
 	
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.copyRegion( { xmin: 0 , xmax: 2 , ymin: 0 , ymax: 2 } , { xmin: 3 , xmax: 5 , ymin: 2 , ymax: 4 } ) ;
+	//buffer.copyRegion( { xmin: 0 , xmax: 2 , ymin: 0 , ymax: 2 } , { xmin: 3 , xmax: 5 , ymin: 2 , ymax: 4 } ) ;
+	//buffer.copyRegion( { xmin: 0 , xmax: 2 , ymin: 0 , ymax: 2 } , { xmin: 0 , xmax: 2 , ymin: 2 , ymax: 4 } ) ;
+	buffer.copyRegion( { x: 1 , y: 0 , width: 3 , height: 3 } , { x: 1 , y: 2 } ) ;
 	buffer.draw( { delta } ) ;
 	await Promise.resolveTimeout( 500 ) ;
 	buffer.draw( { delta } ) ;

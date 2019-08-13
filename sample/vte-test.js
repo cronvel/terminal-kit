@@ -31,6 +31,7 @@
 
 const termkit = require( '..' ) ;
 const term = termkit.terminal ;
+//const termios = require( 'termios' ) ;
 
 
 
@@ -46,6 +47,13 @@ async function test() {
 	
 	var vte = new termkit.Vte( { width: 80 , height: 24 , dst: term , x: 5 , y: 3 , eventInput: term } ) ;
 	vte.run( process.argv[ 2 ] || 'ls' , process.argv.slice( 3 ) ) ;
+
+	/*
+	setInterval( () => {
+		console.error( 'TERMIOS stdin attr:' , termios.getattr( vte.childProcess.stdin.fd ) ) ;
+		//console.error( 'TERMIOS stdout attr:' , termios.getattr( vte.childProcess.stdout.fd ) ) ;
+	} , 2000 ) ;
+	*/
 }
 
 test() ;

@@ -39,8 +39,9 @@ async function test() {
 	term.clear() ;
 
 	var delta = true ,
-		scrollingYmin = 1 ,
-		scrollingYmax = 2 ;
+		scroll = -1 ,
+		scrollingYmin = 0 ,
+		scrollingYmax = 3 ;
 	
 	var buffer = termkit.ScreenBuffer.create( { dst: term , width: 4 , height: 4 } ) ; //.clear() ;
 
@@ -51,11 +52,11 @@ async function test() {
 	buffer.draw( { delta } ) ;
 	
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.vScroll( -1 , undefined , scrollingYmin , scrollingYmax , true ) ;
+	buffer.vScroll( scroll , undefined , scrollingYmin , scrollingYmax , true ) ;
 	buffer.put( { x: 0 , y: scrollingYmax } , 'qrst' ) ;
 	buffer.draw( { delta } ) ;
 	await Promise.resolveTimeout( 500 ) ;
-	buffer.vScroll( -1 , undefined , scrollingYmin , scrollingYmax , true ) ;
+	buffer.vScroll( scroll , undefined , scrollingYmin , scrollingYmax , true ) ;
 	buffer.put( { x: 0 , y: scrollingYmax } , 'uvwx' ) ;
 	buffer.draw( { delta } ) ;
 	await Promise.resolveTimeout( 500 ) ;
