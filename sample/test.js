@@ -35,14 +35,14 @@ const term = require( '..' ).terminal ;
 //*
 term.clear() ;
 term.moveTo( 1 , 1 ) ;
-term( 'abcde\nfghij\nklmno\npqrst\nuvwxy\n' ) ;
+term.bgGreen( 'abcde\nfghij\nklmno\npqrst\nuvwxy\n' ) ;
 term.moveTo( 3 , 3 ) ;
-term.delete( 6 ) ;
+//term.bgRed.deleteLine( 1 , '*' ) ;
 //term( '\x08\x08\x08\x08\x08\x08\x08*' ) ;
 //term( '\x7f\x7f' ) ;
-//term.backDelete() ;
+term.bgRed.delete() ;
 //term.inverse()( '!\r' ) ;
-//term.eraseDisplayAbove() ;
+//term.bgRed.eraseDisplayAbove() ;
 //term( '!' ) ;
 term.moveTo( 1 , 8 ) ;
 process.exit() ;
