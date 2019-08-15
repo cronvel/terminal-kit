@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 
 	var terminating = false ;
@@ -53,7 +49,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		
 		if ( terminating ) { return ; }
 		
-		term.getColor( i , function get( error , reg ) {
+		term.getColor( i , ( error , reg ) => {
 			
 			if ( error ) { term.red( error.toString() + '\n' ) ; }
 			else { term( '#%u -- R:%u G:%u B:%u\n' , reg.register , reg.r , reg.g , reg.b ) ; }

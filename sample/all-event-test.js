@@ -29,102 +29,93 @@
 
 
 
-//var term = require( '../lib/termkit.js' ).terminal ;
-require( '../lib/termkit.js' ).getDetectedTerminal( ( error , term ) => {
+const term = require( '..' ).terminal ;
 
-
-	function terminate()
-	{
-		term.brightBlack( 'About to exit...\n' ) ;
-		term.grabInput( false ) ;
-		term.applicationKeypad( false ) ;
-		term.beep() ;
-		term.fullscreen( false ) ;
-		
-		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() ; } , 100 ) ;
-	} 
-
-
-
-	term.fullscreen() ;
-	term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
-	term.green( 'Hit CTRL-C to quit, CTRL-D to change the mouse reporting mode\n\n' ) ;
+function terminate() {
+	term.brightBlack( 'About to exit...\n' ) ;
+	term.grabInput( false ) ;
+	term.applicationKeypad( false ) ;
+	term.beep() ;
+	term.fullscreen( false ) ;
 	
-	// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
-	term.applicationKeypad() ;
+	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
+	setTimeout( function() { process.exit() ; } , 100 ) ;
+} 
 
-	//term.keyboardModifier() ;
 
-	term.grabInput( { mouse: 'button' , focus: true } ) ;
 
-	var mouseMode = 1 ;
+term.fullscreen() ;
+term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
+term.green( 'Hit CTRL-C to quit, CTRL-D to change the mouse reporting mode\n\n' ) ;
+
+// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
+term.applicationKeypad() ;
+
+//term.keyboardModifier() ;
+
+term.grabInput( { mouse: 'button' , focus: true } ) ;
+
+var mouseMode = 1 ;
+
+term.on( 'key' , ( name , matches , data ) => {
 	
-	term.on( 'key' , ( name , matches , data ) => {
-		
-		console.log(
-			"'key' event:" ,
-			name ,
-			matches ,
-			Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) ,
-			data.codepoint ? data.codepoint.toString( 16 ) : ''
-		) ;
-		
-		if ( matches.indexOf( 'CTRL_C' ) >= 0 )
-		{
-			term.green( 'CTRL-C received...\n' ) ;
-			terminate() ;
-		}
-		
-		if ( matches.indexOf( 'CTRL_R' ) >= 0 )
-		{
-			term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
-			term.requestCursorLocation() ;
-			term.requestScreenSize() ;
-		}
-		
-		if ( matches.indexOf( 'CTRL_D' ) >= 0 )
-		{
-			term.green( 'CTRL-D received: ' ) ;
-			mouseMode = ( mouseMode + 1 ) % 4 ;
-			
-			switch ( mouseMode )
-			{
-				case 0 :
-					term.green( 'turn mouse off\n' ) ;
-					term.grabInput( { mouse: false , focus: true } ) ;
-					break ;
-				case 1 :
-					term.green( 'mouse in button mode\n' ) ;
-					term.grabInput( { mouse: 'button' , focus: true } ) ;
-					break ;
-				case 2 :
-					term.green( 'mouse in drag mode\n' ) ;
-					term.grabInput( { mouse: 'drag' , focus: true } ) ;
-					break ;
-				case 3 :
-					term.green( 'mouse in motion mode\n' ) ;
-					term.grabInput( { mouse: 'motion' , focus: true } ) ;
-					break ;
-			}
-		}
-	} ) ;
-
-	term.on( 'terminal' , ( name , data ) => {
-		console.log( "'terminal' event:" , name , data ) ;
-	} ) ;
+	console.log(
+		"'key' event:" ,
+		name ,
+		matches ,
+		Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) ,
+		data.codepoint ? data.codepoint.toString( 16 ) : ''
+	) ;
 	
-	term.on( 'mouse' , ( name , data ) => {
-		console.log( "'mouse' event:" , name , data ) ;
-	} ) ;
+	if ( matches.indexOf( 'CTRL_C' ) >= 0 ) {
+		term.green( 'CTRL-C received...\n' ) ;
+		terminate() ;
+	}
+	
+	if ( matches.indexOf( 'CTRL_R' ) >= 0 ) {
+		term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
+		term.requestCursorLocation() ;
+		term.requestScreenSize() ;
+	}
+	
+	if ( matches.indexOf( 'CTRL_D' ) >= 0 ) {
+		term.green( 'CTRL-D received: ' ) ;
+		mouseMode = ( mouseMode + 1 ) % 4 ;
+		
+		switch ( mouseMode ) {
+			case 0 :
+				term.green( 'turn mouse off\n' ) ;
+				term.grabInput( { mouse: false , focus: true } ) ;
+				break ;
+			case 1 :
+				term.green( 'mouse in button mode\n' ) ;
+				term.grabInput( { mouse: 'button' , focus: true } ) ;
+				break ;
+			case 2 :
+				term.green( 'mouse in drag mode\n' ) ;
+				term.grabInput( { mouse: 'drag' , focus: true } ) ;
+				break ;
+			case 3 :
+				term.green( 'mouse in motion mode\n' ) ;
+				term.grabInput( { mouse: 'motion' , focus: true } ) ;
+				break ;
+		}
+	}
+} ) ;
 
-	term.on( 'unknown' , ( buffer ) => {
-		console.log( "'unknown' event, buffer:" , buffer ) ;
-	} ) ;
+term.on( 'terminal' , ( name , data ) => {
+	console.log( "'terminal' event:" , name , data ) ;
+} ) ;
 
-	term.on( 'resize' , ( width , height ) => {
-		console.log( "'resize' event, new width and height:" , width , height ) ;
-	} ) ;
+term.on( 'mouse' , ( name , data ) => {
+	console.log( "'mouse' event:" , name , data ) ;
+} ) ;
 
+term.on( 'unknown' , ( buffer ) => {
+	console.log( "'unknown' event, buffer:" , buffer ) ;
+} ) ;
+
+term.on( 'resize' , ( width , height ) => {
+	console.log( "'resize' event, new width and height:" , width , height ) ;
 } ) ;
 
