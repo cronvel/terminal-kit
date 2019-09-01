@@ -1,4 +1,10 @@
 
+v1.31.2
+-------
+
+Reject bad RegExp for .inputField's tokenRegExp option: throw if the RegExp doesn't have the 'g' flag (fix #97)
+
+
 v1.31.1
 -------
 

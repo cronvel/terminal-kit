@@ -369,6 +369,7 @@ It produces:
 	* tokenResetHook `Function( term , config )` this is a hook called before the first token
 	* tokenRegExp `RegExp` this is the regex used to tokenize the input, by default a token is space-delimited,
 	  so "one two three" would be tokenized as [ "one" , "two" , "three" ].
+	  **NOTE**: this `RegExp` **MUST** have the `g` flag, or it will throw an error.
 * callback( error , input ) (optional)
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
