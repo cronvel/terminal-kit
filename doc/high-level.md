@@ -982,6 +982,8 @@ When the user press RETURN/ENTER, it displays the index, text and coordinates of
 			* each time `progressBar.itemDone()` is called
 			* each time `progressBar.update()` is called
 			* each time `progressBar.resume()` is called
+	* y `integer` if set (and non-zero), the progressBar will be on the *yth* line
+	* x `integer` if set (and non-zero) and the 'y' option is set (and non-zero), the progressBar will start on the *xth* row
 
 It creates a nice progress bar and returns a controller object to interact with it.
 

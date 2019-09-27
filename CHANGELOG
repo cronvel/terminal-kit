@@ -1,4 +1,10 @@
 
+v1.31.4
+-------
+
+Add the x,y option to .progressBar() (may somewhat solve #99)
+
+
 v1.31.3
 -------
 
