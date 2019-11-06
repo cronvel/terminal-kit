@@ -1,4 +1,10 @@
 
+v1.31.5
+-------
+
+Limited support for newline in ScreenBuffer#put(), replace other control chars by a space (#103)
+
+
 v1.31.4
 -------
 
