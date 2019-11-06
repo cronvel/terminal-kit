@@ -255,6 +255,7 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 	  see: [the attribute object](#ref.ScreenBuffer.attributes))
 	* wrap `boolean` if true, text wrapping is enabled: when the cursor move beyond the last column, it is moved to the begining
 	  of the next line
+    * newLine: if true, then \r and \n produce new lines, false by default: .put() does not manage lines
 	* direction `string` the direction where the cursor move after each char, one of:
 		* 'right' (default)
 		* 'left'

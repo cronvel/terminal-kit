@@ -1,4 +1,10 @@
 
+v1.31.6
+-------
+
+Support for new line in ScreenBuffer#put() need the opt-in option 'newLine' set to true, fixing v1.31.5 non-backward compatible behavior change (#103)
+
+
 v1.31.5
 -------
 
