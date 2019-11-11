@@ -4,7 +4,7 @@
 <a name="ref.document"></a>
 ## The Document Model
 
-[!unstable](unstable.png)
+![unstable](unstable.png)
 
 The *document model* is almost stable, but the current documentation is still in progress.
 
