@@ -29,10 +29,6 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
 var termkit = require( '../../lib/termkit.js' ) ;
 var term = termkit.terminal ;
@@ -42,7 +38,7 @@ var term = termkit.terminal ;
 term.clear() ;
 
 var document = term.createDocument( {
-//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
+	// backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
 var text = new termkit.Text( {
@@ -111,8 +107,7 @@ button3.on( 'submit' , onSubmit ) ;
 button2.on( 'submit' , onSubmit ) ;
 button1.on( 'submit' , onSubmit ) ;
 
-function onSubmit( value )
-{
+function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
@@ -137,6 +132,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 
