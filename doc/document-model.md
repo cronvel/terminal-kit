@@ -25,6 +25,7 @@ manage widget focus, event dispatching, widget cycling, **with mouse support eve
 
 
 
+<a name="toc"></a>
 ## Table of Contents
 
 * Instantiable classes:
@@ -63,9 +64,9 @@ manage widget focus, event dispatching, widget cycling, **with mouse support eve
 ## Document
 
 The *Document element* is the main [*Element*](#ref.Element) of the *document model*: it represents the whole document just like the
-*document* object of the browser DOM. Most use cases need just one *document* mapping the whole terminal.
+*document* object of the browser DOM. Most use cases need just one *document*, mapping the whole terminal.
 
-All other *elements* are children of a *document* or children of children of (children of... etc) a *document*, they just don't work without it.
+All other *elements* are children of a *document* or children of children of (children of... etc) a *document*: they just don't work without it.
 
 Being a [*Container*](#ref.Container), it is backed by a [*screenBuffer*](screenbuffer.md#top).
 
