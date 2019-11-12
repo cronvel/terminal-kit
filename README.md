@@ -62,7 +62,7 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
-*New:* [Document model](doc.document-model.md#top) for building rich app GUI.
+*New:* [Document model](doc/document-model.md#top) for building rich app GUI.
 
 *New:* Promises can be used instead of callback everywhere.
 
