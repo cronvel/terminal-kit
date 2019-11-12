@@ -160,5 +160,25 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 * *New* [ScreenBuffer HD](screenbuffer-hd.md#top)
 * [TextBuffer](textbuffer.md#top)
 * [Rect](rect.md#top)
+* *New* [Document model](document-model.md#top) for rich app GUI, available elements:
+	* [Document](document-model.md#ref.Document)
+	* [Button](document-model.md#ref.Button)
+	* [ColumnMenu](document-model.md#ref.ColumnMenu)
+	* [ColumnMenuMulti](document-model.md#ref.ColumnMenuMulti)
+	* [DropDownMenu](document-model.md#ref.DropDownMenu)
+	* [EditableTextBox)](document-model.md#ref.EditableTextBox)
+	* [Form](document-model.md#ref.Form)
+	* [LabeledInput](document-model.md#ref.LabeledInput)
+	* [Layout](document-model.md#ref.Layout)
+	* [RowMenu](document-model.md#ref.RowMenu)
+	* [SelectList](document-model.md#ref.SelectList)
+	* [SelectListMulti](document-model.md#ref.SelectListMulti)
+	* [TextBox](document-model.md#ref.TextBox)
+	* [Text](document-model.md#ref.Text)
+	* [ToggleButton](document-model.md#ref.ToggleButton)
 
+  See also those base classes:
+	* [Element](document-model.md#ref.Element)
+	* [Container](document-model.md#ref.Container)
+	* [BaseMenu](document-model.md#ref.BaseMenu)
 

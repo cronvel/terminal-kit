@@ -62,6 +62,8 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
+*New:* [Document model](doc.document-model.md#top) for building rich app GUI.
+
 *New:* Promises can be used instead of callback everywhere.
 
 *New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column
