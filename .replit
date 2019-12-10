@@ -1,0 +1,2 @@
+language = "nodejs"
+run = "npm install && cd demo && node spaceship.js"

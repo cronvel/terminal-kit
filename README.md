@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/github/license/cronvel/terminal-kit.svg)](https://github.com/cronvel/terminal-kit)
 [![Downloads](https://img.shields.io/npm/dm/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
 [![Version](https://img.shields.io/npm/v/terminal-kit.svg)](https://www.npmjs.com/package/terminal-kit)
+[![run on repl.it](http://repl.it/badge/github/cronvel/terminal-kit)](https://repl.it/github/cronvel/terminal-kit)
 
 [![Stats](https://nodei.co/npm/terminal-kit.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/terminal-kit)
 
