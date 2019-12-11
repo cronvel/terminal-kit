@@ -1,2 +1,2 @@
 language = "nodejs"
-run = "npm install && cd demo && node spaceship.js"
+run = "yarn install && yarn link && cd sample && yarn link terminal-kit && cd ../demo && node spaceship.js"
