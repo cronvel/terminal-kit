@@ -1,2 +1,2 @@
 language = "nodejs"
-run = "npm install && mkdir samples/node_modules && ln -s ../../ samples/node_modules/terminal-kit"
+run = "npm install && mkdir sample/node_modules && ln -s ../../ sample/node_modules/terminal-kit && cd demo && node spaceship.js"
