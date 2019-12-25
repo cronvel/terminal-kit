@@ -62,6 +62,28 @@ require( '../lib/termkit.js' ).getDetectedTerminal( ( error , term ) => {
 		//menu_.on( 'highlight' , eventData => console.error( '\neventData:' , eventData ) ) ;
 	}
 
+	function menuCentered() {
+		var options = {
+			y: 1 ,
+			centered: true ,
+			style: term.inverse ,
+			selectedStyle: term.dim.blue.bgGreen
+		} ;
+
+		term.singleLineMenu( items , options , ( error2 , response ) => {
+			if ( error2 ) {
+				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+				terminate() ;
+				return ;
+			}
+
+			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
+			terminate() ;
+		} ) ;
+
+		//menu_.on( 'highlight' , eventData => console.error( '\neventData:' , eventData ) ) ;
+	}
+
 	function menuStartingOnSecondPage() {
 		var options = {
 			y: 1 ,
@@ -104,6 +126,9 @@ require( '../lib/termkit.js' ).getDetectedTerminal( ( error , term ) => {
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 
 	switch ( process.argv[2] ) {
+		case 'menuCentered' :
+			menuCentered() ;
+			break ;
 		case 'menuSecondPage' :
 			menuStartingOnSecondPage() ;
 			break ;
