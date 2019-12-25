@@ -29,10 +29,10 @@
 
 
 
-require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
+require( '../lib/termkit.js' ).getDetectedTerminal( ( error , term ) => {
 
 	term.grabInput( { mouse: 'motion' } ) ;
-	
+
 	var items = [
 		'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' ,
 		'File' , 'Edit' , 'View' , 'History' , 'Bookmarks' , 'Tools' , 'Help' ,
@@ -40,60 +40,78 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		'汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字汉字' ,
 		'汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字' , '汉字汉字汉字汉字汉字汉字汉字汉字'
 	] ;
-	
-	function menu()
-	{
+
+	function menu() {
 		var options = {
 			y: 1 ,
 			style: term.inverse ,
 			selectedStyle: term.dim.blue.bgGreen
 		} ;
-		
-		var menu_ = term.singleLineMenu( items , options , function( error , response ) {
-			
-			if ( error )
-			{
+
+		term.singleLineMenu( items , options , ( error2 , response ) => {
+			if ( error2 ) {
 				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
 				terminate() ;
 				return ;
 			}
-			
+
 			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
 			terminate() ;
 		} ) ;
-		
+
 		//menu_.on( 'highlight' , eventData => console.error( '\neventData:' , eventData ) ) ;
 	}
-	
-	
-	
-	async function asyncMenu()
-	{
+
+	function menuStartingOnSecondPage() {
+		var options = {
+			y: 1 ,
+			selectedIndex: 8 ,
+			style: term.inverse ,
+			selectedStyle: term.dim.blue.bgGreen
+		} ;
+
+		term.singleLineMenu( items , options , ( error2 , response ) => {
+			if ( error2 ) {
+				term.red.bold( "\nAn error occurs: " + error + "\n" ) ;
+				terminate() ;
+				return ;
+			}
+
+			term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
+			terminate() ;
+		} ) ;
+	}
+
+	async function menuAsync() {
 		var options = {
 			y: 1 ,
 			style: term.inverse ,
 			selectedStyle: term.dim.blue.bgGreen
 		} ;
-		
+
 		var response = await term.singleLineMenu( items , options ).promise ;
 		term.green( "\n#%s selected: %s (%s,%s)\n" , response.selectedIndex , response.selectedText , response.x , response.y ) ;
 		terminate() ;
 	}
-	
-	
-	
-	function terminate()
-	{
+
+	function terminate() {
 		term.grabInput( false ) ;
 		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() ; } , 100 ) ;
+		setTimeout( () => { process.exit() ; } , 100 ) ;
 	}
-	
+
 	term.clear() ;
 	term.bold.cyan( '\n\nSelect one item from the menu!' ) ;
 
-	menu() ; 
-	//asyncMenu() ; 
+	switch ( process.argv[2] ) {
+		case 'menuSecondPage' :
+			menuStartingOnSecondPage() ;
+			break ;
+		case 'menuAsync' :
+			menuAsync() ;
+			break ;
+		default :
+			menu() ;
+			break ;
+	}
 } ) ;
-
-
