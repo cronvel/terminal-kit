@@ -658,6 +658,8 @@ term.fileInput(
 	* style `function` the style of unselected items, default to the current `term`
 	* selectedStyle `function` the style of the selected item, default to `term.dim.blue.bgGreen`
 	* selectedIndex `number` selected index at initialization (default: 0)
+	* align `string` one of 'left' (default), 'right' or 'center', align the menu accordingly
+	* fillIn `boolean` if true (default: false), the menu will fill in the whole line with white chars
 	* keyBindings `Object` overide default key bindings, object's keys are Terminal-kit key names, the value is the action (string)
 	* cancelable `boolean` if ESCAPE is pressed, it exits, calling the callback with undefined values
 	* exitOnUnexpectedKey `boolean` if an unexpected key is pressed, it exits, calling the callback with undefined values

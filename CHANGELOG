@@ -1,4 +1,10 @@
 
+v1.32.3
+-------
+
+.singleLineMenu() now supports option 'align' (=right|center|left) and 'fillIn' (boolean) (inspired by PR #105)
+
+
 v1.32.2
 -------
 
