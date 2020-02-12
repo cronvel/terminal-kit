@@ -77,6 +77,10 @@ term.on( 'key' , ( name , matches , data ) => {
 		term.requestCursorLocation() ;
 		term.requestScreenSize() ;
 	}
+	if ( matches.indexOf( 'CTRL_V' ) >= 0 ) {
+		term.green( 'CTRL-V received... asking terminal the clipboard...\n' ) ;
+		term.requestClipboard() ;
+	}
 	
 	if ( matches.indexOf( 'CTRL_D' ) >= 0 ) {
 		term.green( 'CTRL-D received: ' ) ;
