@@ -32,14 +32,16 @@
 const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
+
+
 async function run() {
 	var str ;
 
 	try {
 		str = await term.getClipboard() ;
 		term( "Clipboard is: '%s'\n" , str ) ;
-		
-		term.setClipboard( "Booob!" ) ;
+
+		term.setClipboard( "Bob!!!" ) ;
 		str = await term.getClipboard() ;
 		term( "Clipboard is: '%s'\n" , str ) ;
 	}
