@@ -104,7 +104,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 	} ) ;
 
 	term.on( 'mouse' , function( name , data ) {
-		console.log( "'mouse' event:" , name , data ) ;
+		term( "'mouse' event: %s %n\n" , name , data ) ;
 	} ) ;
 
 	term.on( 'unknown' , function( buffer ) {

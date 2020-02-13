@@ -81,6 +81,9 @@ term.on( 'key' , function( key ) {
 			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
 			break ;
 		
+		case 'CTRL_O' :
+			break ;
+
 		default :
 			textBox.setContent( textBox.getContent() + key ) ;
 			break ;

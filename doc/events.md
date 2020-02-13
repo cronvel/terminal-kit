@@ -106,6 +106,10 @@ If you have to use some of those less supported keys, either provide alternative
 	* ctrl `boolean` true if the CTRL key is down or not
 	* alt `boolean` true if the ALT key is down or not
 	* shift `boolean` true if the SHIFT key is down or not
+	* left `boolean` **ONLY** defined for MOUSE_DRAG subtype, true if it's a left-button mouse-drag
+	* right `boolean` **ONLY** defined for MOUSE_DRAG subtype, true if it's a right-button mouse-drag
+	* xFrom `number` **ONLY** defined for MOUSE_DRAG subtype, the x position from where the mouse-drag started
+	* yFrom `number` **ONLY** defined for MOUSE_DRAG subtype, the y position from where the mouse-drag started
 
 Activated when grabInput() is called with the 'mouse' options, e.g. `{ mouse: 'button' }`, `{ mouse: 'drag' }` or `{ mouse: 'motion' }`.
 
@@ -117,20 +121,24 @@ The argument 'name' can be:
 * MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN: self explanatory
 * MOUSE_OTHER_BUTTON_PRESSED, MOUSE_OTHER_BUTTON_RELEASED: a fourth mouse button is sometime supported
 * MOUSE_BUTTON_RELEASED: a button were released, however the terminal does not tell us which one
-* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is passed to grabInput(), every moves of the mouse will fire this event,
-  if `{ mouse: 'drag' }` is given, it will be fired if the mouse move while a button is pressed
+* MOUSE_MOTION: if the options `{ mouse: 'motion' }` is passed to grabInput(), every moves of the mouse will fire this event
+* MOUSE_DRAG: if the options `{ mouse: 'motion' }` or `{ mouse: 'drag' }` is passed to grabInput(), every moves of the mouse
+  while a button is pressed will fire this event
 
 *Good* terminals will provide everything: which specific buttons was pressed, which was released, mouse wheel, motions...
 
 Some terminals will just report *MOUSE_BUTTON_RELEASED* for any button releases instead of the correct
 *MOUSE_LEFT_BUTTON_RELEASED* / *MOUSE_RIGHT_BUTTON_RELEASED* / *MOUSE_MIDDLE_BUTTON_RELEASED* / *MOUSE_OTHER_BUTTON_RELEASED*.
 
-Some terminals will never report *MOUSE_RIGHT_BUTTON_PRESSED* (e.g. *Gnome-Terminal*), instead it triggers
+Some terminals will never report *MOUSE_RIGHT_BUTTON_PRESSED* (e.g. old versions of *Gnome-Terminal*), instead it triggers
 the terminal's context menu.
 
-Some terminals will never report *MOUSE_MOTION*.
+Some terminals will never report *MOUSE_MOTION* / *MOUSE_DRAG*.
 By the way, **you can still get the mouse position** when a button is pressed (or released): the *data* argument still contains
 the x and y coordinates of the mouse when said event was fired.
+
+For *MOUSE_DRAG*, *left* and *right* are not activated at the same time, if they are both pressed, it will be considered
+as a left-button drag (per terminal limitation).
 
 So your application should not rely too much on less supported features: it should always provide alternatives.
 
@@ -154,4 +162,6 @@ The argument 'name' can be:
 * FOCUS_IN: it is emitted if the terminal gains focus (if supported by your terminal)
 
 * FOCUS_OUT: it is emitted if the terminal loses focus (if supported by your terminal)
+
+* CLIPBOARD: **internal usage only** it is emitted in response of a requestClipboard()
 

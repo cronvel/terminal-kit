@@ -1,4 +1,14 @@
 
+v1.33.0
+-------
+
+New: clipboard API
+Mouse event: new event subtype MOUSE_DRAG
+TextBuffer support selection with hilight (inverse foreground and background)
+TextBox are selectable and copy to primary clipboard on doing so while CTRL_O copy current selection to cut clipboard
+EditableTextBox: CTRL_P paste from cut clipboard
+
+
 v1.32.3
 -------
 
