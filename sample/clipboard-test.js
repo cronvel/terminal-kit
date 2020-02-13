@@ -29,6 +29,7 @@
 
 
 
+const Promise = require( 'seventh' ) ;
 const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
@@ -41,7 +42,10 @@ async function run() {
 		str = await term.getClipboard() ;
 		term( "Clipboard is: '%s'\n" , str ) ;
 
-		term.setClipboard( "Bob!!!" ) ;
+		await Promise.resolveTimeout( 100 ) ;
+		await term.setClipboard( "Bob!!!" ) ;
+
+		await Promise.resolveTimeout( 100 ) ;
 		str = await term.getClipboard() ;
 		term( "Clipboard is: '%s'\n" , str ) ;
 	}
