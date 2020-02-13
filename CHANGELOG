@@ -1,4 +1,11 @@
 
+v1.33.1
+-------
+
+EditableTextBox supports cursor moves on click, and supports middle-click that paste the so-called 'primary' clipboard
+LabeledInput support clipboard operation
+
+
 v1.33.0
 -------
 
