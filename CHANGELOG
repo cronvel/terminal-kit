@@ -1,4 +1,11 @@
 
+v1.33.3
+-------
+
+Fix Document model drag event
+basic support for scrollable TextBox
+
+
 v1.33.2
 -------
 

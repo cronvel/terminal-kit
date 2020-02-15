@@ -40,7 +40,7 @@ var document = term.createDocument() ;
 
 var labeledInput ;
 
-/*
+//*
 labeledInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'name: ' ,
@@ -50,7 +50,7 @@ labeledInput = new termkit.LabeledInput( {
 } ) ;
 //*/
 
-//*
+/*
 labeledInput = new termkit.LabeledInput( {
 	parent: document ,
 	label: 'name: ' ,

@@ -49,8 +49,7 @@ var text = new termkit.Text( {
 } ) ;
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;

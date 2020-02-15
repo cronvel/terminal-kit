@@ -52,6 +52,7 @@ var textBox = new termkit.TextBox( {
 	//attr: { color: 241 } ,
 	//attr: { color: '*royal-blue' } ,
 	//hidden: true ,
+	scrollable: true ,
 	x: 10 ,
 	y: 2 ,
 	width: 30 ,
@@ -61,8 +62,7 @@ var textBox = new termkit.TextBox( {
 
 term.on( 'key' , function( key ) {
 	
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
@@ -81,6 +81,8 @@ term.on( 'key' , function( key ) {
 			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
 			break ;
 		
+		case 'PAGE_DOWN' :
+		case 'PAGE_UP' :
 		case 'CTRL_O' :
 			break ;
 
