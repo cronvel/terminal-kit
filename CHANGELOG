@@ -1,4 +1,11 @@
 
+v1.33.4
+-------
+
+Document model: improved mouse event
+TextBox and EditableTextBox scrolling is greatly improved (auto scroll when needed, scroll move cursor, mouse wheel support)
+
+
 v1.33.3
 -------
 
