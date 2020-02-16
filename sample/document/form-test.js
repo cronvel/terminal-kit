@@ -108,6 +108,7 @@ var form = new termkit.Form( {
 			label: 'comment: ' ,
 			content: 'multi\nline\ncontent' ,
 			height: 3 ,
+			scrollable: true ,
 			validator: { type: 'string' }
 		} ,
 	] ,
