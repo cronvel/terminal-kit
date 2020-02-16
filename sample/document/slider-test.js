@@ -41,16 +41,17 @@ var document = term.createDocument( {
 	//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var scrollbar = new termkit.ScrollBar( {
+var slider = new termkit.Slider( {
 	parent: document ,
 	x: 10 ,
 	y: 10 ,
-	height: 5
+	height: 5 ,
+	isVertical: true
 } ) ;
 
 var acc = 0 ;
 
-scrollbar.on( 'scroll' , ( dx , dy ) => scrollbar.setScrollRate( acc += 0.1 * dy ) ) ;
+slider.on( 'slide' , ( dx , dy ) => slider.setSlideRate( acc += 0.1 * dy ) ) ;
 
 document.focusNext() ;
 
@@ -68,6 +69,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 
