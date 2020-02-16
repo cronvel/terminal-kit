@@ -1,4 +1,11 @@
 
+v1.33.7
+-------
+
+Fix scrollable for TextBox, it can now get focus for listening key events (page up/down)
+All *Menu* are now sensible to mouse wheel
+
+
 v1.33.6
 -------
 
