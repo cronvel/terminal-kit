@@ -48,7 +48,9 @@ var scrollbar = new termkit.ScrollBar( {
 	height: 5
 } ) ;
 
+var acc = 0 ;
 
+scrollbar.on( 'scroll' , ( dx , dy ) => scrollbar.setScrollRate( acc += 0.1 * dy ) ) ;
 
 document.focusNext() ;
 
