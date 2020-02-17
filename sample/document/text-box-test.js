@@ -53,7 +53,7 @@ var textBox = new termkit.TextBox( {
 	//attr: { color: '*royal-blue' } ,
 	//hidden: true ,
 	scrollable: true ,
-	hasVScrollBar: true ,
+	vScrollBar: true ,
 	x: 10 ,
 	y: 2 ,
 	width: 30 ,

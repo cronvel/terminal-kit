@@ -68,7 +68,7 @@ var textBox = new termkit.EditableTextBox( {
 	width: 50 ,
 	height: 20 ,
 	scrollable: true ,
-	hasVScrollBar: true ,
+	vScrollBar: true ,
 	stateMachine: stateMachine
 } ) ;
 
