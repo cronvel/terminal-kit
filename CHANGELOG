@@ -1,4 +1,10 @@
 
+v1.33.10
+--------
+
+Minor improvement on Slider (fix micro bug of the cursor hanging at the bottom and one cell right off of the slider)
+
+
 v1.33.9
 -------
 
