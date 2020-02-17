@@ -61,13 +61,14 @@ catch( error ) {
 var textBox = new termkit.EditableTextBox( {
 	parent: document ,
 	content: placeHolder ,
-	attr: { bgColor: 'gray' } ,
+	attr: { bgColor: 'black' } ,
 	//hidden: true ,
 	x: 10 ,
 	y: 2 ,
 	width: 50 ,
 	height: 20 ,
 	scrollable: true ,
+	hasVScrollBar: true ,
 	stateMachine: stateMachine
 } ) ;
 

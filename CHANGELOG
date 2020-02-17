@@ -1,4 +1,11 @@
 
+v1.33.8
+-------
+
+New: Document model has now a Slider widget (only vertical support ATM)
+Now TextBox and EditableTextBox can have a vertical scrollbar using the new Slider widget
+
+
 v1.33.7
 -------
 

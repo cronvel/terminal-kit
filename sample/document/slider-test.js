@@ -44,14 +44,16 @@ var document = term.createDocument( {
 var slider = new termkit.Slider( {
 	parent: document ,
 	x: 10 ,
-	y: 10 ,
-	height: 5 ,
+	y: 5 ,
+	height: 10 ,
 	isVertical: true
 } ) ;
 
 var acc = 0 ;
 
-slider.on( 'slide' , ( dx , dy ) => slider.setSlideRate( acc += 0.1 * dy ) ) ;
+slider.on( 'slideStep' , d => {
+	slider.setSlideRate( acc += 0.1 * d ) ;
+} ) ;
 
 document.focusNext() ;
 
