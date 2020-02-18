@@ -1,4 +1,12 @@
 
+v1.33.12
+--------
+
+Some word-wrapping bugs fixed for TextBuffer
+horizontal Slider supported
+TextBox supports horizontal scroll bar now
+
+
 v1.33.11
 --------
 

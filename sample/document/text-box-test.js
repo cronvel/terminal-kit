@@ -83,6 +83,7 @@ var textBox = new termkit.TextBox( {
 	//contentHasMarkup: true ,
 	scrollable: true ,
 	vScrollBar: true ,
+	//hScrollBar: true ,
 	wordwrap: true ,
 	x: 10 ,
 	y: 2 ,
