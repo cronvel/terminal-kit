@@ -1,4 +1,11 @@
 
+v1.33.11
+--------
+
+Word-wrapping support for TextBuffer and TextBox
+Improved scrolling on Slider, TextBox and EditableTextBox, as well as more navigation keys and tiny draw-code performances bugs fixed
+
+
 v1.33.10
 --------
 
