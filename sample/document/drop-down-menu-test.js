@@ -29,13 +29,9 @@
 
 
 
-/* jshint unused:false */
-
-
-
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -80,14 +76,6 @@ var dropDownMenu = new termkit.DropDownMenu( {
 			]
 		} ,
 		{
-			content: 'Help' ,
-			value: 'help' ,
-			items: [
-				{ content: 'Reference' , value: 'reference' } ,
-				{ content: 'About' , value: 'about' } ,
-			]
-		} ,
-		{
 			content: 'topSubmit' ,
 			value: 'topSubmit' ,
 			topSubmit: true
@@ -97,6 +85,14 @@ var dropDownMenu = new termkit.DropDownMenu( {
 			value: 'escapeSubmit' ,
 			topSubmit: true ,
 			shortcuts: 'ESCAPE'
+		} ,
+		{
+			content: 'Help' ,
+			value: 'help' ,
+			items: [
+				{ content: 'Reference' , value: 'reference' } ,
+				{ content: 'About' , value: 'about' } ,
+			]
 		}
 	]
 } ) ;
@@ -105,13 +101,27 @@ var dropDownMenu = new termkit.DropDownMenu( {
 
 dropDownMenu.on( 'submit' , onSubmit ) ;
 
-function onSubmit( buttonValue )
-{
+function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
 	term.restoreCursor() ;
 }
+
+
+
+// Test menu when losing focus (but it fails ATM)
+/*
+var button = new termkit.Button( {
+	parent: document ,
+	//content: '> button#1' ,
+	content: '> button' ,
+	contentHasMarkup: true ,
+	value: 'b1' ,
+	x: 10 ,
+	y: 10 ,
+} ) ;
+//*/
 
 
 

@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../..' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 
 

@@ -1,4 +1,10 @@
 
+v1.33.14
+--------
+
+Fix the SelectMenuMulti behavior, submitting on 'clickOut'
+
+
 v1.33.13
 --------
 
