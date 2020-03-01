@@ -46,7 +46,8 @@ var textTable = new termkit.TextTable( {
 		//*
 		[ 'header #1' , 'header #2' , 'header #3' ] ,
 		[ 'row #1' , 'Bigger cell bigger cell bigger cell' , 'cell' ] ,
-		[ 'row #2' , 'cell' , 'a medium cell' ]
+		[ 'row #2' , 'cell' , 'a medium cell' ] ,
+		[ 'row #3' , 'cell' , 'header #3' ]
 		//*/
 		/*
 		[ '1-1' , '2-1' , '3-1' ] ,
