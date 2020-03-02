@@ -45,9 +45,10 @@ var textTable = new termkit.TextTable( {
 	cellContents: [
 		//*
 		[ 'header #1' , 'header #2' , 'header #3' ] ,
-		[ 'row #1' , 'Bigger cell bigger cell bigger cell' , 'cell' ] ,
+		[ 'row #1' , 'a much bigger cell '.repeat( 10 ) , 'cell' ] ,
 		[ 'row #2' , 'cell' , 'a medium cell' ] ,
-		[ 'row #3' , 'cell' , 'header #3' ]
+		[ 'row #3' , 'cell' , 'cell' ] ,
+		[ 'row #4' , 'cell\nwith\nnew\nlines' , 'cell' ]
 		//*/
 		/*
 		[ '1-1' , '2-1' , '3-1' ] ,
@@ -57,8 +58,11 @@ var textTable = new termkit.TextTable( {
 	] ,
 	x: 0 ,
 	y: 2 ,
-	width: 100 ,
-	height: 25
+	width: 30 ,
+	//width: term.width ,
+	height: 15 ,
+	fit: true ,	// Activate all expand/shrink + wordwrap
+	//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordwrap: true ,
 } ) ;
 
 

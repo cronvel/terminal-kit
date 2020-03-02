@@ -29,7 +29,7 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
+var termkit = require( '../..' ) ;
 var term = termkit.terminal ;
 
 
@@ -109,7 +109,32 @@ async function test2() {
 	columnMenu.document.giveFocusTo( columnMenu ) ;
 }
 
+async function test3() {
+	var table = await term.createInlineElement( termkit.TextTable , {
+		cellContents: [
+			//*
+			[ 'header #1' , 'header #2' , 'header #3' ] ,
+			[ 'row #1' , 'a much bigger cell '.repeat( 10 ) , 'cell' ] ,
+			[ 'row #2' , 'cell' , 'a medium cell' ] ,
+			[ 'row #3' , 'cell' , 'cell' ] ,
+			[ 'row #4' , 'cell\nwith\nnew\nlines' , 'cell' ]
+			//*/
+			/*
+			[ '1-1' , '2-1' , '3-1' ] ,
+			[ '1-2' , '2-2' , '3-2' ] ,
+			[ '1-3' , '2-3' , '3-3' ]
+			//*/
+		] ,
+		//x: 1 , y: 1 ,
+		width: 60 , height: 20 ,
+		fit: true
+	} ) ;
+	console.log( '\n' ) ;
+	//console.log( 'ok' ) ;
+	process.exit() ;
+}
 
 
-test2() ;
+
+test3() ;
 

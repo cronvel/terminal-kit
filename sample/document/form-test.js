@@ -47,7 +47,7 @@ var document = term.createDocument() ;
 var form = new termkit.Form( {
 	parent: document ,
 	x: 10 ,
-	y: 10 ,
+	y: 3 ,
 	width: 40 ,
 	inputs: [
 		{
