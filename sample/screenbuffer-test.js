@@ -56,15 +56,28 @@ function moveRedraw()
 }
 //*/
 
-var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 } ) ; //.clear() ;
+/*
+var buffer = new termkit.ScreenBuffer( { dst: term , width: 8 , height: 8 } ) ; //.clear() ;
 buffer.put( { x: 3 , y: 2 , attr: { color: 'red' , bgColor: 'brightBlack' , underline: true } } , 'toto' ) ;
 buffer.put( { x: 4 , y: 5 , attr: { color: 'brightYellow' , bold: true } } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+//*/
 
-var buffer2 = termkit.ScreenBuffer.create( { dst: term , width: 3 , height: 1 , x: 70 , y: 3 } ) ; //.clear() ;
+//*
+var buffer = new termkit.ScreenBufferHD( { dst: term , width: 8 , height: 8 } )
+buffer.fill( { attr: { bgColor: {r:12,g:12,b:12} } } ) ;
+buffer.put( { x: 3 , y: 2 , attr: { color: {r:233,g:33,b:34} , bgColor: 'brightBlack' , underline: true } } , 'toto' ) ;
+buffer.put( { x: 4 , y: 5 , attr: { color: {r:233,g:233,b:34} , bold: true } } , '𝌆' ) ;	// <-- takes more than one UCS-2 character
+//*/
+
+buffer.draw( { inline: true } ) ; return ;
+buffer.draw() ; return ;
+
+var buffer2 = new termkit.ScreenBuffer( { dst: term , width: 3 , height: 1 , x: 70 , y: 3 } ) ; //.clear() ;
 buffer2.put( { x: 0 , y: 0 , attr: { color: 'yellow' } } , '<--' ) ;
 
-var buffer3 = termkit.ScreenBuffer.create( { dst: buffer , width: 3 , height: 3 , x: 2 , y: 6 } ) ; //.clear() ;
+var buffer3 = new termkit.ScreenBuffer( { dst: buffer , width: 3 , height: 3 , x: 2 , y: 6 } ) ; //.clear() ;
 buffer3.put( { x: 1 , y: 1 , attr: { color: 'brightMagenta' } } , '*' ) ;
+
 
 //buffer3.draw() ;
 //buffer.dump() ; return ;
