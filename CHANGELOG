@@ -1,4 +1,13 @@
 
+v1.34.0
+-------
+
+New: document model TextTable
+New: term.table() (using TextTable in inline mode)
+New: ScreenBuffer* now support inline terminal rendering (i.e.: no moveTo operation, just newlines)
+Document model support strict inline mode (no grabInput, no asyncness, but only for static one-time-rendered elements)
+
+
 v1.33.15
 --------
 

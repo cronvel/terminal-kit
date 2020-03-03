@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../..' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 
 //term.clear() ;
@@ -109,8 +109,8 @@ async function test2() {
 	columnMenu.document.giveFocusTo( columnMenu ) ;
 }
 
-async function test3() {
-	var table = await term.createInlineElement( termkit.TextTable , {
+function test3() {
+	var table = term.createInlineElement( termkit.TextTable , {
 		cellContents: [
 			//*
 			[ 'header #1' , 'header #2' , 'header #3' ] ,
@@ -126,10 +126,11 @@ async function test3() {
 			//*/
 		] ,
 		//x: 1 , y: 1 ,
-		width: 60 , height: 20 ,
+		//width: 70 ,
+		//height: 20 ,
 		fit: true
 	} ) ;
-	console.log( '\n' ) ;
+	//console.log( '\n' ) ;
 	//console.log( 'ok' ) ;
 	//process.exit() ;
 }
