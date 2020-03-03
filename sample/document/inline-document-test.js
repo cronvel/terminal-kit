@@ -131,7 +131,7 @@ async function test3() {
 	} ) ;
 	console.log( '\n' ) ;
 	//console.log( 'ok' ) ;
-	process.exit() ;
+	//process.exit() ;
 }
 
 
