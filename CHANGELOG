@@ -1,4 +1,10 @@
 
+v1.34.1
+-------
+
+TextTable fixed when hasBorder:false, plus a whole bunch of new options to set attributes of columns, rows, cells, borders... as well as markup support (#109)
+
+
 v1.34.0
 -------
 

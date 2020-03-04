@@ -33,26 +33,30 @@ const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
 
-var table = term.table( [
-		//*
+term.table( [
 		[ 'header #1' , 'header #2' , 'header #3' ] ,
 		[ 'row #1' , 'a much bigger cell '.repeat( 10 ) , 'cell' ] ,
 		[ 'row #2' , 'cell' , 'a medium cell' ] ,
 		[ 'row #3' , 'cell' , 'cell' ] ,
-		[ 'row #4' , 'cell\nwith\nnew\nlines' , 'cell' ]
-		//*/
-		/*
-		[ '1-1' , '2-1' , '3-1' ] ,
-		[ '1-2' , '2-2' , '3-2' ] ,
-		[ '1-3' , '2-3' , '3-3' ]
-		//*/
+		[ 'row #4' , 'cell\nwith\nnew\nlines' , '^YThis ^Mis ^Ca ^Rcell ^Gwith ^Bmarkup^R^+!' ]
 	] , {
-		//x: 1 , y: 1 ,
-		hasBorder: false ,
+		//hasBorder: false ,
+		contentHasMarkup: true ,
 		borderChars: 'lightRounded' ,
+		borderAttr: { color: 'blue' } ,
+		textAttr: { bgColor: 'default' } ,
+		//textAttr: { bgColor: 'black' } ,
+		firstCellTextAttr: { bgColor: 'blue' } ,
+		firstRowTextAttr: { bgColor: 'gray' } ,
+		firstColumnTextAttr: { bgColor: 'red' } ,
+		//checkerEvenCellTextAttr: { bgColor: 'gray' } ,
+		//evenCellTextAttr: { bgColor: 'gray' } ,
+		//evenRowTextAttr: { bgColor: 'gray' } ,
+		//evenColumnTextAttr: { bgColor: 'gray' } ,
 		width: 50 ,
 		//height: 20 ,
-		fit: true
+		fit: true , // Activate all expand/shrink + wordwrap
+		//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordwrap: true ,
 	}
 ) ;
 
