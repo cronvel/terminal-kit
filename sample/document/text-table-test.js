@@ -30,7 +30,7 @@
 
 
 //console.error( "\n\n\n\n\n\n\n\n" ) ;
-const termkit = require( '../../lib/termkit.js' ) ;
+const termkit = require( '../..' ) ;
 const term = termkit.terminal ;
 
 term.clear() ;
@@ -58,7 +58,8 @@ var textTable = new termkit.TextTable( {
 	] ,
 	x: 0 ,
 	y: 2 ,
-	width: 30 ,
+	hasBorder: true ,
+	width: 50 ,
 	//width: term.width ,
 	height: 15 ,
 	fit: true ,	// Activate all expand/shrink + wordwrap

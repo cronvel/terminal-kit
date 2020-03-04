@@ -48,6 +48,8 @@ var table = term.table( [
 		//*/
 	] , {
 		//x: 1 , y: 1 ,
+		hasBorder: false ,
+		borderChars: 'lightRounded' ,
 		width: 50 ,
 		//height: 20 ,
 		fit: true
