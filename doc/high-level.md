@@ -390,6 +390,7 @@ Special keys are supported by the input field:
 * END: move the cursor at the end of the input field
 * DOWN, UP: use the history feature (if `options.history` is set)
 * TAB: use the auto-completion feature (if `options.autoComplete` is set)
+* CTRL_R: use the auto-completion feature, using the provided history array (`options.history`)
 * CTRL_U/CTRL_K: delete all characters before/after the cursor
 
 Additional keys are used when the auto-completion displays its menu (see [.singleLineMenu()](#ref.singleLineMenu) for details).
@@ -412,6 +413,7 @@ Available actions are:
 * startOfInput: move the cursor at the begining of input (default: HOME)
 * endOfInput: move the cursor at the end of input (default: END)
 * autoComplete: auto-complete the input (default: TAB)
+* autoCompleteUsingHistory: auto-complete the input, using the provided history (`options.history` array instead of `options.autoComplete`)
 * meta: if bound to ESCAPE, allows for two-key combos like ESC-D to generate an ALT_D 
   (useful for terminals that do not have a modifier key assigned to alt/meta)
 

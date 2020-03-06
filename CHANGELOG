@@ -1,4 +1,10 @@
 
+v1.34.2
+-------
+
+.inputField() now supports CTRL_R auto-completion, using history as its source instead of options.autoComplete
+
+
 v1.34.1
 -------
 
