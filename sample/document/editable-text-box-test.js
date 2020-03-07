@@ -96,7 +96,7 @@ term.on( 'key' , function( key ) {
 			break ;
 		
 		case 'CTRL_W' :
-			textBox.textBuffer.wrapLines( 20 ) ;
+			textBox.textBuffer.wrapAllLines( 20 ) ;
 			textBox.draw() ;
 			break ;
 	}
