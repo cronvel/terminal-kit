@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 term.clear() ;
 
@@ -69,6 +69,7 @@ var textBox = new termkit.EditableTextBox( {
 	height: 20 ,
 	scrollable: true ,
 	vScrollBar: true ,
+	wordWrap: true ,
 	stateMachine: stateMachine
 } ) ;
 
@@ -76,8 +77,7 @@ document.giveFocusTo( textBox ) ;
 
 term.on( 'key' , function( key ) {
 	
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
