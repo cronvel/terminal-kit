@@ -1,4 +1,11 @@
 
+v1.34.3
+-------
+
+TextBuffer now supports both word-wrapping and 'hard' line-wrapping
+word-wrapping options are now spelled 'wordWrap' everywhere in Terminal Kit, old 'wordwrap' spelling is DEPRECATED but kept for backward compatibility
+
+
 v1.34.2
 -------
 

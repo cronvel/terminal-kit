@@ -53,10 +53,10 @@ term.table( [
 		//evenCellTextAttr: { bgColor: 'gray' } ,
 		//evenRowTextAttr: { bgColor: 'gray' } ,
 		//evenColumnTextAttr: { bgColor: 'gray' } ,
-		width: 50 ,
+		width: 60 ,
 		//height: 20 ,
-		fit: true , // Activate all expand/shrink + wordwrap
-		//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordwrap: true ,
+		fit: true , // Activate all expand/shrink + wordWrap
+		//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordWrap: true ,
 	}
 ) ;
 

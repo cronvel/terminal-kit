@@ -73,8 +73,9 @@ var textTable = new termkit.TextTable( {
 	width: 50 ,
 	//width: term.width ,
 	height: 15 ,
-	fit: true ,	// Activate all expand/shrink + wordwrap
-	//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordwrap: true ,
+	fit: true ,	// Activate all expand/shrink + wordWrap
+	//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordWrap: true ,
+	//lineWrap: true ,
 } ) ;
 
 
