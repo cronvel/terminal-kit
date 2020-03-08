@@ -1,4 +1,10 @@
 
+v1.34.5
+-------
+
+Transmit lineWrap/wordWrap options from LabeledInput and Form to EditableTextBox
+
+
 v1.34.4
 -------
 
