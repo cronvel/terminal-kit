@@ -29,16 +29,8 @@
 
 
 
-/* jshint unused:false */
-
-
-
-console.error( "\n\n\n\n\n\n\n\n" ) ;
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
-
-
-
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -133,9 +125,4 @@ term.on( 'key' , function( key ) {
 
 
 //term.moveTo( 1 , term.height ) ;
-
-
-
-
-
 

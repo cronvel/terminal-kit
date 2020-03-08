@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -69,8 +69,7 @@ labeledInput = new termkit.LabeledInput( {
 
 labeledInput.on( 'submit' , onSubmit ) ;
 
-function onSubmit( value )
-{
+function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
@@ -82,8 +81,7 @@ document.focusNext() ;
 
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
