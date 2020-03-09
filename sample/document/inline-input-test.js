@@ -45,6 +45,10 @@ var inlineInput = new termkit.InlineInput( {
 	x: 0 ,
 	y: 10 ,
 	width: 30 ,
+	cancelable: true ,
+	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
+	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,
+	autoCompleteMenu: true ,
 } ) ;
 
 inlineInput.on( 'submit' , onSubmit ) ;
@@ -52,7 +56,16 @@ inlineInput.on( 'submit' , onSubmit ) ;
 function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , "Submitted: '%s'\n" , value ) ;
+	term.restoreCursor() ;
+}
+
+inlineInput.on( 'cancel' , onCancel ) ;
+
+function onCancel() {
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Canceled\n' ) ;
 	term.restoreCursor() ;
 }
 
