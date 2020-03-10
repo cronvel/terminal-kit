@@ -44,7 +44,7 @@ var inlineInput = new termkit.InlineInput( {
 	emptyAttr: { bgColor: 'blue' } ,
 	x: 0 ,
 	y: 10 ,
-	width: 30 ,
+	width: 50 ,
 	cancelable: true ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,

@@ -46,7 +46,7 @@ var rowMenu = new termkit.RowMenu( {
 	y: 0 ,
 	//buttonSpacing: 3 ,
 	//justify: true ,
-	//width: 50 ,
+	width: 10 ,
 	items: [
 		{
 			content: 'File' ,
