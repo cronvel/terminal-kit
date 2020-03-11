@@ -1,4 +1,13 @@
 
+v1.35.0
+-------
+
+New document-model widget: InlineInput, it's like .inputField() and implements almost every features of it, and will supersede it once its inline-mode is ready
+TextBuffer: fix some cursor position issue with line-wrapping
+RowMenu now supports pagination
+TextBuffer now supports voidTextBuffer (a kind of 'ghost' textBuffer companion, used to implement hint and placeholder in InlineInput)
+
+
 v1.34.5
 -------
 
