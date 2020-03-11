@@ -41,7 +41,8 @@ var document = term.createDocument() ;
 var inlineInput = new termkit.InlineInput( {
 	parent: document ,
 	textAttr: { bgColor: 'blue' } ,
-	emptyAttr: { bgColor: 'blue' } ,
+	voidAttr: { bgColor: 'blue' } ,
+	placeholder: 'Your name here' ,
 	x: 0 ,
 	y: 10 ,
 	width: 50 ,
@@ -49,6 +50,7 @@ var inlineInput = new termkit.InlineInput( {
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,
 	autoCompleteMenu: true ,
+	autoCompleteHint: true ,
 } ) ;
 
 inlineInput.on( 'submit' , onSubmit ) ;

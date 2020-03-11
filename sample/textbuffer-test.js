@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
 
 var isHd = process.argv[ 2 ] === 'hd' ;
 
