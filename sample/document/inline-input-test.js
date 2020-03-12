@@ -45,6 +45,11 @@ var inlineInput = new termkit.InlineInput( {
 	placeholder: 'Your name here' ,
 	x: 0 ,
 	y: 10 ,
+	prompt: {
+		textAttr: { bgColor: 'blue' } ,
+		content: 'a big big big prompt> ' ,
+	} ,
+	//firstLineRightShift: 8 ,
 	width: 16 ,
 	cancelable: true ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
