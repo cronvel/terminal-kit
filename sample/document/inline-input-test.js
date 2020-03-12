@@ -45,7 +45,7 @@ var inlineInput = new termkit.InlineInput( {
 	placeholder: 'Your name here' ,
 	x: 0 ,
 	y: 10 ,
-	width: 50 ,
+	width: 16 ,
 	cancelable: true ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,
