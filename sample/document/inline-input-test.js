@@ -47,10 +47,11 @@ var inlineInput = new termkit.InlineInput( {
 	y: 10 ,
 	prompt: {
 		textAttr: { bgColor: 'blue' } ,
-		content: 'a big big big prompt> ' ,
+		content: '^R^+a big ^Gbig ^Ybig ^Rprompt> ' ,
+		contentHasMarkup: true
 	} ,
 	//firstLineRightShift: 8 ,
-	width: 16 ,
+	width: 36 ,
 	cancelable: true ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,

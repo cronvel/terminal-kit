@@ -1,4 +1,10 @@
 
+v1.35.1
+-------
+
+Many Document-model fix, including not altering user passed options
+
+
 v1.35.0
 -------
 
