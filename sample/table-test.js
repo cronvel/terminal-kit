@@ -39,6 +39,8 @@ term.table( [
 		[ 'row #2' , 'cell' , 'a medium cell' ] ,
 		[ 'row #3' , 'cell' , 'cell' ] ,
 		[ 'row #4' , 'cell\nwith\nnew\nlines' , '^YThis ^Mis ^Ca ^Rcell ^Gwith ^Bmarkup^R^+!' ]
+		//, ... new Array( 20 ).fill( [ 'filler row' , 'filler cell' , 'filler cell' ] )
+		, ... new Array( 20 ).fill( null ).map( (e,i) => [ 'filler row #' + i , 'filler cell' , 'filler cell' ] )
 	] , {
 		//hasBorder: false ,
 		contentHasMarkup: true ,

@@ -1,4 +1,10 @@
 
+v1.35.2
+-------
+
+Fix the 'strictInline' mode clipping issue for widget with a height greater than the terminal height (#111)
+
+
 v1.35.1
 -------
 
