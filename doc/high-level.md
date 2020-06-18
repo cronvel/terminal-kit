@@ -314,6 +314,8 @@ It produces:
 ### .inputField( [options] , [callback] )
 
 * options `Object` where:
+	* y `number` (optional) if set, this is the y coordinate (the row) of the beginning of the inputField
+	* x `number` (optional) if set, this is the x coordinate (the column) of the beginning of the inputField
 	* echo `boolean` if true (the default), input are displayed on the terminal
 	* echoChar `string` or `true` if set, all characters are replaced by this one (useful for password fields),
 	  if true, it is replaced by a dot: •
@@ -370,7 +372,8 @@ It produces:
 	* tokenRegExp `RegExp` this is the regex used to tokenize the input, by default a token is space-delimited,
 	  so "one two three" would be tokenized as [ "one" , "two" , "three" ].
 	  **NOTE**: this `RegExp` **MUST** have the `g` flag, or it will throw an error.
-* callback( error , input ) (optional)
+* callback( error , input ): an optional completion callback, for promise, use the *returnValue's* `.promise` preperty.
+  Arguments:
 	* error `mixed` truthy if an underlying error occurs
 	* input `string` the user input
 

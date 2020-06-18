@@ -1,4 +1,10 @@
 
+v1.35.5
+-------
+
+.inputField(), .progressBar() and all .*Menu() fallback to the last line position when requesting cursor location is not possible on the terminal (mainly a Windows problem) (#74)
+
+
 v1.35.4
 -------
 
