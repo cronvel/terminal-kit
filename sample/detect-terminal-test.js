@@ -33,10 +33,53 @@
 /* global describe, it, before, after */
 
 
-var termkit = require( '../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../lib/termkit.js' ) ;
+const term = termkit.terminal ;
+
+
+
+async function termInfo( t ) {
+	var r ;
+
+	term( 'Terminal name: %s\n' , t.appName ) ;
+	term( 'Terminal app ID: %s\n' , t.appId ) ;
+	term( 'Generic terminal: %s\n' , t.generic ) ;
+	term( 'Config file: %s\n' , t.termconfigFile ) ;
+	term( '\n' ) ;
+	
+	term( "Support for delta escape sequence: " + ( t.support.deltaEscapeSequence ? "^GOK^:\n" : "^RNO^:\n" ) ) ;
+	term( "Support for 256 colors: " + ( t.support['256colors'] ? "^GOK^:\n" : "^RNO^:\n" ) ) ;
+	term( "Support for true colors: " + ( t.support.trueColor ? "^GOK^:\n" : "^RNO^:\n" ) ) ;
+
+	try {
+		term( "Support for cursor location request: " ) ;
+		r = await t.getCursorLocation() ;
+		term( "^GOK^ ^K(%N)^:\n" , r ) ;
+	}
+	catch ( error ) {
+		term( "^RFAILED^ (%s)^:\n" , error ) ;
+	}
+
+	try {
+		term( "Support for palette request: " ) ;
+		await t.getPalette() ;
+		term( "^GOK^:\n" ) ;
+	}
+	catch ( error ) {
+		term( "^RFAILED^ (%s)^:\n" , error ) ;
+	}
+
+	term( "Issue #116 CURSOR_LOCATION keymap: " + ( t.keymap.CURSOR_LOCATION && typeof t.keymap.CURSOR_LOCATION === 'object' ? "^GOK^:\n" : "^RNO^:\n" ) ) ;
+	term( "Issue #116 cursorLocation handler: " + ( typeof t.handler.cursorLocation === 'function' ? "^GOK^:\n" : "^RNO^:\n" ) ) ;
+
+	term( '\n' ) ;
+}
+
+
 
 async function detect() {
+	var info , newTerm ;
+
 	term.green( '\n== Environment variable ==\n\n' ) ;
 	term( '$TERM: %s\n' , process.env.TERM ) ;
 	term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
@@ -47,26 +90,27 @@ async function detect() {
 
 	term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
 	term( '.guessTerminal(): %J\n' , termkit.guessTerminal() ) ;
-	term( 'Terminal name: %s\n' , term.appName ) ;
-	term( 'Terminal app ID: %s\n' , term.appId ) ;
-	term( 'Generic terminal: %s\n' , term.generic ) ;
-	term( 'Config file: %s\n' , term.termconfigFile ) ;
-	term( '\n' ) ;
+	await termInfo( term ) ;
 
 
 
 	term.green( '\n== Using advanced terminal detection ==\n\n' ) ;
-	var info = await termkit.getParentTerminalInfo( info ) ;
+	try {
+		info = await termkit.getParentTerminalInfo( info ) ;
+		term( '.getParentTerminalInfo(): %J\n' , info ) ;
+	}
+	catch ( error ) {
+		term.red( "Can't get parent terminal info: %E" , error ) ;
+	}
 	
-	term( '.getParentTerminalInfo(): %J\n' , info ) ;
-	
-	var newTerm = await termkit.getDetectedTerminal() ;
-	
-	term( 'Terminal name: %s\n' , newTerm.appName ) ;
-	term( 'Terminal app ID: %s\n' , newTerm.appId ) ;
-	term( 'Generic terminal: %s\n' , newTerm.generic ) ;
-	term( 'Config file: %s\n' , newTerm.termconfigFile ) ;
-	term( '\n' ) ;
+	try {
+		newTerm = await termkit.getDetectedTerminal() ;
+		await termInfo( newTerm ) ;
+	}
+	catch ( error ) {
+		term.red( "Can't get detect real terminal: %E" , error ) ;
+	}
 }
 
 detect() ;
+

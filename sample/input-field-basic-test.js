@@ -33,7 +33,7 @@ const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
 
-
+console.log( term.termconfigFile ) ;
 async function asyncQuestion() {
 	term.green( 'Please enter your name: ' ) ;
 	
