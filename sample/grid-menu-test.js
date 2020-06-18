@@ -45,7 +45,7 @@ require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
 		'know what? a menu entry!' ,
 		'surprise! a menu entry!' ,
 		'dang! a menu entry!' ,
-		'double dang! a menu entry!' ,
+		'^Ydouble dang! a menu entry!' ,
 		'OMG! too much menu entries!' ,
 		'seriously: this is a menu entry!' ,
 	] ;

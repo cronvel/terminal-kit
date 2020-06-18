@@ -216,8 +216,8 @@ See [the full style markup reference](markup.md#top) for details.
 * .insert(n): insert n chars after (like the INSERT key). The inserted characters are empty ones (equivalent to spaces).
 * .delete(n): delete n chars after (like the DELETE key)
 * .erase(n): erase n chars after (i.e. overwrite with empty char)
-* .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1)
-  followed by a .delete(1)
+* .backDelete(): delete one char backward (like the BACKSPACE key), shorthand composed by a .left(1) followed by a .delete(1).
+  **WARNING**: this doesn't work if the previous char is a full-width char, don't use it if your use-case need them!
 * .scrollUp(n): scroll up n lines, new lines are added at the bottom
 * .scrollDown(n): scroll down n lines, new lines are added at the top
 * .alternateScreenBuffer(): this set/unset the alternate screen buffer, many terminal do not support it or inhibit it
