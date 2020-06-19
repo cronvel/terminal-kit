@@ -33,13 +33,15 @@ const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
 
-console.log( term.termconfigFile ) ;
+
+term( "Terminal: %s\n" , term.termconfigFile ) ;
+
 async function asyncQuestion() {
-	term.green( 'Please enter your name: ' ) ;
+	term.green( 'Enter something:\n> ' ) ;
 	
 	var input = await term.inputField().promise ;
 
-	term.green( "\nYour name is '%s'\n" , input ) ;
+	term.green( "\nYour input is '%s'\n" , input ) ;
 	term.processExit() ;
 }
 

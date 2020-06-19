@@ -1,4 +1,10 @@
 
+v1.35.7
+-------
+
+.inputField(): Fixing (again) issues related to full-width char (#117)
+
+
 v1.35.6
 -------
 
