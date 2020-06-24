@@ -394,6 +394,14 @@ It set the alternate text-content, work like its [.setContent()](#ref.Element.se
 
 
 
+<a name="ref.TextBox.textBuffer"></a>
+### .textBuffer
+
+This property hold the underlying [TextBuffer](textbuffer.md#top) object.
+It can be used to achieve more complex stuffs.
+
+
+
 <a name="ref.TextTable"></a>
 ## TextTable
 
