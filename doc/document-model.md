@@ -1,27 +1,25 @@
 
 
 <a name="top"></a>
-<a name="ref.document"></a>
+<a name="ref.document-model"></a>
 ## The Document Model
 
-![unstable](unstable.png)
+The *document model* is **99% stable**, but the current documentation is still in progress.
 
-The *document model* is almost stable, but the current documentation is still in progress.
-
-The *document model* uses the whole or a part of terminal area as a *document*, in a similar way than a webpage,
+The *document model* uses the whole or a part of the terminal area as a *document*, in a similar way than a webpage,
 where multiple widgets are present on a specific place in the screen, all active at the same time.
 
 It is opposed to the *inline mode* (i.e. all other Terminal Kit's features), where widgets are instanciated 
 one at a time, line after line.
 
-Some widget exist in both the *inline mode* and the *document model*, but with different features.
+Some widgets exist in both the *inline mode* and the *document model*, but with different features.
 Those differences will eventually disappear, once those *document model* widgets will be compatible with the *inline mode*
 and supersede the older one.
 
 The *document model* is backed by [*screenBuffers*](screenbuffer.md#top).
 
-It can manages drawing multiple widgets, even some that can overlap, like a [*drop-down menu*](#ref.DropDownMenu),
-manage widget focus, event dispatching, widget cycling, **with mouse support everywhere**.
+It can manage multiple widgets each with its own redraw condition, even some that overlap, like a [*drop-down menu*](#ref.DropDownMenu),
+it manages widget keyboard focus, event dispatching, widget cycling, **with mouse support everywhere**.
 
 
 
@@ -42,15 +40,18 @@ manage widget focus, event dispatching, widget cycling, **with mouse support eve
     * [ColumnMenu](#ref.ColumnMenu)
     * [ColumnMenuMulti](#ref.ColumnMenuMulti)
     * [DropDownMenu](#ref.DropDownMenu)
-    * [EditableTextBox)](#ref.EditableTextBox)
+    * [EditableTextBox](#ref.EditableTextBox)
     * [Form](#ref.Form)
+    * [InlineInput](#ref.InlineInput)
     * [LabeledInput](#ref.LabeledInput)
     * [Layout](#ref.Layout)
     * [RowMenu](#ref.RowMenu)
     * [SelectList](#ref.SelectList)
     * [SelectListMulti](#ref.SelectListMulti)
-    * [TextBox](#ref.TextBox)
+    * [Slider](#ref.Slider)
     * [Text](#ref.Text)
+    * [TextBox](#ref.TextBox)
+    * [TextTable](#ref.TextTable)
     * [ToggleButton](#ref.ToggleButton)
 
 * Base classes:
@@ -64,8 +65,9 @@ manage widget focus, event dispatching, widget cycling, **with mouse support eve
 ## Document
 
 The *Document element* is the main [*Element*](#ref.Element) of the *document model*: it represents the whole document just like the
-*document* object of the browser DOM. Most use cases need just one *document*, mapping the whole terminal.
+*document* object of the browser DOM. Most use cases just need one *document*, mapping the whole terminal area.
 
+It is the necessary top-level *Element*, on top of all other widgets, since it manages drawing/redrawing of them, as well as event dispatching, and so on.
 All other *elements* are children of a *document* or children of children of (children of... etc) a *document*: they just don't work without it.
 
 Being a [*Container*](#ref.Container), it is backed by a [*screenBuffer*](screenbuffer.md#top).
@@ -100,19 +102,19 @@ See [Element's key event](ref.Element.event.key).
 
 * options `Object`, where:
 	* outputDst `Terminal` or `ScreenBuffer` this is the object where the document should be drawn into, 
-	  ** it is set automatically when using `term.createDocument()` instead of `new termkit.Document()`.**
+	  **it is set automatically when using `term.createDocument()` instead of `new termkit.Document()`.**
 	* eventSource `EventEmitter` or any EventEmitter-compatible objects (e.g. [nextgen-events](https://github.com/cronvel/nextgen-events))
-	  ** it is set automatically when using `term.createDocument()` instead of `new termkit.Document()`.**
+	  **it is set automatically when using `term.createDocument()` instead of `new termkit.Document()`.**
 	* outputX, outputY, outputWidth, outputHeight `integer` (optional) the position and size of the document
 	  with respect to the screen (i.e. the *outputDst*)
-	* keyBindings `Object` having a [*Terminal Kit key name*](events.md#ref.event.key) as the key and an action as value ([see below](#ref.Document.keyBindings))
+	* keyBindings `Object` having a [*Terminal Kit key name*](events.md#ref.event.key) as the key and an action as value ([see above](#ref.Document.keyBindings))
 	* noDraw `boolean` if true, don't draw the document on instantiation (default: false, draw immediately)
 	* *... and all [Container](#ref.Container) options*
 
 Instead of using `new termkit.Document()`, it's recommended to use `term.createDocument()`: it set automatically some options
 like *outputDst* and *eventSource* to `term`.
 
-TODOC
+This creates a *document* mapping an area of the terminal (or even an area of another *screenBuffer*).
 
 
 
@@ -197,6 +199,13 @@ TODOC
 
 
 
+<a name="ref.InlineInput"></a>
+## InlineInput
+
+TODOC
+
+
+
 <a name="ref.LabeledInput"></a>
 ## LabeledInput
 
@@ -232,8 +241,8 @@ TODOC
 
 
 
-<a name="ref.TextBox"></a>
-## TextBox
+<a name="ref.Slider"></a>
+## Slider
 
 TODOC
 
@@ -241,6 +250,24 @@ TODOC
 
 <a name="ref.Text"></a>
 ## Text
+
+TODOC
+
+
+
+<a name="ref.TextBox"></a>
+## TextBox
+
+A textBox is box area containing a text.
+The text can have **attributes** (**colors, styles**), it can be wrapped (**line-wrapping, word-wrapping**), the whole textBox can be **scrollable**.
+The text content source can have **markup**.
+
+TODOC
+
+
+
+<a name="ref.TextTable"></a>
+## TextTable
 
 TODOC
 

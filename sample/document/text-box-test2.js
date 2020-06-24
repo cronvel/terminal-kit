@@ -74,7 +74,7 @@ term.on( 'key' , function( key ) {
 		
 		case 'ENTER' :
 		case 'KP_ENTER' :
-			textBox.setContent( textBox.getContent() + '\n' ) ;
+			textBox.appendContent( '\n' ) ;
 			break ;
 		
 		case 'BACKSPACE' :
@@ -87,8 +87,16 @@ term.on( 'key' , function( key ) {
 		case 'CTRL_O' :
 			break ;
 
+		case 'CTRL_P' :
+			textBox.prependContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
+			break ;
+
+		case 'CTRL_R' :
+			textBox.appendContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
+			break ;
+
 		default :
-			textBox.setContent( textBox.getContent() + key ) ;
+			textBox.appendContent( key ) ;
 			break ;
 	}
 } ) ;

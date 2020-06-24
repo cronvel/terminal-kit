@@ -1,4 +1,11 @@
 
+v1.35.8
+-------
+
+TextBuffer now supports .append() and .prepend()
+TextBox now supports .appendContent() and .prependContent()
+
+
 v1.35.7
 -------
 
