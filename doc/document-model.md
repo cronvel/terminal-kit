@@ -299,29 +299,98 @@ See [Element's key event](ref.Element.event.key).
 ### new TextBox( options )
 
 * options `Object`, where:
-	* outputX, outputY, outputWidth, outputHeight `integer` (optional) the position and size of the document
-	  with respect to the screen (i.e. the *outputDst*)
-	* keyBindings `Object` having a [*Terminal Kit key name*](events.md#ref.event.key) as the key and an action as value ([see above](#ref.Document.keyBindings))
-	* noDraw `boolean` if true, don't draw the document on instantiation (default: false, draw immediately)
-	* *... and all [Element](#ref.Element.new) options*
+	* attr `object` general attribute for the textBox
+	* textAttr `object` attribute for the text content, default to `{ bgColor: 'default' }`
+	* altTextAttr `object` alternate attribute for the text, default to `textAttr` + `{ color: 'gray' , italic: true } `
+	* voidAttr `object` attribute for the area of the textBox without any text content, default to `{ bgColor: 'default' }`
+	* emptyAttr `object` alias of `voidAttr`
+	* scrollable `boolean` if set, the textBox is scrollable
+	* hasHScrollBar `boolean` if set and if *scrollable*, the textBox has a horizontal scrollbar
+	* hasVScrollBar `boolean` if set and if *scrollable*, the textBox has a vertical scrollbar
+	* scrollX `number` the initial horizontal scroll value, default: 0
+	* scrollY `number` the initial vertical scroll value, default: 0
+	* extraScrolling `boolean` if unset (the default), it is possible to scroll down until both the content bottom and textBox bottom are on the same line,
+	  if set, it is possible to scroll down until the bottom of the content reaches the top of the textBox
+	* lineWrap `boolean` when set, the text content is wrapped to the next line instead of being clipped by the textBox border
+	* wordWrap `boolean` like `lineWrap` but is word-aware, i.e. it doesn't split words
+	* firstLineRightShift `number` if set (default: 0) , the first-line of content is right-shifted from this amount of cells, may be useful for prompt,
+	  or continuing another box in the flow
+	* hiddenContent `string` or `null`, if set, the content is hidden, using this string as a replacement for all chars (useful for password)
+	* stateMachine `object` (TODOC)
+	* *... and all [the super-class *Element* constructor's](#ref.Element.new) options*
 
-Instead of using `new termkit.Document()`, it's recommended to use `term.createDocument()`: it set automatically some options
-like *outputDst* and *eventSource* to `term`.
-
-This creates a *document* mapping an area of the terminal (or even an area of another *screenBuffer*).
+This creates a *TextBox element*.
 
 
 
-<a name="ref.Document.giveFocusTo"></a>
-### .giveFocusTo( element )
+<a name="ref.TextBox.setSizeAndPosition"></a>
+### .setSizeAndPosition( options )
 
-* element `Element` the element to give focus to
+* options `Object`, where:
+	* x, y, width, height: see [the super-class *Element* constructor's](#ref.Element.new) options*
 
-Give the focus to an *Element*.
+This set the size and position of the textBox, updating line-wrapping and scrollbar.
+
+
+
+<a name="ref.TextBox.scrollTo"></a>
+### .scrollTo( x , y )
+
+* x, y `number` the new scrolling coordinates
+
+This scroll the textBox to the *x,y* coordinates and update scrollbars.
 
 
 
 
+<a name="ref.TextBox.scroll"></a>
+### .scrollTo( dx , dy )
+
+* dx, dy `number` the delta of the scroll
+
+This scroll the textBox from this *x,y* delta and update scrollbars.
+
+
+
+<a name="ref.TextBox.getContent"></a>
+### .getContent()
+
+It returns the current text-content.
+
+
+
+<a name="ref.TextBox.getContentSize"></a>
+### .getContentSize()
+
+It returns the current text-content size, an object with a *width* and *height* property.
+
+
+
+<a name="ref.TextBox.appendContent"></a>
+### .appendContent( content , [dontDraw] )
+
+Append text-content at the end of the current content. It supports markup if the textBox was instanciated with the `contentHasMarkup` options on.
+
+
+
+<a name="ref.TextBox.prependContent"></a>
+### .prependContent( content , [dontDraw] )
+
+Prepend text-content at the begining of the current content. It supports markup if the textBox was instanciated with the `contentHasMarkup` options on.
+
+
+
+<a name="ref.TextBox.getAltContent"></a>
+### .getAltContent()
+
+It returns the alternate text-content.
+
+
+
+<a name="ref.TextBox.setAltContent"></a>
+### .setAltContent( content , [hasMarkup] , [dontDraw] )
+
+It set the alternate text-content, work like its [.setContent()](#ref.Element.setContent) counterpart.
 
 
 
@@ -369,22 +438,27 @@ TODOC / unstable.
 <a name="ref.Element.new"></a>
 ### new Element( options )
 
-* x, y `number` this is the coordinate of the *element* **relative to its closest ancestor-container**
-* zIndex `number` the *element* z-index, greater z-index *elements* are rendered after (i.e. *over*) lesser z-index *elements*
-* z `number` alias of `zIndex`
-* width, height `number` the general width and height of the *element*
-* outputWidth, outputHeight `number` the width and height of the rendered *element* (inside its parent), for most widget it is the same than `width` and `height`
-* label `string` a label for this element, only relevant for some widgets
-* key `string` a key for this element, only relevant for some widgets
-* value `any` a value associated with this element, only relevant for some widgets
-* content `string` the content of the element that will be displayed, if it makes sense for the widget
-* contentHasMarkup `boolean` when set, the content contains Terminal Kit's markup, used to set attributes of parts of the content,
-  only relevant for some widgets, default: false.
-* contentWidth `number` the width (in terminal's cells) of the content, only relevant for some widgets
-* hidden `boolean` when set, the element is not visible and no interaction is possible with this element. It also affects children. Default: false.
-* disabled: mostly for user-input, the element is often grayed and unselectable, the effect depending on the widget
-* meta `any` a userland-only property, it associates the element with some data that make sense in the application business-logic
-* shortcuts **unstable** (TODOC)
+* options `Object`, where:
+	* parent `Element` this is the parent of the current *element*, the current *element* will be *attached* to it
+	* x, y `number` this is the coordinate of the *element* **relative to its closest ancestor-container**
+	* zIndex `number` the *element* z-index, greater z-index *elements* are rendered after (i.e. *over*) lesser z-index *elements*
+	* z `number` alias of `zIndex`
+	* width, height `number` the general width and height of the *element*
+	* outputWidth, outputHeight `number` the width and height of the rendered *element* (inside its parent), for most widget it is the same than `width` and `height`
+	  and will default to them
+	* label `string` a label for this element, only relevant for some widgets
+	* key `string` a key for this element, only relevant for some widgets
+	* value `any` a value associated with this element, only relevant for some widgets
+	* content `string` the content of the element that will be displayed, if it makes sense for the widget
+	* contentHasMarkup `boolean` when set, the content contains Terminal Kit's markup, used to set attributes of parts of the content,
+	  only relevant for some widgets, default: false.
+	* contentWidth `number` the width (in terminal's cells) of the content, only relevant for some widgets
+	* hidden `boolean` when set, the element is not visible and no interaction is possible with this element. It also affects children. Default: false.
+	* disabled: mostly for user-input, the element is often grayed and unselectable, the effect depending on the widget
+	* keyBindings `Object` having a [*Terminal Kit key name*](events.md#ref.event.key) as the key and an action as value ([see above](#ref.Document.keyBindings))
+	* meta `any` a userland-only property, it associates the element with some data that make sense in the application business-logic
+	* noDraw `boolean` if true, don't draw the document on instantiation (default: false, draw immediately)
+	* shortcuts **unstable** (TODOC)
 
 While *Element* is a super-class that is never directly instanciated, the derived class's constructor always call the *Element* constructor with the `options` object.
 This contains all `options` that are common across all/many widgets.
