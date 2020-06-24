@@ -259,10 +259,69 @@ TODOC
 ## TextBox
 
 A textBox is box area containing a text.
-The text can have **attributes** (**colors, styles**), it can be wrapped (**line-wrapping, word-wrapping**), the whole textBox can be **scrollable**.
+The text can have **attributes** (**colors, styles**), it can be wrapped (**line-wrapping, word-wrapping**), the whole textBox can be **scrollable** 
+(both horizontal and vertical).
 The text content source can have **markup**.
 
-TODOC
+When scrollable, it is sensible to mouse-wheel (anywhere) and click on the scrollbar.
+It supports text-selection, and copy to clipboard (Linux only at the moment, it needs xclipboard).
+
+It is built on top of a [TextBuffer](textbuffer.md#top).
+
+
+
+<a name="ref.TextBox.event"></a>
+### Events
+
+<a name="ref.TextBox.event.key"></a>
+#### *key*
+
+See [Element's key event](ref.Element.event.key).
+
+
+
+<a name="ref.TextBox.keyBindings"></a>
+### Key Bindings
+
+* *tinyScrollUp*: scroll up a bit, default: UP
+* *tinyScrollDown*: scroll down a bit, default: DOWN
+* *scrollUp*: scroll up, default: PAGE_UP
+* *scrollDown*: scroll down, default: PAGE_DOWN, *space*
+* *scrollTop*: scroll to the top, default: HOME
+* *scrollBottom*: scroll to the bottom, default: END
+* *scrollLeft*: scroll left, default: LEFT
+* *scrollRight*: scroll right, default: RIGHT
+* *copyClipboard*: copy to clipboard, default: CTRL_O
+
+
+
+<a name="ref.TextBox.new"></a>
+### new TextBox( options )
+
+* options `Object`, where:
+	* outputX, outputY, outputWidth, outputHeight `integer` (optional) the position and size of the document
+	  with respect to the screen (i.e. the *outputDst*)
+	* keyBindings `Object` having a [*Terminal Kit key name*](events.md#ref.event.key) as the key and an action as value ([see above](#ref.Document.keyBindings))
+	* noDraw `boolean` if true, don't draw the document on instantiation (default: false, draw immediately)
+	* *... and all [Element](#ref.Element.new) options*
+
+Instead of using `new termkit.Document()`, it's recommended to use `term.createDocument()`: it set automatically some options
+like *outputDst* and *eventSource* to `term`.
+
+This creates a *document* mapping an area of the terminal (or even an area of another *screenBuffer*).
+
+
+
+<a name="ref.Document.giveFocusTo"></a>
+### .giveFocusTo( element )
+
+* element `Element` the element to give focus to
+
+Give the focus to an *Element*.
+
+
+
+
 
 
 
@@ -304,6 +363,108 @@ This event is strictly the same than [the regular Terminal Kit key event](events
 #### *shortcut*
 
 TODOC / unstable.
+
+
+
+<a name="ref.Element.new"></a>
+### new Element( options )
+
+* x, y `number` this is the coordinate of the *element* **relative to its closest ancestor-container**
+* zIndex `number` the *element* z-index, greater z-index *elements* are rendered after (i.e. *over*) lesser z-index *elements*
+* z `number` alias of `zIndex`
+* width, height `number` the general width and height of the *element*
+* outputWidth, outputHeight `number` the width and height of the rendered *element* (inside its parent), for most widget it is the same than `width` and `height`
+* label `string` a label for this element, only relevant for some widgets
+* key `string` a key for this element, only relevant for some widgets
+* value `any` a value associated with this element, only relevant for some widgets
+* content `string` the content of the element that will be displayed, if it makes sense for the widget
+* contentHasMarkup `boolean` when set, the content contains Terminal Kit's markup, used to set attributes of parts of the content,
+  only relevant for some widgets, default: false.
+* contentWidth `number` the width (in terminal's cells) of the content, only relevant for some widgets
+* hidden `boolean` when set, the element is not visible and no interaction is possible with this element. It also affects children. Default: false.
+* disabled: mostly for user-input, the element is often grayed and unselectable, the effect depending on the widget
+* meta `any` a userland-only property, it associates the element with some data that make sense in the application business-logic
+* shortcuts **unstable** (TODOC)
+
+While *Element* is a super-class that is never directly instanciated, the derived class's constructor always call the *Element* constructor with the `options` object.
+This contains all `options` that are common across all/many widgets.
+
+
+
+<a name="ref.Element.updateZ"></a>
+### .updateZ( z ) / .updateZIndex( z )
+
+* z `number` the new z-index for that *element*
+
+It updates the z-index of the *element* and triggers all internal mechanism needed.
+
+
+
+<a name="ref.Element.topZ"></a>
+### .topZ()
+
+It updates the z-index of the *element* so that it is above all sibling *elements*.
+
+
+
+<a name="ref.Element.bottomZ"></a>
+### .bottomZ()
+
+It updates the z-index of the *element* so that it is below all sibling *elements*.
+
+
+
+<a name="ref.Element.setContent"></a>
+### .setContent( content , [hasMarkup] , [dontDraw] )
+
+* content `string` the new content for this *element*
+* hasMarkup `boolean` when set, the content contains Terminal Kit's markup, default: false
+* dontDraw `boolean` when set, the content's update does not trigger the *redraw* of the *element*
+
+Set the content of this *element*.
+
+
+
+<a name="ref.Element.draw"></a>
+### .draw()
+
+Draw the *element* on its parent.
+
+It is called internally/automatically, userland code should not be bothered with that, except in rare use-cases.
+
+
+
+<a name="ref.Element.redraw"></a>
+### .redraw()
+
+Redraw the *element*.
+While `.draw()` is used when drawing the current *element* is enough (the *element* has not moved, and has not been resized),
+`.redraw()` is used it is necessary to draw the closest ancestor which is a container.
+
+It is called internally/automatically, userland code should not be bothered with that, except in rare use-cases.
+
+
+
+<a name="ref.Element.drawCursor"></a>
+### .drawCursor()
+
+*Draw* the *element* cursor, i.e. move it to the right place.
+
+It is called internally/automatically, userland code should not be bothered with that, except in rare use-cases.
+
+
+
+<a name="ref.Element.saveCursor"></a>
+### .saveCursor()
+
+Save the *element* cursor position.
+
+
+
+<a name="ref.Element.restoreCursor"></a>
+### .restoreCursor()
+
+Restore the *element* cursor position.
 
 
 
