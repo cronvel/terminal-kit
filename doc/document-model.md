@@ -202,6 +202,8 @@ TODOC
 <a name="ref.InlineInput"></a>
 ## InlineInput
 
+An inlineInput is a one-line-text-input.
+
 TODOC
 
 
