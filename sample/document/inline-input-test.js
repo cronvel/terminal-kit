@@ -45,13 +45,16 @@ var inlineInput = new termkit.InlineInput( {
 	placeholder: 'Your name here' ,
 	x: 0 ,
 	y: 10 ,
+	//*
 	prompt: {
 		textAttr: { bgColor: 'blue' } ,
-		content: '^R^+a big ^Gbig ^Ybig ^Rprompt> ' ,
+		content: '^R^+a big ^Gbig ^Ybig ^Rprompt>^:^B ' ,
 		contentHasMarkup: true
 	} ,
+	//*/
 	//firstLineRightShift: 8 ,
-	width: 36 ,
+	//width: 36 ,
+	width: 100 ,
 	cancelable: true ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,
