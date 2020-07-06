@@ -4,14 +4,13 @@ v1.35.11
 
 Document model: new option 'autoWidth' and 'autoHeight' to adjust width/height to the parent Container size
 TextBox inside a Layout/Container auto-adjust itself on Container resizing (#119)
-TextBuffer now supports content containing ANSI code, and so does TextBox
 Fix Text/Button display error when on the last column of a Container
 
 
 v1.35.10
 --------
 
-Now TextBuffer supports ANSI as input (#119)
+TextBuffer now supports content containing ANSI code, and so does TextBox (#119)
 
 
 v1.35.9
