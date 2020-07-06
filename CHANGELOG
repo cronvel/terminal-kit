@@ -1,4 +1,10 @@
 
+v1.35.10
+--------
+
+Now TextBuffer supports ANSI as input (#119)
+
+
 v1.35.9
 -------
 
