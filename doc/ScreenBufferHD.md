@@ -6,9 +6,9 @@
 
 *This feature is still in beta, but its API is considered stable/backward compatible.*
 
-This is the 32-bit (RGBA) version of [the ScreenBuffer](screenbuffer.md#ref.ScreenBuffer), it subclasses it.
+This is the 32-bit (RGBA) version of [the ScreenBuffer](ScreenBuffer.md#ref.ScreenBuffer), it subclasses it.
 
-See the [the ScreenBuffer documentation](screenbuffer.md#ref.ScreenBuffer) for the common parts:
+See the [the ScreenBuffer documentation](ScreenBuffer.md#ref.ScreenBuffer) for the common parts:
 **only HD specific features are listed here.**
 
 A *screenBufferHD* is a buffer holding contents for a rectangular area.

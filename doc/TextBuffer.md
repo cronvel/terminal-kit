@@ -7,7 +7,7 @@
 A *textBuffer* is a buffer holding text contents that can be used for things like *text areas*, or even *text editors*.
 
 A *textBuffer* is way more flexible than a raw *screenBuffer* for that purpose.
-Nonetheless, a *textBuffer* is always backed by a [*screenBuffer*](screenbuffer.md#top), i.e. its *dst* (destination)
+Nonetheless, a *textBuffer* is always backed by a [*screenBuffer*](ScreenBuffer.md#top), i.e. its *dst* (destination)
 should be a *screenBuffer*.
 
 Internally, it has 3 buffers:
@@ -157,7 +157,7 @@ It returns an object with a *width* and *height* properties: the size of the tex
 ### .setEmptyCellAttr( attr )
 
 * attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
-  see: [the attribute object](screenbuffer.md#ref.ScreenBuffer.attributes))
+  see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
 
 This set the attributes for empty cells, i.e. cells in the *screenBuffer* where there is no *textBuffer* content (not even spaces).
 
@@ -167,7 +167,7 @@ This set the attributes for empty cells, i.e. cells in the *screenBuffer* where 
 ### .setAttrAt( attr , x , y )
 
 * attr `Object` or `integer` attributes of the char (attribute object or bit flags,
-  see: [the attribute object](screenbuffer.md#ref.ScreenBuffer.attributes))
+  see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
 * x `integer` the x-coordinate (i.e. the column number)
 * y `integer` the y-coordinate (i.e. the row number)
 
@@ -190,7 +190,7 @@ Like [.setAttrAt()](#ref.TextBuffer.setAttrAt), but it only accepts attributes i
 ### .setAttrRegion( attr , [region] )
 
 * attr `Object` or `integer` attributes of the char (attribute object or bit flags,
-  see: [the attribute object](screenbuffer.md#ref.ScreenBuffer.attributes))
+  see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
 * region `Object` (optional, default to the whole *textBuffer*) the targeted rectangular region, where:
 	* xmin `integer` the minimal x-coordinate
 	* xmax `integer` the maximal x-coordinate
@@ -365,7 +365,7 @@ It moves the *textBuffer*'s cursor in bound, i.e. to a cell that has text conten
 
 * text `string` the raw text to insert
 * attr `Object` or `integer` (optional, default: the empty cell attributes) attributes of the text about to be inserted
- (attribute object or bit flags, see: [the attribute object](screenbuffer.md#ref.ScreenBuffer.attributes))
+ (attribute object or bit flags, see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
 
 It inserts the text at the current cursor position, with the given attributes.
 
@@ -418,7 +418,7 @@ It moves the cursor to the end of the line and joins the current line with the f
 		* y `integer` the y-coordinate (i.e. the row number) of the current cell
 		* text `string` a single character string, the character of the current cell
 		* attr `integer` the attributes of the current cell in the bit flags mode, use 
-		  [ScreenBuffer.attr2object()](screenbuffer.md#ref.ScreenBuffer.attr2object) to convert it if necessary
+		  [ScreenBuffer.attr2object()](ScreenBuffer.md#ref.ScreenBuffer.attr2object) to convert it if necessary
 		* misc `Object` userland meta-data for the current cell
 
 It iterates over the whole *textBuffer*, using the *callback* for each cell.
