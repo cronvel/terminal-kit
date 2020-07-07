@@ -28,140 +28,26 @@ it manages widget keyboard focus, event dispatching, widget cycling, **with mous
 
 * Instantiable classes:
 	* [Document](Document.md#top)
-	* [Button](#ref.Button)
-	* [ColumnMenu](#ref.ColumnMenu)
-	* [ColumnMenuMulti](#ref.ColumnMenuMulti)
-	* [DropDownMenu](#ref.DropDownMenu)
-	* [EditableTextBox](#ref.EditableTextBox)
-	* [Form](#ref.Form)
-	* [InlineInput](#ref.InlineInput)
-	* [LabeledInput](#ref.LabeledInput)
-	* [Layout](#ref.Layout)
-	* [RowMenu](#ref.RowMenu)
-	* [SelectList](#ref.SelectList)
-	* [SelectListMulti](#ref.SelectListMulti)
-	* [Slider](#ref.Slider)
-	* [Text](#ref.Text)
-	* [TextBox](#ref.TextBox)
-	* [TextTable](#ref.TextTable)
-	* [ToggleButton](#ref.ToggleButton)
+	* [Button](Button.md#top)
+	* [ColumnMenu](ColumnMenu.md#top)
+	* [ColumnMenuMulti](ColumnMenuMulti.md#top)
+	* [DropDownMenu](DropDownMenu.md#top)
+	* [EditableTextBox](EditableTextBox.md#top)
+	* [Form](Form.md#top)
+	* [InlineInput](InlineInput.md#top)
+	* [LabeledInput](LabeledInput.md#top)
+	* [Layout](Layout.md#top)
+	* [RowMenu](RowMenu.md#top)
+	* [SelectList](SelectList.md#top)
+	* [SelectListMulti](SelectListMulti.md#top)
+	* [Slider](Slider.md#top)
+	* [Text](Text.md#top)
+	* [TextBox](TextBox.md#top)
+	* [TextTable](TextTable.md#top)
+	* [ToggleButton](ToggleButton.md#top)
 
 * Base classes:
 	* [Element](Element.md#top)
 	* [Container](Container.md#top)
 	* [BaseMenu](BaseMenu.md#top)
-
-
-
-<a name="ref.Button"></a>
-## Button
-
-TODOC
-
-
-
-<a name="ref.ColumnMenu"></a>
-## ColumnMenu
-
-TODOC
-
-
-
-<a name="ref.ColumnMenuMulti"></a>
-## ColumnMenuMulti
-
-TODOC
-
-
-
-<a name="ref.DropDownMenu"></a>
-## DropDownMenu
-
-TODOC
-
-
-
-<a name="ref.EditableTextBox"></a>
-## EditableTextBox
-
-TODOC
-
-
-
-<a name="ref.Form"></a>
-## Form
-
-TODOC
-
-
-
-<a name="ref.InlineInput"></a>
-## InlineInput
-
-An inlineInput is a one-line-text-input.
-
-TODOC
-
-
-
-<a name="ref.LabeledInput"></a>
-## LabeledInput
-
-TODOC
-
-
-
-<a name="ref.Layout"></a>
-## Layout
-
-TODOC
-
-
-
-<a name="ref.RowMenu"></a>
-## RowMenu
-
-TODOC
-
-
-
-<a name="ref.SelectList"></a>
-## SelectList
-
-TODOC
-
-
-
-<a name="ref.SelectListMulti"></a>
-## SelectListMulti
-
-TODOC
-
-
-
-<a name="ref.Slider"></a>
-## Slider
-
-TODOC
-
-
-
-<a name="ref.Text"></a>
-## Text
-
-TODOC
-
-
-
-<a name="ref.TextTable"></a>
-## TextTable
-
-TODOC
-
-
-
-<a name="ref.ToggleButton"></a>
-## ToggleButton
-
-TODOC
 
