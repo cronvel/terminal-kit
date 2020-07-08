@@ -45,7 +45,8 @@ var columnMenu = new termkit.ColumnMenu( {
 	x: 0 ,
 	y: 5 ,
 	width: 20 ,
-	//pageMaxHeight: 5 ,
+	pageMaxHeight: 5 ,
+	//height: 5 ,
 	blurLeftPadding: '  ' ,
 	focusLeftPadding: '^R> ' ,
 	disabledLeftPadding: '  ' ,
@@ -97,11 +98,13 @@ var columnMenu = new termkit.ColumnMenu( {
 			disabled: true ,
 			value: 'disabled'
 		} ,
+		//*
 		{
 			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
 			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
 			value: 'very long'
 		} ,
+		//*/
 		{
 			content: 'Not long' ,
 			value: 'not long'
@@ -128,14 +131,19 @@ function onSubmit( buttonValue , action ) {
 columnMenu.focusValue( 'edit' ) ;
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
 			term.styleReset() ;
 			term.clear() ;
 			process.exit() ;
+			break ;
+		case 'CTRL_D' :
+			columnMenu.draw() ;
+			break ;
+		case 'CTRL_R' :
+			columnMenu.redraw() ;
 			break ;
 	}
 } ) ;
