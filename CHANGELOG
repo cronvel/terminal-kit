@@ -1,4 +1,10 @@
 
+v1.36.0
+-------
+
+ColumnMenu height bugfixes, autoWidth/Height support, and 'parentResize' event support (issue #120)
+
+
 v1.35.13
 --------
 
