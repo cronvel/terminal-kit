@@ -3,7 +3,7 @@
 <a name="ref.TextBox"></a>
 ## TextBox
 
-A textBox is box area containing a text.
+A *textBox* is box area containing a text.
 The text can have **attributes** (**colors, styles**), it can be wrapped (**line-wrapping, word-wrapping**), the whole textBox can be **scrollable** 
 (both horizontal and vertical).
 The text content source may have **markup** or **ansi** code (if so, the *contentHasMarkup* option should be set accordingly, see below).
