@@ -340,7 +340,7 @@ It produces:
 	  special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu,
 	  and if it has the special property `postfix` (still a string), this will be appended to the output of the
 	  auto complete menu.
-	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' options, if *truthy*
+	* autoCompleteMenu `boolean` or `Object` of options, used in conjunction with the 'autoComplete' option, if *truthy*
 	  any auto-complete attempt having many completion candidates will display a menu to let the user choose between each
 	  possibilities. If an object is given, it should contain options for the [.singleLineMenu()](#ref.singleLineMenu)
 	  that is used for the completion (notice: some options are overwritten: 'y' and 'exitOnUnexpectedKey')

@@ -108,21 +108,18 @@ This event is triggered when the user cancels the input, if the *inlineInput* is
 	* submitted `boolean` if true, the input is already submitted, default: false
 	* cancelable `boolean` if true, the *inlineInput* is cancelable, i.e. the user can use the cancel key (default key: ESCAPE), default: false
 	* canceled `boolean` if true, the input is already canceled, default: false
-    * autoComplete `Array` or `Function( inputString , [callback] )` or `null` if set, this is either an array of possible completion,
-      so the autocomplete key (default key: TAB) will auto-complete the input. If it is a function, it should accept an input `string`
-      and return the completed `string` (if no completion can be done, it should return the input string,
-      if multiple candidate are possible, it should return an array of string), if **the function accepts 2 arguments**
-      (checked using *function*.length), then **the auto-completer will be asynchronous**!
-      If it does not accept a callback but returns a *thenable* (Promise-like), it will be **asynchronous** too.
-      Also note that if it is an array or the result of the function is an array, and if that array has a
-      special property `prefix` (a string), then this prefix will be prepended to the output of the auto complete menu,
-      and if it has the special property `postfix` (still a string), this will be appended to the output of the
-      auto complete menu.
-
+	* autoComplete `Array` or `Function( inputString , [callback] )` or `null` if set, this is either an array of possible completion,
+	  so the autocomplete key (default key: TAB) will auto-complete the input. If it is a function, it should accept an input `string`
+	  and return the completed `string` (if no completion can be done, it should return the input string,
+	  if multiple candidate are possible, it should return an array of string), the function can be **asynchronous** en return a `Promise`.
+	* useAutoCompleteHint `boolean` if true and used in conjunction with the `autoComplete` option, write an auto-completion preview
+	  at the right of the input (usually using a gray+italic style), default: false
+	* autoCompleteHint `boolean` alias of `useAutoCompleteHint` (mimic `.inputField()`'s option)
+	* useAutoCompleteMenu `boolean` if true and used in conjunction with the `autoComplete` option, create an addhoc [RowMenu](RowMenu.md#ref.top)
+	  everytime the auto-completion return more than one candidate
+	* autoCompleteMenu `boolean` alias of `useAutoCompleteMenu` (mimic `.inputField()`'s option)
+	* menu `object` or `null` if set and used in conjunction with the `autoComplete` option, this object is passed to
+	  the [RowMenu's contructor](RowMenu.md#ref.RowMenu.new)
 
 This creates an *InlineInput element*.
 
-
-
-
-TODOC
