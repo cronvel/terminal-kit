@@ -144,8 +144,7 @@ function test3() {
 function test4() {
 	var spinner = term.createInlineElement( termkit.AnimatedText , {
 		animation: 'unboxing-color' ,
-		contentHasMarkup: true ,
-		rightPadding: ' '
+		//rightPadding: ' '
 	} ) ;
 }
 
