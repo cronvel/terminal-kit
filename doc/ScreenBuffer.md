@@ -229,7 +229,7 @@ If true, blending is enabled (e.g. background transparency, char transparency, e
 	* attr `Object` or `integer` (optional) attributes of the chars (attribute object or bit flags,
 	  see: [the attribute object](#ref.ScreenBuffer.attributes)) (default to the default attributes)
 	* char `string` (optional) a single character used to fill the buffer (default: the space character)
-	* region: `Object` or `Rect` (optional), a [`Rect` compliant object](rect.md#ref.Rect.new) defining the region to fill
+	* region: `Object` or `Rect` (optional), a [`Rect` compliant object](Rect.md#ref.Rect.new) defining the region to fill
 	  (default: fill the whole ScreenBuffer)
 
 It fills the *screenBuffer* with the specified *char* and *attributes*.
@@ -297,7 +297,7 @@ It returns an object, where:
 ### .resize( fromRect )
 
 * fromRect `Object` or `Rect` the rectangle used to resize the buffer, if it is an object, it should contains properties
-  needed by the [`Rect`'s contructor](rect.md#ref.Rect.new), namely either:
+  needed by the [`Rect`'s contructor](Rect.md#ref.Rect.new), namely either:
 	* width `integer` the width of the rectangle
 	* height `integer` the height of the rectangle
 	* x `integer` (optional, default to the left-most x-coordinate) the minimum x-coordinate of the rectangle

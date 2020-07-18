@@ -29,7 +29,7 @@
 
 
 
-const termkit = require( '../../lib/termkit.js' ) ;
+const termkit = require( '../..' ) ;
 const term = termkit.terminal ;
 
 
@@ -102,10 +102,73 @@ new termkit.TextBox( {
 	autoHeight: true
 } ) ;
 
-new termkit.Text( {
+new termkit.ColumnMenu( {
 	parent: document.elements.auto ,
-	content: 'Auto sized box' ,
-	attr: { color: 'green' , italic: true }
+	autoWidth: true ,
+	autoHeight: true ,
+	blurLeftPadding: '  ' ,
+	focusLeftPadding: '^R> ' ,
+	disabledLeftPadding: '  ' ,
+	paddingHasMarkup: true ,
+	multiLineItems: true ,
+	buttonEvenBlurAttr: { bgColor: '@dark-gray' , color: 'white' , bold: true } ,
+	buttonKeyBindings: {
+		ENTER: 'submit' ,
+		CTRL_UP: 'submit' ,
+		CTRL_DOWN: 'submit'
+	} ,
+	buttonActionKeyBindings: {
+		CTRL_UP: 'up' ,
+		CTRL_DOWN: 'down'
+	} ,
+	items: [
+		{
+			content: 'File' ,
+			value: 'file'
+		} ,
+		{
+			//content: 'Edit' ,
+			content: '^REdit' , markup: true ,
+			value: 'edit'
+		} ,
+		{
+			content: 'View' ,
+			value: 'view'
+		} ,
+		{
+			content: 'History' ,
+			value: 'history'
+		} ,
+		{
+			content: '^[fg:*royal-blue]Bookmarks' ,
+			markup: true ,
+			value: 'bookmarks'
+		} ,
+		{
+			content: 'Tools' ,
+			value: 'tools'
+		} ,
+		{
+			content: 'Help' ,
+			value: 'help'
+		} ,
+		{
+			content: 'Disabled button' ,
+			disabled: true ,
+			value: 'disabled'
+		} ,
+		//*
+		{
+			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
+			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
+			value: 'very long'
+		} ,
+		//*/
+		{
+			content: 'Not long' ,
+			value: 'not long'
+		} ,
+	]
 } ) ;
 
 new termkit.Text( {

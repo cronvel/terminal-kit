@@ -53,7 +53,7 @@ Click any image to see the documentation related to the feature!
 
 [![Yes or no output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/yes-no-doc1.gif)](doc/high-level.md#ref.yesOrNo)
 
-[![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/screenbuffer.md)
+[![Spaceship](https://raw.githubusercontent.com/cronvel/terminal-kit/master/demo/record.gif)](doc/ScreenBuffer.md)
 ← Surfaces and Sprites
 
 [![Draw an image inside the terminal](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/image-loading.png)](doc/high-level.md#ref.drawImage)
@@ -69,7 +69,7 @@ Click any image to see the documentation related to the feature!
 
 *New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column
 
-*New:* [ScreenBuffer HD](doc/screenbuffer-hd.md#top) (*beta*), 32-bit (RGBA) surfaces with composition and image loading
+*New:* [ScreenBuffer HD](doc/ScreenBufferHD.md#top) 32-bit (RGBA) surfaces with composition and image loading
 
 * [colors, 256 colors or even 24-bit colors](doc/low-level.md#ref.colors), if the terminal supports it
 * [styles (bold, underline, italic, and many more)](doc/low-level.md#ref.styles)
@@ -87,8 +87,8 @@ Click any image to see the documentation related to the feature!
 * [grid/table menu](doc/high-level.md#ref.gridMenu)
 * [progress bar](doc/high-level.md#ref.progressBar)
 * [interactive 'yes or no'](doc/high-level.md#ref.yesOrNo)
-* [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/screenbuffer.md#top)
-* [text buffers](doc/textbuffer.md#top)
+* [screen & off-screen buffers (a concept similar to SDL's *Surface*)](doc/ScreenBuffer.md#top)
+* [text buffers](doc/TextBuffer.md#top)
 * [change the terminal color palette](doc/high-level.md#ref.setPalette)
 * [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#ref.drawImage)
 * [event-driven](doc/events.md#top)

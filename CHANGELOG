@@ -1,4 +1,22 @@
 
+v1.36.0
+-------
+
+ColumnMenu height bugfixes, autoWidth/Height support, and 'parentResize' event support (issue #120)
+
+
+v1.35.13
+--------
+
+Document model -- ColumnMenu: fix a redraw bug introduced in v1.35.0 (issue #120)
+
+
+v1.35.12
+--------
+
+Documentation
+
+
 v1.35.11
 --------
 

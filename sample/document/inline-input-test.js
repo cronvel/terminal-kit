@@ -56,6 +56,7 @@ var inlineInput = new termkit.InlineInput( {
 	//width: 36 ,
 	width: 100 ,
 	cancelable: true ,
+	value: 'toto' ,
 	history: [ 'Bob' , 'Bill' , 'Jack' , 'Some entry string' ] ,
 	autoComplete: [ 'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' , 'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' , 'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' , 'Harry Truman' , 'Franklin Roosevelt' ] ,
 	autoCompleteMenu: true ,

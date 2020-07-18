@@ -156,10 +156,10 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* ['terminal'](events.md#ref.event.terminal)
 	* ['mouse'](events.md#ref.event.mouse)
 
-* [ScreenBuffer](screenbuffer.md#top)
-* *New* [ScreenBuffer HD](screenbuffer-hd.md#top)
-* [TextBuffer](textbuffer.md#top)
-* [Rect](rect.md#top)
+* [ScreenBuffer](ScreenBuffer.md#top)
+* *New* [ScreenBuffer HD](ScreenBufferHD.md#top)
+* [TextBuffer](TextBuffer.md#top)
+* [Rect](Rect.md#top)
 * *New* [Document model](document-model.md#top) for rich app GUI, available elements:
 	* [Document](document-model.md#ref.Document)
 	* [Button](document-model.md#ref.Button)
