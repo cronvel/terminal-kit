@@ -38,14 +38,15 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var spinner = new termkit.Spinner( {
+var spinner = new termkit.AnimatedText( {
 	parent: document ,
-	animation: 'ascii' ,
-	x: 10 ,
-	y: 10
+	animation: 'unboxingMarkup' ,
+	contentHasMarkup: true ,
+	x: 0 ,
+	y: term.height - 1
 } ) ;
 
-setTimeout( () => spinner.animate( true , 50 ) , 2000 ) ;
+setTimeout( () => spinner.animate( true , 100 ) , 2000 ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key ) {

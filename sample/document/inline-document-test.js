@@ -137,5 +137,15 @@ function test3() {
 
 
 
-test3() ;
+function test4() {
+	var spinner = term.createInlineElement( termkit.AnimatedText , {
+		animation: 'unboxingMarkup' ,
+		contentHasMarkup: true ,
+		rightPadding: ' '
+	} ) ;
+}
+
+
+
+test4() ;
 
