@@ -33,6 +33,10 @@ const termkit = require( '..' ) ;
 const term = termkit.terminal ;
 
 
-var spinner = term.spinner() ;
+async function test() {
+	var spinner = await term.spinner( 'unboxing-color' ) ;
+	term( ' Loading... ' ) ;
+}
 
+test() ;
 

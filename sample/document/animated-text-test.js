@@ -40,8 +40,8 @@ var document = term.createDocument() ;
 
 var spinner = new termkit.AnimatedText( {
 	parent: document ,
-	animation: 'unboxingMarkup' ,
-	contentHasMarkup: true ,
+	animation: 'unboxing-color' ,
+	//contentHasMarkup: true ,
 	x: 0 ,
 	y: term.height - 1
 } ) ;

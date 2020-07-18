@@ -50,12 +50,12 @@ term.on( 'key' , function( key ) {
 
 
 
-async function test() {
+async function test1() {
 	var button = await term.createInlineElement( termkit.Button , {
 		outputDst: term ,
 		content: '> bob' ,
 		value: 'bob' ,
-		x: 2 , y: 10 ,
+		x: 10 , y: 10 ,
 	} ) ;
 }
 
@@ -143,7 +143,7 @@ function test3() {
 
 function test4() {
 	var spinner = term.createInlineElement( termkit.AnimatedText , {
-		animation: 'unboxingMarkup' ,
+		animation: 'unboxing-color' ,
 		contentHasMarkup: true ,
 		rightPadding: ' '
 	} ) ;
@@ -151,5 +151,5 @@ function test4() {
 
 
 
-test() ;
+test4() ;
 
