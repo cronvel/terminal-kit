@@ -55,9 +55,11 @@ async function test() {
 		outputDst: term ,
 		content: '> bob' ,
 		value: 'bob' ,
-		x: 10 , y: 10 ,
+		x: 2 , y: 10 ,
 	} ) ;
 }
+
+
 
 async function test2() {
 	//term( "Menu\n" ) ;
@@ -109,6 +111,8 @@ async function test2() {
 	columnMenu.document.giveFocusTo( columnMenu ) ;
 }
 
+
+
 function test3() {
 	var table = term.createInlineElement( termkit.TextTable , {
 		cellContents: [
@@ -147,5 +151,5 @@ function test4() {
 
 
 
-test4() ;
+test() ;
 
