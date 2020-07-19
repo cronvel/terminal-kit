@@ -29,11 +29,7 @@
 
 
 
-/* jshint unused:false */
-
-
-
-var term = require( '../lib/termkit.js' ).terminal ;
+const term = require( '..' ).terminal ;
 
 term( '\n' ) ;
 term( ' ^+bold^ ^-dim^ ^/italic^ ^_underline^ ^!inverse^ ' ).strike( 'strike' )( '\n' ) ;

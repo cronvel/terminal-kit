@@ -28,6 +28,7 @@ it manages widget keyboard focus, event dispatching, widget cycling, **with mous
 
 * Instantiable classes:
 	* [Document](Document.md#top)
+	* [AnimatedText](AnimatedText.md#top)
 	* [Button](Button.md#top)
 	* [ColumnMenu](ColumnMenu.md#top)
 	* [ColumnMenuMulti](ColumnMenuMulti.md#top)

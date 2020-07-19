@@ -25,6 +25,7 @@ create nice progress bars, or display some special effects.
 * [.getPalette()](#ref.getPalette)
 * [.setPalette()](#ref.setPalette)
 * [.wrapColumn()](#ref.wrapColumn)
+* [.table()](#ref.table)
 * [.yesOrNo()](#ref.yesOrNo)
 * [.inputField()](#ref.inputField)
 * [.fileInput()](#ref.fileInput)
@@ -248,6 +249,79 @@ term.wrap.red( 'hereby granted' ) ;
 It produces:
 
 ![Word-wrapping](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/wordwrap-doc1.png)
+
+
+
+<a name="ref.table"></a>
+### .table( tableCells , [options] )
+
+* options `Object` where:
+	* tableCells `array` of `array` of `string` describing the text content of each cells
+	* options `object`, see [TextTable](#TextTable.md#ref.TextTable.new)
+
+This creates a table of text.
+
+Behind the scene, this method uses the *inlinized* [TextTable widget](TextTable.md#ref.TextTable.new) of the document-model,
+so for more details, you will have to read the [TextTable doc](TextTable.md#top).
+
+Example of a table with border:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term.table( [
+		[ 'header #1' , 'header #2' , 'header #3' ] ,
+		[ 'row #1' , 'a much bigger cell, a much bigger cell, a much bigger cell... ' , 'cell' ] ,
+		[ 'row #2' , 'cell' , 'a medium cell' ] ,
+		[ 'row #3' , 'cell' , 'cell' ] ,
+		[ 'row #4' , 'cell\nwith\nnew\nlines' , '^YThis ^Mis ^Ca ^Rcell ^Gwith ^Bmarkup^R^+!' ]
+	] , {
+		hasBorder: true ,
+		contentHasMarkup: true ,
+		borderChars: 'lightRounded' ,
+		borderAttr: { color: 'blue' } ,
+		textAttr: { bgColor: 'default' } ,
+		firstCellTextAttr: { bgColor: 'blue' } ,
+		firstRowTextAttr: { bgColor: 'yellow' } ,
+		firstColumnTextAttr: { bgColor: 'red' } ,
+		width: 60 ,
+		fit: true   // Activate all expand/shrink + wordWrap
+	}
+) ;
+```
+
+It produces:
+
+![Table with border](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/table-doc1.png)
+
+
+
+Example of a table without a border, with checkered cells:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+term.table( [
+        [ 'header #1' , 'header #2' , 'header #3' ] ,
+        [ 'row #1' , 'a much bigger cell, a much bigger cell, a much bigger cell... ' , 'cell' ] ,
+        [ 'row #2' , 'cell' , 'a medium cell' ] ,
+        [ 'row #3' , 'cell' , 'cell' ] ,
+        [ 'row #4' , 'cell\nwith\nnew\nlines' , '^YThis ^Mis ^Ca ^Rcell ^Gwith ^Bmarkup^R^+!' ]
+    ] , {
+        hasBorder: false ,
+        contentHasMarkup: true ,
+        textAttr: { bgColor: 'default' } ,
+        firstCellTextAttr: { bgColor: 'blue' } ,
+        firstRowTextAttr: { bgColor: 'yellow' } ,
+        firstColumnTextAttr: { bgColor: 'red' } ,
+        checkerEvenCellTextAttr: { bgColor: 'gray' } ,
+        width: 60 ,
+        fit: true   // Activate all expand/shrink + wordWrap
+    }
+) ;
+```
+
+It produces:
+
+![Table without border and checkered cells](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/table-doc2.png)
 
 
 
