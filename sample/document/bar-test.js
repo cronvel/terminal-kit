@@ -46,11 +46,12 @@ var bar = new termkit.Bar( {
 	x: 2 ,
 	y: 2 ,
 	width: 30 ,
-	value: 0.2 ,
-	barChars: 'solid'
+	//barChars: 'solid' ,
+	barChars: 'classicArrow' ,
+	value: 1
 } ) ;
 
-setTimeout( () => bar.setValue( 0.5 ) , 1000 ) ;
+//setInterval( () => bar.setValue( bar.getValue() + 0.01 ) , 100 ) ;
 
 
 
