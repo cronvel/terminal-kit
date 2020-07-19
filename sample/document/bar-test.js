@@ -46,18 +46,18 @@ var bar = new termkit.Bar( {
 	x: 2 ,
 	y: 2 ,
 	width: 30 ,
+	barChars: 'classicWithArrow' ,
+	//barChars: 'classicWithHalf' ,
 	//barChars: 'solid' ,
-	barChars: 'classicArrow' ,
-	value: 1
+	value: 0
 } ) ;
 
-//setInterval( () => bar.setValue( bar.getValue() + 0.01 ) , 100 ) ;
+setInterval( () => bar.setValue( bar.getValue() + 0.01 ) , 100 ) ;
 
 
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
