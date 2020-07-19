@@ -33,6 +33,9 @@ Click any image to see the documentation related to the feature!
 [![Word-wrapping](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/wordwrap-doc1.png)](doc/high-level.md#ref.wrapColumn)
 ← Word-wrapping
 
+[![Table](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/table-doc1.png)](doc/high-level.md#ref.table)
+← Table with automatic column computing, cell fitting and word-wrapping
+
 [![Input field output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/input-field-doc1.gif)](doc/high-level.md#ref.inputField)
 
 [![File input output](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/file-input-doc1.gif)](doc/high-level.md#ref.fileInput)
@@ -65,9 +68,11 @@ Click any image to see the documentation related to the feature!
 
 *New:* [Document model](doc/document-model.md#top) for building rich app GUI.
 
+*New:* [Table](doc/high-level.md#ref.table) with automatic column computing, cell fitting and word-wrapping
+
 *New:* Promises can be used instead of callback everywhere.
 
-*New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column
+*New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column-width
 
 *New:* [ScreenBuffer HD](doc/ScreenBufferHD.md#top) 32-bit (RGBA) surfaces with composition and image loading
 
@@ -92,19 +97,6 @@ Click any image to see the documentation related to the feature!
 * [change the terminal color palette](doc/high-level.md#ref.setPalette)
 * [draw an image file (PNG, JPEG, GIF) directly inside the terminal](doc/high-level.md#ref.drawImage)
 * [event-driven](doc/events.md#top)
-* Platform: any xterm-compatible terminal.
-  These terminals have been successfully tested:
-	* xterm
-	* gnome-terminal
-	* Konsole
-	* iTerm
-	* Terminator
-	* xfce4-terminal
-	* Linux Console
-	* rxvt/urxvt
-	* Eterm
-	* Terminology
-	* **Your terminal?** Help tracking terminal compatibilities [on github!](https://github.com/cronvel/terminal-kit/issues)
 
 
 
