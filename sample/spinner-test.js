@@ -36,6 +36,7 @@ const term = termkit.terminal ;
 async function test() {
 	var spinner = await term.spinner( 'unboxing-color' ) ;
 	term( ' Loading... ' ) ;
+	//setTimeout( () => process.exit() , 5000 ) ;
 }
 
 test() ;

@@ -1,4 +1,12 @@
 
+v1.37.0
+-------
+
+New: AnimatedText widget, used for the new .spinner() (#98)
+Lot of inline mode fixes for document-model widget
+Documentation on .spinner(), .table() and TextTable (#109), built-in box/border/frame and animation/spinner
+
+
 v1.36.0
 -------
 

@@ -68,9 +68,11 @@ Click any image to see the documentation related to the feature!
 
 *New:* [Document model](doc/document-model.md#top) for building rich app GUI
 
+*New:* [Spinner](doc/high-level.md#ref.spinner)
+
 *New:* [Table](doc/high-level.md#ref.table) with automatic column computing, cell fitting and word-wrapping
 
-*New:* Promises can be used instead of callback everywhere.
+*New:* Promises can be used instead of callback everywhere
 
 *New:* [Word-wrapping](doc/high-level.md#ref.wrapColumn) along full terminal width or a pre-defined column-width
 

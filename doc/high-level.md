@@ -33,6 +33,7 @@ create nice progress bars, or display some special effects.
 * [.singleRowMenu()](#ref.singleRowMenu)
 * [.singleColumnMenu()](#ref.singleColumnMenu)
 * [.gridMenu()](#ref.gridMenu)
+* [.spinner()](#ref.spinner)
 * [.progressBar()](#ref.progressBar)
 * [.bar()](#ref.bar)
 * [.slowTyping()](#ref.slowTyping)
@@ -255,14 +256,13 @@ It produces:
 <a name="ref.table"></a>
 ### .table( tableCells , [options] )
 
-* options `Object` where:
-	* tableCells `array` of `array` of `string` describing the text content of each cells
-	* options `object`, see [TextTable](#TextTable.md#ref.TextTable.new)
+* tableCells `array` of `array` of `string` describing the text content of each cells
+* options `object`, see [TextTable](#TextTable.md#ref.TextTable.new)
 
 This creates a table of text.
 
-Behind the scene, this method uses the *inlinized* [TextTable widget](TextTable.md#ref.TextTable.new) of the document-model,
-so for more details, you will have to read the [TextTable doc](TextTable.md#top).
+Behind the scene, this method uses the *inlinized* variant of the [TextTable widget](TextTable.md#ref.TextTable.new)
+of the document-model, so for more details, you will have to read the [TextTable doc](TextTable.md#top).
 
 Example of a table with border:
 ```js
@@ -1026,6 +1026,56 @@ It produces:
 
 It reads the current directory and creates a menu with all files and folder, displayed using a table layout.
 When the user press RETURN/ENTER, it displays the index, text and coordinates of the selected menu item.
+
+
+
+<a name="ref.spinner"></a>
+### .spinner( [options] ) or .spinner( animation )
+
+* animation `string` or `array` when using this shorthand ariant, the argument is turned into an object having an *animation* property
+  set to this value, if it is a string, it should be one of [those built-in animations](spChars.md#ref.spChars.animation),
+  if it is an array, it should comply with this format [those built-in animations](spChars.md#ref.spChars.animation.custom).
+* options `object`, see [AnimatedText](#AnimatedText.md#ref.AnimatedText.new)
+
+This creates a spinner.
+
+Behind the scene, this method uses the *inlinized* variant of the [AnimatedText widget](AnimatedText.md#ref.AnimatedText.new)
+of the document-model, so for more details, you will have to read the [AnimatedText doc](AnimatedText.md#top).
+
+Example of the classic line spinner:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+term.spinner() ;
+```
+
+It produces:
+
+![Classic spinner](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/spinner-doc1.png)
+
+
+
+Example of a colorful *unboxing* spinner with a text appended after it:
+```js
+var term = require( 'terminal-kit' ).terminal ;
+
+async function test() {
+    var spinner = await term.spinner( 'unboxing-color' ) ;
+    term( ' Loading... ' ) ;
+}
+
+test() ;
+```
+
+It produces:
+
+![Colorful spinner](https://raw.githubusercontent.com/cronvel/terminal-kit/master/sample/spinner-doc2.png)
+
+Internally, since the spinner is animated, the lib needs to get the cursor location from the terminal before starting spinning,
+that's why we *await* it before writing after.
+Without *await*, it would write *' Loading...'* first, then overwrite it with the spinner.
+
+[Here is the list of all built-in animations](spChars.md#ref.spChars.animation) and for custom animation,
+[follow this format](spChars.md#ref.spChars.animation.custom).
 
 
 
