@@ -43,6 +43,7 @@
     "gpm",
     "cursor",
     "menu",
+    "spinner",
     "progress bar",
     "screenbuffer",
     "textbuffer",
