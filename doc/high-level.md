@@ -257,7 +257,7 @@ It produces:
 ### .table( tableCells , [options] )
 
 * tableCells `array` of `array` of `string` describing the text content of each cells
-* options `object`, see [TextTable](#TextTable.md#ref.TextTable.new)
+* options `object`, see [TextTable](TextTable.md#ref.TextTable.new)
 
 This creates a table of text.
 
