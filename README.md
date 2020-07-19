@@ -66,7 +66,7 @@ Click any image to see the documentation related to the feature!
 
 ## Key features
 
-*New:* [Document model](doc/document-model.md#top) for building rich app GUI.
+*New:* [Document model](doc/document-model.md#top) for building rich app GUI
 
 *New:* [Table](doc/high-level.md#ref.table) with automatic column computing, cell fitting and word-wrapping
 
