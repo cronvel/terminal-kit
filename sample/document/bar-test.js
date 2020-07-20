@@ -43,16 +43,22 @@ var document = term.createDocument( {
 
 var bar = new termkit.Bar( {
 	parent: document ,
-	x: 2 ,
+	x: 0 ,
 	y: 2 ,
 	width: 30 ,
-	barChars: 'classicWithArrow' ,
+	//barChars: 'classicWithArrow' ,
 	//barChars: 'classicWithHalf' ,
-	//barChars: 'solid' ,
+	barChars: 'solid' ,
+	content: "Downloading..." ,
 	value: 0
 } ) ;
 
+var contents = [
+	"Downloading..." , "Decrunching data..." , "Data mining..." , "Generating the data tree..." , "Parsing metadata..."
+] ;
+
 setInterval( () => bar.setValue( bar.getValue() + 0.01 ) , 100 ) ;
+setInterval( () => bar.setContent( contents[ Math.floor( Math.random() * contents.length ) ] ) , 1000 ) ;
 
 
 
