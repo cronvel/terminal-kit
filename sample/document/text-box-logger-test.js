@@ -31,6 +31,7 @@
 
 const termkit = require( '../..' ) ;
 const term = termkit.terminal ;
+const Promise = require( 'seventh' ) ;
 
 
 
@@ -43,25 +44,44 @@ var document = term.createDocument( {
 
 var textBox = new termkit.TextBox( {
 	parent: document ,
-	//content: '^#^MHe^:^bll^#^Ro!' ,
-	content: '^[fg:*royal-blue]royal!' ,
-	//content: 'royal!' ,
-	contentHasMarkup: true ,
-	//attr: { color: 'magenta' } ,
-	//attr: { color: 241 } ,
-	//attr: { color: '*royal-blue' } ,
-	//hidden: true ,
+	//content: text ,
+	//contentHasMarkup: true ,
 	scrollable: true ,
 	vScrollBar: true ,
-	x: 10 ,
+	lineWrap: true ,
+	//wordWrap: true ,
+	x: 0 ,
 	y: 2 ,
-	width: 30 ,
-	height: 10
+	width: 40 ,
+	height: 8
 } ) ;
 
 
+
+async function randomLogs() {
+	var index = 0 ,
+		randomStr = [
+			"[INFO] Initilizing..." ,
+			"[INFO] Exiting..." ,
+			"[INFO] Reloading..." ,
+			"[WARN] No config found" ,
+			"[VERB] Client disconnected" ,
+			"[INFO] Loading data" ,
+			"[VERB] Awesome computing in progress" ,
+			"[VERB] Lorem ipsum"
+		] ;
+
+	while ( true ) {
+		await Promise.resolveTimeout( 50 + Math.random() * 1000 ) ;
+		textBox.appendLog( "Log #" + ( index ++ ) + ' ' + randomStr[ Math.floor( Math.random() * randomStr.length ) ] ) ;
+	}
+}
+
+randomLogs() ;
+
+
+
 term.on( 'key' , function( key ) {
-	
 	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
@@ -69,33 +89,6 @@ term.on( 'key' , function( key ) {
 			term.styleReset() ;
 			term.clear() ;
 			process.exit() ;
-			break ;
-		
-		case 'ENTER' :
-		case 'KP_ENTER' :
-			textBox.appendContent( '\n' ) ;
-			break ;
-		
-		case 'BACKSPACE' :
-		case 'DELETE' :
-			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
-			break ;
-		
-		case 'PAGE_DOWN' :
-		case 'PAGE_UP' :
-		case 'CTRL_O' :
-			break ;
-
-		case 'CTRL_P' :
-			textBox.prependContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		case 'CTRL_R' :
-			textBox.appendContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		default :
-			textBox.appendContent( key ) ;
 			break ;
 	}
 } ) ;

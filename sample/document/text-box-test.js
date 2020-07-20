@@ -29,8 +29,7 @@
 
 
 
-//console.error( "\n\n\n\n\n\n\n\n" ) ;
-const termkit = require( '../../lib/termkit.js' ) ;
+const termkit = require( '../..' ) ;
 const term = termkit.terminal ;
 
 term.clear() ;
