@@ -1,4 +1,11 @@
 
+v1.38.0
+-------
+
+New: Bar widget, featuring text-over-bar, suitable as a component for a future progress-bar widget
+Fixing SelectList master-button enlargement bug
+
+
 v1.37.0
 -------
 
