@@ -46,6 +46,7 @@ var window = new termkit.Window( {
 	y: 10 ,
 	width: 50 ,
 	height: 10 ,
+	inputHeight: 30 ,
 	title: "^c^+Cool^:, a ^/window^:!" ,
 	titleHasMarkup: true ,
 	movable: true ,
