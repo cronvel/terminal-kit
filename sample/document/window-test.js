@@ -49,22 +49,28 @@ var window = new termkit.Window( {
 	title: "^c^+Cool^:, a ^/window^:!" ,
 	titleHasMarkup: true ,
 	movable: true ,
-	
+	scrollable: true ,
+	vScrollBar: true ,
+	//hScrollBar: true ,
+
 	// Features that are planned, but not yet supported:
 	minimizable: true ,
 	dockable: true ,
 	closable: true ,
-	scrollable: true ,
 	resizable: true
 } ) ;
 
+var content = [
+	'This is the window content...' ,
+	'Second line of content...' ,
+	'Third line of content...'
+] ;
+
+for ( let i = 4 ; i <= 30 ; i ++ ) { content.push( '' + i + 'th line of content...' ) ; }
+
 new termkit.Text( {
 	parent: window ,
-	content: [
-		'This is the window content...' ,
-		'Second line of content...' ,
-		'Third line of content...'
-	] ,
+	content ,
 	attr: { color: 'green' , italic: true }
 } ) ;
 
