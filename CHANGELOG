@@ -1,4 +1,12 @@
 
+v1.40.0
+-------
+
+Fix a bad ScreenBuffer#put() behavior when trying to write out of the buffer without wrap:true
+Container now supports a 'movable' option that makes them movable by mouse-drag
+New Window widget with title, border, movable by default, that will serve as a base to iterate upon (planned feature: resizing, minimizing, docking, closing, scrolling)
+
+
 v1.39.0
 -------
 

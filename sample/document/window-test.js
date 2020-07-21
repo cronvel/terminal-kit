@@ -35,7 +35,7 @@ const term = termkit.terminal ;
 
 
 term.clear() ;
-//term.moveTo.brightMagenta.bold.italic( 1 , 1 , "Responsive terminal layout! Try resizing your terminal! ;)" ) ;
+//term.hideCursor( true ) ;
 
 var document = term.createDocument() ;
 
@@ -48,9 +48,9 @@ var window = new termkit.Window( {
 	height: 10 ,
 	title: "^c^+Cool^:, a ^/window^:!" ,
 	titleHasMarkup: true ,
+	movable: true ,
 	
 	// Features that are planned, but not yet supported:
-	movable: true ,
 	minimizable: true ,
 	dockable: true ,
 	closable: true ,
@@ -68,11 +68,12 @@ new termkit.Text( {
 	attr: { color: 'green' , italic: true }
 } ) ;
 
-
+term.moveTo( 1 , 1 ) ;
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
 		term.grabInput( false ) ;
+		//term.hideCursor( false ) ;
 		term.clear() ;
 		process.exit() ;
 	}

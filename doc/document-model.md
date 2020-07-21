@@ -47,6 +47,7 @@ it manages widget keyboard focus, event dispatching, widget cycling, **with mous
 	* [TextBox](TextBox.md#top)
 	* [TextTable](TextTable.md#top)
 	* [ToggleButton](ToggleButton.md#top)
+	* [Window](Window.md#top)
 
 * Base classes:
 	* [Element](Element.md#top)

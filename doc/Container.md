@@ -22,6 +22,7 @@ Everything needing an intermediate [screenBuffer](ScreenBuffer.md#top) is an ins
 
 * Methods:
     * [.resize() / .resizeInput()](#ref.Container.resize)
+    * [.move()](#ref.Container.move)
     * [.moveTo()](#ref.Container.moveTo)
 
 * Properties:
@@ -39,6 +40,7 @@ Everything needing an intermediate [screenBuffer](ScreenBuffer.md#top) is an ins
 	  when there is no clipping/scrolling
 	* inputWidth, inputHeight `number` the size of the *inputDst*, default to *outputWidth*, *outputHeight* or *width*, *height*
 	  when there is no clipping/scrolling, i.e. when the *inputDst* is fully drawn into the *outputDst*
+	* movable `boolean` when set, the container can be moved using with a mouse drag (default: false)
 	* palette `Palette` a [Palette instance](Palette.md#top), default to the current document's palette
     * backgroundAttr `number` or `object` the background [attributes](ScreenBuffer#ref.ScreenBuffer.attributes) for the *inputDst* screenBuffer,
       default to `{ bgColor: 'default' }`
@@ -56,13 +58,23 @@ Resize this *container* own [screenBuffer](ScreenBuffer.md#top).
 
 
 
+<a name="ref.Container.move"></a>
+### .move( dx , dy )
+
+* dx, dy `number` the delta of the position of the *container* relative to itself
+
+Move that *container* relative to its current position.
+In other words, change the position of its own [screenBuffer](ScreenBuffer.md#top) relative to its parent screenBuffer.
+
+
+
 <a name="ref.Container.moveTo"></a>
 ### .moveTo( x , y )
 
 * x, y `number` the position of the *container* relative to its parent *container*
 
 Move that *container* to a position relative to its parent's *container*.
-In other words, change the position of its own [screenBuffer](ScreenBuffer.md#top) relative to the parent screenBuffer.
+In other words, change the position of its own [screenBuffer](ScreenBuffer.md#top) relative to its parent screenBuffer.
 
 
 

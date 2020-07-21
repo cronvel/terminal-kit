@@ -29,14 +29,13 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 term.clear() ;
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
