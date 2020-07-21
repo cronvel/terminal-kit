@@ -39,92 +39,42 @@ term.clear() ;
 
 var document = term.createDocument() ;
 
-var text = new termkit.Text( {
+var window = new termkit.Window( {
 	parent: document ,
-	content: "Responsive terminal layout! Try resizing your terminal! ;)" ,
-	attr: {
-		color: 'brightMagenta' ,
-		bold: true ,
-		italic: true
-	}
-} ) ;
-
-var layout = new termkit.Layout( {
-	parent: document ,
-	boxChars: 'double' ,
-	layout: {
-		id: 'main' ,
-		y: 3 ,
-		//widthPercent: 60 ,
-		widthPercent: 100 ,
-		//heightPercent: 60 ,
-		heightPercent: 80 ,
-		rows: [
-			{
-				id: '1st row' ,
-				heightPercent: 75 ,
-				columns: [
-					{ id: 'percent' , widthPercent: 100/3 } ,
-					{ id: 'auto' } ,
-					{ id: 'fixed' , width: 30 } ,
-				]
-			} ,
-			{
-				id: '2nd row' ,
-				columns: [
-					{ id: 'fixed2' , width: 20 } ,
-					{ id: 'auto2' } ,
-				]
-			}
-		]
-	}
-} ) ;
-
-
-term.hideCursor() ;
-//layout.draw() ;
-//layout.setAutoResize( true ) ;
-
-new termkit.Text( {
-	parent: document.elements.percent ,
-	content: 'Percent sized box' ,
-	attr: { color: 'red' }
+	//boxChars: 'dotted' ,
+	x: 10 ,
+	y: 10 ,
+	width: 50 ,
+	height: 10 ,
+	title: "^c^+Cool^:, a ^/window^:!" ,
+	titleHasMarkup: true ,
+	
+	// Features that are planned, but not yet supported:
+	movable: true ,
+	minimizable: true ,
+	dockable: true ,
+	closable: true ,
+	scrollable: true ,
+	resizable: true
 } ) ;
 
 new termkit.Text( {
-	parent: document.elements.auto ,
-	content: 'Auto sized box' ,
+	parent: window ,
+	content: [
+		'This is the window content...' ,
+		'Second line of content...' ,
+		'Third line of content...'
+	] ,
 	attr: { color: 'green' , italic: true }
 } ) ;
 
-new termkit.Text( {
-	parent: document.elements.auto2 ,
-	content: 'Auto sized box' ,
-	attr: { color: 'yellow' , italic: true }
-} ) ;
-
-new termkit.Text( {
-	parent: document.elements.fixed ,
-	content: 'Fixed size box' ,
-	attr: { color: 'cyan' , bold: true }
-} ) ;
-
-new termkit.Text( {
-	parent: document.elements.fixed2 ,
-	content: 'Fixed size box' ,
-	attr: { color: 'magenta' , bold: true }
-} ) ;
 
 
 term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
 		term.grabInput( false ) ;
-		term.hideCursor( false ) ;
 		term.clear() ;
 		process.exit() ;
 	}
 } ) ;
-
-
-//term.moveTo( 1 , term.height ) ;
 
