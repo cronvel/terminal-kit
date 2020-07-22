@@ -34,7 +34,7 @@ const term = termkit.terminal ;
 
 
 
-term.clear() ;
+//term.clear() ;
 //term.moveTo.brightMagenta.bold.italic( 1 , 1 , "Responsive terminal layout! Try resizing your terminal! ;)" ) ;
 
 var document = term.createDocument() ;
@@ -194,7 +194,8 @@ term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
 		term.grabInput( false ) ;
 		term.hideCursor( false ) ;
-		term.clear() ;
+		term.moveTo( 1 , term.height )( '\n' ) ;
+		//term.clear() ;
 		process.exit() ;
 	}
 } ) ;

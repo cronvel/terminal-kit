@@ -85,7 +85,7 @@ See [Element's key event](Element.md#ref.Element.event.key).
 	* altTextAttr `object` alternate attribute for the text, default to `textAttr` + `{ color: 'gray' , italic: true } `
 	* voidAttr `object` attribute for the area of the textBox without any text content, default to `{ bgColor: 'default' }`
 	* emptyAttr `object` alias of `voidAttr`
-	* scrollable `boolean` if set, the textBox is scrollable
+	* scrollable `boolean` if set, the textBox is scrollable (default: false)
 	* hasHScrollBar `boolean` if set and if *scrollable*, the textBox has a horizontal scrollbar
 	* hasVScrollBar `boolean` if set and if *scrollable*, the textBox has a vertical scrollbar
 	* scrollX `number` the initial horizontal scroll value, default: 0
@@ -122,7 +122,6 @@ This scrolls the textBox to the *x,y* coordinates and updates scrollbars.
 
 
 
-
 <a name="ref.TextBox.scroll"></a>
 ### .scroll( dx , dy )
 
@@ -139,12 +138,10 @@ This scrolls the textBox to the top and updates scrollbars.
 
 
 
-
 <a name="ref.TextBox.scrollToBottom"></a>
 ### .scrollToBottom()
 
 This scrolls the textBox to the bottom and updates scrollbars.
-
 
 
 

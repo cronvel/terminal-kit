@@ -99,7 +99,7 @@ new termkit.Text( {
 
 new termkit.Text( {
 	parent: document.elements.auto2 ,
-	content: 'Auto sized box' ,
+	content: 'Auto sized box (2)' ,
 	attr: { color: 'yellow' , italic: true }
 } ) ;
 
@@ -111,7 +111,7 @@ new termkit.Text( {
 
 new termkit.Text( {
 	parent: document.elements.fixed2 ,
-	content: 'Fixed size box' ,
+	content: 'Fixed size box (2)' ,
 	attr: { color: 'magenta' , bold: true }
 } ) ;
 
@@ -120,7 +120,8 @@ term.on( 'key' , function( key ) {
 	if ( key === 'CTRL_C' ) {
 		term.grabInput( false ) ;
 		term.hideCursor( false ) ;
-		term.clear() ;
+		term.moveTo( 1 , term.height )( '\n' ) ;
+		//term.clear() ;
 		process.exit() ;
 	}
 } ) ;
