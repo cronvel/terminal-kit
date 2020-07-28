@@ -35,68 +35,54 @@ const term = termkit.terminal ;
 
 
 term.clear() ;
+//term.hideCursor( true ) ;
 
-var document = term.createDocument( {
-	palette: new termkit.Palette()
-	//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
-} ) ;
+var document = term.createDocument() ;
 
-var textBox = new termkit.TextBox( {
+var window = new termkit.Window( {
 	parent: document ,
-	//content: '^#^MHe^:^bll^#^Ro!' ,
-	content: '^[fg:*royal-blue]royal!' ,
-	//content: 'royal!' ,
-	contentHasMarkup: true ,
-	//attr: { color: 'magenta' } ,
-	//attr: { color: 241 } ,
-	//attr: { color: '*royal-blue' } ,
-	//hidden: true ,
+	//boxChars: 'dotted' ,
+	x: 10 ,
+	y: 10 ,
+	width: 50 ,
+	height: 10 ,
+	inputHeight: 30 ,
+	title: "^c^+Cool^:, a ^/window^:!" ,
+	titleHasMarkup: true ,
+	movable: true ,
 	scrollable: true ,
 	vScrollBar: true ,
-	x: 10 ,
-	y: 2 ,
-	width: 30 ,
-	height: 10
+	//hScrollBar: true ,
+
+	// Features that are planned, but not yet supported:
+	minimizable: true ,
+	dockable: true ,
+	closable: true ,
+	resizable: true
 } ) ;
 
+var content = [
+	'This is the window content...' ,
+	'Second line of content...' ,
+	'Third line of content...'
+] ;
+
+for ( let i = 4 ; i <= 30 ; i ++ ) { content.push( '' + i + 'th line of content...' ) ; }
+
+new termkit.Text( {
+	parent: window ,
+	content ,
+	attr: { color: 'green' , italic: true }
+} ) ;
+
+term.moveTo( 1 , 1 ) ;
 
 term.on( 'key' , function( key ) {
-	
-	switch( key ) {
-		case 'CTRL_C' :
-			term.grabInput( false ) ;
-			term.hideCursor( false ) ;
-			term.styleReset() ;
-			term.clear() ;
-			process.exit() ;
-			break ;
-		
-		case 'ENTER' :
-		case 'KP_ENTER' :
-			textBox.appendContent( '\n' ) ;
-			break ;
-		
-		case 'BACKSPACE' :
-		case 'DELETE' :
-			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
-			break ;
-		
-		case 'PAGE_DOWN' :
-		case 'PAGE_UP' :
-		case 'CTRL_O' :
-			break ;
-
-		case 'CTRL_P' :
-			textBox.prependContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		case 'CTRL_R' :
-			textBox.appendContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		default :
-			textBox.appendContent( key ) ;
-			break ;
+	if ( key === 'CTRL_C' ) {
+		term.grabInput( false ) ;
+		//term.hideCursor( false ) ;
+		term.clear() ;
+		process.exit() ;
 	}
 } ) ;
 

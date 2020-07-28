@@ -30,10 +30,13 @@ It is backed by a [TextBuffer](TextBuffer.md#top).
 	* [.setSizeAndPosition()](#ref.TextBox.setSizeAndPosition)
 	* [.scrollTo()](#ref.TextBox.scrollTo)
 	* [.scroll()](#ref.TextBox.scroll)
+	* [.scrollToTop()](#ref.TextBox.scrollToTop)
+	* [.scrollToBottom()](#ref.TextBox.scrollToBottom)
 	* [.getContent()](#ref.TextBox.getContent)
 	* [.getContentSize()](#ref.TextBox.getContentSize)
-	* [.appendContent()](#ref.TextBox.appendContent)
 	* [.prependContent()](#ref.TextBox.prependContent)
+	* [.appendContent()](#ref.TextBox.appendContent)
+	* [.appendLog()](#ref.TextBox.appendLog)
 	* [.getAltContent()](#ref.TextBox.getAltContent)
 	* [.setAltContent()](#ref.TextBox.setAltContent)
 
@@ -82,7 +85,7 @@ See [Element's key event](Element.md#ref.Element.event.key).
 	* altTextAttr `object` alternate attribute for the text, default to `textAttr` + `{ color: 'gray' , italic: true } `
 	* voidAttr `object` attribute for the area of the textBox without any text content, default to `{ bgColor: 'default' }`
 	* emptyAttr `object` alias of `voidAttr`
-	* scrollable `boolean` if set, the textBox is scrollable
+	* scrollable `boolean` if set, the textBox is scrollable (default: false)
 	* hasHScrollBar `boolean` if set and if *scrollable*, the textBox has a horizontal scrollbar
 	* hasVScrollBar `boolean` if set and if *scrollable*, the textBox has a vertical scrollbar
 	* scrollX `number` the initial horizontal scroll value, default: 0
@@ -119,13 +122,26 @@ This scrolls the textBox to the *x,y* coordinates and updates scrollbars.
 
 
 
-
 <a name="ref.TextBox.scroll"></a>
 ### .scroll( dx , dy )
 
 * dx, dy `number` the delta of the scroll
 
 This scrolls the textBox from this *x,y* delta and updates scrollbars.
+
+
+
+<a name="ref.TextBox.scrollToTop"></a>
+### .scrollToTop()
+
+This scrolls the textBox to the top and updates scrollbars.
+
+
+
+<a name="ref.TextBox.scrollToBottom"></a>
+### .scrollToBottom()
+
+This scrolls the textBox to the bottom and updates scrollbars.
 
 
 
@@ -143,6 +159,16 @@ It returns the current text-content size, an object with a *width* and *height* 
 
 
 
+<a name="ref.TextBox.prependContent"></a>
+### .prependContent( content , [dontDraw] )
+
+* content `string` the text-content to prepend
+* dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
+
+Prepend text-content at the begining of the current content. It supports markup or ansi if the textBox was instanciated with the `contentHasMarkup` options on.
+
+
+
 <a name="ref.TextBox.appendContent"></a>
 ### .appendContent( content , [dontDraw] )
 
@@ -153,13 +179,17 @@ Append text-content at the end of the current content. It supports markup or ans
 
 
 
-<a name="ref.TextBox.prependContent"></a>
-### .prependContent( content , [dontDraw] )
+<a name="ref.TextBox.appendLog"></a>
+### .appendLog( content , [dontDraw] )
 
-* content `string` the text-content to prepend
+* content `string` the text-content to append
 * dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
 
-Prepend text-content at the begining of the current content. It supports markup or ansi if the textBox was instanciated with the `contentHasMarkup` options on.
+This method is almost like [.appendContent()](ref.TextBox.appendContent), but more suitable for logging.
+It appends **a new line** of text-content at the end of the current content.
+Then it performs an *intelligent scroll* of the textBox: *if the scrolling was already at the bottom*,
+it will scroll down so that new content will be in the viewport.
+It supports markup or ansi if the textBox was instanciated with the `contentHasMarkup` options on.
 
 
 

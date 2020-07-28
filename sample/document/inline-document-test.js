@@ -50,7 +50,7 @@ term.on( 'key' , function( key ) {
 
 
 
-async function test() {
+async function test1() {
 	var button = await term.createInlineElement( termkit.Button , {
 		outputDst: term ,
 		content: '> bob' ,
@@ -58,6 +58,8 @@ async function test() {
 		x: 10 , y: 10 ,
 	} ) ;
 }
+
+
 
 async function test2() {
 	//term( "Menu\n" ) ;
@@ -109,6 +111,8 @@ async function test2() {
 	columnMenu.document.giveFocusTo( columnMenu ) ;
 }
 
+
+
 function test3() {
 	var table = term.createInlineElement( termkit.TextTable , {
 		cellContents: [
@@ -137,5 +141,14 @@ function test3() {
 
 
 
-test3() ;
+function test4() {
+	var spinner = term.createInlineElement( termkit.AnimatedText , {
+		animation: 'unboxing-color' ,
+		//rightPadding: ' '
+	} ) ;
+}
+
+
+
+test4() ;
 

@@ -31,20 +31,19 @@
 
 const term = require( '..' ).terminal ;
 
+
+
 function terminate() {
 	term.brightBlack( 'About to exit...\n' ) ;
 	term.grabInput( false ) ;
 	term.applicationKeypad( false ) ;
-	term.beep() ;
-	term.fullscreen( false ) ;
-	
+
 	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-	setTimeout( function() { process.exit() ; } , 100 ) ;
-} 
+	setTimeout( () => { process.exit() ; } , 100 ) ;
+}
 
 
 
-term.fullscreen() ;
 term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
 term.green( 'Hit CTRL-C to quit, CTRL-D to change the mouse reporting mode\n\n' ) ;
 
@@ -58,7 +57,7 @@ term.grabInput( { mouse: 'button' , focus: true } ) ;
 var mouseMode = 1 ;
 
 term.on( 'key' , ( name , matches , data ) => {
-	
+
 	console.log(
 		"'key' event:" ,
 		name ,
@@ -66,12 +65,12 @@ term.on( 'key' , ( name , matches , data ) => {
 		Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 ) ,
 		data.codepoint ? data.codepoint.toString( 16 ) : ''
 	) ;
-	
+
 	if ( matches.indexOf( 'CTRL_C' ) >= 0 ) {
 		term.green( 'CTRL-C received...\n' ) ;
 		terminate() ;
 	}
-	
+
 	if ( matches.indexOf( 'CTRL_R' ) >= 0 ) {
 		term.green( 'CTRL-R received... asking terminal some information...\n' ) ;
 		term.requestCursorLocation() ;
@@ -82,11 +81,11 @@ term.on( 'key' , ( name , matches , data ) => {
 		term.green( 'CTRL-V received... asking terminal the clipboard...\n' ) ;
 		term.requestClipboard() ;
 	}
-	
+
 	if ( matches.indexOf( 'CTRL_D' ) >= 0 ) {
 		term.green( 'CTRL-D received: ' ) ;
 		mouseMode = ( mouseMode + 1 ) % 4 ;
-		
+
 		switch ( mouseMode ) {
 			case 0 :
 				term.green( 'turn mouse off\n' ) ;

@@ -29,12 +29,9 @@
 
 
 
-/* jshint unused:false */
+const fs = require( 'fs' ) ;
+const term = require( '..' ).terminal ;
 
-
-
-var fs = require( 'fs' ) ;
-var term = require( '..' ).terminal ;
 
 
 var timeFactor = 10 ;

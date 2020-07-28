@@ -29,15 +29,27 @@
 
 
 
-const term = require( '..' ).terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
 
-term( '\n' ) ;
-term( ' ^+bold^ ^-dim^ ^/italic^ ^_underline^ ^!inverse^ ' ).strike( 'strike' )( '\n' ) ;
-term( ' ^Rred ^Ggreen ^Yyellow ^Bblue ^Mmagenta ^Ccyan\n' ) ;
-term( ' ' ).bgRed( 'bgRed' )( ' ' ) ;
-term.bgGreen( 'bgGreen' )( ' ' ) ;
-term.bgYellow( 'bgYellow' )( ' ' ) ;
-term.bgBlue( 'bgBlue' )( ' ' ) ;
-term.bgMagenta( 'bgMagenta' )( ' ' ) ;
-term.bgCyan( 'bgCyan' )( '\n' ) ;
-term( '\n' ) ;
+
+term.table( [
+		[ 'header #1' , 'header #2' , 'header #3' ] ,
+		[ 'row #1' , 'a much bigger cell, a much bigger cell, a much bigger cell... ' , 'cell' ] ,
+		[ 'row #2' , 'cell' , 'a medium cell' ] ,
+		[ 'row #3' , 'cell' , 'cell' ] ,
+		[ 'row #4' , 'cell\nwith\nnew\nlines' , '^YThis ^Mis ^Ca ^Rcell ^Gwith ^Bmarkup^R^+!' ]
+	] , {
+		hasBorder: true ,
+		contentHasMarkup: true ,
+		borderChars: 'lightRounded' ,
+		borderAttr: { color: 'blue' } ,
+		textAttr: { bgColor: 'default' } ,
+		firstCellTextAttr: { bgColor: 'blue' } ,
+		firstRowTextAttr: { bgColor: 'yellow' } ,
+		firstColumnTextAttr: { bgColor: 'red' } ,
+		width: 60 ,
+		fit: true	// Activate all expand/shrink + wordWrap
+	}
+) ;
+

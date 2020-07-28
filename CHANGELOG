@@ -1,9 +1,44 @@
 
-v1.37.0
+v1.42.0
 -------
 
 Dependencies upgraded (get-pixels and underlying jpeg-js, pngjs and other lib)
 Upgrade forces Node v8 drop, now supports Node >= v10
+
+
+v1.41.0
+-------
+
+Container now supports scrolling, and so does Window.
+
+
+v1.40.0
+-------
+
+Fix a bad ScreenBuffer#put() behavior when trying to write out of the buffer without wrap:true
+Container now supports a 'movable' option that makes them movable by mouse-drag
+New Window widget with title, border, movable by default, that will serve as a base to iterate upon (planned feature: resizing, minimizing, docking, closing, scrolling)
+
+
+v1.39.0
+-------
+
+New TextBox methods: .scrollToTop(), .scrollToBottom() and .appendLog() (see the doc), and minor draw fix
+
+
+v1.38.0
+-------
+
+New: Bar widget, featuring text-over-bar, suitable as a component for a future progress-bar widget
+Fixing SelectList master-button enlargement bug
+
+
+v1.37.0
+-------
+
+New: AnimatedText widget, used for the new .spinner() (#98)
+Lot of inline mode fixes for document-model widget
+Documentation on .spinner(), .table() and TextTable (#109), built-in box/border/frame and animation/spinner
 
 
 v1.36.0

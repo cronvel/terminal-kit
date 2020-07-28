@@ -70,7 +70,7 @@ TODOC / unstable.
 	* key `string` a key for this element, only relevant for some widgets
 	* value `any` a value associated with this element, only relevant for some widgets
 	* content `string` the content of the element that will be displayed, if it makes sense for the widget
-	* contentHasMarkup `boolean` or `string` when set to *true* or the string *'markup'*, the content contains Terminal Kit's markup,
+	* contentHasMarkup <a name="ref.Element.new.contentHasMarkup"></a>`boolean` or `string` when set to *true* or the string *'markup'*, the content contains Terminal Kit's markup,
 	  used to set attributes of parts of the content, when set to the string *'ansi'*, the content contains ANSI escape sequence,
 	  *true* and *markup* are only relevant for some widgets and *ansi* is even less supported, default: false.
 	* contentWidth `number` the width (in terminal's cells) of the content, only relevant for some widgets

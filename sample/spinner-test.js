@@ -29,15 +29,15 @@
 
 
 
-const term = require( '..' ).terminal ;
+const termkit = require( '..' ) ;
+const term = termkit.terminal ;
 
-term( '\n' ) ;
-term( ' ^+bold^ ^-dim^ ^/italic^ ^_underline^ ^!inverse^ ' ).strike( 'strike' )( '\n' ) ;
-term( ' ^Rred ^Ggreen ^Yyellow ^Bblue ^Mmagenta ^Ccyan\n' ) ;
-term( ' ' ).bgRed( 'bgRed' )( ' ' ) ;
-term.bgGreen( 'bgGreen' )( ' ' ) ;
-term.bgYellow( 'bgYellow' )( ' ' ) ;
-term.bgBlue( 'bgBlue' )( ' ' ) ;
-term.bgMagenta( 'bgMagenta' )( ' ' ) ;
-term.bgCyan( 'bgCyan' )( '\n' ) ;
-term( '\n' ) ;
+
+async function test() {
+	var spinner = await term.spinner( 'unboxing-color' ) ;
+	term( ' Loading... ' ) ;
+	//setTimeout( () => process.exit() , 5000 ) ;
+}
+
+test() ;
+

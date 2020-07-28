@@ -41,61 +41,36 @@ var document = term.createDocument( {
 	//	backgroundAttr: { bgColor: 'magenta' , dim: true } ,
 } ) ;
 
-var textBox = new termkit.TextBox( {
+var bar = new termkit.Bar( {
 	parent: document ,
-	//content: '^#^MHe^:^bll^#^Ro!' ,
-	content: '^[fg:*royal-blue]royal!' ,
-	//content: 'royal!' ,
-	contentHasMarkup: true ,
-	//attr: { color: 'magenta' } ,
-	//attr: { color: 241 } ,
-	//attr: { color: '*royal-blue' } ,
-	//hidden: true ,
-	scrollable: true ,
-	vScrollBar: true ,
-	x: 10 ,
+	x: 0 ,
 	y: 2 ,
 	width: 30 ,
-	height: 10
+	//barChars: 'classicWithArrow' ,
+	//barChars: 'classicWithHalf' ,
+	barChars: 'solid' ,
+	content: "Downloading..." ,
+	value: 0
 } ) ;
+
+var contents = [
+	"Downloading..." , "Decrunching data..." , "Data mining..." , "Generating the data tree..." , "Parsing metadata..."
+] ;
+
+setInterval( () => bar.setValue( bar.getValue() + 0.01 ) , 100 ) ;
+setInterval( () => bar.setContent( contents[ Math.floor( Math.random() * contents.length ) ] ) , 1000 ) ;
+
 
 
 term.on( 'key' , function( key ) {
-	
 	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
 			term.styleReset() ;
-			term.clear() ;
+			//term.clear() ;
+			term( '\n' ) ;
 			process.exit() ;
-			break ;
-		
-		case 'ENTER' :
-		case 'KP_ENTER' :
-			textBox.appendContent( '\n' ) ;
-			break ;
-		
-		case 'BACKSPACE' :
-		case 'DELETE' :
-			textBox.setContent( textBox.getContent().split( '\n' ).slice( 0 , -1 ).join( '\n' ) ) ;
-			break ;
-		
-		case 'PAGE_DOWN' :
-		case 'PAGE_UP' :
-		case 'CTRL_O' :
-			break ;
-
-		case 'CTRL_P' :
-			textBox.prependContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		case 'CTRL_R' :
-			textBox.appendContent( '^RR^YA^GI^CN^BB^MO^MW' ) ;
-			break ;
-
-		default :
-			textBox.appendContent( key ) ;
 			break ;
 	}
 } ) ;

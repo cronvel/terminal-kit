@@ -29,66 +29,56 @@
 
 
 
-/* jshint unused:false */
+const term = require( '..' ).terminal ;
 
 
 
-require( '../lib/termkit.js' ).getDetectedTerminal( function( error , term ) {
+function terminate() {
+	term.brightBlack( 'About to exit...\n' ) ;
+	term.grabInput( false ) ;
+	term.applicationKeypad( false ) ;
 
-
-	function terminate()
-	{
-		term.brightBlack( 'About to exit...\n' ) ;
-		term.grabInput( false ) ;
-		term.applicationKeypad( false ) ;
-		term.beep() ;
-		term.fullscreen( false ) ;
-		
-		// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
-		setTimeout( function() { process.exit() ; } , 100 ) ;
-	} 
+	// Add a 100ms delay, so the terminal will be ready when the process effectively exit, preventing bad escape sequences drop
+	setTimeout( () => { process.exit() ; } , 100 ) ;
+}
 
 
 
-	term.fullscreen() ;
-	term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
-	term.green( 'Hit CTRL-C to quit.\n\n' ) ;
+term.bold.cyan( 'Key test, hit anything on the keyboard to see how it is detected...\n' ) ;
+term.green( 'Hit CTRL-C to quit.\n\n' ) ;
 
-	// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
-	var applicationKeypad = true ;
-	term.applicationKeypad( applicationKeypad ) ;
-	
-	//term.keyboardModifier() ;
+// Set Application Keypad mode, but it does not works on every box (sometime numlock should be off for this to work)
+var applicationKeypad = true ;
+term.applicationKeypad( applicationKeypad ) ;
 
-	term.grabInput() ;
-	//term.grabInput( { mouse: 'motion' , focus: true } ) ;
+//term.keyboardModifier() ;
 
-	term.on( 'key' , function( name , matches , data ) {
-		
-		console.log(
-			"Key:" , name ,
-			", length:" , name.length ,
-			", all matches:" , matches ,
-			", is character:" , data.isCharacter ,
-			", codepoint:" , data.codepoint ? data.codepoint.toString( 16 ) : '' ,
-			", buffer:" , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 )
-		) ;
-		
-		switch ( name )
-		{
-			case 'CTRL_C' :
-				term.green( 'CTRL-C received...\n' ) ;
-				terminate() ;
-				break ;
-			
-			case 'CTRL_K' :
-				applicationKeypad = ! applicationKeypad ;
-				term.applicationKeypad( applicationKeypad ) ;
-				term.green( 'CTRL-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
-				break ;
-		}
-		
-	} ) ;
-	
+term.grabInput() ;
+//term.grabInput( { mouse: 'motion' , focus: true } ) ;
+
+term.on( 'key' , ( name , matches , data ) => {
+
+	console.log(
+		"Key:" , name ,
+		", length:" , name.length ,
+		", all matches:" , matches ,
+		", is character:" , data.isCharacter ,
+		", codepoint:" , data.codepoint ? data.codepoint.toString( 16 ) : '' ,
+		", buffer:" , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 )
+	) ;
+
+	switch ( name ) {
+		case 'CTRL_C' :
+			term.green( 'CTRL-C received...\n' ) ;
+			terminate() ;
+			break ;
+
+		case 'CTRL_K' :
+			applicationKeypad = ! applicationKeypad ;
+			term.applicationKeypad( applicationKeypad ) ;
+			term.green( 'CTRL-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
+			break ;
+	}
+
 } ) ;
 
