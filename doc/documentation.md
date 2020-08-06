@@ -166,7 +166,7 @@ You can also define your own terminal interface, see [.createTerminal()](#ref.cr
 	* [ColumnMenu](document-model.md#ref.ColumnMenu)
 	* [ColumnMenuMulti](document-model.md#ref.ColumnMenuMulti)
 	* [DropDownMenu](document-model.md#ref.DropDownMenu)
-	* [EditableTextBox)](document-model.md#ref.EditableTextBox)
+	* [EditableTextBox](document-model.md#ref.EditableTextBox)
 	* [Form](document-model.md#ref.Form)
 	* [LabeledInput](document-model.md#ref.LabeledInput)
 	* [Layout](document-model.md#ref.Layout)
