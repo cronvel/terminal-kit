@@ -95,6 +95,9 @@ var textBox = new termkit.TextBox( {
 } ) ;
 
 
+//setTimeout( () => textBox.setContent( '^RChanged!' , true ) , 1000 ) ;
+
+
 term.on( 'key' , function( key ) {
 	switch( key ) {
 		case 'CTRL_C' :

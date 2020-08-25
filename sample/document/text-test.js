@@ -42,11 +42,17 @@ var document = term.createDocument( {
 
 var text = new termkit.Text( {
 	parent: document ,
-	content: '^[fg:*royal-blue]A simple text' ,
+	//content: '^[fg:*royal-blue]A simple text' ,
+	content: ['^[fg:*royal-blue]A simple text','2nd line'] ,
 	contentHasMarkup: true ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
+
+setTimeout( () => {
+	text.setContent( ['^RS'] , true ) ;
+	//text.setContent( ['^RChanged!^ ljsdlkfjsmlkdjfmlksjflkjdslkfj','bob'] , true ) ;
+} , 1200 ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key ) {
