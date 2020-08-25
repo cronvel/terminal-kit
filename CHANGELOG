@@ -1,4 +1,12 @@
 
+v1.43.0
+-------
+
+New method TextTable#setCellContent() (#123)
+Fix Text#setContent()
+Fix a LabeledInput's label highlight bug on direct click focus
+
+
 v1.42.0
 -------
 

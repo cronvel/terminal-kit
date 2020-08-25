@@ -56,6 +56,7 @@ var textTable = new termkit.TextTable( {
 		[ '1-3' , '2-3' , '3-3' ]
 		//*/
 	] ,
+	contentHasMarkup: true ,
 	x: 0 ,
 	y: 2 ,
 	//hasBorder: false ,
@@ -72,11 +73,15 @@ var textTable = new termkit.TextTable( {
 	//evenColumnTextAttr: { bgColor: 'gray' } ,
 	width: 50 ,
 	//width: term.width ,
-	height: 15 ,
+	height: 20 ,
 	fit: true ,	// Activate all expand/shrink + wordWrap
 	//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordWrap: true ,
 	//lineWrap: true ,
 } ) ;
+
+setTimeout( () => {
+    textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
+} , 1200 ) ;
 
 
 term.on( 'key' , function( key ) {

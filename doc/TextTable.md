@@ -31,6 +31,9 @@ TextTable features:
 * Constructor:
 	* [new TextTable()](#ref.TextTable.new)
 
+* Methods:
+	* [.setCellContent()](#ref.TextTable.setCellContent)
+
 * Inherit methods and properties from [Element](Element.md#ref.Element.toc)
 
 
@@ -92,4 +95,18 @@ TextTable features:
 	* textBoxKeyBindings `object` if set, it replaces default key-bindings for all the *TextBox* instances
 
 This creates a *TextTable element*.
+
+
+
+<a name="ref.TextTable.setCellContent"></a>
+### .setCellContent( x , y , content , [dontDraw] , [dontUpdateLayout] )
+
+* x,y `number` the cell coordinate to modify
+* content `string` the new content for this table cell
+* dontDraw `boolean` when set, the cell content's update does not trigger the *redraw* of the *textTable*
+* dontUpdateLayout `boolean` when set, the table layout is not updated
+
+This update an existing cell content.
+The table layout will be updated if needed, except if *dontUpdateLayout* is set.
+The content may contain *markup*, but it should have been enabled on the *textTable* creation for this to work.
 
