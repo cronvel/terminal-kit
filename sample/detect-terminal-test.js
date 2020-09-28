@@ -29,10 +29,7 @@
 
 
 
-/* jshint unused:false */
-/* global describe, it, before, after */
-
-
+const os = require( 'os' ) ;
 const termkit = require( '../lib/termkit.js' ) ;
 const term = termkit.terminal ;
 
@@ -80,10 +77,14 @@ async function termInfo( t ) {
 async function detect() {
 	var info , newTerm ;
 
-	term.green( '\n== Environment variable ==\n\n' ) ;
+	term.green( '\n== OS and Environment Variables ==\n\n' ) ;
+	term( 'OS platform: %s\n' , os.platform() ) ;
+	term( 'OS type: %s\n' , os.type() ) ;
+	term( 'OS version: %s\n' , os.version && os.version() ) ;
 	term( '$TERM: %s\n' , process.env.TERM ) ;
 	term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
 	term( '$VTE_VERSION: %s\n' , process.env.VTE_VERSION ) ;
+	term( '$TERM_PROGRAM: %s\n' , process.env.TERM_PROGRAM ) ;
 	term( '\n' ) ;
 
 
