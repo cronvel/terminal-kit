@@ -78,8 +78,10 @@ async function detect() {
 	var info , newTerm ;
 
 	term.green( '\n== OS and Environment Variables ==\n\n' ) ;
+	term( 'Node version: %s\n' , process.version ) ;
 	term( 'OS platform: %s\n' , os.platform() ) ;
 	term( 'OS type: %s\n' , os.type() ) ;
+	term( 'OS release: %s\n' , os.release() ) ;
 	term( 'OS version: %s\n' , os.version && os.version() ) ;
 	term( '$TERM: %s\n' , process.env.TERM ) ;
 	term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
