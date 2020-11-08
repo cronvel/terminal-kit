@@ -15,6 +15,7 @@ _templates
 _static
 
 
+
 # gitignore / Node.gitignore #
 ##############################
 lib-cov
@@ -35,6 +36,7 @@ build
 .grunt
 sample/__issue.js
 package-lock.json
+yarn.lock
 
 node_modules
 
