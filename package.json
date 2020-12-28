@@ -14,8 +14,8 @@
     "chroma-js": "^2.1.0",
     "lazyness": "^1.2.0",
     "ndarray": "^1.0.19",
-    "nextgen-events": "^1.3.0",
-    "seventh": "^0.7.35",
+    "nextgen-events": "^1.3.3",
+    "seventh": "^0.7.40",
     "string-kit": "^0.11.8",
     "tree-kit": "^0.6.2"
   },
