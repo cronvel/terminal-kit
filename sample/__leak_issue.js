@@ -18,7 +18,7 @@ async function flood() {
 			term.table(data, {});
 		}
 
-		await Promise.resolveTimeout( 10000 ) ;
+		await Promise.resolveTimeout( 200 ) ;
 	}
 }
 
