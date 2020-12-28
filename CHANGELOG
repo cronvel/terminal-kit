@@ -1,4 +1,10 @@
 
+v1.44.1
+-------
+
+Mitigate leak issue with term.table() (#138)
+
+
 v1.44.0
 -------
 
