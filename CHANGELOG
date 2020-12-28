@@ -1,4 +1,10 @@
 
+v1.44.2
+-------
+
+Fix a memory leak in the Document model (#138)
+
+
 v1.44.1
 -------
 

@@ -11,13 +11,17 @@ term.clear();
 async function flood() {
 	var i , round ;
 	for ( round = 0 ;; round ++ ) {
-		term.moveTo(1, 1)( "Starting round #%i    \n" , round );
 
-		for ( i = 0 ; i < 1000 ; i ++ ) {
-			term.moveTo(1, 2);
-			term.table(data, {});
+		for ( i = 0 ; i < 500 ; i ++ ) {
+			if ( i % 20 === 0 ) {
+				term.moveTo( 1 , 1 )( "Starting round #%i    iteration: #%i   mem: %k    \n" , round , i , process.memoryUsage().heapUsed ) ;
+			}
+
+			term.moveTo( 1 , 2 ) ;
+			term.table( data , {} ) ;
 		}
 
+		//term.moveTo( 1 , 1 )( "PAUSE                                                    \n" ) ;
 		await Promise.resolveTimeout( 200 ) ;
 	}
 }
