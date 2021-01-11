@@ -83,14 +83,22 @@ var rowMenu = new termkit.RowMenu( {
 
 
 
-rowMenu.on( 'submit' , onSubmit ) ;
-
 function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
 	term.restoreCursor() ;
 }
+
+function onItemFocus( buttonValue , focus ) {
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Item focus: %s %s\n' , buttonValue , focus ) ;
+	term.restoreCursor() ;
+}
+
+rowMenu.on( 'submit' , onSubmit ) ;
+rowMenu.on( 'itemFocus' , onItemFocus ) ;
 
 
 

@@ -1,4 +1,10 @@
 
+v1.45.1
+-------
+
+Add the 'itemFocus' event on the BaseMenu superclass (#143)
+
+
 v1.45.0
 -------
 

@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../..' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -114,16 +114,24 @@ var columnMenu = new termkit.ColumnMenu( {
 
 
 
-columnMenu.on( 'submit' , onSubmit ) ;
-
-var counter = 0 ;
+var submitCount = 0 , focusCount = 0 ;
 
 function onSubmit( buttonValue , action ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %s %s\n' , counter ++ , buttonValue , action ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %s %s\n' , submitCount ++ , buttonValue , action ) ;
 	term.restoreCursor() ;
 }
+
+function onItemFocus( buttonValue , focus ) {
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Item focus #%i: %s %s\n' , focusCount ++ , buttonValue , focus ) ;
+	term.restoreCursor() ;
+}
+
+columnMenu.on( 'submit' , onSubmit ) ;
+columnMenu.on( 'itemFocus' , onItemFocus ) ;
 
 
 
