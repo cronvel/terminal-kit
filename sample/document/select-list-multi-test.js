@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -69,16 +69,24 @@ var selectListMulti = new termkit.SelectListMulti( {
 
 
 
-selectListMulti.on( 'submit' , onSubmit ) ;
-
-var counter = 0 ;
+var submitCount = 0 , toggleCount = 0 ;
 
 function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J\n' , counter ++ , value ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J\n' , submitCount ++ , value ) ;
 	term.restoreCursor() ;
 }
+
+function onItemToggle( key , toggle ) {
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Toggled #%i: %s %s\n' , toggleCount ++ , key , toggle ) ;
+	term.restoreCursor() ;
+}
+
+selectListMulti.on( 'submit' , onSubmit ) ;
+selectListMulti.on( 'itemToggle' , onItemToggle ) ;
 
 
 

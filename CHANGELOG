@@ -1,4 +1,10 @@
 
+v1.45.2
+-------
+
+Following v1.45.1, adding 'itemToggle' event on the ColumnMenuMulti and derivated class
+
+
 v1.45.1
 -------
 

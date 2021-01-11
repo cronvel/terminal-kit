@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../..' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -105,15 +105,23 @@ var columnMenuMulti = new termkit.ColumnMenuMulti( {
 
 
 
-columnMenuMulti.on( 'submit' , onSubmit ) ;
-
-var counter = 0 ;
+var submitCount = 0 , toggleCount = 0 ;
 
 function onSubmit( buttonValue ) {
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J\n' , counter ++ , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J\n' , submitCount ++ , buttonValue ) ;
 	term.restoreCursor() ;
 }
+
+function onItemToggle( key , toggle ) {
+	//console.error( 'Submitted: ' , value ) ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Toggled #%i: %s %s\n' , toggleCount ++ , key , toggle ) ;
+	term.restoreCursor() ;
+}
+
+columnMenuMulti.on( 'submit' , onSubmit ) ;
+columnMenuMulti.on( 'itemToggle' , onItemToggle ) ;
 
 
 

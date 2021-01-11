@@ -29,8 +29,8 @@
 
 
 
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../../lib/termkit.js' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -69,7 +69,6 @@ var selectList = new termkit.SelectList( {
 
 
 
-selectList.on( 'submit' , onSubmit ) ;
 
 function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
@@ -79,6 +78,8 @@ function onSubmit( buttonValue ) {
 	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Select .getValue(): %s\n' , selectList.getValue() ) ;
 	term.restoreCursor() ;
 }
+
+selectList.on( 'submit' , onSubmit ) ;
 
 
 
