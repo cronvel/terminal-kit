@@ -1,4 +1,10 @@
 
+v1.45.0
+-------
+
+Fix keyboard navigation with Form having SelectList and SelectListMulti (#142), and some 'focus' event issues
+
+
 v1.44.3
 -------
 
