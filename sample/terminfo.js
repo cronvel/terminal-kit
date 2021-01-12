@@ -1,7 +1,8 @@
+#!/usr/bin/env node
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2020 Cédric Ronvel
+	Copyright (c) 2009 - 2021 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -26,12 +27,18 @@
 
 "use strict" ;
 
+const terminfo = require( '../lib/terminfo/terminfo.js' ) ;
 
+var termName = process.argv[ 2 ] || process.env.TERM ;
+var key = process.argv[ 3 ] || null ;
 
-/*
-	Known tput/infocmp command name.
-	This will be used later, when the terminfo support will be coded.
-	http://pubs.opengroup.org/onlinepubs/7990989799/xcurses/terminfo.html
-*/
+console.log( termName ) ;
+var info = terminfo( termName ) ;
 
+if ( key ) {
+	console.log( key + ':' , JSON.stringify( info[ key ] ) ) ;
+}
+else {
+	console.log( info ) ;
+}
 
