@@ -1,4 +1,10 @@
 
+v1.45.3
+-------
+
+Add 'kitty' termconfig (dummy, fully based upon xterm 256/true color config) (#139)
+
+
 v1.45.2
 -------
 
