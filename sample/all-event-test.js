@@ -77,6 +77,11 @@ term.on( 'key' , ( name , matches , data ) => {
 		term.requestScreenSize() ;
 	}
 
+	if ( matches.indexOf( 'CTRL_T' ) >= 0 ) {
+		term.green( 'CTRL-T received... requesting terminfo...\n' ) ;
+		term.getTerminfo( 'name' , 'TN' , 'colors' , 'RGB' , 'rgb' , 'kitty-query-version' , 'kitty-query-allow_hyperlinks' ) ;
+	}
+
 	if ( matches.indexOf( 'CTRL_V' ) >= 0 ) {
 		term.green( 'CTRL-V received... asking terminal the clipboard...\n' ) ;
 		term.requestClipboard() ;

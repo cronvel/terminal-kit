@@ -79,6 +79,5 @@ term.on( 'key' , ( name , matches , data ) => {
 			term.green( 'CTRL-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
 			break ;
 	}
-
 } ) ;
 
