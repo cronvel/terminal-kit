@@ -78,8 +78,18 @@ term.on( 'key' , ( name , matches , data ) => {
 	}
 
 	if ( matches.indexOf( 'CTRL_T' ) >= 0 ) {
+		// For instance, only *kitty* is known to respond to XTGETTCAP, which is used by getTerminfo
 		term.green( 'CTRL-T received... requesting terminfo...\n' ) ;
-		term.getTerminfo( 'name' , 'TN' , 'colors' , 'RGB' , 'rgb' , 'kitty-query-version' , 'kitty-query-allow_hyperlinks' ) ;
+		//term.getTerminfo( 'name' , 'TN' , 'colors' , 'RGB' , 'rgb' , 'kitty-query-version' , 'kitty-query-allow_hyperlinks' ) ;
+		term.getTerminfo( 'name' ) ;
+		term.getTerminfo( 'colors' ) ;
+		term.getTerminfo( 'RGB' ) ;
+		term.getTerminfo( 'rgb' ) ;
+	}
+
+	if ( matches.indexOf( 'CTRL_Y' ) >= 0 ) {
+		term.green( 'CTRL-Y received... requesting terminal unit ID\n' ) ;
+		term.requestTerminalUnitIdLL() ;
 	}
 
 	if ( matches.indexOf( 'CTRL_V' ) >= 0 ) {
