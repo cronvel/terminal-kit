@@ -1,4 +1,10 @@
 
+v1.45.4
+-------
+
+Markup: add special reset that also reset forced attr (document-model) (#144)
+
+
 v1.45.3
 -------
 

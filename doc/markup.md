@@ -18,6 +18,7 @@ Regular markup consists only of two chars, first the caret `^`, then any char li
 * `^^` output a single caret `^`
 * `^:` style reset (back to the default color/background color/attribute)
 * `^ ` syntactic sugar: style reset and still output a space
+* `^;` *special* style reset: it also reset attribute forced by a document-model's widget
 * `^#` *shift*, the next markup will use the *background* list
 
 
