@@ -54,6 +54,8 @@ var button1 = new termkit.Button( {
 var button2 = new termkit.Button( {
 	parent: document ,
 	content: '> button#2' ,
+	blurContent: '> button#2' ,
+	focusContent: '> BUTTON#2' ,
 	value: 'b2' ,
 	x: 13 ,
 	y: 12 ,

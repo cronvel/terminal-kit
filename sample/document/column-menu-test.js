@@ -69,7 +69,10 @@ var columnMenu = new termkit.ColumnMenu( {
 		} ,
 		{
 			//content: 'Edit' ,
-			content: '^REdit' , markup: true ,
+			markup: true ,
+			content: '^REdit' ,
+			blurContent: '^REdit' ,
+			focusContent: '^REDIT' ,
 			value: 'edit'
 		} ,
 		{
