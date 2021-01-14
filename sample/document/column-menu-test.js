@@ -71,8 +71,10 @@ var columnMenu = new termkit.ColumnMenu( {
 			//content: 'Edit' ,
 			markup: true ,
 			content: '^REdit' ,
+			//content: '^R> > > > > EDIT < < < < <' ,
 			blurContent: '^REdit' ,
-			focusContent: '^REDIT' ,
+			focusContent: '^R> EDIT <' ,
+			//focusContent: '^R> > > > > EDIT < < < < <' ,
 			value: 'edit'
 		} ,
 		{
@@ -105,6 +107,7 @@ var columnMenu = new termkit.ColumnMenu( {
 		{
 			//content: 'Very long, very long, very long, very long, very long, very long, very long, very long, very long, very long' ,
 			content: 'Very long, very long, very ^rlong, very long, very long, very long, very ^blong, very long, very long, very long' , markup: true ,
+			//focusContent: 'Very big, very big, very ^rbig, very big, very big, very big, very ^bbig, very big, very big, very big' , markup: true ,
 			value: 'very long'
 		} ,
 		//*/
