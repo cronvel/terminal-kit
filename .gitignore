@@ -33,7 +33,7 @@ logs
 results
 build
 .grunt
-sample/__issue.js
+__issue.js
 package-lock.json
 
 node_modules
