@@ -35,7 +35,7 @@ const term = termkit.terminal ;
 
 
 
-async function termInfo( t ) {
+async function testTerminal( t ) {
 	var r ;
 
 	term( 'Terminal name: %s\n' , t.appName ) ;
@@ -93,7 +93,7 @@ async function detect() {
 
 	term.green( '\n== Using simple terminal guessing ==\n\n' ) ;
 	term( '.guessTerminal(): %J\n' , termkit.guessTerminal() ) ;
-	await termInfo( term ) ;
+	await testTerminal( term ) ;
 
 
 
@@ -108,11 +108,13 @@ async function detect() {
 	
 	try {
 		newTerm = await termkit.getDetectedTerminal() ;
-		await termInfo( newTerm ) ;
+		await testTerminal( newTerm ) ;
 	}
 	catch ( error ) {
 		term.red( "Can't get detect real terminal: %E" , error ) ;
 	}
+	
+	process.exit() ;
 }
 
 detect() ;
