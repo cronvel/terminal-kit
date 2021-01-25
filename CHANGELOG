@@ -1,4 +1,10 @@
 
+v1.45.7
+-------
+
+Button: fixed some .setContent() bugs
+
+
 v1.45.6
 -------
 
