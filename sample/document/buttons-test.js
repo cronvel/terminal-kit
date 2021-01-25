@@ -45,6 +45,8 @@ var button1 = new termkit.Button( {
 	parent: document ,
 	//content: '> button#1' ,
 	content: '> ^[fg:*royal-blue]button#1' ,
+	//content: '> ^[fg:*coquelicot]button#1' ,
+	focusAttr: { bgColor: '@light-gray' } ,
 	contentHasMarkup: true ,
 	value: 'b1' ,
 	x: 10 ,
