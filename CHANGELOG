@@ -1,4 +1,11 @@
 
+v1.46.0
+-------
+
+Document model: new 'blinked' event emitted by Button, re-emitted by all *Menu* widget
+DropDownMenu now have the option 'clearColumnMenuOnSubmit' (boolean) that clear the drop down column menu on submit (on 'submit' then and once 'blinked')
+
+
 v1.45.9
 -------
 

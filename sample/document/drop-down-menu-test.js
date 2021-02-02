@@ -45,6 +45,7 @@ var dropDownMenu = new termkit.DropDownMenu( {
 	parent: document ,
 	x: 0 ,
 	y: 0 ,
+	clearColumnMenuOnSubmit: true ,
 	//width: 50 ,
 	items: [
 		{
@@ -99,7 +100,8 @@ var dropDownMenu = new termkit.DropDownMenu( {
 
 
 
-dropDownMenu.on( 'submit' , onSubmit ) ;
+//dropDownMenu.on( 'submit' , onSubmit ) ;
+dropDownMenu.on( 'blinked' , onSubmit ) ;
 
 function onSubmit( buttonValue ) {
 	//console.error( 'Submitted: ' , value ) ;
