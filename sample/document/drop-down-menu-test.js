@@ -108,6 +108,13 @@ function onSubmit( buttonValue ) {
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
 	term.restoreCursor() ;
+	
+	if ( buttonValue === 'decrunch' ) {
+		dropDownMenu.setDropDownItem( 'tools' , 'decrunch' , { content: 'Crunch' , value: 'crunch' } ) ;
+	}
+	else if ( buttonValue === 'crunch' ) {
+		dropDownMenu.setDropDownItem( 'tools' , 'crunch' , { content: 'Decrunch' , value: 'decrunch' } ) ;
+	}
 }
 
 
