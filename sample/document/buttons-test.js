@@ -68,7 +68,10 @@ var button2 = new termkit.Button( {
 	} ,
 	actionKeyBindings: {
 		CTRL_UP: 'up' ,
-		CTRL_DOWN: 'down'
+		CTRL_DOWN: 'down' ,
+		click: 'left-click' ,
+		middleClick: 'middle-click' ,
+		rightClick: 'right-click' ,
 	}
 } ) ;
 
@@ -96,7 +99,9 @@ var toggleButton2 = new termkit.ToggleButton( {
 //container1.draw() ;
 
 button1.on( 'submit' , onSubmit ) ;
+button1.on( 'blinked' , onBlinked ) ;
 button2.on( 'submit' , onSubmit ) ;
+button2.on( 'blinked' , onBlinked ) ;
 toggleButton1.on( 'toggle' , onToggle ) ;
 toggleButton1.on( 'submit' , onSubmit ) ;
 toggleButton2.on( 'toggle' , onToggle ) ;
@@ -107,6 +112,12 @@ var counter = 0 ;
 function onSubmit( value , action ) {
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %J , action: %J\n' , counter ++ , value , action ) ;
+	term.restoreCursor() ;
+}
+
+function onBlinked( value , action ) {
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Blinked #%i: %J , action: %J\n' , counter ++ , value , action ) ;
 	term.restoreCursor() ;
 }
 
@@ -134,6 +145,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 

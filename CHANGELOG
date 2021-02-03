@@ -1,4 +1,10 @@
 
+v1.47.0
+-------
+
+Document model: better handling of middle and right click, and now Button are sensible to all 3 clicks
+
+
 v1.46.1
 -------
 
