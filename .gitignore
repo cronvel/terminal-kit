@@ -34,6 +34,7 @@ results
 build
 .grunt
 __issue.js
+__issues
 package-lock.json
 
 node_modules
