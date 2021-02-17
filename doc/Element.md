@@ -24,6 +24,8 @@
 	* [.topZ()](#ref.Element.topZ)
 	* [.bottomZ()](#ref.Element.bottomZ)
 	* [.setContent()](#ref.Element.setContent)
+	* [.show()](#ref.Element.show)
+	* [.hide()](#ref.Element.hide)
 	* [.draw()](#ref.Element.draw)
 	* [.redraw()](#ref.Element.redraw)
 	* [.drawCursor()](#ref.Element.drawCursor)
@@ -122,6 +124,24 @@ Set the content of this *element*.
 
 
 
+<a name="ref.Element.show"></a>
+### .show( [dontDraw] )
+
+* dontDraw `boolean` when set (default: false) the element is not redrawn (it will be made visible the next time something trigger a *redraw*)
+
+Turn the element visibility **on** and redraw it immediately (unless the `dontDraw` option is on).
+
+
+
+<a name="ref.Element.show"></a>
+### .hide( [dontDraw] )
+
+* dontDraw `boolean` when set (default: false) the element is not redrawn (it will be hidden the next time something trigger a *redraw* on its parent)
+
+Turn the element visibility **off** and redraw its parent immediately (unless the `dontDraw` option is on).
+
+
+
 <a name="ref.Element.draw"></a>
 ### .draw()
 
@@ -132,7 +152,10 @@ It is called internally/automatically, userland code should not be bothered with
 
 
 <a name="ref.Element.redraw"></a>
-### .redraw()
+### .redraw( [force] )
+
+* force `boolean` **INTERNAL** when set (default: false) the element is *redrawn* even if it is hidden: i.e. the parent is redrawn,
+  it would effectively clear an hidden element from its parent
 
 Redraw the *element*.
 While `.draw()` is used when drawing the current *element* is enough (the *element* has not moved, and has not been resized),

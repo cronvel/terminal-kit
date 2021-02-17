@@ -124,6 +124,7 @@ function onBlinked( value , action ) {
 function onToggle( value ) {
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Toggled #%i: %J\n' , counter ++ , value ) ;
+	//if ( value ) { button1.hide() ; } else { button1.show() ; }
 	term.restoreCursor() ;
 }
 
