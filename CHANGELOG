@@ -1,4 +1,10 @@
 
+v1.48.0
+-------
+
+New method: BaseMenu#setItem() (#150)
+
+
 v1.47.2
 -------
 

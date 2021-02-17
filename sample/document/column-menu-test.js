@@ -124,6 +124,8 @@ var submitCount = 0 , focusCount = 0 ;
 
 function onSubmit( buttonValue , action ) {
 	//console.error( 'Submitted: ' , value ) ;
+	if ( buttonValue === 'view' ) { columnMenu.setItem( buttonValue , { content: 'bob' } ) ; }
+
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted #%i: %s %s\n' , submitCount ++ , buttonValue , action ) ;
 	term.restoreCursor() ;
@@ -137,6 +139,7 @@ function onItemFocus( buttonValue , focus ) {
 }
 
 columnMenu.on( 'submit' , onSubmit ) ;
+//columnMenu.on( 'blinked' , onSubmit ) ;
 columnMenu.on( 'itemFocus' , onItemFocus ) ;
 
 
