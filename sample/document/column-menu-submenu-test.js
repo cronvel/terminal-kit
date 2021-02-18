@@ -57,8 +57,10 @@ var columnMenu = new termkit.ColumnMenu( {
 		disposition: 'overwrite' ,
 		hideParent: true ,
 		openOn: 'parentBlinked' ,
+		closeOn: 'childSubmit' ,
 		focusOnOpen: true ,
 		//*/
+
 		//*
 		disposition: 'right' ,
 		hideParent: false ,

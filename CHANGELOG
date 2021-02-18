@@ -1,4 +1,11 @@
 
+v1.49.0
+-------
+
+Now Node.js v14 is required
+ColumnMenu now supports submenu (still beta) (#151)
+
+
 v1.48.1
 -------
 
