@@ -7,7 +7,7 @@
     "test": "test"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=14.0.0"
   },
   "dependencies": {
     "@cronvel/get-pixels": "^3.4.0",

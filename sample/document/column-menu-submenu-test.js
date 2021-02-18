@@ -56,11 +56,15 @@ var columnMenu = new termkit.ColumnMenu( {
 		/*
 		disposition: 'overwrite' ,
 		hideParent: true ,
-		openOn: 'blinked' ,
+		openOn: 'parentBlinked' ,
+		focusOnOpen: true ,
 		//*/
 		//*
 		disposition: 'right' ,
-		openOn: 'focus' ,
+		hideParent: false ,
+		openOn: 'parentFocus' ,
+		closeOn: 'childSubmit' ,
+		focusOnOpen: false ,
 		//*/
 	} ,
 	buttonEvenBlurAttr: { bgColor: '@dark-gray' , color: 'white' , bold: true } ,
