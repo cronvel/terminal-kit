@@ -1,4 +1,10 @@
 
+v1.49.1
+-------
+
+Fix wrong keybinding for ColumnMenu's submenu (#151)
+
+
 v1.49.0
 -------
 
