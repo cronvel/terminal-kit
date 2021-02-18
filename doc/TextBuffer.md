@@ -40,6 +40,8 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 	* [.getHidden()](#ref.TextBuffer.getHidden)
 	* [.setHidden()](#ref.TextBuffer.setHidden)
 	* [.getContentSize()](#ref.TextBuffer.getContentSize)
+	* [.getCursorOffset()](#ref.TextBuffer.getCursorOffset)
+	* [.setCursorOffset()](#ref.TextBuffer.setCursorOffset)
 	* [.setEmptyCellAttr()](#ref.TextBuffer.setEmptyCellAttr)
 	* [.setAttrAt()](#ref.TextBuffer.setAttrAt)
 	* [.setAttrCodeAt()](#ref.TextBuffer.setAttrCodeAt)
@@ -59,14 +61,21 @@ a small text-editor in early alpha stage, featuring a javascript syntax hilighte
 	* [.moveBackward()](#ref.TextBuffer.moveBackward)
 	* [.moveToStartOfWord()](#ref.TextBuffer.moveToStartOfWord)
 	* [.moveToEndOfWord()](#ref.TextBuffer.moveToEndOfWord)
+	* [.moveToStartOfLine()](#ref.TextBuffer.moveToStartOfLine)
 	* [.moveToEndOfLine()](#ref.TextBuffer.moveToEndOfLine)
+	* [.moveToStartOfBuffer()](#ref.TextBuffer.moveToStartOfBuffer)
+	* [.moveToEndOfBuffer()](#ref.TextBuffer.moveToEndOfBuffer)
 	* [.moveInBound()](#ref.TextBuffer.moveInBound)
 	* [.insert()](#ref.TextBuffer.insert)
+	* [.prepend()](#ref.TextBuffer.prepend)
+	* [.append()](#ref.TextBuffer.append)
 	* [.delete()](#ref.TextBuffer.delete)
 	* [.backDelete()](#ref.TextBuffer.backDelete)
 	* [.newLine()](#ref.TextBuffer.newLine)
 	* [.joinLine()](#ref.TextBuffer.joinLine)
 	* [.iterate()](#ref.TextBuffer.iterate)
+	* [.wrapLine()](#ref.TextBuffer.wrapLine)
+	* [.wrapAllLines()](#ref.TextBuffer.wrapAllLines)
 	* [.draw()](#ref.TextBuffer.draw)
 	* [.drawCursor()](#ref.TextBuffer.drawCursor)
 	* [.load()](#ref.TextBuffer.load)
@@ -116,10 +125,13 @@ It extracts and returns the text content of the *textBuffer*.
 
 
 <a name="ref.TextBuffer.setText"></a>
-### .setText( text , markup )
+### .setText( text , [ [markup] , baseAttr ] )
 
 * text `string` the text content
-* markup `boolean` true if the text contains markup that should be interpreted
+* markup `boolean` or 'ansi', true if the text contains markup that should be interpreted
+  'ansi' if it contains *ANSI* code (default: false - raw text)
+* baseAttr `object` or `integer`, an attribute used as the base attribute for the text content
+  (if there is markup, the markup attributes are *stacked* with this base attribute)
 
 This set the text content of the *textBuffer*.
 
@@ -150,6 +162,22 @@ The *hidden mode* is useful if your *textBuffer* is holding things like password
 ### .getContentSize()
 
 It returns an object with a *width* and *height* properties: the size of the text content.
+
+
+
+<a name="ref.TextBuffer.getCursorOffset"></a>
+### .getCursorOffset()
+
+It returns the cursor offset in the raw text content.
+
+
+
+<a name="ref.TextBuffer.setCursorOffset"></a>
+### .setCursorOffset( offset )
+
+* offset `integer` the new offset of the cursor
+
+It set the cursor offset in the raw text content.
 
 
 
@@ -344,10 +372,31 @@ It moves the *textBuffer*'s cursor to the end of the current word.
 
 
 
+<a name="ref.TextBuffer.moveToStartOfLine"></a>
+### .moveToStartOfLine()
+
+It moves the *textBuffer*'s cursor to the begining of the current line.
+
+
+
 <a name="ref.TextBuffer.moveToEndOfLine"></a>
 ### .moveToEndOfLine()
 
 It moves the *textBuffer*'s cursor to the end of the current line.
+
+
+
+<a name="ref.TextBuffer.moveToStartOfBuffer"></a>
+### .moveToStartOfBuffer()
+
+It moves the *textBuffer*'s cursor to the begining of the buffer (i.e. the begining of the first line).
+
+
+
+<a name="ref.TextBuffer.moveToEndOfBuffer"></a>
+### .moveToEndOfBuffer()
+
+It moves the *textBuffer*'s cursor to the end of the buffer (i.e. the end of the last line).
 
 
 
@@ -361,13 +410,41 @@ It moves the *textBuffer*'s cursor in bound, i.e. to a cell that has text conten
 
 
 <a name="ref.TextBuffer.insert"></a>
-### .insert( text , [attr] )
+### .insert( text , [ [markup] , attr ] )
 
 * text `string` the raw text to insert
+* markup `boolean` or 'ansi', true if the text contains markup that should be interpreted
+  'ansi' if it contains *ANSI* code (default: false - raw text)
 * attr `Object` or `integer` (optional, default: the empty cell attributes) attributes of the text about to be inserted
  (attribute object or bit flags, see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
 
 It inserts the text at the current cursor position, with the given attributes.
+
+
+
+<a name="ref.TextBuffer.prepend"></a>
+### .prepend( text , [ [markup] , attr ] )
+
+* text `string` the raw text to insert
+* markup `boolean` or 'ansi', true if the text contains markup that should be interpreted
+  'ansi' if it contains *ANSI* code (default: false - raw text)
+* attr `Object` or `integer` (optional, default: the empty cell attributes) attributes of the text about to be inserted
+ (attribute object or bit flags, see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
+
+It prepend the text (i.e. insert it at the begining), with the given attributes.
+
+
+
+<a name="ref.TextBuffer.append"></a>
+### .append( text , [ [markup] , attr ] )
+
+* text `string` the raw text to insert
+* markup `boolean` or 'ansi', true if the text contains markup that should be interpreted
+  'ansi' if it contains *ANSI* code (default: false - raw text)
+* attr `Object` or `integer` (optional, default: the empty cell attributes) attributes of the text about to be inserted
+ (attribute object or bit flags, see: [the attribute object](ScreenBuffer.md#ref.ScreenBuffer.attributes))
+
+It append the text (i.e. insert it at the end), with the given attributes.
 
 
 
@@ -422,6 +499,29 @@ It moves the cursor to the end of the line and joins the current line with the f
 		* misc `Object` userland meta-data for the current cell
 
 It iterates over the whole *textBuffer*, using the *callback* for each cell.
+
+
+
+<a name="ref.TextBuffer.wrapLine"></a>
+### .wrapLine( [y] , [width] , [wordWrap] )
+
+* y `integer` the line to wrap (default: current line, the line where the cursor is)
+* width `integer` the wanted width (default: the current textBuffer's *lineWrapWidth*)
+* wordWrap `boolean` if true, force word-aware line-splitting (default: the current textBuffer's *wordWrap*)
+
+It wraps the current line (or the line *y*), splitting it as many times it is necessary to fit the wanted width.
+
+The *wordWrap* option can be used to avoid splitting in a middle of a word or before punctuation.
+
+
+
+<a name="ref.TextBuffer.wrapAllLines"></a>
+### .wrapAllLines( [width] , [wordWrap] )
+
+* width `integer` the wanted width (default: the current textBuffer's *lineWrapWidth*)
+* wordWrap `boolean` if true, force word-aware line-splitting (default: the current textBuffer's *wordWrap*)
+
+Same than [`.wrapLine()`](#ref.TextBuffer.wrapLine), but for all lines.
 
 
 

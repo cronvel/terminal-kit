@@ -1,4 +1,11 @@
 
+v1.48.1
+-------
+
+ScreenBuffer#put() now supports 'ansi' for the 'markup' option (#153)
+Improved the TextBuffer's doc
+
+
 v1.48.0
 -------
 
