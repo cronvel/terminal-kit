@@ -1,4 +1,10 @@
 
+v1.49.2
+-------
+
+Fix a .destroy() bug on ColumnMenu's submenu (#151)
+
+
 v1.49.1
 -------
 

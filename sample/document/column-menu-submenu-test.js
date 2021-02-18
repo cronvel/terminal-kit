@@ -132,7 +132,17 @@ var columnMenu = new termkit.ColumnMenu( {
 				} ,
 				{
 					content: 'Manual' ,
-					value: 'manual'
+					value: 'manual' ,
+					items: [
+						{
+							content: 'Local' ,
+							value: 'local'
+						} ,
+						{
+							content: 'Online' ,
+							value: 'online'
+						}
+					]
 				}
 			]
 		}
