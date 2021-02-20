@@ -1,4 +1,10 @@
 
+v2.0.1
+------
+
+Fix some niche ansi markup issues, adding a 'legacyAnsi' markup option for document's widgets (#155)
+
+
 v2.0.0
 ------
 
