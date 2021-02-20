@@ -1,4 +1,10 @@
 
+v2.0.0
+------
+
+BREAKING: Node >= 14.15.0 (Fermium LTS) required (#156)
+
+
 v1.49.3
 -------
 
