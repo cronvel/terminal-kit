@@ -1,4 +1,10 @@
 
+v1.49.3
+-------
+
+Revert engine changes introduced in v1.49.0 (#156) (will re-introduce it as of v2.0.0)
+
+
 v1.49.2
 -------
 
