@@ -43,16 +43,21 @@ var document = term.createDocument( {
 var text = new termkit.Text( {
 	parent: document ,
 	//content: '^[fg:*royal-blue]A simple text' ,
-	content: ['^[fg:*royal-blue]A simple text','2nd line'] ,
-	contentHasMarkup: true ,
+	//content: ['^[fg:*royal-blue]A simple text','2nd line'] ,
+	content: ['\x1b[31mgra\x1b[1;31mnted\x1b[0m, free of \x1b[1;32mcha\x1b[22mrge\x1b[0m'] ,
+	//contentHasMarkup: true ,
+	//contentHasMarkup: 'ansi' ,
+	contentHasMarkup: 'legacyAnsi' ,
 	x: 10 ,
 	y: 10 ,
 } ) ;
 
+/*
 setTimeout( () => {
 	text.setContent( ['^RS'] , true ) ;
 	//text.setContent( ['^RChanged!^ ljsdlkfjsmlkdjfmlksjflkjdslkfj','bob'] , true ) ;
 } , 1200 ) ;
+*/
 
 term.on( 'key' , function( key ) {
 	switch( key ) {
