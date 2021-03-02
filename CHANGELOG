@@ -1,4 +1,10 @@
 
+v2.0.4
+------
+
+Bar widget: fix rate calculation bug when minValue and maxValue is used (#159)
+
+
 v2.0.3
 ------
 
