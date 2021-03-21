@@ -1,4 +1,10 @@
 
+v2.0.7
+------
+
+sample/detect-terminal-test.js now returns the lib version
+
+
 v2.0.6
 ------
 

@@ -79,6 +79,7 @@ async function detect() {
 
 	term.green( '\n== OS and Environment Variables ==\n\n' ) ;
 	term( 'Node version: %s\n' , process.version ) ;
+	term( 'Terminal Kit version: %s\n' , require( '../package.json' ).version ) ;
 	term( 'OS platform: %s\n' , os.platform() ) ;
 	term( 'OS type: %s\n' , os.type() ) ;
 	term( 'OS release: %s\n' , os.release() ) ;
