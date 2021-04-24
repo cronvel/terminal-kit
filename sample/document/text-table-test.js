@@ -77,6 +77,10 @@ var textTable = new termkit.TextTable( {
 	fit: true ,	// Activate all expand/shrink + wordWrap
 	//expandToWidth: true , shrinkToWidth: true , expandToHeight: true , shrinkToHeight: true , wordWrap: true ,
 	//lineWrap: true ,
+
+    // Custom:
+    borderSelAttr: { color: 'green' },
+    selectedRowTextAttr: { bgColor: 'green', color: 'black' },
 } ) ;
 
 setTimeout( () => {
@@ -84,8 +88,10 @@ setTimeout( () => {
 } , 1200 ) ;
 
 
+var activeRow = 1;
 term.on( 'key' , function( key ) {
 	switch( key ) {
+		case 'q':
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
@@ -93,6 +99,12 @@ term.on( 'key' , function( key ) {
 			term.clear() ;
 			process.exit() ;
 			break ;
+		case 'UP' :
+			textTable.selectPrevRow();
+			break;
+		case 'DOWN':
+			textTable.selectNextRow();
+			break;
 	}
 } ) ;
 
