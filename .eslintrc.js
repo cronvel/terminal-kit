@@ -25,7 +25,7 @@ module.exports = {
 		'valid-typeof': 'error' ,
 		'no-unneeded-ternary': 'error' ,
 		'no-unused-vars': 'warn' ,	// During development phase, it's boring to clean unused var since they can be used later
-		'no-lonely-if': 'error' ,
+		'no-lonely-if': 'off' ,		// Can hurt semantic programming
 		'no-nested-ternary': 'off' ,	// Now I use the streamlined ternary operator a lot
 		'no-shadow': 'warn' ,
 		'no-shadow-restricted-names': 'error' ,
@@ -62,9 +62,7 @@ module.exports = {
 			'MemberExpression': 1 ,
 			'flatTernaryExpressions': true
 		} ] ,
-		'newline-per-chained-call': [ 'error', {
-			'ignoreChainWithDepth': 2 
-		} ] ,
+		'newline-per-chained-call': 'off',
 		'no-multi-spaces': 'off' ,
 		'block-spacing': 'error' ,
 		'comma-spacing': [ 'error' , {

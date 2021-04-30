@@ -33,6 +33,14 @@ TextTable features:
 
 * Methods:
 	* [.setCellContent()](#ref.TextTable.setCellContent)
+	* [.setCellAttr()](#ref.TextTable.setCellAttr)
+	* [.resetCellAttr()](#ref.TextTable.resetCellAttr)
+	* [.setRowAttr()](#ref.TextTable.setRowAttr)
+	* [.resetRowAttr()](#ref.TextTable.resetRowAttr)
+	* [.setColumnAttr()](#ref.TextTable.setColumnAttr)
+	* [.resetColumnAttr()](#ref.TextTable.resetColumnAttr)
+	* [.setTableAttr()](#ref.TextTable.setTableAttr)
+	* [.resetTableAttr()](#ref.TextTable.resetTableAttr)
 
 * Inherit methods and properties from [Element](Element.md#ref.Element.toc)
 
@@ -103,10 +111,97 @@ This creates a *TextTable element*.
 
 * x,y `number` the cell coordinate to modify
 * content `string` the new content for this table cell
-* dontDraw `boolean` when set, the cell content's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell content's update does not trigger the *redraw* of the *textTable* (or of the cell's *textBox*
+  if *dontUpdateLayout* is set)
 * dontUpdateLayout `boolean` when set, the table layout is not updated
 
 This update an existing cell content.
 The table layout will be updated if needed, except if *dontUpdateLayout* is set.
 The content may contain *markup*, but it should have been enabled on the *textTable* creation for this to work.
+
+
+
+<a name="ref.TextTable.setCellAttr"></a>
+### .setCellAttr( x , y , textAttr , [voidAttr] , [dontDraw] )
+
+* x,y `number` the cell coordinate to modify
+* textAttr `object` generic/default attributes for the cell's content (*textBox*)
+* voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the cell's *textBox*
+
+This update an existing cell text attribute.
+
+
+
+<a name="ref.TextTable.resetCellAttr"></a>
+### .resetCellAttr( x , y , [dontDraw] )
+
+* x,y `number` the cell coordinate to reset
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the cell's *textBox*
+
+This reset an existing cell text attribute to what it should be, based upon the constructor's parameters.
+
+
+
+<a name="ref.TextTable.setRowAttr"></a>
+### .setRowAttr( y , textAttr , [voidAttr] , [dontDraw] )
+
+* y `number` the row's index to modify
+* textAttr `object` generic/default attributes for the row's cell's content (*textBox*)
+* voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This update all cells' text attribute of a row.
+
+
+
+<a name="ref.TextTable.resetRowAttr"></a>
+### .resetRowAttr( y , [dontDraw] )
+
+* y `number` the row's index to reset
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This reset all cells' text attribute of a row to what it should be, based upon the constructor's parameters.
+
+
+
+<a name="ref.TextTable.setColumnAttr"></a>
+### .setColumnAttr( x , textAttr , voidAttr , [dontDraw] )
+
+* x `number` the column's index to modify
+* textAttr `object` generic/default attributes for the column's cell's content (*textBox*)
+* voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This update all cells's text attribute of a column.
+
+
+
+<a name="ref.TextTable.resetColumnAttr"></a>
+### .resetColumnAttr( x , [dontDraw] )
+
+* x `number` the column's index to reset
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This reset all cells' text attribute of a column to what it should be, based upon the constructor's parameters.
+
+
+
+<a name="ref.TextTable.setTableAttr"></a>
+### .setTableAttr( textAttr , voidAttr , [dontDraw] )
+
+* textAttr `object` generic/default attributes for the table's cell's content (*textBox*)
+* voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This update all cells's text attribute.
+
+
+
+<a name="ref.TextTable.resetTableAttr"></a>
+### .resetTableAttr( [dontDraw] )
+
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+
+This reset all cells's text attribute to what it should be, based upon the constructor's parameters.
 

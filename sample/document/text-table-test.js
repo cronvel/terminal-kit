@@ -71,6 +71,7 @@ var textTable = new termkit.TextTable( {
 	//evenCellTextAttr: { bgColor: 'gray' } ,
 	//evenRowTextAttr: { bgColor: 'gray' } ,
 	//evenColumnTextAttr: { bgColor: 'gray' } ,
+	selectedTextAttr: { bgColor: 'blue' } , selectable: 'cell' ,
 	width: 50 ,
 	//width: term.width ,
 	height: 20 ,
@@ -79,9 +80,25 @@ var textTable = new termkit.TextTable( {
 	//lineWrap: true ,
 } ) ;
 
+/*
 setTimeout( () => {
-    textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
-} , 1200 ) ;
+	textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
+} , 1000 ) ;
+//*/
+
+setTimeout( () => {
+	//textTable.setCellAttr( 1 , 2 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
+	textTable.setRowAttr( 2 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
+	//textTable.setColumnAttr( 1 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
+	//textTable.setTableAttr( { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
+} , 500 ) ;
+
+setTimeout( () => {
+	//textTable.resetCellAttr( 1 , 2 ) ;
+	textTable.resetRowAttr( 2 ) ;
+	//textTable.resetColumnAttr( 1 ) ;
+	//textTable.resetTableAttr() ;
+} , 1500 ) ;
 
 
 term.on( 'key' , function( key ) {
