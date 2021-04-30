@@ -87,10 +87,10 @@ setTimeout( () => {
 //*/
 
 setTimeout( () => {
-	//textTable.setCellAttr( 1 , 2 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
-	textTable.setRowAttr( 2 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
-	//textTable.setColumnAttr( 1 , { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
-	//textTable.setTableAttr( { bgColor: 'cyan' } , { bgColor: 'cyan' } ) ;
+	//textTable.setCellAttr( 1 , 2 , { bgColor: 'cyan' } ) ;
+	textTable.setRowAttr( 2 , { bgColor: 'cyan' } ) ;
+	//textTable.setColumnAttr( 1 , { bgColor: 'cyan' } ) ;
+	//textTable.setTableAttr( { bgColor: 'cyan' } ) ;
 } , 500 ) ;
 
 setTimeout( () => {
