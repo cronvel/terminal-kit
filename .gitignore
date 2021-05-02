@@ -15,6 +15,7 @@ _templates
 _static
 
 
+
 # gitignore / Node.gitignore #
 ##############################
 lib-cov
@@ -36,6 +37,7 @@ build
 __issue.js
 __issues
 package-lock.json
+yarn.lock
 
 node_modules
 

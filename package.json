@@ -12,6 +12,7 @@
   "dependencies": {
     "@cronvel/get-pixels": "^3.4.0",
     "chroma-js": "^2.1.0",
+    "clipboardy": "^2.3.0",
     "lazyness": "^1.2.0",
     "ndarray": "^1.0.19",
     "nextgen-events": "^1.3.4",
