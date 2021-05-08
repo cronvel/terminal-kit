@@ -80,7 +80,7 @@ var textTable = new termkit.TextTable( {
 	//lineWrap: true ,
 } ) ;
 
-/*
+//*
 setTimeout( () => {
 	textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
 } , 1000 ) ;

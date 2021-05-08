@@ -1,4 +1,10 @@
 
+v2.1.1
+------
+
+TextTable fix: when providing a custom 'borderChars', check that all character types exists (#173)
+
+
 v2.1.0
 ------
 
