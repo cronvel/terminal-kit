@@ -1,4 +1,10 @@
 
+v2.1.2
+------
+
+Fix TextTable 'autoWidth' bug (#177)
+
+
 v2.1.1
 ------
 
