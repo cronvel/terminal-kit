@@ -1,4 +1,10 @@
 
+v2.1.3
+------
+
+New: use require('terminal-kit/lib/termkit-no-lazy-require.js') if lazy loading is troublesome (#176)
+
+
 v2.1.2
 ------
 

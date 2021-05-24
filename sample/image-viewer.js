@@ -29,9 +29,10 @@
 
 
 
-var termkit = require( 'terminal-kit' ) ;
-var term = termkit.terminal ;
-var path = require( 'path' ) ;
+const termkit = require( '..' ) ;
+//const termkit = require( '../lib/termkit-no-lazy-require.js' ) ;
+const term = termkit.terminal ;
+const path = require( 'path' ) ;
 
 
 
