@@ -28,16 +28,29 @@ publish: log/npm-publish.log log/github-push.log
 # Clean temporary things, or things that can be automatically regenerated
 clean: clean-all
 
+# browserify
+browser: browser/termkit.js browser/termkit.min.js
+
 
 
 # Variables
 
 MOCHA=./node_modules/mocha/bin/mocha
 JSHINT=./node_modules/jshint/bin/jshint --verbose
+BROWSERIFY=browserify
+UGLIFY=uglifyjs
 
 
 
 # Files rules
+
+# Build the browser lib
+browser/termkit.js: lib/*.js lib/*/*.js
+	${BROWSERIFY} lib/browser.js -s TerminalKit -i get-pixels -i child_pty -o browser/termkit.js
+
+# Build the browser minified lib
+browser/termkit.min.js: browser/termkit.js
+	${UGLIFY} browser/termkit.js -o browser/termkit.min.js -m
 
 # JsHint STDOUT test
 log/jshint.log: log/npm-dev-install.log lib/*.js lib/colorScheme/*.json lib/termconfig/*.js
