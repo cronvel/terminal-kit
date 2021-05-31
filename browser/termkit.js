@@ -21625,7 +21625,6 @@ if ( process.platform === 'win32' ) { require( './windows.js' )( termkit ) ; }
 
 
 
-// Lazy submodules
 termkit.image = require( './image.js' ) ;
 termkit.Palette = require( './Palette.js' ) ;
 termkit.Rect = require( './Rect.js' ) ;
@@ -21705,7 +21704,7 @@ lazy.properties( termkit , {
 
 }).call(this)}).call(this,require('_process'))
 },{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Button.js":16,"./document/ColumnMenu.js":17,"./document/ColumnMenuMulti.js":18,"./document/Container.js":19,"./document/Document.js":20,"./document/DropDownMenu.js":21,"./document/EditableTextBox.js":22,"./document/Element.js":23,"./document/Form.js":24,"./document/InlineInput.js":25,"./document/LabeledInput.js":26,"./document/Layout.js":27,"./document/RowMenu.js":28,"./document/SelectList.js":29,"./document/SelectListMulti.js":30,"./document/Slider.js":31,"./document/Text.js":32,"./document/TextBox.js":33,"./document/TextTable.js":34,"./document/ToggleButton.js":35,"./document/Window.js":36,"./image.js":40,"./misc.js":42,"./spChars.js":48,"./tty.js":51,"./vte/Vte.js":53,"./windows.js":56,"_process":179,"chroma-js":59,"lazyness":68}],50:[function(require,module,exports){
-(function (process){(function (){
+(function (process,__dirname){(function (){
 /*
 	Terminal Kit
 
@@ -21733,6 +21732,16 @@ lazy.properties( termkit , {
 */
 
 "use strict" ;
+
+
+
+const path = require( 'path' ) ;
+
+if ( process.browser || require.cache[ path.join( __dirname , 'termkit-no-lazy-require.js' ) ] ) {
+	console.log( 'using termkit-no-lazy-require.js' ) ;
+	module.exports = require( './termkit-no-lazy-require.js' ) ;
+	return ;
+}
 
 
 
@@ -21848,8 +21857,8 @@ lazy.properties( termkit , {
 } , true ) ;
 
 
-}).call(this)}).call(this,require('_process'))
-},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":42,"./windows.js":56,"_process":179,"lazyness":68}],51:[function(require,module,exports){
+}).call(this)}).call(this,require('_process'),"/lib")
+},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":42,"./termkit-no-lazy-require.js":49,"./windows.js":56,"_process":179,"lazyness":68,"path":178}],51:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -22395,7 +22404,6 @@ SequencesReader.prototype.streamToEvent = async function( stream ) {
 
 
 
-const termkit = require( '../termkit.js' ) ;
 const ScreenBuffer = require( '../ScreenBuffer.js' ) ;
 const Rect = require( '../Rect.js' ) ;
 const string = require( 'string-kit' ) ;
@@ -23373,7 +23381,7 @@ Vte.prototype.onChildOutputOSC = function( type , args ) {
 } ;
 
 
-},{"../Rect.js":2,"../ScreenBuffer.js":3,"../termkit.js":50,"./SequencesReader.js":52,"./toInputSequence.js":55,"child_process":136,"child_pty":136,"nextgen-events":72,"seventh":108,"string-kit":123}],54:[function(require,module,exports){
+},{"../Rect.js":2,"../ScreenBuffer.js":3,"./SequencesReader.js":52,"./toInputSequence.js":55,"child_process":136,"child_pty":136,"nextgen-events":72,"seventh":108,"string-kit":123}],54:[function(require,module,exports){
 /*
 	Terminal Kit
 

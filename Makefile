@@ -7,6 +7,9 @@
 # Build every buildable things
 all: install
 
+# Things to build
+build: browser
+
 # Just install things so it works, basicaly: it just performs a "npm install --production" ATM
 install: log/npm-install.log
 
