@@ -10171,8 +10171,10 @@ ColumnMenuMulti.prototype.onButtonToggle = function( buttonValue , action , butt
 
 
 const Element = require( './Element.js' ) ;
-const Slider = require( './Slider.js' ) ;
 const ScreenBuffer = require( '../ScreenBuffer.js' ) ;
+
+// Avoid requiring Slider at top-level, it could cause circular require troubles
+//const Slider = require( './Slider.js' ) ;
 
 
 
@@ -10246,6 +10248,8 @@ Container.prototype.elementType = 'Container' ;
 Container.prototype.isContainer = true ;
 Container.prototype.containerBorderSize = 0 ;
 
+const termkit = require( '../termkit.js' ) ;
+
 
 
 Container.prototype.destroy = function( isSubDestroy , noDraw = false ) {
@@ -10276,8 +10280,10 @@ Container.prototype.keyBindings = {
 
 
 Container.prototype.initChildren = function() {
+	// Avoid requiring Slider at top-level, it could cause circular require troubles
+
 	if ( this.hasVScrollBar ) {
-		this.vScrollBarSlider = new Slider( {
+		this.vScrollBarSlider = new termkit.Slider( {
 			internal: true ,
 			parent: this ,
 			x: this.viewportWidth - 1 ,
@@ -10294,7 +10300,7 @@ Container.prototype.initChildren = function() {
 	}
 
 	if ( this.hasHScrollBar ) {
-		this.hScrollBarSlider = new Slider( {
+		this.hScrollBarSlider = new termkit.Slider( {
 			internal: true ,
 			parent: this ,
 			x: 0 ,
@@ -10525,7 +10531,7 @@ Container.prototype.onDrag = function( data ) {
 } ;
 
 
-},{"../ScreenBuffer.js":3,"./Element.js":23,"./Slider.js":31}],20:[function(require,module,exports){
+},{"../ScreenBuffer.js":3,"../termkit.js":50,"./Element.js":23}],20:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -11787,6 +11793,9 @@ const misc = require( '../misc.js' ) ;
 const string = require( 'string-kit' ) ;
 const NextGenEvents = require( 'nextgen-events' ) ;
 
+// Avoid requiring Document at top-level, it could cause circular require troubles
+//const Document = require( './Document.js' ) ;
+
 
 
 function Element( options = {} ) {
@@ -11877,6 +11886,8 @@ module.exports = Element ;
 Element.prototype = Object.create( NextGenEvents.prototype ) ;
 Element.prototype.constructor = Element ;
 Element.prototype.elementType = 'Element' ;
+
+const termkit = require( '../termkit.js' ) ;
 
 
 
@@ -12565,7 +12576,7 @@ Element.createInline = async function( term , Type , options ) {
 		noDraw: true
 	} ;
 
-	var document = new Document( documentOptions ) ;
+	var document = new termkit.Document( documentOptions ) ;
 
 	document.attach( element ) ;
 
@@ -12598,10 +12609,8 @@ Element.prototype.staticInline = false ;	// boolean, true if the inline version 
 Element.prototype.inlineCursorRestoreAfterDraw = false ;	// when set, save/restore cursor in inline mode (forced when strictInline is true)
 Element.prototype.needInput = false ;	// no need for input by default (used to configure inline mode)
 
-const Document = require( './Document.js' ) ;
 
-
-},{"../misc.js":42,"./Document.js":20,"nextgen-events":72,"string-kit":123}],24:[function(require,module,exports){
+},{"../misc.js":42,"../termkit.js":50,"nextgen-events":72,"string-kit":123}],24:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
