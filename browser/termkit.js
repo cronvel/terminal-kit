@@ -12047,6 +12047,14 @@ Element.prototype.detach = function( noDraw = false ) {
 
 
 
+// Resize the element to its content
+Element.prototype.resizeToContent = function() {
+	this.outputWidth = this.contentWidth ;
+	this.outputHeight = this.contentHeight ;
+} ;
+
+
+
 // Sort zChildren, only necessary when a child zIndex changed
 Element.prototype.zSort = function() {
 	this.zChildren.sort( ( a , b ) => a.zIndex - b.zIndex ) ;
@@ -12560,6 +12568,10 @@ Element.createInline = async function( term , Type , options ) {
 			term.up( scrollY ) ;	// move the cursor up, so save/restore cursor could work
 			position.y -= scrollY ;
 		}
+	}
+
+	if ( element.inlineResizeToContent ) {
+		element.resizeToContent() ;
 	}
 
 	var documentOptions = {
@@ -16334,6 +16346,7 @@ TextTable.prototype.elementType = 'TextTable' ;
 // Support for strictInline mode
 TextTable.prototype.strictInlineSupport = true ;
 TextTable.prototype.staticInline = true ;
+TextTable.prototype.inlineResizeToContent = true ;
 
 
 
@@ -30496,7 +30509,7 @@ module.exports = wrappedNDArrayCtor
 /*
 	Next-Gen Events
 
-	Copyright (c) 2015 - 2019 Cédric Ronvel
+	Copyright (c) 2015 - 2021 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -31915,7 +31928,7 @@ NextGenEvents.Proxy = require( './Proxy.js' ) ;
 /*
 	Next-Gen Events
 
-	Copyright (c) 2015 - 2019 Cédric Ronvel
+	Copyright (c) 2015 - 2021 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -32461,20 +32474,21 @@ RemoteService.prototype.receiveAckEmit = function( message ) {
 },{"./NextGenEvents.js":72}],74:[function(require,module,exports){
 module.exports={
   "name": "nextgen-events",
-  "version": "1.4.0",
+  "version": "1.5.2",
   "description": "The next generation of events handling for javascript! New: abstract away the network!",
   "main": "lib/NextGenEvents.js",
   "engines": {
     "node": ">=6.0.0"
   },
   "directories": {
-    "test": "test"
+    "test": "test",
+    "bench": "bench"
   },
   "dependencies": {},
   "devDependencies": {
-    "browserify": "^16.2.2",
+    "browserify": "^17.0.0",
     "uglify-js-es6": "^2.8.9",
-    "ws": "^5.1.1"
+    "ws": "^7.4.6"
   },
   "scripts": {
     "test": "tea-time -R dot"
@@ -32511,7 +32525,7 @@ module.exports={
     "title": "Next-Gen Events",
     "years": [
       2015,
-      2019
+      2021
     ],
     "owner": "Cédric Ronvel"
   }
@@ -40222,13 +40236,13 @@ modes.f = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
-	if ( modes.rounding !== null ) { sn.round( modes.rounding ) ; }
-	if ( modes.precision ) { sn.precision( modes.precision ) ; }
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
 
-	return sn.toString( modes.leftPadding , modes.rightPadding , modes.rightPaddingOnlyIfDecimal ) ;
+	return sn.toString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal ) ;
 } ;
 
 modes.f.noSanitize = true ;
@@ -40242,14 +40256,14 @@ modes.P = ( arg , modeArg ) => {
 
 	arg *= 100 ;
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
 	// Force rounding to zero by default
-	if ( modes.rounding !== null || ! modes.precision ) { sn.round( modes.rounding || 0 ) ; }
-	if ( modes.precision ) { sn.precision( modes.precision ) ; }
+	if ( subModes.rounding !== null || ! subModes.precision ) { sn.round( subModes.rounding || 0 ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
 
-	return sn.toNoExpString( modes.leftPadding , modes.rightPadding , modes.rightPaddingOnlyIfDecimal ) + '%' ;
+	return sn.toNoExpString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal ) + '%' ;
 } ;
 
 modes.P.noSanitize = true ;
@@ -40263,15 +40277,15 @@ modes.p = ( arg , modeArg ) => {
 
 	arg = ( arg - 1 ) * 100 ;
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
 	// Force rounding to zero by default
-	if ( modes.rounding !== null || ! modes.precision ) { sn.round( modes.rounding || 0 ) ; }
-	if ( modes.precision ) { sn.precision( modes.precision ) ; }
+	if ( subModes.rounding !== null || ! subModes.precision ) { sn.round( subModes.rounding || 0 ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
 
 	// 4th argument force a '+' sign
-	return sn.toNoExpString( modes.leftPadding , modes.rightPadding , modes.rightPaddingOnlyIfDecimal , true ) + '%' ;
+	return sn.toNoExpString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal , true ) + '%' ;
 } ;
 
 modes.p.noSanitize = true ;
@@ -40283,14 +40297,14 @@ modes.k = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
 	if ( typeof arg !== 'number' ) { return '0' ; }
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
-	if ( modes.rounding !== null ) { sn.round( modes.rounding ) ; }
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
 	// Default to 3 numbers precision
-	if ( modes.precision || modes.rounding === null ) { sn.precision( modes.precision || 3 ) ; }
+	if ( subModes.precision || subModes.rounding === null ) { sn.precision( subModes.precision || 3 ) ; }
 
-	return sn.toMetricString( modes.leftPadding , modes.rightPadding , modes.rightPaddingOnlyIfDecimal ) ;
+	return sn.toMetricString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal ) ;
 } ;
 
 modes.k.noSanitize = true ;
@@ -40302,11 +40316,11 @@ modes.e = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
-	if ( modes.rounding !== null ) { sn.round( modes.rounding ) ; }
-	if ( modes.precision ) { sn.precision( modes.precision ) ; }
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
 
 	return sn.toExponential() ;
 } ;
@@ -40320,11 +40334,11 @@ modes.K = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
-	var modes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , modes.groupSeparator ) ;
+	var subModes = floatModeArg( modeArg ) ,
+		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
 
-	if ( modes.rounding !== null ) { sn.round( modes.rounding ) ; }
-	if ( modes.precision ) { sn.precision( modes.precision ) ; }
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
 
 	return sn.toScientific() ;
 } ;
@@ -40612,6 +40626,7 @@ var defaultFormatter = {
 exports.createFormatter = ( options ) => exports.formatMethod.bind( Object.assign( {} , defaultFormatter , options ) ) ;
 exports.format = exports.formatMethod.bind( defaultFormatter ) ;
 exports.format.default = defaultFormatter ;
+exports.format.modes = modes ;	// <-- expose modes, used by Babel-Tower for String Kit interop'
 
 
 
@@ -42096,59 +42111,120 @@ exports.occurrenceCount = function( str , subStr , overlap = false ) {
 
 
 
-/*
- * Natural Sort algorithm for Javascript - Version 0.8 - Released under MIT license
- * Author: Jim Palmer (based on chunking idea from Dave Koelle)
- */
-module.exports = function( a , b ) {
-	var re = /(^([+-]?(?:\d*)(?:\.\d*)?(?:[eE][+-]?\d+)?)?$|^0x[\da-fA-F]+$|\d+)/g ,
-		sre = /^\s+|\s+$/g ,   // trim pre-post whitespace
-		snre = /\s+/g ,        // normalize all whitespace to single ' ' character
-		dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[/-]\d{1,4}[/-]\d{1,4}|^\w+, \w+ \d+, \d{4})/ ,
-		hre = /^0x[0-9a-f]+$/i ,
-		ore = /^0/ ,
-		i = function( s ) {
-			return ( '' + s ).toLowerCase().replace( sre , '' ) ;
-		} ,
-		// convert all to strings strip whitespace
-		x = i( a ) || '' ,
-		y = i( b ) || '' ,
-		// chunk/tokenize
-		xN = x.replace( re , '\0$1\0' ).replace( /\0$/ , '' )
-			.replace( /^\0/ , '' )
-			.split( '\0' ) ,
-		yN = y.replace( re , '\0$1\0' ).replace( /\0$/ , '' )
-			.replace( /^\0/ , '' )
-			.split( '\0' ) ,
-		// numeric, hex or date detection
-		xD = parseInt( x.match( hre ) , 16 ) || ( xN.length !== 1 && Date.parse( x ) ) ,
-		yD = parseInt( y.match( hre ) , 16 ) || xD && y.match( dre ) && Date.parse( y ) || null ,
-		normChunk = function( s , l ) {
-			// normalize spaces; find floats not starting with '0', string or 0 if not defined (Clint Priest)
-			return ( ! s.match( ore ) || l === 1 ) && parseFloat( s ) || s.replace( snre , ' ' ).replace( sre , '' ) || 0 ;	// jshint ignore:line
-		} ,
-		oFxNcL , oFyNcL ;
-	// first try and sort Hex codes or Dates
-	if ( yD ) {
-		if ( xD < yD ) { return -1 ; }
-		else if ( xD > yD ) { return 1 ; }
+const CONTROL_CLASS = 1 ;
+const WORD_SEPARATOR_CLASS = 2 ;
+const LETTER_CLASS = 3 ;
+const NUMBER_CLASS = 4 ;
+const SYMBOL_CLASS = 5 ;
+
+
+
+function getCharacterClass( char , code ) {
+	if ( isWordSeparator( code ) ) { return WORD_SEPARATOR_CLASS ; }
+	if ( code <= 0x1f || code === 0x7f ) { return CONTROL_CLASS ; }
+	if ( isNumber( code ) ) { return NUMBER_CLASS ; }
+	// Here we assume that a letter is a char with a “case”
+	if ( char.toUpperCase() !== char.toLowerCase() ) { return LETTER_CLASS ; }
+	return SYMBOL_CLASS ;
+}
+
+
+
+function isWordSeparator( code ) {
+	if (
+		// space, tab, no-break space
+		code === 0x20 || code === 0x09 || code === 0xa0 ||
+		// hyphen, underscore
+		code === 0x2d || code === 0x5f
+	) {
+		return true ;
 	}
-	// natural sorting through split numeric strings and default strings
-	for( var cLoc = 0 , xNl = xN.length , yNl = yN.length , numS = Math.max( xNl , yNl ) ; cLoc < numS ; cLoc ++ ) {
-		oFxNcL = normChunk( xN[cLoc] , xNl ) ;
-		oFyNcL = normChunk( yN[cLoc] , yNl ) ;
-		// handle numeric vs string comparison - number < string - (Kyle Adams)
-		if ( isNaN( oFxNcL ) !== isNaN( oFyNcL ) ) { return ( isNaN( oFxNcL ) ) ? 1 : -1 ; }
-		// rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
-		else if ( typeof oFxNcL !== typeof oFyNcL ) {
-			oFxNcL += '' ;
-			oFyNcL += '' ;
+
+	return false ;
+}
+
+
+
+function isNumber( code ) {
+	if ( code >= 0x30 && code <= 0x39 ) { return true ; }
+	return false ;
+}
+
+
+
+function naturalSort( a , b ) {
+	a = '' + a ;
+	b = '' + b ;
+
+	var aIndex , aEndIndex , aChar , aCode , aClass , aCharLc , aNumber ,
+		aTrim = a.trim() ,
+		aLength = aTrim.length ,
+		bIndex , bEndIndex , bChar , bCode , bClass , bCharLc , bNumber ,
+		bTrim = b.trim() ,
+		bLength = bTrim.length ,
+		advantage = 0 ;
+
+	for ( aIndex = bIndex = 0 ; aIndex < aLength && bIndex < bLength ; aIndex ++ , bIndex ++ ) {
+		aChar = aTrim[ aIndex ] ;
+		bChar = bTrim[ bIndex ] ;
+		aCode = aTrim.charCodeAt( aIndex ) ;
+		bCode = bTrim.charCodeAt( bIndex ) ;
+		aClass = getCharacterClass( aChar , aCode ) ;
+		bClass = getCharacterClass( bChar , bCode ) ;
+		if ( aClass !== bClass ) { return aClass - bClass ; }
+
+		switch ( aClass ) {
+			case WORD_SEPARATOR_CLASS :
+				// Eat all white chars and continue
+				while ( isWordSeparator( aTrim.charCodeAt( aIndex + 1 ) ) ) { aIndex ++ ; }
+				while ( isWordSeparator( bTrim.charCodeAt( bIndex + 1 ) ) ) { bIndex ++ ; }
+				break ;
+
+			case CONTROL_CLASS :
+			case SYMBOL_CLASS :
+				if ( aCode !== bCode ) { return aCode - bCode ; }
+				break ;
+
+			case LETTER_CLASS :
+				aCharLc = aChar.toLowerCase() ;
+				bCharLc = bChar.toLowerCase() ;
+				if ( aCharLc !== bCharLc ) { return aCharLc > bCharLc ? 1 : -1 ; }
+
+				// As a last resort, we would sort uppercase first
+				if ( ! advantage && aChar !== bChar ) { advantage = aChar !== aCharLc ? -1 : 1 ; }
+
+				break ;
+
+			case NUMBER_CLASS :
+				// Lookup for a whole number and parse it
+				aEndIndex = aIndex + 1 ;
+				while ( isNumber( aTrim.charCodeAt( aEndIndex ) ) ) { aEndIndex ++ ; }
+				aNumber = parseFloat( aTrim.slice( aIndex , aEndIndex ) ) ;
+
+				bEndIndex = bIndex + 1 ;
+				while ( isNumber( bTrim.charCodeAt( bEndIndex ) ) ) { bEndIndex ++ ; }
+				bNumber = parseFloat( bTrim.slice( bIndex , bEndIndex ) ) ;
+
+				if ( aNumber !== bNumber ) { return aNumber - bNumber ; }
+
+				// As a last resort, we would sort the number with the less char first
+				if ( ! advantage && aEndIndex - aIndex !== bEndIndex - bIndex ) { advantage = ( aEndIndex - aIndex ) - ( bEndIndex - bIndex ) ; }
+
+				// Advance the index at the end of the number area
+				aIndex = aEndIndex - 1 ;
+				bIndex = bEndIndex - 1 ;
+				break ;
 		}
-		if ( oFxNcL < oFyNcL ) { return -1 ; }
-		if ( oFxNcL > oFyNcL ) { return 1 ; }
 	}
-	return 0 ;
-} ;
+
+	// If there was an “advantage”, use it now
+	if ( advantage ) { return advantage ; }
+
+	// Finally, sort by remaining char, or by trimmed length or by full length
+	return ( aLength - aIndex ) - ( bLength - bIndex ) || aLength - bLength || a.length - b.length ;
+}
+
+module.exports = naturalSort ;
 
 
 },{}],121:[function(require,module,exports){
@@ -42321,7 +42397,7 @@ exports.regexp.array2alternatives = function array2alternatives( array ) {
 
 
 
-var stringKit = {} ;
+const stringKit = {} ;
 module.exports = stringKit ;
 
 
@@ -43353,14 +43429,25 @@ module.exports = dotPath ;
 
 
 const EMPTY_PATH = [] ;
-const PROTO_POLLUTION_MESSAGE = 'This would pollute prototype' ;
+const PROTO_POLLUTION_MESSAGE = 'This would cause prototype pollution' ;
 
 
 
 function toPathArray( path ) {
-	if ( Array.isArray( path ) ) { return path ; }
-	else if ( ! path ) { return EMPTY_PATH ; }
-	else if ( typeof path === 'string' ) { return path.split( '.' ) ; }
+	if ( Array.isArray( path ) ) {
+		/*
+		let i , iMax = path.length ;
+		for ( i = 0 ; i < iMax ; i ++ ) {
+			if ( typeof path[ i ] !== 'string' || typeof path[ i ] !== 'number' ) { path[ i ] = '' + path[ i ] ; }
+		}
+		//*/
+		return path ;
+	}
+
+	if ( ! path ) { return EMPTY_PATH ; }
+	if ( typeof path === 'string' ) {
+		return path[ path.length - 1 ] === '.' ? path.slice( 0 , -1 ).split( '.' ) : path.split( '.' ) ;
+	}
 
 	throw new TypeError( '[tree.dotPath]: the path argument should be a string or an array' ) ;
 }
@@ -43375,7 +43462,7 @@ function walk( object , pathArray , maxOffset = 0 ) {
 	for ( i = 0 , iMax = pathArray.length + maxOffset ; i < iMax ; i ++ ) {
 		key = pathArray[ i ] ;
 
-		if ( key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+		if ( typeof key === 'object' || key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 		if ( ! pointer || typeof pointer !== 'object' ) { return undefined ; }
 
 		pointer = pointer[ key ] ;
@@ -43396,7 +43483,7 @@ function pave( object , pathArray ) {
 	for ( i = 0 , iMax = pathArray.length - 1 ; i < iMax ; i ++ ) {
 		key = pathArray[ i ] ;
 
-		if ( key === '__proto__' || typeof pointer[ key ] === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+		if ( typeof key === 'object' || key === '__proto__' || typeof pointer[ key ] === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 		if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = {} ; }
 
 		pointer = pointer[ key ] ;
@@ -43420,7 +43507,7 @@ dotPath.set = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43440,7 +43527,7 @@ dotPath.define = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43460,7 +43547,7 @@ dotPath.inc = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43481,7 +43568,7 @@ dotPath.dec = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43502,7 +43589,7 @@ dotPath.concat = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43526,7 +43613,7 @@ dotPath.insert = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43545,7 +43632,7 @@ dotPath.delete = ( object , path ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = walk( object , pathArray , -1 ) ;
 
@@ -43565,7 +43652,7 @@ dotPath.autoPush = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43587,7 +43674,7 @@ dotPath.append = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43609,7 +43696,7 @@ dotPath.prepend = ( object , path , value ) => {
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
 
-	if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
 	var pointer = pave( object , pathArray ) ;
 
@@ -43668,9 +43755,15 @@ dotPath.prepend = ( object , path , value ) => {
 			(it is a replacement for deepFilter.blacklist which was removed in Tree Kit 0.6).
 		* maxDepth: used in conjunction with deep, when max depth is reached an exception is raised, default to 100 when
 			the 'circular' option is off, or default to null if 'circular' is on
-		* circular: circular references reconnection
-		* move: move properties to target (delete properties from the sources)
-		* preserve: existing properties in the target object are not overwritten
+		* circular: boolean, circular references reconnection
+		* move: boolean, move properties to target (delete properties from the sources)
+		* preserve: boolean, existing properties in the target object are not overwritten
+		* mask: boolean or number, reverse of 'preserve', only update existing properties in the target, do not create new keys,
+			if its a number, the mask effect is only effective for the Nth element.
+			E.g: .extend( {mask:2} , {} , object1 , object2 )
+			So object1 extends the empty object like, but object2 do not create new keys not present in object1.
+			With mask:true or mask:1, the mask behavior would apply at step 1 too, when object1 would try to extend the empty object,
+			and since an empty object has no key, nothing would change, and the whole extend would return an empty object.
 		* nofunc: skip functions
 		* deepFunc: in conjunction with 'deep', this will process sources functions like objects rather than
 			copying/referencing them directly into the source, thus, the result will not be a function, it forces 'deep'
@@ -43684,7 +43777,6 @@ dotPath.prepend = ( object , path , value ) => {
 		* unflat: assume sources are in the 'flat' format, expand all properties deeply into the target, disable 'flat'
 */
 function extend( options , target , ... sources ) {
-	//console.log( "\nextend():\n" , arguments ) ;
 	var i , source , newTarget = false , length = sources.length ;
 
 	if ( ! length ) { return target ; }
@@ -43758,7 +43850,7 @@ function extend( options , target , ... sources ) {
 	for ( i = 0 ; i < length ; i ++ ) {
 		source = sources[ i ] ;
 		if ( ! source || ( typeof source !== 'object' && typeof source !== 'function' ) ) { continue ; }
-		extendOne( runtime , options , target , source ) ;
+		extendOne( runtime , options , target , source , options.mask <= i + 1 ) ;
 	}
 
 	return target ;
@@ -43768,12 +43860,10 @@ module.exports = extend ;
 
 
 
-function extendOne( runtime , options , target , source ) {
-	//console.log( "\nextendOne():\n" , arguments ) ;
-	//process.exit() ;
-
-	var j , jmax , sourceKeys , sourceKey , sourceValue , sourceValueProto ,
-		value , sourceDescriptor , targetKey , targetPointer , path ,
+function extendOne( runtime , options , target , source , mask ) {
+	var j , jmax , path ,
+		sourceKeys , sourceKey , sourceValue , sourceValueIsObject , sourceValueProto , sourceDescriptor ,
+		targetKey , targetPointer , targetValue , targetValueIsObject ,
 		indexOfSource = -1 ;
 
 	// Max depth check
@@ -43835,6 +43925,11 @@ function extendOne( runtime , options , target , source ) {
 			}
 		}
 
+		// Again, trigger an eventual getter only once
+		targetValue = targetPointer[ targetKey ] ;
+		targetValueIsObject = targetValue && ( typeof targetValue === 'object' || typeof targetValue === 'function' ) ;
+		sourceValueIsObject = sourceValue && ( typeof sourceValue === 'object' || typeof sourceValue === 'function' ) ;
+
 
 		if ( options.deep	// eslint-disable-line no-constant-condition
 			&& sourceValue
@@ -43844,6 +43939,8 @@ function extendOne( runtime , options , target , source ) {
 			&& ( ( sourceValueProto = Object.getPrototypeOf( sourceValue ) ) || true )
 			&& ( ! ( options.deep instanceof Set ) || options.deep.has( sourceValueProto ) )
 			&& ( ! options.immutables || ! options.immutables.has( sourceValueProto ) )
+			&& ( ! options.preserve || targetValueIsObject )
+			&& ( ! mask || targetValueIsObject )
 		) {
 			if ( options.circular ) {
 				indexOfSource = runtime.references.sources.indexOf( sourceValue ) ;
@@ -43855,71 +43952,78 @@ function extendOne( runtime , options , target , source ) {
 
 				extendOne(
 					{ depth: runtime.depth + 1 , prefix: runtime.prefix + sourceKey + options.flat , references: runtime.references } ,
-					options , targetPointer , sourceValue
+					options , targetPointer , sourceValue , mask
 				) ;
 			}
 			else {
 				if ( indexOfSource >= 0 ) {
 					// Circular references reconnection...
+					targetValue = runtime.references.targets[ indexOfSource ] ;
+
 					if ( options.descriptor ) {
 						Object.defineProperty( targetPointer , targetKey , {
-							value: runtime.references.targets[ indexOfSource ] ,
+							value: targetValue ,
 							enumerable: sourceDescriptor.enumerable ,
 							writable: sourceDescriptor.writable ,
 							configurable: sourceDescriptor.configurable
 						} ) ;
 					}
 					else {
-						targetPointer[ targetKey ] = runtime.references.targets[ indexOfSource ] ;
+						targetPointer[ targetKey ] = targetValue ;
 					}
 
 					continue ;
 				}
 
-				if ( ! targetPointer[ targetKey ] || ! Object.prototype.hasOwnProperty.call( targetPointer , targetKey ) || ( typeof targetPointer[ targetKey ] !== 'object' && typeof targetPointer[ targetKey ] !== 'function' ) ) {
-					if ( Array.isArray( sourceValue ) ) { value = [] ; }
-					else if ( options.proto ) { value = Object.create( sourceValueProto ) ; }	// jshint ignore:line
-					else if ( options.inherit ) { value = Object.create( sourceValue ) ; }
-					else { value = {} ; }
+				if ( ! targetValueIsObject || ! Object.prototype.hasOwnProperty.call( targetPointer , targetKey ) ) {
+					if ( Array.isArray( sourceValue ) ) { targetValue = [] ; }
+					else if ( options.proto ) { targetValue = Object.create( sourceValueProto ) ; }	// jshint ignore:line
+					else if ( options.inherit ) { targetValue = Object.create( sourceValue ) ; }
+					else { targetValue = {} ; }
 
 					if ( options.descriptor ) {
 						Object.defineProperty( targetPointer , targetKey , {
-							value: value ,
+							value: targetValue ,
 							enumerable: sourceDescriptor.enumerable ,
 							writable: sourceDescriptor.writable ,
 							configurable: sourceDescriptor.configurable
 						} ) ;
 					}
 					else {
-						targetPointer[ targetKey ] = value ;
+						targetPointer[ targetKey ] = targetValue ;
 					}
 				}
-				else if ( options.proto && Object.getPrototypeOf( targetPointer[ targetKey ] ) !== sourceValueProto ) {
-					Object.setPrototypeOf( targetPointer[ targetKey ] , sourceValueProto ) ;
+				else if ( options.proto && Object.getPrototypeOf( targetValue ) !== sourceValueProto ) {
+					Object.setPrototypeOf( targetValue , sourceValueProto ) ;
 				}
-				else if ( options.inherit && Object.getPrototypeOf( targetPointer[ targetKey ] ) !== sourceValue ) {
-					Object.setPrototypeOf( targetPointer[ targetKey ] , sourceValue ) ;
+				else if ( options.inherit && Object.getPrototypeOf( targetValue ) !== sourceValue ) {
+					Object.setPrototypeOf( targetValue , sourceValue ) ;
 				}
 
 				if ( options.circular ) {
 					runtime.references.sources.push( sourceValue ) ;
-					runtime.references.targets.push( targetPointer[ targetKey ] ) ;
+					runtime.references.targets.push( targetValue ) ;
 				}
 
 				// Recursively extends sub-object
 				extendOne(
 					{ depth: runtime.depth + 1 , prefix: '' , references: runtime.references } ,
-					options , targetPointer[ targetKey ] , sourceValue
+					options , targetValue , sourceValue , mask
 				) ;
 			}
 		}
-		else if ( options.preserve && targetPointer[ targetKey ] !== undefined ) {
+		else if ( mask && ( targetValue === undefined || targetValueIsObject || sourceValueIsObject ) ) {
+			// Do not create new value, and so do not delete source's properties that were not moved.
+			// We also do not overwrite object with non-object, and we don't overwrite non-object with object (preserve hierarchy)
+			continue ;
+		}
+		else if ( options.preserve && targetValue !== undefined ) {
 			// Do not overwrite, and so do not delete source's properties that were not moved
 			continue ;
 		}
 		else if ( ! options.inherit ) {
 			if ( options.descriptor ) { Object.defineProperty( targetPointer , targetKey , sourceDescriptor ) ; }
-			else { targetPointer[ targetKey ] = sourceValue ; }
+			else { targetPointer[ targetKey ] = targetValue = sourceValue ; }
 		}
 
 		// Delete owned property of the source object
@@ -44392,7 +44496,7 @@ module.exports = treePath ;
 
 
 
-const PROTO_POLLUTION_MESSAGE = 'This would pollute prototype' ;
+const PROTO_POLLUTION_MESSAGE = 'This would cause prototype pollution' ;
 
 
 
@@ -44412,6 +44516,11 @@ treePath.op = function( type , object , path , value ) {
 	else if ( Array.isArray( path ) ) {
 		parts = path ;
 		pathArrayMode = true ;
+		/*
+		for ( i = 0 ; i < parts.length ; i ++ ) {
+			if ( typeof parts[ i ] !== 'string' || typeof parts[ i ] !== 'number' ) { parts[ i ] = '' + parts[ i ] ; }
+		}
+		//*/
 	}
 	else {
 		throw new TypeError( '[tree.path] .' + type + '(): the path argument should be a string or an array' ) ;
@@ -44447,7 +44556,7 @@ treePath.op = function( type , object , path , value ) {
 		if ( pathArrayMode ) {
 			if ( key === undefined ) {
 				key = parts[ i ] ;
-				if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+				if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 				continue ;
 			}
 
@@ -44459,7 +44568,7 @@ treePath.op = function( type , object , path , value ) {
 
 			pointer = pointer[ key ] ;
 			key = parts[ i ] ;
-			if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+			if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 			continue ;
 		}
 		else if ( parts[ i ] === '.' ) {
@@ -44515,7 +44624,7 @@ treePath.op = function( type , object , path , value ) {
 
 		if ( ! isArray ) {
 			key = parts[ i ] ;
-			if ( key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+			if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 			continue ;
 		}
 

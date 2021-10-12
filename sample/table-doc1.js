@@ -49,6 +49,7 @@ term.table( [
 		firstRowTextAttr: { bgColor: 'yellow' } ,
 		firstColumnTextAttr: { bgColor: 'red' } ,
 		width: 60 ,
+		//height: 20 ,
 		fit: true	// Activate all expand/shrink + wordWrap
 	}
 ) ;
