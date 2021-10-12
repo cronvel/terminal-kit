@@ -19123,9 +19123,11 @@ misc.truncateString = ( str , maxWidth ) => {
 
 
 
-// width of a string with a markup, without control chars
+// Width of a string with a markup, without control chars
 misc.markupWidth = str => {
-	return string.unicode.width( str.replace( /\^\[[^\]]*]|\^(.)/g , ( match , second ) => {
+	// Fix a possible ReDoS, the regex:   /\^\[[^\]]*]|\^(.)/g   was replaced by:   /\^\[[^^[\]]*]|\^(.)/g
+	// The exploit was possible with a string like: '^['.repeat(bigNumber)
+	return string.unicode.width( str.replace( /\^\[[^^[\]]*]|\^(.)/g , ( match , second ) => {
 		if ( second === ' ' || second === '^' ) {
 			return second ;
 		}
