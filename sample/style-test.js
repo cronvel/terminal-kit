@@ -29,15 +29,11 @@
 
 
 
-/* jshint unused:false */
+const terminal = require( '..' ) ;
 
 
 
-var terminal = require( '../lib/termkit.js' ) ;
-
-
-
-terminal.getDetectedTerminal( function( error , term ) {
+terminal.getDetectedTerminal( ( error , term ) => {
 	
 	var i ;
 	
@@ -125,10 +121,21 @@ terminal.getDetectedTerminal( function( error , term ) {
 	term( attr ) ;
 	term( '\nAttr test2' ) ;
 
+
+
+	// Test markup
+
+	term.styleReset() ;
+	term( '\n\n' ) ;
+	term( "This is ^+bold^:.\n" ) ;
+	term( "This is ^[fg:#aaee55]green^:.\n" ) ;
+
+
+
 	// Reset before exiting...
 
-	term( '\n' ) ;
 	term.styleReset() ;
+	term( '\n' ) ;
 	term( 'Reset...\n' ) ;
 	
 } ) ;
