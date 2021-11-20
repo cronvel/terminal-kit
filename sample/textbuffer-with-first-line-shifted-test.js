@@ -42,7 +42,11 @@ async function test() {
 	var tbuf = new termkit.TextBuffer( { dst: sbuf , firstLineRightShift: 8 } ) ;
 	tbuf.setDefaultAttr( { bgColor: 'blue' } ) ;
 	tbuf.setVoidAttr( { bgColor: 'blue' } ) ;
-	tbuf.setText( "First line.\nSecond line.\nThird line." ) ;
+	//tbuf.setText( "First line.\nSecond line.\nThird line." ) ;
+	tbuf.setText( "First line.\n^[red]^[bg:white]Second line.\nThird line." , true ) ;
+	//tbuf.setText( "First line.\n\x1b[31;46;1mSecond line.\nThird line." , 'ansi' ) ;
+	//tbuf.setText( "First line.\n\x1b[31;46;1mSecond line.\nThird line." , 'ansi' ) ;
+	//tbuf.setText( "First line.\n\x1b[31;46;1mSecond line.\nThird line." , 'legacyAnsi' ) ;
 
 	tbuf.draw() ;
 	sbuf.draw() ;
