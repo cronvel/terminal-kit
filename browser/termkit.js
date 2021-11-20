@@ -215,8 +215,8 @@ Palette.prototype.generateAdaptive = function() {
 			saturationMark = '' ;
 		}
 
-		for ( j = 2 ; j >= -3 ; j -- ) {
 
+		for ( j = 2 ; j >= -3 ; j -- ) {
 			if ( j > 0 ) {
 				lightnessMark = '+'.repeat( j ) ;
 			}
@@ -235,7 +235,6 @@ Palette.prototype.generateAdaptive = function() {
 				register ++ ;
 			}
 		}
-
 	}
 } ;
 
@@ -1238,7 +1237,7 @@ ScreenBuffer.prototype.clear = ScreenBuffer.prototype.fill ;
 
 
 ScreenBuffer.prototype.preserveMarkupFormat = misc.preserveMarkupFormat ;
-ScreenBuffer.prototype.markupOptions = misc.markupOptions ;
+ScreenBuffer.prototype.parseMarkup = string.markupMethod.bind( misc.markupOptions ) ;
 
 
 
@@ -1261,7 +1260,7 @@ ScreenBuffer.prototype.markupOptions = misc.markupOptions ;
 */
 // Shared
 ScreenBuffer.prototype.put = function( options , str , ... args ) {
-	var parser , legacyColor , startX , startY , x , y , dx , dy , baseAttr , attr , attrObject , wrap ;
+	var startX , startY , x , y , dx , dy , baseAttr , attr , attrObject , wrap ;
 
 	// Manage options
 	if ( ! options ) { options = {} ; }
@@ -1319,14 +1318,7 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 		str = options.markup === true ? this.preserveMarkupFormat( str , ... args ) : string.format( str , ... args ) ;
 	}
 
-	legacyColor = false ;
-	parser = null ;
 
-	switch ( options.markup ) {
-		case 'ansi' : parser = termkit.parseAnsi ; break ;
-		case 'legacyAnsi' : parser = termkit.parseAnsi ; legacyColor = true ; break ;
-		case true : parser = termkit.parseMarkup ; break ;
-	}
 
 	// The processing of raw chunk of text
 	var processRaw = part => {
@@ -1423,29 +1415,37 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 		processRaw( str ) ;
 	}
 	else {
-		attrObject = this.attr2object( attr ) ;
-		parser( str , this.markupOptions ).forEach( part => {
-			if ( typeof part === 'string' ) {
-				processRaw( part ) ;
-			}
-			else {
-				if ( part.markup.reset ) {
-					attr = part.markup.special ? this.DEFAULT_ATTR : baseAttr ;
-					attrObject = this.attr2object( attr ) ;
-				}
-				else {
-					Object.assign( attrObject , part.markup ) ;
+		const defaultAttrObject = this.attr2object( this.DEFAULT_ATTR ) ;
+		const baseAttrObject = this.attr2object( baseAttr ) ;
 
-					// Remove incompatible flags
-					if ( attrObject.defaultColor && attrObject.color ) { delete attrObject.defaultColor ; }
-					if ( attrObject.bgDefaultColor && attrObject.bgColor ) { delete attrObject.bgDefaultColor ; }
+		let legacyColor = false ;
+		let parts = null ;
 
-					attr = this.object2attr( attrObject , undefined , legacyColor ) ;
-				}
+		switch ( options.markup ) {
+			case 'ansi' :
+				parts = string.ansi.parse( str ) ;
+				break ;
+			case 'legacyAnsi' :
+				parts = string.ansi.parse( str ) ;
+				legacyColor = true ;
+				break ;
+			case true :
+				parts = this.parseMarkup( str ) ;
+				break ;
+		}
 
-				if ( part.markup.raw ) {
-					processRaw( part.markup.raw ) ;
-				}
+		parts.forEach( part => {
+			attrObject = Object.assign( {} , part.specialReset ? defaultAttrObject : baseAttrObject , part ) ;
+			delete attrObject.text ;
+
+			// Remove incompatible flags
+			if ( attrObject.defaultColor && attrObject.color ) { delete attrObject.defaultColor ; }
+			if ( attrObject.bgDefaultColor && attrObject.bgColor ) { delete attrObject.bgDefaultColor ; }
+
+			attr = this.object2attr( attrObject , undefined , legacyColor ) ;
+
+			if ( part.text ) {
+				processRaw( part.text ) ;
 			}
 		} ) ;
 	}
@@ -2777,7 +2777,7 @@ ScreenBuffer.prototype.saveSync = ScreenBuffer.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./misc.js":42,"./termkit.js":50,"buffer":147,"fs":136,"nextgen-events":72,"string-kit":123}],4:[function(require,module,exports){
+},{"./misc.js":42,"./termkit.js":50,"buffer":146,"fs":135,"nextgen-events":72,"string-kit":122}],4:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -2810,6 +2810,7 @@ ScreenBuffer.prototype.saveSync = ScreenBuffer.prototype.saveSyncV2 ;
 
 
 const ScreenBuffer = require( './ScreenBuffer.js' ) ;
+const misc = require( './misc.js' ) ;
 
 const fs = require( 'fs' ) ;
 const string = require( 'string-kit' ) ;
@@ -3620,8 +3621,15 @@ ScreenBufferHD.object2attr = function( object ) {
 	// Misc and color part
 	attr[ BPOS_MISC ] = 0 ;
 
-	if ( object.color && typeof object.color === 'object' ) {
-		// Color part
+	// Color part
+	if ( typeof object.color === 'string' ) {
+		let color = misc.hexToRgba( object.color ) ;
+		attr[ BPOS_R ] = color.r ;
+		attr[ BPOS_G ] = color.g ;
+		attr[ BPOS_B ] = color.b ;
+		attr[ BPOS_A ] = color.a ;
+	}
+	else if ( object.color && typeof object.color === 'object' ) {
 		attr[ BPOS_R ] = + object.color.r || 0 ;
 		attr[ BPOS_G ] = + object.color.g || 0 ;
 		attr[ BPOS_B ] = + object.color.b || 0 ;
@@ -3634,8 +3642,15 @@ ScreenBufferHD.object2attr = function( object ) {
 		attr[ BPOS_A ] = 255 ;
 	}
 
-	if ( object.bgColor && typeof object.bgColor === 'object' ) {
-		// Background color part
+	// Background color part
+	if ( typeof object.bgColor === 'string' ) {
+		let color = misc.hexToRgba( object.bgColor ) ;
+		attr[ BPOS_BG_R ] = color.r ;
+		attr[ BPOS_BG_G ] = color.g ;
+		attr[ BPOS_BG_B ] = color.b ;
+		attr[ BPOS_BG_A ] = color.a ;
+	}
+	else if ( object.bgColor && typeof object.bgColor === 'object' ) {
 		attr[ BPOS_BG_R ] = + object.bgColor.r || 0 ;
 		attr[ BPOS_BG_G ] = + object.bgColor.g || 0 ;
 		attr[ BPOS_BG_B ] = + object.bgColor.b || 0 ;
@@ -3928,7 +3943,7 @@ ScreenBufferHD.prototype.saveSync = ScreenBufferHD.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./termkit.js":50,"buffer":147,"fs":136,"string-kit":123}],5:[function(require,module,exports){
+},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./misc.js":42,"./termkit.js":50,"buffer":146,"fs":135,"string-kit":122}],5:[function(require,module,exports){
 (function (process,Buffer){(function (){
 /*
 	Terminal Kit
@@ -6032,7 +6047,7 @@ notChainable.drawImage = function( filepath , options , callback ) {
 
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":37,"./fileInput.js":38,"./gridMenu.js":39,"./inputField.js":41,"./progressBar.js":44,"./singleColumnMenu.js":45,"./singleLineMenu.js":46,"./slowTyping.js":47,"./termkit.js":50,"./yesOrNo.js":57,"_process":179,"buffer":147,"nextgen-events":72,"seventh":108,"string-kit":123,"tree-kit":134}],6:[function(require,module,exports){
+},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":37,"./fileInput.js":38,"./gridMenu.js":39,"./inputField.js":41,"./progressBar.js":44,"./singleColumnMenu.js":45,"./singleLineMenu.js":46,"./slowTyping.js":47,"./termkit.js":50,"./yesOrNo.js":57,"_process":178,"buffer":146,"nextgen-events":72,"seventh":108,"string-kit":122,"tree-kit":133}],6:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -6062,6 +6077,8 @@ notChainable.drawImage = function( filepath , options , callback ) {
 "use strict" ;
 
 
+
+const misc = require( './misc.js' ) ;
 
 const fs = require( 'fs' ) ;
 const string = require( 'string-kit' ) ;
@@ -6133,13 +6150,15 @@ module.exports = TextBuffer ;
 // Backward compatibility
 TextBuffer.create = ( ... args ) => new TextBuffer( ... args ) ;
 
+TextBuffer.prototype.parseMarkup = string.markupMethod.bind( misc.markupOptions ) ;
 
 
-function Cell( char = ' ' , attr = null , misc = null ) {
+
+function Cell( char = ' ' , attr = null , misc_ = null ) {
 	this.char = char || ' ' ;
 	this.filler = char === null ;
 	this.attr = attr ;
-	this.misc = misc ;
+	this.misc = misc_ ;
 }
 
 TextBuffer.Cell = Cell ;
@@ -6191,9 +6210,9 @@ TextBuffer.prototype.setText = function( text , hasMarkup , baseAttr ) {
 	var legacyColor = false , parser = null ;
 
 	switch ( hasMarkup ) {
-		case 'ansi' : parser = termkit.parseAnsi ; break ;
-		case 'legacyAnsi' : parser = termkit.parseAnsi ; legacyColor = true ; break ;
-		case true : parser = termkit.parseMarkup ; break ;
+		case 'ansi' : parser = string.ansi.parse ; break ;
+		case 'legacyAnsi' : parser = string.ansi.parse ; legacyColor = true ; break ;
+		case true : parser = this.parseMarkup ; break ;
 	}
 
 	if ( baseAttr === undefined ) { baseAttr = this.defaultAttr ; }
@@ -6220,40 +6239,28 @@ TextBuffer.prototype.setText = function( text , hasMarkup , baseAttr ) {
 
 // Internal, transform a line of text, with or without markup to cells...
 TextBuffer.prototype.lineToCells = function( line , parser , baseAttr , offset = 0 , legacyColor = false ) {
-	var attr = baseAttr ,
-		attrObject , cells ;
-
 	if ( ! parser ) {
-		return string.unicode.toCells( Cell , line , this.tabWidth , offset , attr ) ;
+		return string.unicode.toCells( Cell , line , this.tabWidth , offset , baseAttr ) ;
 	}
 
-	// Reset attr at each end of line
-	attr = baseAttr ;
-	attrObject = this.ScreenBuffer.attr2object( attr ) ;
-	cells = [] ;
+	var attr , attrObject ,
+		cells = [] ;
 
-	parser( line , termkit.markupOptions ).forEach( part => {
-		if ( typeof part === 'string' ) {
-			cells.push( ... string.unicode.toCells( Cell , part , this.tabWidth , offset + cells.length , attr ) ) ;
-			return ;
-		}
+	const defaultAttrObject = this.ScreenBuffer.attr2object( this.ScreenBuffer.DEFAULT_ATTR ) ;
+	const baseAttrObject = this.ScreenBuffer.attr2object( baseAttr ) ;
 
-		if ( part.markup.reset ) {
-			attr = part.markup.special ? this.ScreenBuffer.DEFAULT_ATTR : baseAttr ;
-			attrObject = this.ScreenBuffer.attr2object( attr ) ;
-		}
-		else {
-			Object.assign( attrObject , part.markup ) ;
+	parser( line ).forEach( part => {
+		attrObject = Object.assign( {} , part.specialReset ? defaultAttrObject : baseAttrObject , part ) ;
+		delete attrObject.text ;
 
-			// Remove incompatible flags
-			if ( attrObject.defaultColor && attrObject.color !== undefined ) { delete attrObject.defaultColor ; }
-			if ( attrObject.bgDefaultColor && attrObject.bgColor !== undefined ) { delete attrObject.bgDefaultColor ; }
+		// Remove incompatible flags
+		if ( attrObject.defaultColor && attrObject.color ) { delete attrObject.defaultColor ; }
+		if ( attrObject.bgDefaultColor && attrObject.bgColor ) { delete attrObject.bgDefaultColor ; }
 
-			attr = this.object2attr( attrObject , undefined , legacyColor ) ;
-		}
+		attr = this.object2attr( attrObject , undefined , legacyColor ) ;
 
-		if ( part.markup.raw ) {
-			cells.push( ... string.unicode.toCells( Cell , part.markup.raw , this.tabWidth , offset + cells.length , attr ) ) ;
+		if ( part.text ) {
+			cells.push( ... string.unicode.toCells( Cell , part.text , this.tabWidth , offset + cells.length , attr ) ) ;
 		}
 	} ) ;
 
@@ -7064,9 +7071,9 @@ TextBuffer.prototype.insert = function( text , hasMarkup , attr ) {
 	var legacyColor = false , parser = null ;
 
 	switch ( hasMarkup ) {
-		case 'ansi' : parser = termkit.parseAnsi ; break ;
-		case 'legacyAnsi' : parser = termkit.parseAnsi ; legacyColor = true ; break ;
-		case true : parser = termkit.parseMarkup ; break ;
+		case 'ansi' : parser = string.ansi.parse ; break ;
+		case 'legacyAnsi' : parser = string.ansi.parse ; legacyColor = true ; break ;
+		case true : parser = this.parseMarkup ; break ;
 	}
 
 	lines = text.split( '\n' ) ;
@@ -7081,7 +7088,7 @@ TextBuffer.prototype.insert = function( text , hasMarkup , attr ) {
 
 	for ( index = 1 ; index < length ; index ++ ) {
 		this.newLine( true ) ;
-		this.inlineInsert( lines[ index ] , parser , attr ) ;
+		this.inlineInsert( lines[ index ] , parser , attr , legacyColor ) ;
 	}
 } ;
 
@@ -7691,16 +7698,16 @@ TextMachineApi.blockStyle = function( context , style ) {
 
 
 TextMachineApi.hint = function( context , hints ) {
-	var misc ;
+	var misc_ ;
 
 	if ( hints[ context.buffer ] ) {
-		misc = context.textBuffer.getMiscAt( context.x , context.y ) ;
-		if ( misc ) { misc.hint = hints[ context.buffer ] ; }
+		misc_ = context.textBuffer.getMiscAt( context.x , context.y ) ;
+		if ( misc_ ) { misc_.hint = hints[ context.buffer ] ; }
 	}
 } ;
 
 
-},{"./termkit.js":50,"fs":136,"string-kit":123}],7:[function(require,module,exports){
+},{"./misc.js":42,"./termkit.js":50,"fs":135,"string-kit":122}],7:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -8331,7 +8338,7 @@ exports.getDetectedTerminal = async function( callback ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./termkit.js":50,"_process":179,"child_process":136,"os":166,"path":178,"seventh":108}],13:[function(require,module,exports){
+},{"./termkit.js":50,"_process":178,"child_process":135,"os":165,"path":177,"seventh":108}],13:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -9132,7 +9139,7 @@ BaseMenu.prototype.childUseParentKeyValue = false ;
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":16,"./Element.js":23,"_process":179,"tree-kit":134}],16:[function(require,module,exports){
+},{"./Button.js":16,"./Element.js":23,"_process":178,"tree-kit":133}],16:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -11758,7 +11765,7 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 EditableTextBox.prototype.updateStatus = function() {} ;
 
 
-},{"./TextBox.js":33,"string-kit":123}],23:[function(require,module,exports){
+},{"./TextBox.js":33,"string-kit":122}],23:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -12622,7 +12629,7 @@ Element.prototype.inlineCursorRestoreAfterDraw = false ;	// when set, save/resto
 Element.prototype.needInput = false ;	// no need for input by default (used to configure inline mode)
 
 
-},{"../misc.js":42,"../termkit.js":50,"nextgen-events":72,"string-kit":123}],24:[function(require,module,exports){
+},{"../misc.js":42,"../termkit.js":50,"nextgen-events":72,"string-kit":122}],24:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -12949,7 +12956,7 @@ Form.prototype.onButtonSubmit = function( buttonValue , action ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":16,"./Element.js":23,"./LabeledInput.js":26,"_process":179}],25:[function(require,module,exports){
+},{"./Button.js":16,"./Element.js":23,"./LabeledInput.js":26,"_process":178}],25:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -13505,7 +13512,7 @@ InlineInput.prototype.onMiddleClick = function( data ) {
 //InlineInput.prototype.updateStatus = function() {} ;
 
 
-},{"../autoComplete.js":7,"./EditableTextBox.js":22,"./RowMenu.js":28,"./TextBox.js":33,"seventh":108,"string-kit":123}],26:[function(require,module,exports){
+},{"../autoComplete.js":7,"./EditableTextBox.js":22,"./RowMenu.js":28,"./TextBox.js":33,"seventh":108,"string-kit":122}],26:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -13902,7 +13909,7 @@ LabeledInput.prototype.onClick = function( data ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./EditableTextBox.js":22,"./Element.js":23,"./SelectList.js":29,"./SelectListMulti.js":30,"./Text.js":32,"_process":179,"string-kit":123}],27:[function(require,module,exports){
+},{"./EditableTextBox.js":22,"./Element.js":23,"./SelectList.js":29,"./SelectListMulti.js":30,"./Text.js":32,"_process":178,"string-kit":122}],27:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -14649,7 +14656,7 @@ RowMenu.prototype.preDrawSelf = function() {
 } ;
 
 
-},{"../misc.js":42,"./BaseMenu.js":15,"./Button.js":16,"./Element.js":23,"./ToggleButton.js":35,"string-kit":123}],29:[function(require,module,exports){
+},{"../misc.js":42,"./BaseMenu.js":15,"./Button.js":16,"./Element.js":23,"./ToggleButton.js":35,"string-kit":122}],29:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16213,7 +16220,7 @@ TextBox.prototype.onParentResize = function() {
 } ;
 
 
-},{"../Rect.js":2,"../ScreenBuffer.js":3,"../TextBuffer.js":6,"./Element.js":23,"./Slider.js":31,"string-kit":123}],34:[function(require,module,exports){
+},{"../Rect.js":2,"../ScreenBuffer.js":3,"../TextBuffer.js":6,"./Element.js":23,"./Slider.js":31,"string-kit":122}],34:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -17155,7 +17162,7 @@ else {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./patches.js":43,"_process":179,"child_process":136,"seventh":108,"string-kit":123}],38:[function(require,module,exports){
+},{"./patches.js":43,"_process":178,"child_process":135,"seventh":108,"string-kit":122}],38:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -17330,7 +17337,7 @@ function readdir( dir ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./autoComplete.js":7,"_process":179,"fs":136,"path":178,"seventh":108}],39:[function(require,module,exports){
+},{"./autoComplete.js":7,"_process":178,"fs":135,"path":177,"seventh":108}],39:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -17869,7 +17876,7 @@ image.shrinkNdarrayImage = function shrinkNdarrayImage( pixels , options ) {
 
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@cronvel/get-pixels":58,"get-pixels":136,"ndarray":71,"seventh":108}],41:[function(require,module,exports){
+},{"@cronvel/get-pixels":58,"get-pixels":135,"ndarray":71,"seventh":108}],41:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18940,7 +18947,7 @@ module.exports = function inputField( options , callback ) {
 } ;
 
 
-},{"./autoComplete.js":7,"nextgen-events":72,"seventh":108,"string-kit":123}],42:[function(require,module,exports){
+},{"./autoComplete.js":7,"nextgen-events":72,"seventh":108,"string-kit":122}],42:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -19125,9 +19132,9 @@ misc.truncateString = ( str , maxWidth ) => {
 
 // Width of a string with a markup, without control chars
 misc.markupWidth = str => {
-	// Fix a possible ReDoS, the regex:   /\^\[[^\]]*]|\^(.)/g   was replaced by:   /\^\[[^^[\]]*]|\^(.)/g
+	// Fix a possible ReDoS, the regex:   /\^\[[^\]]*]|\^(.)/g   was replaced by:   /\^\[[^\]]*]?|\^(.)/g
 	// The exploit was possible with a string like: '^['.repeat(bigNumber)
-	return string.unicode.width( str.replace( /\^\[[^^[\]]*]|\^(.)/g , ( match , second ) => {
+	return string.unicode.width( str.replace( /\^\[[^\]]*]?|\^(.)/g , ( match , second ) => {
 		if ( second === ' ' || second === '^' ) {
 			return second ;
 		}
@@ -19255,7 +19262,7 @@ misc.wordWrapAnsi = ( str , width ) => string.wordwrap( str , {
 
 
 
-misc.wordwrapMarkup =	// <-- DEPRECATED
+misc.wordwrapMarkup =	// <-- DEPRECATED name (bad camel case)
 misc.wordWrapMarkup = ( str , width ) => string.wordwrap( str , {
 	width: width ,
 	noJoin: true ,
@@ -19316,18 +19323,20 @@ misc.preserveMarkupFormat = string.createFormatter( {
 
 
 misc.markupOptions = {
-	complexMarkupAliases: {
-		c: 'color' ,
-		fg: 'color' ,
-		bg: 'bgColor'
-	} ,
+	parse: true ,
 	shiftMarkup: {
 		'#': 'background'
 	} ,
 	markup: {
-		':': { reset: true } ,
-		' ': { reset: true , raw: ' ' } ,
-		';': { reset: true , special: true } ,		// "Special reset" can reset forced attr (Document-model)
+		':': null ,
+		' ': markupStack => {
+			markupStack.length = 0 ;
+			return [ null , ' ' ] ;
+		} ,
+		';': markupStack => {
+			markupStack.length = 0 ;
+			return [ null , { specialReset: true } ] ;
+		} ,
 
 		'-': { dim: true } ,
 		'+': { bold: true } ,
@@ -19354,12 +19363,14 @@ misc.markupOptions = {
 	} ,
 	shiftedMarkup: {
 		background: {
-			':': { reset: true , defaultColor: true , bgDefaultColor: true } ,
-			' ': {
-				reset: true , defaultColor: true , bgDefaultColor: true , raw: ' '
+			':': [ null , { defaultColor: true , bgDefaultColor: true } ] ,
+			' ': markupStack => {
+				markupStack.length = 0 ;
+				return [ null , { defaultColor: true , bgDefaultColor: true } , ' ' ] ;
 			} ,
-			';': {
-				reset: true , special: true , defaultColor: true , bgDefaultColor: true
+			';': markupStack => {
+				markupStack.length = 0 ;
+				return [ null , { specialReset: true , defaultColor: true , bgDefaultColor: true } ] ;
 			} ,
 
 			'k': { bgColor: 0 } ,
@@ -19379,131 +19390,30 @@ misc.markupOptions = {
 			'C': { bgColor: 14 } ,
 			'W': { bgColor: 15 }
 		}
-	}
-} ;
+	} ,
+	dataMarkup: {
+		color: 'color' ,
+		fgColor: 'color' ,
+		fg: 'color' ,
+		c: 'color' ,
+		bgColor: 'bgColor' ,
+		bg: 'bgColor'
+	} ,
+	markupCatchAll: ( markupStack , key , value ) => {
+		var attr = {} ;
 
-
-
-// /!\ Should be moved to string-kit once finished /!\
-const parseMarkupRegexp = /\^\[([^\]]*)]|\^(.)|([^^]+)/g ;
-
-misc.parseMarkup = ( str , options ) => {
-	var complex , markup , raw , match ,
-		base = options.markup ,
-		output = [] ;
-
-	parseMarkupRegexp.lastIndex = 0 ;
-
-	while ( ( match = parseMarkupRegexp.exec( str ) ) ) {
-		[ , complex , markup , raw ] = match ;
-
-		if ( complex ) {
-			var custom = {} ;
-			complex.split( ',' ).forEach( part => {
-				var [ k , v ] = part.split( ':' ) ;
-				if ( options.complexMarkupAliases[ k ] ) { k = options.complexMarkupAliases[ k ] ; }
-				custom[ k ] = v || true ;
-			} ) ;
-
-			output.push( { markup: custom } ) ;
+		if ( value === undefined ) {
+			//if ( key[ 0 ] === '#' ) {}
+			attr = { color: key } ;
 		}
-		else if ( raw ) { output.push( raw ) ; }
-		else if ( markup === '^' ) { output.push( '^' ) ; }
-		else if ( options.shiftMarkup[ markup ] ) { base = options.shiftedMarkup[ options.shiftMarkup[ markup ] ] ; continue ; }
-		else if ( base[ markup ] ) { output.push( { markup: base[ markup ] } ) ; }
 
-		base = options.markup ;
+		markupStack.push( attr ) ;
+		return attr || {} ;
 	}
-
-	return output ;
 } ;
 
 
-
-const ANSI_CODES = {
-	'0': { reset: true } ,
-
-	'1': { bold: true } ,
-	'2': { dim: true } ,
-	'22': { bold: false , dim: false } ,
-	'3': { italic: true } ,
-	'23': { italic: false } ,
-	'4': { underline: true } ,
-	'24': { underline: false } ,
-	'5': { blink: true } ,
-	'25': { blink: false } ,
-	'7': { inverse: true } ,
-	'27': { inverse: false } ,
-	'8': { hidden: true } ,
-	'28': { hidden: false } ,
-	'9': { strike: true } ,
-	'29': { strike: false } ,
-
-	'30': { color: 0 } ,
-	'31': { color: 1 } ,
-	'32': { color: 2 } ,
-	'33': { color: 3 } ,
-	'34': { color: 4 } ,
-	'35': { color: 5 } ,
-	'36': { color: 6 } ,
-	'37': { color: 7 } ,
-	'39:': { defaultColor: true } ,
-
-	'90': { color: 8 } ,
-	'91': { color: 9 } ,
-	'92': { color: 10 } ,
-	'93': { color: 11 } ,
-	'94': { color: 12 } ,
-	'95': { color: 13 } ,
-	'96': { color: 14 } ,
-	'97': { color: 15 } ,
-
-	'40': { bgColor: 0 } ,
-	'41': { bgColor: 1 } ,
-	'42': { bgColor: 2 } ,
-	'43': { bgColor: 3 } ,
-	'44': { bgColor: 4 } ,
-	'45': { bgColor: 5 } ,
-	'46': { bgColor: 6 } ,
-	'47': { bgColor: 7 } ,
-	'49:': { bgDefaultColor: true } ,
-
-	'100': { bgColor: 8 } ,
-	'101': { bgColor: 9 } ,
-	'102': { bgColor: 10 } ,
-	'103': { bgColor: 11 } ,
-	'104': { bgColor: 12 } ,
-	'105': { bgColor: 13 } ,
-	'106': { bgColor: 14 } ,
-	'107': { bgColor: 15 }
-} ;
-
-
-
-// /!\ Should be moved to string-kit once finished /!\
-const parseAnsiRegexp = /\x1b\[([0-9;]+)m|(.[^\x1b]*)/g ;
-
-misc.parseAnsi = str => {
-	var match , ansiCodes , raw , output = [] ;
-
-	parseAnsiRegexp.lastIndex = 0 ;
-
-	while ( ( match = parseAnsiRegexp.exec( str ) ) ) {
-		[ , ansiCodes , raw ] = match ;
-
-		if ( raw ) { output.push( raw ) ; }
-		else {
-			ansiCodes.split( ';' ).forEach( ansiCode => {
-				if ( ANSI_CODES[ ansiCode ] ) { output.push( { markup: ANSI_CODES[ ansiCode ] } ) ; }
-			} ) ;
-		}
-	}
-
-	return output ;
-} ;
-
-
-},{"string-kit":123}],43:[function(require,module,exports){
+},{"string-kit":122}],43:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -19540,7 +19450,7 @@ const Promise = require( 'seventh' ) ;
 Promise.promisifyNodeApi( require( 'child_process' ) ) ;
 
 
-},{"child_process":136,"seventh":108}],44:[function(require,module,exports){
+},{"child_process":135,"seventh":108}],44:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -20719,7 +20629,7 @@ module.exports = function singleColumnMenu( menuItemsArg , options , callback ) 
 } ;
 
 
-},{"./termkit":50,"nextgen-events":72,"seventh":108,"string-kit":123}],46:[function(require,module,exports){
+},{"./termkit":50,"nextgen-events":72,"seventh":108,"string-kit":122}],46:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -21727,7 +21637,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Button.js":16,"./document/ColumnMenu.js":17,"./document/ColumnMenuMulti.js":18,"./document/Container.js":19,"./document/Document.js":20,"./document/DropDownMenu.js":21,"./document/EditableTextBox.js":22,"./document/Element.js":23,"./document/Form.js":24,"./document/InlineInput.js":25,"./document/LabeledInput.js":26,"./document/Layout.js":27,"./document/RowMenu.js":28,"./document/SelectList.js":29,"./document/SelectListMulti.js":30,"./document/Slider.js":31,"./document/Text.js":32,"./document/TextBox.js":33,"./document/TextTable.js":34,"./document/ToggleButton.js":35,"./document/Window.js":36,"./image.js":40,"./misc.js":42,"./spChars.js":48,"./tty.js":51,"./vte/Vte.js":53,"./windows.js":56,"_process":179,"chroma-js":59,"lazyness":68}],50:[function(require,module,exports){
+},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Button.js":16,"./document/ColumnMenu.js":17,"./document/ColumnMenuMulti.js":18,"./document/Container.js":19,"./document/Document.js":20,"./document/DropDownMenu.js":21,"./document/EditableTextBox.js":22,"./document/Element.js":23,"./document/Form.js":24,"./document/InlineInput.js":25,"./document/LabeledInput.js":26,"./document/Layout.js":27,"./document/RowMenu.js":28,"./document/SelectList.js":29,"./document/SelectListMulti.js":30,"./document/Slider.js":31,"./document/Text.js":32,"./document/TextBox.js":33,"./document/TextTable.js":34,"./document/ToggleButton.js":35,"./document/Window.js":36,"./image.js":40,"./misc.js":42,"./spChars.js":48,"./tty.js":51,"./vte/Vte.js":53,"./windows.js":56,"_process":178,"chroma-js":59,"lazyness":68}],50:[function(require,module,exports){
 (function (process,__dirname){(function (){
 /*
 	Terminal Kit
@@ -21882,7 +21792,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'),"/lib")
-},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":42,"./termkit-no-lazy-require.js":49,"./windows.js":56,"_process":179,"lazyness":68,"path":178}],51:[function(require,module,exports){
+},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":42,"./termkit-no-lazy-require.js":49,"./windows.js":56,"_process":178,"lazyness":68,"path":177}],51:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -22042,7 +21952,7 @@ tty_.getOutput = function getOutput() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":179,"child_process":136,"fs":136,"tty":198}],52:[function(require,module,exports){
+},{"_process":178,"child_process":135,"fs":135,"tty":197}],52:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -22397,7 +22307,7 @@ SequencesReader.prototype.streamToEvent = async function( stream ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./fromOutputSequence.js":54,"buffer":147,"nextgen-events":72,"seventh":108,"string-kit":123}],53:[function(require,module,exports){
+},{"./fromOutputSequence.js":54,"buffer":146,"nextgen-events":72,"seventh":108,"string-kit":122}],53:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -23405,7 +23315,7 @@ Vte.prototype.onChildOutputOSC = function( type , args ) {
 } ;
 
 
-},{"../Rect.js":2,"../ScreenBuffer.js":3,"./SequencesReader.js":52,"./toInputSequence.js":55,"child_process":136,"child_pty":136,"nextgen-events":72,"seventh":108,"string-kit":123}],54:[function(require,module,exports){
+},{"../Rect.js":2,"../ScreenBuffer.js":3,"./SequencesReader.js":52,"./toInputSequence.js":55,"child_process":135,"child_pty":135,"nextgen-events":72,"seventh":108,"string-kit":122}],54:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -24149,7 +24059,7 @@ module.exports = function getPixels(url, type, cb) {
 }
 
 }).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":162,"fs":136,"jpeg-js":65,"ndarray":71,"ndarray-pack":69,"node-bitmap":75,"omggif":77,"path":178,"pngjs":97}],59:[function(require,module,exports){
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":161,"fs":135,"jpeg-js":65,"ndarray":71,"ndarray-pack":69,"node-bitmap":75,"omggif":77,"path":177,"pngjs":97}],59:[function(require,module,exports){
 /**
  * chroma.js - JavaScript library for color conversions
  *
@@ -27847,7 +27757,7 @@ function generateCWiseOp(proc, typesig) {
 }
 module.exports = generateCWiseOp
 
-},{"uniq":135}],62:[function(require,module,exports){
+},{"uniq":134}],62:[function(require,module,exports){
 "use strict"
 
 // The function below is called when constructing a cwise function object, and does the following:
@@ -29103,7 +29013,7 @@ function decode(jpegData, userOpts = {}) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":147}],67:[function(require,module,exports){
+},{"buffer":146}],67:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
   Copyright (c) 2008, Adobe Systems Incorporated
@@ -29906,7 +29816,7 @@ function getImageDataFromImage(idOrElement){
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":147}],68:[function(require,module,exports){
+},{"buffer":146}],68:[function(require,module,exports){
 /*
 	Lazyness
 
@@ -31926,7 +31836,7 @@ NextGenEvents.Proxy = require( './Proxy.js' ) ;
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"../package.json":74,"./Proxy.js":73,"_process":179,"timers":197}],73:[function(require,module,exports){
+},{"../package.json":74,"./Proxy.js":73,"_process":178,"timers":196}],73:[function(require,module,exports){
 /*
 	Next-Gen Events
 
@@ -33141,7 +33051,7 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":147}],77:[function(require,module,exports){
+},{"buffer":146}],77:[function(require,module,exports){
 // (c) Dean McNamee <dean@gmail.com>, 2013.
 //
 // https://github.com/deanm/omggif
@@ -34221,7 +34131,7 @@ exports.dataToBitMap = function (data, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":88,"buffer":147}],79:[function(require,module,exports){
+},{"./interlace":88,"buffer":146}],79:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -34383,7 +34293,7 @@ module.exports = function (dataIn, width, height, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":81,"buffer":147}],80:[function(require,module,exports){
+},{"./constants":81,"buffer":146}],80:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -34576,7 +34486,7 @@ ChunkStream.prototype._process = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":179,"buffer":147,"stream":181,"util":202}],81:[function(require,module,exports){
+},{"_process":178,"buffer":146,"stream":180,"util":201}],81:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -34827,7 +34737,7 @@ module.exports = function (pxData, width, height, options, bpp) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./paeth-predictor":92,"buffer":147}],84:[function(require,module,exports){
+},{"./paeth-predictor":92,"buffer":146}],84:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -34855,7 +34765,7 @@ let FilterAsync = (module.exports = function (bitmapInfo) {
 util.inherits(FilterAsync, ChunkStream);
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./chunkstream":80,"./filter-parse":86,"buffer":147,"util":202}],85:[function(require,module,exports){
+},{"./chunkstream":80,"./filter-parse":86,"buffer":146,"util":201}],85:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -34880,7 +34790,7 @@ exports.process = function (inBuffer, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./filter-parse":86,"./sync-reader":99,"buffer":147}],86:[function(require,module,exports){
+},{"./filter-parse":86,"./sync-reader":99,"buffer":146}],86:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35061,7 +34971,7 @@ Filter.prototype._reverseFilterLine = function (rawData) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":88,"./paeth-predictor":92,"buffer":147}],87:[function(require,module,exports){
+},{"./interlace":88,"./paeth-predictor":92,"buffer":146}],87:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35158,7 +35068,7 @@ module.exports = function (indata, imageData) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":147}],88:[function(require,module,exports){
+},{"buffer":146}],88:[function(require,module,exports){
 "use strict";
 
 // Adam 7
@@ -35309,7 +35219,7 @@ PackerAsync.prototype.pack = function (data, width, height, gamma) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":81,"./packer":91,"buffer":147,"stream":181,"util":202}],90:[function(require,module,exports){
+},{"./constants":81,"./packer":91,"buffer":146,"stream":180,"util":201}],90:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35369,7 +35279,7 @@ module.exports = function (metaData, opt) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":81,"./packer":91,"buffer":147,"zlib":146}],91:[function(require,module,exports){
+},{"./constants":81,"./packer":91,"buffer":146,"zlib":145}],91:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35502,7 +35412,7 @@ Packer.prototype.packIEND = function () {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitpacker":79,"./constants":81,"./crc":82,"./filter-pack":83,"buffer":147,"zlib":146}],92:[function(require,module,exports){
+},{"./bitpacker":79,"./constants":81,"./crc":82,"./filter-pack":83,"buffer":146,"zlib":145}],92:[function(require,module,exports){
 "use strict";
 
 module.exports = function paethPredictor(left, above, upLeft) {
@@ -35687,7 +35597,7 @@ ParserAsync.prototype._complete = function (filteredData) {
   this.emit("parsed", normalisedBitmapData);
 };
 
-},{"./bitmapper":78,"./chunkstream":80,"./filter-parse-async":84,"./format-normaliser":87,"./parser":95,"util":202,"zlib":146}],94:[function(require,module,exports){
+},{"./bitmapper":78,"./chunkstream":80,"./filter-parse-async":84,"./format-normaliser":87,"./parser":95,"util":201,"zlib":145}],94:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35799,7 +35709,7 @@ module.exports = function (buffer, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitmapper":78,"./filter-parse-sync":85,"./format-normaliser":87,"./parser":95,"./sync-inflate":98,"./sync-reader":99,"buffer":147,"zlib":146}],95:[function(require,module,exports){
+},{"./bitmapper":78,"./filter-parse-sync":85,"./format-normaliser":87,"./parser":95,"./sync-inflate":98,"./sync-reader":99,"buffer":146,"zlib":145}],95:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36093,7 +36003,7 @@ Parser.prototype._parseIEND = function (data) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":81,"./crc":82,"buffer":147}],96:[function(require,module,exports){
+},{"./constants":81,"./crc":82,"buffer":146}],96:[function(require,module,exports){
 "use strict";
 
 let parse = require("./parser-sync");
@@ -36305,7 +36215,7 @@ PNG.prototype.adjustGamma = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./packer-async":89,"./parser-async":93,"./png-sync":96,"_process":179,"buffer":147,"stream":181,"util":202}],98:[function(require,module,exports){
+},{"./packer-async":89,"./parser-async":93,"./png-sync":96,"_process":178,"buffer":146,"stream":180,"util":201}],98:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -36477,7 +36387,7 @@ exports.createInflate = createInflate;
 exports.inflateSync = inflateSync;
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":179,"assert":138,"buffer":147,"util":202,"zlib":146}],99:[function(require,module,exports){
+},{"_process":178,"assert":137,"buffer":146,"util":201,"zlib":145}],99:[function(require,module,exports){
 "use strict";
 
 let SyncReader = (module.exports = function (buffer) {
@@ -36714,7 +36624,7 @@ SyncReader.prototype.process = function () {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":179}],101:[function(require,module,exports){
+},{"_process":178}],101:[function(require,module,exports){
 /*
 	Seventh
 
@@ -38395,7 +38305,7 @@ if ( process.browser ) {
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":179,"setimmediate":100,"timers":197}],105:[function(require,module,exports){
+},{"_process":178,"setimmediate":100,"timers":196}],105:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39001,7 +38911,7 @@ Promise.resolveSafeTimeout = function( timeout , value ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./seventh.js":108,"_process":179}],107:[function(require,module,exports){
+},{"./seventh.js":108,"_process":178}],107:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39660,7 +39570,7 @@ function arrayConcatSlice( intoArray , sourceArray , start = 0 , end = sourceArr
 
 
 // To solve dependency hell, we do not rely on terminal-kit anymore.
-module.exports = {
+const ansi = {
 	reset: '\x1b[0m' ,
 	bold: '\x1b[1m' ,
 	dim: '\x1b[2m' ,
@@ -39707,6 +39617,145 @@ module.exports = {
 	bgBrightMagenta: '\x1b[105m' ,
 	bgBrightCyan: '\x1b[106m' ,
 	bgBrightWhite: '\x1b[107m'
+} ;
+
+module.exports = ansi ;
+
+
+
+ansi.trueColor = ( r , g , b ) => {
+	if ( g === undefined && typeof r === 'string' ) {
+		let hex = r ;
+		if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }	// Strip the # if necessary
+		if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+		r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
+		g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
+		b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+	}
+
+	return '\x1b[38;2;' + r + ';' + g + ';' + b + 'm' ;
+} ;
+
+
+
+ansi.bgTrueColor = ( r , g , b ) => {
+	if ( g === undefined && typeof r === 'string' ) {
+		let hex = r ;
+		if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }	// Strip the # if necessary
+		if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+		r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
+		g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
+		b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+	}
+
+	return '\x1b[48;2;' + r + ';' + g + ';' + b + 'm' ;
+} ;
+
+
+
+const ANSI_CODES = {
+	'0': null ,
+
+	'1': { bold: true } ,
+	'2': { dim: true } ,
+	'22': { bold: false , dim: false } ,
+	'3': { italic: true } ,
+	'23': { italic: false } ,
+	'4': { underline: true } ,
+	'24': { underline: false } ,
+	'5': { blink: true } ,
+	'25': { blink: false } ,
+	'7': { inverse: true } ,
+	'27': { inverse: false } ,
+	'8': { hidden: true } ,
+	'28': { hidden: false } ,
+	'9': { strike: true } ,
+	'29': { strike: false } ,
+
+	'30': { color: 0 } ,
+	'31': { color: 1 } ,
+	'32': { color: 2 } ,
+	'33': { color: 3 } ,
+	'34': { color: 4 } ,
+	'35': { color: 5 } ,
+	'36': { color: 6 } ,
+	'37': { color: 7 } ,
+	//'39': { defaultColor: true } ,
+	'39': { color: 'default' } ,
+
+	'90': { color: 8 } ,
+	'91': { color: 9 } ,
+	'92': { color: 10 } ,
+	'93': { color: 11 } ,
+	'94': { color: 12 } ,
+	'95': { color: 13 } ,
+	'96': { color: 14 } ,
+	'97': { color: 15 } ,
+
+	'40': { bgColor: 0 } ,
+	'41': { bgColor: 1 } ,
+	'42': { bgColor: 2 } ,
+	'43': { bgColor: 3 } ,
+	'44': { bgColor: 4 } ,
+	'45': { bgColor: 5 } ,
+	'46': { bgColor: 6 } ,
+	'47': { bgColor: 7 } ,
+	//'49': { bgDefaultColor: true } ,
+	'49': { bgColor: 'default' } ,
+
+	'100': { bgColor: 8 } ,
+	'101': { bgColor: 9 } ,
+	'102': { bgColor: 10 } ,
+	'103': { bgColor: 11 } ,
+	'104': { bgColor: 12 } ,
+	'105': { bgColor: 13 } ,
+	'106': { bgColor: 14 } ,
+	'107': { bgColor: 15 }
+} ;
+
+
+
+// Parse ANSI codes, output is compatible with the markup parser
+ansi.parse = str => {
+	var ansiCodes , raw , part , style , output = [] ;
+
+	for ( [ , ansiCodes , raw ] of str.matchAll( /\x1b\[([0-9;]+)m|(.[^\x1b]*)/g ) ) {
+		if ( raw ) {
+			if ( output.length ) { output[ output.length - 1 ].text += raw ; }
+			else { output.push( { text: raw } ) ; }
+		}
+		else {
+			ansiCodes.split( ';' ).forEach( ansiCode => {
+				style = ANSI_CODES[ ansiCode ] ;
+				if ( style === undefined ) { return ; }
+
+				if ( ! output.length || output[ output.length - 1 ].text ) {
+					if ( ! style ) {
+						part = { text: '' } ;
+					}
+					else {
+						part = Object.assign( {} , part , style ) ;
+						part.text = '' ;
+					}
+
+					output.push( part ) ;
+				}
+				else {
+					// There is no text, no need to create a new part
+					if ( ! style ) {
+						// Replace the last part
+						output[ output.length - 1 ] = { text: '' } ;
+					}
+					else {
+						// update the last part
+						Object.assign( part , style ) ;
+					}
+				}
+			} ) ;
+		}
+	}
+
+	return output ;
 } ;
 
 
@@ -39979,7 +40028,10 @@ const StringNumber = require( './StringNumber.js' ) ;
 */
 
 exports.formatMethod = function( ... args ) {
-	var str = args[ 0 ] ;
+	var arg ,
+		str = args[ 0 ] ,
+		autoIndex = 1 ,
+		length = args.length ;
 
 	if ( typeof str !== 'string' ) {
 		if ( ! str ) { str = '' ; }
@@ -39987,72 +40039,32 @@ exports.formatMethod = function( ... args ) {
 		else { str = '' ; }
 	}
 
-	var arg , autoIndex = 1 , length = args.length ,
-		hasMarkup = false , shift = null , markupStack = [] ;
+	var runtime = {
+		hasMarkup: false ,
+		shift: null ,
+		markupStack: []
+	} ;
 
 	if ( this.markupReset && this.startingMarkupReset ) {
-		str = ( typeof this.markupReset === 'function' ? this.markupReset( markupStack ) : this.markupReset ) + str ;
+		str = ( typeof this.markupReset === 'function' ? this.markupReset( runtime.markupStack ) : this.markupReset ) + str ;
 	}
 
 	//console.log( 'format args:' , arguments ) ;
 
 	// /!\ each changes here should be reported on string.format.count() and string.format.hasFormatting() too /!\
-	//str = str.replace( /\^(.?)|%(?:([+-]?)([0-9]*)(?:\/([^\/]*)\/)?([a-zA-Z%])|\[([a-zA-Z0-9_]+)(?::([^\]]*))?\])/g ,
-	str = str.replace( /\^(.?)|(%%)|%([+-]?)([0-9]*)(?:\[([^\]]*)\])?([a-zA-Z])/g ,
-		( match , markup , doublePercent , relative , index , modeArg , mode ) => {
-
+	// Note: the closing bracket is optional to prevent ReDoS
+	str = str.replace( /\^\[([^\]]*)]?|\^(.)|(%%)|%([+-]?)([0-9]*)(?:\[([^\]]*)\])?([a-zA-Z])/g ,
+		( match , complexMarkup , markup , doublePercent , relative , index , modeArg , mode ) => {
 			var replacement , i , tmp , fn , fnArgString , argMatches , argList = [] ;
 
 			//console.log( 'replaceArgs:' , arguments ) ;
 			if ( doublePercent ) { return '%' ; }
 
+			if ( complexMarkup ) { markup = complexMarkup ; }
 			if ( markup ) {
 				if ( this.noMarkup ) { return '^' + markup ; }
-				if ( markup === '^' ) { return '^' ; }
-
-				if ( this.shiftMarkup && this.shiftMarkup[ markup ] ) {
-					shift = this.shiftMarkup[ markup ] ;
-					return '' ;
-				}
-
-				if ( shift ) {
-					if ( ! this.shiftedMarkup || ! this.shiftedMarkup[ shift ] || ! this.shiftedMarkup[ shift ][ markup ] ) {
-						return '' ;
-					}
-
-					hasMarkup = true ;
-
-					if ( typeof this.shiftedMarkup[ shift ][ markup ] === 'function' ) {
-						replacement = this.shiftedMarkup[ shift ][ markup ]( markupStack ) ;
-						// method should manage markup stack themselves
-					}
-					else {
-						replacement = this.shiftedMarkup[ shift ][ markup ] ;
-						markupStack.push( replacement ) ;
-					}
-
-					shift = null ;
-				}
-				else {
-					if ( ! this.markup || ! this.markup[ markup ] ) {
-						return '' ;
-					}
-
-					hasMarkup = true ;
-
-					if ( typeof this.markup[ markup ] === 'function' ) {
-						replacement = this.markup[ markup ]( markupStack ) ;
-						// method should manage markup stack themselves
-					}
-					else {
-						replacement = this.markup[ markup ] ;
-						markupStack.push( replacement ) ;
-					}
-				}
-
-				return replacement ;
+				return markupReplace.call( this , runtime , match , markup ) ;
 			}
-
 
 			if ( index ) {
 				index = parseInt( index , 10 ) ;
@@ -40122,8 +40134,8 @@ exports.formatMethod = function( ... args ) {
 		}
 	) ;
 
-	if ( hasMarkup && this.markupReset && this.endingMarkupReset ) {
-		str += typeof this.markupReset === 'function' ? this.markupReset( markupStack ) : this.markupReset ;
+	if ( runtime.hasMarkup && this.markupReset && this.endingMarkupReset ) {
+		str += typeof this.markupReset === 'function' ? this.markupReset( runtime.markupStack ) : this.markupReset ;
 	}
 
 	if ( this.extraArguments ) {
@@ -40141,9 +40153,306 @@ exports.formatMethod = function( ... args ) {
 
 
 
-// --- MODES ---
+exports.markupMethod = function( str ) {
+	if ( typeof str !== 'string' ) {
+		if ( ! str ) { str = '' ; }
+		else if ( typeof str.toString === 'function' ) { str = str.toString() ; }
+		else { str = '' ; }
+	}
+
+	var runtime = {
+		hasMarkup: false ,
+		shift: null ,
+		markupStack: []
+	} ;
+
+	if ( this.parse ) {
+		let markupObjects , markupObject , match , complexMarkup , markup , raw , lastChunk ,
+			output = [] ;
+
+		// Note: the closing bracket is optional to prevent ReDoS
+		for ( [ match , complexMarkup , markup , raw ] of str.matchAll( /\^\[([^\]]*)]?|\^(.)|([^^]+)/g ) ) {
+			if ( raw ) {
+				if ( output.length ) { output[ output.length - 1 ].text += raw ; }
+				else { output.push( { text: raw } ) ; }
+				continue ;
+			}
+
+			if ( complexMarkup ) { markup = complexMarkup ; }
+			markupObjects = markupReplace.call( this , runtime , match , markup ) ;
+
+			if ( ! Array.isArray( markupObjects ) ) { markupObjects = [ markupObjects ] ; }
+
+			for ( markupObject of markupObjects ) {
+				lastChunk = output.length ? output[ output.length - 1 ] : null ;
+				if ( typeof markupObject === 'string' ) {
+					// This markup is actually a text to add to the last chunk (e.g. "^^" markup is converted to a single "^")
+					if ( lastChunk ) { lastChunk.text += markupObject ; }
+					else { output.push( { text: markupObject } ) ; }
+				}
+				else if ( ! markupObject ) {
+					// Null is for a markup's style reset
+					if ( lastChunk && lastChunk.text.length && Object.keys( lastChunk ).length > 1 ) {
+						// If there was style and text on the last chunk, then this means that the new markup starts a new chunk
+						// markupObject can be null for markup reset function, but we have to create a new chunk
+						output.push( { text: '' } ) ;
+					}
+				}
+				else {
+					if ( lastChunk && lastChunk.text.length ) {
+						// If there was text on the last chunk, then this means that the new markup starts a new chunk
+						output.push( Object.assign( { text: '' } , ... runtime.markupStack ) ) ;
+					}
+					else {
+						// There wasn't any text added, so append the current markup style to the current chunk
+						if ( lastChunk ) { Object.assign( lastChunk , markupObject ) ; }
+						else { output.push( Object.assign( { text: '' } , markupObject ) ) ; }
+					}
+				}
+			}
+		}
+
+		return output ;
+	}
+
+	if ( this.markupReset && this.startingMarkupReset ) {
+		str = ( typeof this.markupReset === 'function' ? this.markupReset( runtime.markupStack ) : this.markupReset ) + str ;
+	}
+
+	str = str.replace( /\^\[([^\]]*)]?|\^(.)/g , ( match , complexMarkup , markup ) => markupReplace.call( this , runtime , match , complexMarkup || markup ) ) ;
+
+	if ( runtime.hasMarkup && this.markupReset && this.endingMarkupReset ) {
+		str += typeof this.markupReset === 'function' ? this.markupReset( runtime.markupStack ) : this.markupReset ;
+	}
+
+	return str ;
+} ;
+
+
+
+// Used by both formatMethod and markupMethod
+function markupReplace( runtime , match , markup ) {
+	var markupTarget , key , value , replacement , colonIndex ;
+
+	if ( markup === '^' ) { return '^' ; }
+
+	if ( this.shiftMarkup && this.shiftMarkup[ markup ] ) {
+		runtime.shift = this.shiftMarkup[ markup ] ;
+		return '' ;
+	}
+
+	if ( markup.length > 1 && this.dataMarkup && ( colonIndex = markup.indexOf( ':' ) ) !== -1 ) {
+		key = markup.slice( 0 , colonIndex ) ;
+		markupTarget = this.dataMarkup[ key ] ;
+
+		if ( markupTarget === undefined ) {
+			if ( this.markupCatchAll === undefined ) { return '' ; }
+			markupTarget = this.markupCatchAll ;
+		}
+
+		runtime.hasMarkup = true ;
+		value = markup.slice( colonIndex + 1 ) ;
+
+		if ( typeof markupTarget === 'function' ) {
+			replacement = markupTarget( runtime.markupStack , key , value ) ;
+			// method should manage markup stack themselves
+		}
+		else {
+			replacement = { [ markupTarget ]: value } ;
+			stackMarkup( runtime , replacement ) ;
+		}
+
+		return replacement ;
+	}
+
+	if ( runtime.shift ) {
+		markupTarget = this.shiftedMarkup?.[ runtime.shift ]?.[ markup ] ;
+		runtime.shift = null ;
+	}
+	else {
+		markupTarget = this.markup?.[ markup ] ;
+	}
+
+	if ( markupTarget === undefined ) {
+		if ( this.markupCatchAll === undefined ) { return '' ; }
+		markupTarget = this.markupCatchAll ;
+	}
+
+	runtime.hasMarkup = true ;
+
+	if ( typeof markupTarget === 'function' ) {
+		replacement = markupTarget( runtime.markupStack , markup ) ;
+		// method should manage markup stack themselves
+	}
+	else {
+		replacement = markupTarget ;
+		stackMarkup( runtime , replacement ) ;
+	}
+
+	return replacement ;
+}
+
+// internal method for markupReplace()
+function stackMarkup( runtime , replacement ) {
+	if ( Array.isArray( replacement ) ) {
+		for ( let item of replacement ) {
+			if ( item === null ) { runtime.markupStack.length = 0 ; }
+			else { runtime.markupStack.push( item ) ; }
+		}
+	}
+	else {
+		if ( replacement === null ) { runtime.markupStack.length = 0 ; }
+		else { runtime.markupStack.push( replacement ) ; }
+	}
+}
+
+
+
+const DEFAULT_FORMATTER = {
+	argumentSanitizer: str => escape.control( str , true ) ,
+	extraArguments: true ,
+	color: false ,
+	noMarkup: false ,
+	endingMarkupReset: true ,
+	startingMarkupReset: false ,
+	markupReset: ansi.reset ,
+	shiftMarkup: {
+		'#': 'background'
+	} ,
+	markup: {
+		":": ansi.reset ,
+		" ": ansi.reset + " " ,
+
+		"-": ansi.dim ,
+		"+": ansi.bold ,
+		"_": ansi.underline ,
+		"/": ansi.italic ,
+		"!": ansi.inverse ,
+
+		"b": ansi.blue ,
+		"B": ansi.brightBlue ,
+		"c": ansi.cyan ,
+		"C": ansi.brightCyan ,
+		"g": ansi.green ,
+		"G": ansi.brightGreen ,
+		"k": ansi.black ,
+		"K": ansi.brightBlack ,
+		"m": ansi.magenta ,
+		"M": ansi.brightMagenta ,
+		"r": ansi.red ,
+		"R": ansi.brightRed ,
+		"w": ansi.white ,
+		"W": ansi.brightWhite ,
+		"y": ansi.yellow ,
+		"Y": ansi.brightYellow
+	} ,
+	shiftedMarkup: {
+		background: {
+			":": ansi.reset ,
+			" ": ansi.reset + " " ,
+
+			"b": ansi.bgBlue ,
+			"B": ansi.bgBrightBlue ,
+			"c": ansi.bgCyan ,
+			"C": ansi.bgBrightCyan ,
+			"g": ansi.bgGreen ,
+			"G": ansi.bgBrightGreen ,
+			"k": ansi.bgBlack ,
+			"K": ansi.bgBrightBlack ,
+			"m": ansi.bgMagenta ,
+			"M": ansi.bgBrightMagenta ,
+			"r": ansi.bgRed ,
+			"R": ansi.bgBrightRed ,
+			"w": ansi.bgWhite ,
+			"W": ansi.bgBrightWhite ,
+			"y": ansi.bgYellow ,
+			"Y": ansi.bgBrightYellow
+		}
+	} ,
+	dataMarkup: {
+		fg: ( markupStack , key , value ) => {
+			var str = ansi.trueColor( value ) ;
+			markupStack.push( str ) ;
+			return str ;
+		} ,
+		bg: ( markupStack , key , value ) => {
+			var str = ansi.bgTrueColor( value ) ;
+			markupStack.push( str ) ;
+			return str ;
+		}
+	} ,
+	markupCatchAll: ( markupStack , key , value ) => {
+		var str = '' ;
+
+		if ( value === undefined ) {
+			if ( key[ 0 ] === '#' ) {
+				str = ansi.trueColor( key ) ;
+			}
+		}
+
+		markupStack.push( str ) ;
+		return str ;
+	}
+} ;
+
+exports.createFormatter = ( options ) => exports.formatMethod.bind( Object.assign( {} , DEFAULT_FORMATTER , options ) ) ;
+exports.format = exports.formatMethod.bind( DEFAULT_FORMATTER ) ;
+exports.format.default = DEFAULT_FORMATTER ;
+
+exports.createMarkup = ( options ) => exports.markupMethod.bind( Object.assign( {} , DEFAULT_FORMATTER , options ) ) ;
+exports.markup = exports.markupMethod.bind( DEFAULT_FORMATTER ) ;
+
+
+
+// Count the number of parameters needed for this string
+exports.format.count = function( str , noMarkup = false ) {
+	var markup , index , relative , autoIndex = 1 , maxIndex = 0 ;
+
+	if ( typeof str !== 'string' ) { return 0 ; }
+
+	// This regex differs slightly from the main regex: we do not count '%%' and %F is excluded
+	// Note: the closing bracket is optional to prevent ReDoS
+	var regexp = noMarkup ?
+		/%([+-]?)([0-9]*)(?:\[[^\]]*\])?[a-zA-EG-Z]/g :
+		/%([+-]?)([0-9]*)(?:\[[^\]]*\])?[a-zA-EG-Z]|(\^\[[^\]]*]?|\^.)/g ;
+
+	for ( [ , relative , index , markup ] of str.matchAll( regexp ) ) {
+		if ( markup ) { continue ; }
+
+		if ( index ) {
+			index = parseInt( index , 10 ) ;
+
+			if ( relative ) {
+				if ( relative === '+' ) { index = autoIndex + index ; }
+				else if ( relative === '-' ) { index = autoIndex - index ; }
+			}
+		}
+		else {
+			index = autoIndex ;
+		}
+
+		autoIndex ++ ;
+
+		if ( maxIndex < index ) { maxIndex = index ; }
+	}
+
+	return maxIndex ;
+} ;
+
+
+
+// Tell if this string contains formatter chars
+exports.format.hasFormatting = function( str ) {
+	if ( str.search( /\^(.?)|(%%)|%([+-]?)([0-9]*)(?:\[([^\]]*)\])?([a-zA-Z])/ ) !== -1 ) { return true ; }
+	return false ;
+} ;
+
+
+
+// --- Format MODES ---
 
 const modes = {} ;
+exports.format.modes = modes ;	// <-- expose modes, used by Babel-Tower for String Kit interop'
 
 
 
@@ -40562,201 +40871,6 @@ modes.D.noSanitize = true ;
 
 
 
-var defaultFormatter = {
-	argumentSanitizer: str => escape.control( str , true ) ,
-	extraArguments: true ,
-	color: false ,
-	noMarkup: false ,
-	endingMarkupReset: true ,
-	startingMarkupReset: false ,
-	markupReset: ansi.reset ,
-	shiftMarkup: {
-		'#': 'background'
-	} ,
-	markup: {
-		":": ansi.reset ,
-		" ": ansi.reset + " " ,
-
-		"-": ansi.dim ,
-		"+": ansi.bold ,
-		"_": ansi.underline ,
-		"/": ansi.italic ,
-		"!": ansi.inverse ,
-
-		"b": ansi.blue ,
-		"B": ansi.brightBlue ,
-		"c": ansi.cyan ,
-		"C": ansi.brightCyan ,
-		"g": ansi.green ,
-		"G": ansi.brightGreen ,
-		"k": ansi.black ,
-		"K": ansi.brightBlack ,
-		"m": ansi.magenta ,
-		"M": ansi.brightMagenta ,
-		"r": ansi.red ,
-		"R": ansi.brightRed ,
-		"w": ansi.white ,
-		"W": ansi.brightWhite ,
-		"y": ansi.yellow ,
-		"Y": ansi.brightYellow
-	} ,
-	shiftedMarkup: {
-		background: {
-			":": ansi.reset ,
-			" ": ansi.reset + " " ,
-
-			"b": ansi.bgBlue ,
-			"B": ansi.bgBrightBlue ,
-			"c": ansi.bgCyan ,
-			"C": ansi.bgBrightCyan ,
-			"g": ansi.bgGreen ,
-			"G": ansi.bgBrightGreen ,
-			"k": ansi.bgBlack ,
-			"K": ansi.bgBrightBlack ,
-			"m": ansi.bgMagenta ,
-			"M": ansi.bgBrightMagenta ,
-			"r": ansi.bgRed ,
-			"R": ansi.bgBrightRed ,
-			"w": ansi.bgWhite ,
-			"W": ansi.bgBrightWhite ,
-			"y": ansi.bgYellow ,
-			"Y": ansi.bgBrightYellow
-		}
-	}
-} ;
-
-exports.createFormatter = ( options ) => exports.formatMethod.bind( Object.assign( {} , defaultFormatter , options ) ) ;
-exports.format = exports.formatMethod.bind( defaultFormatter ) ;
-exports.format.default = defaultFormatter ;
-exports.format.modes = modes ;	// <-- expose modes, used by Babel-Tower for String Kit interop'
-
-
-
-// /!\ Should upgrade that with Terminal-Kit Markup parser /!\
-// It supports complex markup, see: Terminal-Kit/lib/misc.js misc.parseMarkup().
-
-exports.markupMethod = function( str ) {
-	if ( typeof str !== 'string' ) {
-		if ( ! str ) { str = '' ; }
-		else if ( typeof str.toString === 'function' ) { str = str.toString() ; }
-		else { str = '' ; }
-	}
-
-	var hasMarkup = false , shift = null , markupStack = [] ;
-
-	if ( this.markupReset && this.startingMarkupReset ) {
-		str = ( typeof this.markupReset === 'function' ? this.markupReset( markupStack ) : this.markupReset ) + str ;
-	}
-
-	//console.log( 'format args:' , arguments ) ;
-
-	str = str.replace( /\^(.?)/g , ( match , markup ) => {
-		var replacement ;
-
-		if ( markup === '^' ) { return '^' ; }
-
-		if ( this.shiftMarkup && this.shiftMarkup[ markup ] ) {
-			shift = this.shiftMarkup[ markup ] ;
-			return '' ;
-		}
-
-		if ( shift ) {
-			if ( ! this.shiftedMarkup || ! this.shiftedMarkup[ shift ] || ! this.shiftedMarkup[ shift ][ markup ] ) {
-				return '' ;
-			}
-
-			hasMarkup = true ;
-
-			if ( typeof this.shiftedMarkup[ shift ][ markup ] === 'function' ) {
-				replacement = this.shiftedMarkup[ shift ][ markup ]( markupStack ) ;
-				// method should manage markup stack themselves
-			}
-			else {
-				replacement = this.shiftedMarkup[ shift ][ markup ] ;
-				markupStack.push( replacement ) ;
-			}
-
-			shift = null ;
-		}
-		else {
-			if ( ! this.markup || ! this.markup[ markup ] ) {
-				return '' ;
-			}
-
-			hasMarkup = true ;
-
-			if ( typeof this.markup[ markup ] === 'function' ) {
-				replacement = this.markup[ markup ]( markupStack ) ;
-				// method should manage markup stack themselves
-			}
-			else {
-				replacement = this.markup[ markup ] ;
-				markupStack.push( replacement ) ;
-			}
-		}
-
-		return replacement ;
-	} ) ;
-
-	if ( hasMarkup && this.markupReset && this.endingMarkupReset ) {
-		str += typeof this.markupReset === 'function' ? this.markupReset( markupStack ) : this.markupReset ;
-	}
-
-	return str ;
-} ;
-
-
-
-exports.createMarkup = ( options ) => exports.markupMethod.bind( Object.assign( {} , defaultFormatter , options ) ) ;
-exports.markup = exports.markupMethod.bind( defaultFormatter ) ;
-
-
-
-// Count the number of parameters needed for this string
-exports.format.count = function( str ) {
-	var match , index , relative , autoIndex = 1 , maxIndex = 0 ;
-
-	if ( typeof str !== 'string' ) { return 0 ; }
-
-	// This regex differs slightly from the main regex: we do not count '%%' and %F is excluded
-	var regexp = /%([+-]?)([0-9]*)(?:\[([^\]]*)\])?([a-zA-EG-Z])/g ;
-
-
-	while ( ( match = regexp.exec( str ) ) !== null ) {
-		//console.log( match ) ;
-		relative = match[ 1 ] ;
-		index = match[ 2 ] ;
-
-		if ( index ) {
-			index = parseInt( index , 10 ) ;
-
-			if ( relative ) {
-				if ( relative === '+' ) { index = autoIndex + index ; }
-				else if ( relative === '-' ) { index = autoIndex - index ; }
-			}
-		}
-		else {
-			index = autoIndex ;
-		}
-
-		autoIndex ++ ;
-
-		if ( maxIndex < index ) { maxIndex = index ; }
-	}
-
-	return maxIndex ;
-} ;
-
-
-
-// Tell if this string contains formatter chars
-exports.format.hasFormatting = function( str ) {
-	if ( str.search( /\^(.?)|(%%)|%([+-]?)([0-9]*)(?:\[([^\]]*)\])?([a-zA-Z])/ ) !== -1 ) { return true ; }
-	return false ;
-} ;
-
-
-
 // ModeArg formats
 
 // The format for commonModeArg
@@ -40946,7 +41060,7 @@ function round( v , step ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./StringNumber.js":110,"./ansi.js":111,"./escape.js":113,"./inspect.js":116,"./naturalSort.js":120,"./unicode.js":125,"buffer":147}],115:[function(require,module,exports){
+},{"./StringNumber.js":110,"./ansi.js":111,"./escape.js":113,"./inspect.js":116,"./naturalSort.js":120,"./unicode.js":124,"buffer":146}],115:[function(require,module,exports){
 /*
 	String Kit
 
@@ -41981,7 +42095,7 @@ inspectStyle.html = Object.assign( {} , inspectStyle.none , {
 
 
 }).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")},require('_process'))
-},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":162,"./ansi.js":111,"./escape.js":113,"_process":179}],117:[function(require,module,exports){
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":161,"./ansi.js":111,"./escape.js":113,"_process":178}],117:[function(require,module,exports){
 module.exports={"߀":"0","́":""," ":" ","Ⓐ":"A","Ａ":"A","À":"A","Á":"A","Â":"A","Ầ":"A","Ấ":"A","Ẫ":"A","Ẩ":"A","Ã":"A","Ā":"A","Ă":"A","Ằ":"A","Ắ":"A","Ẵ":"A","Ẳ":"A","Ȧ":"A","Ǡ":"A","Ä":"A","Ǟ":"A","Ả":"A","Å":"A","Ǻ":"A","Ǎ":"A","Ȁ":"A","Ȃ":"A","Ạ":"A","Ậ":"A","Ặ":"A","Ḁ":"A","Ą":"A","Ⱥ":"A","Ɐ":"A","Ꜳ":"AA","Æ":"AE","Ǽ":"AE","Ǣ":"AE","Ꜵ":"AO","Ꜷ":"AU","Ꜹ":"AV","Ꜻ":"AV","Ꜽ":"AY","Ⓑ":"B","Ｂ":"B","Ḃ":"B","Ḅ":"B","Ḇ":"B","Ƀ":"B","Ɓ":"B","ｃ":"C","Ⓒ":"C","Ｃ":"C","Ꜿ":"C","Ḉ":"C","Ç":"C","Ⓓ":"D","Ｄ":"D","Ḋ":"D","Ď":"D","Ḍ":"D","Ḑ":"D","Ḓ":"D","Ḏ":"D","Đ":"D","Ɗ":"D","Ɖ":"D","ᴅ":"D","Ꝺ":"D","Ð":"Dh","Ǳ":"DZ","Ǆ":"DZ","ǲ":"Dz","ǅ":"Dz","ɛ":"E","Ⓔ":"E","Ｅ":"E","È":"E","É":"E","Ê":"E","Ề":"E","Ế":"E","Ễ":"E","Ể":"E","Ẽ":"E","Ē":"E","Ḕ":"E","Ḗ":"E","Ĕ":"E","Ė":"E","Ë":"E","Ẻ":"E","Ě":"E","Ȅ":"E","Ȇ":"E","Ẹ":"E","Ệ":"E","Ȩ":"E","Ḝ":"E","Ę":"E","Ḙ":"E","Ḛ":"E","Ɛ":"E","Ǝ":"E","ᴇ":"E","ꝼ":"F","Ⓕ":"F","Ｆ":"F","Ḟ":"F","Ƒ":"F","Ꝼ":"F","Ⓖ":"G","Ｇ":"G","Ǵ":"G","Ĝ":"G","Ḡ":"G","Ğ":"G","Ġ":"G","Ǧ":"G","Ģ":"G","Ǥ":"G","Ɠ":"G","Ꞡ":"G","Ᵹ":"G","Ꝿ":"G","ɢ":"G","Ⓗ":"H","Ｈ":"H","Ĥ":"H","Ḣ":"H","Ḧ":"H","Ȟ":"H","Ḥ":"H","Ḩ":"H","Ḫ":"H","Ħ":"H","Ⱨ":"H","Ⱶ":"H","Ɥ":"H","Ⓘ":"I","Ｉ":"I","Ì":"I","Í":"I","Î":"I","Ĩ":"I","Ī":"I","Ĭ":"I","İ":"I","Ï":"I","Ḯ":"I","Ỉ":"I","Ǐ":"I","Ȉ":"I","Ȋ":"I","Ị":"I","Į":"I","Ḭ":"I","Ɨ":"I","Ⓙ":"J","Ｊ":"J","Ĵ":"J","Ɉ":"J","ȷ":"J","Ⓚ":"K","Ｋ":"K","Ḱ":"K","Ǩ":"K","Ḳ":"K","Ķ":"K","Ḵ":"K","Ƙ":"K","Ⱪ":"K","Ꝁ":"K","Ꝃ":"K","Ꝅ":"K","Ꞣ":"K","Ⓛ":"L","Ｌ":"L","Ŀ":"L","Ĺ":"L","Ľ":"L","Ḷ":"L","Ḹ":"L","Ļ":"L","Ḽ":"L","Ḻ":"L","Ł":"L","Ƚ":"L","Ɫ":"L","Ⱡ":"L","Ꝉ":"L","Ꝇ":"L","Ꞁ":"L","Ǉ":"LJ","ǈ":"Lj","Ⓜ":"M","Ｍ":"M","Ḿ":"M","Ṁ":"M","Ṃ":"M","Ɱ":"M","Ɯ":"M","ϻ":"M","Ꞥ":"N","Ƞ":"N","Ⓝ":"N","Ｎ":"N","Ǹ":"N","Ń":"N","Ñ":"N","Ṅ":"N","Ň":"N","Ṇ":"N","Ņ":"N","Ṋ":"N","Ṉ":"N","Ɲ":"N","Ꞑ":"N","ᴎ":"N","Ǌ":"NJ","ǋ":"Nj","Ⓞ":"O","Ｏ":"O","Ò":"O","Ó":"O","Ô":"O","Ồ":"O","Ố":"O","Ỗ":"O","Ổ":"O","Õ":"O","Ṍ":"O","Ȭ":"O","Ṏ":"O","Ō":"O","Ṑ":"O","Ṓ":"O","Ŏ":"O","Ȯ":"O","Ȱ":"O","Ö":"O","Ȫ":"O","Ỏ":"O","Ő":"O","Ǒ":"O","Ȍ":"O","Ȏ":"O","Ơ":"O","Ờ":"O","Ớ":"O","Ỡ":"O","Ở":"O","Ợ":"O","Ọ":"O","Ộ":"O","Ǫ":"O","Ǭ":"O","Ø":"O","Ǿ":"O","Ɔ":"O","Ɵ":"O","Ꝋ":"O","Ꝍ":"O","Œ":"OE","Ƣ":"OI","Ꝏ":"OO","Ȣ":"OU","Ⓟ":"P","Ｐ":"P","Ṕ":"P","Ṗ":"P","Ƥ":"P","Ᵽ":"P","Ꝑ":"P","Ꝓ":"P","Ꝕ":"P","Ⓠ":"Q","Ｑ":"Q","Ꝗ":"Q","Ꝙ":"Q","Ɋ":"Q","Ⓡ":"R","Ｒ":"R","Ŕ":"R","Ṙ":"R","Ř":"R","Ȑ":"R","Ȓ":"R","Ṛ":"R","Ṝ":"R","Ŗ":"R","Ṟ":"R","Ɍ":"R","Ɽ":"R","Ꝛ":"R","Ꞧ":"R","Ꞃ":"R","Ⓢ":"S","Ｓ":"S","ẞ":"S","Ś":"S","Ṥ":"S","Ŝ":"S","Ṡ":"S","Š":"S","Ṧ":"S","Ṣ":"S","Ṩ":"S","Ș":"S","Ş":"S","Ȿ":"S","Ꞩ":"S","Ꞅ":"S","Ⓣ":"T","Ｔ":"T","Ṫ":"T","Ť":"T","Ṭ":"T","Ț":"T","Ţ":"T","Ṱ":"T","Ṯ":"T","Ŧ":"T","Ƭ":"T","Ʈ":"T","Ⱦ":"T","Ꞇ":"T","Þ":"Th","Ꜩ":"TZ","Ⓤ":"U","Ｕ":"U","Ù":"U","Ú":"U","Û":"U","Ũ":"U","Ṹ":"U","Ū":"U","Ṻ":"U","Ŭ":"U","Ü":"U","Ǜ":"U","Ǘ":"U","Ǖ":"U","Ǚ":"U","Ủ":"U","Ů":"U","Ű":"U","Ǔ":"U","Ȕ":"U","Ȗ":"U","Ư":"U","Ừ":"U","Ứ":"U","Ữ":"U","Ử":"U","Ự":"U","Ụ":"U","Ṳ":"U","Ų":"U","Ṷ":"U","Ṵ":"U","Ʉ":"U","Ⓥ":"V","Ｖ":"V","Ṽ":"V","Ṿ":"V","Ʋ":"V","Ꝟ":"V","Ʌ":"V","Ꝡ":"VY","Ⓦ":"W","Ｗ":"W","Ẁ":"W","Ẃ":"W","Ŵ":"W","Ẇ":"W","Ẅ":"W","Ẉ":"W","Ⱳ":"W","Ⓧ":"X","Ｘ":"X","Ẋ":"X","Ẍ":"X","Ⓨ":"Y","Ｙ":"Y","Ỳ":"Y","Ý":"Y","Ŷ":"Y","Ỹ":"Y","Ȳ":"Y","Ẏ":"Y","Ÿ":"Y","Ỷ":"Y","Ỵ":"Y","Ƴ":"Y","Ɏ":"Y","Ỿ":"Y","Ⓩ":"Z","Ｚ":"Z","Ź":"Z","Ẑ":"Z","Ż":"Z","Ž":"Z","Ẓ":"Z","Ẕ":"Z","Ƶ":"Z","Ȥ":"Z","Ɀ":"Z","Ⱬ":"Z","Ꝣ":"Z","ⓐ":"a","ａ":"a","ẚ":"a","à":"a","á":"a","â":"a","ầ":"a","ấ":"a","ẫ":"a","ẩ":"a","ã":"a","ā":"a","ă":"a","ằ":"a","ắ":"a","ẵ":"a","ẳ":"a","ȧ":"a","ǡ":"a","ä":"a","ǟ":"a","ả":"a","å":"a","ǻ":"a","ǎ":"a","ȁ":"a","ȃ":"a","ạ":"a","ậ":"a","ặ":"a","ḁ":"a","ą":"a","ⱥ":"a","ɐ":"a","ɑ":"a","ꜳ":"aa","æ":"ae","ǽ":"ae","ǣ":"ae","ꜵ":"ao","ꜷ":"au","ꜹ":"av","ꜻ":"av","ꜽ":"ay","ⓑ":"b","ｂ":"b","ḃ":"b","ḅ":"b","ḇ":"b","ƀ":"b","ƃ":"b","ɓ":"b","Ƃ":"b","ⓒ":"c","ć":"c","ĉ":"c","ċ":"c","č":"c","ç":"c","ḉ":"c","ƈ":"c","ȼ":"c","ꜿ":"c","ↄ":"c","C":"c","Ć":"c","Ĉ":"c","Ċ":"c","Č":"c","Ƈ":"c","Ȼ":"c","ⓓ":"d","ｄ":"d","ḋ":"d","ď":"d","ḍ":"d","ḑ":"d","ḓ":"d","ḏ":"d","đ":"d","ƌ":"d","ɖ":"d","ɗ":"d","Ƌ":"d","Ꮷ":"d","ԁ":"d","Ɦ":"d","ð":"dh","ǳ":"dz","ǆ":"dz","ⓔ":"e","ｅ":"e","è":"e","é":"e","ê":"e","ề":"e","ế":"e","ễ":"e","ể":"e","ẽ":"e","ē":"e","ḕ":"e","ḗ":"e","ĕ":"e","ė":"e","ë":"e","ẻ":"e","ě":"e","ȅ":"e","ȇ":"e","ẹ":"e","ệ":"e","ȩ":"e","ḝ":"e","ę":"e","ḙ":"e","ḛ":"e","ɇ":"e","ǝ":"e","ⓕ":"f","ｆ":"f","ḟ":"f","ƒ":"f","ﬀ":"ff","ﬁ":"fi","ﬂ":"fl","ﬃ":"ffi","ﬄ":"ffl","ⓖ":"g","ｇ":"g","ǵ":"g","ĝ":"g","ḡ":"g","ğ":"g","ġ":"g","ǧ":"g","ģ":"g","ǥ":"g","ɠ":"g","ꞡ":"g","ꝿ":"g","ᵹ":"g","ⓗ":"h","ｈ":"h","ĥ":"h","ḣ":"h","ḧ":"h","ȟ":"h","ḥ":"h","ḩ":"h","ḫ":"h","ẖ":"h","ħ":"h","ⱨ":"h","ⱶ":"h","ɥ":"h","ƕ":"hv","ⓘ":"i","ｉ":"i","ì":"i","í":"i","î":"i","ĩ":"i","ī":"i","ĭ":"i","ï":"i","ḯ":"i","ỉ":"i","ǐ":"i","ȉ":"i","ȋ":"i","ị":"i","į":"i","ḭ":"i","ɨ":"i","ı":"i","ⓙ":"j","ｊ":"j","ĵ":"j","ǰ":"j","ɉ":"j","ⓚ":"k","ｋ":"k","ḱ":"k","ǩ":"k","ḳ":"k","ķ":"k","ḵ":"k","ƙ":"k","ⱪ":"k","ꝁ":"k","ꝃ":"k","ꝅ":"k","ꞣ":"k","ⓛ":"l","ｌ":"l","ŀ":"l","ĺ":"l","ľ":"l","ḷ":"l","ḹ":"l","ļ":"l","ḽ":"l","ḻ":"l","ſ":"l","ł":"l","ƚ":"l","ɫ":"l","ⱡ":"l","ꝉ":"l","ꞁ":"l","ꝇ":"l","ɭ":"l","ǉ":"lj","ⓜ":"m","ｍ":"m","ḿ":"m","ṁ":"m","ṃ":"m","ɱ":"m","ɯ":"m","ⓝ":"n","ｎ":"n","ǹ":"n","ń":"n","ñ":"n","ṅ":"n","ň":"n","ṇ":"n","ņ":"n","ṋ":"n","ṉ":"n","ƞ":"n","ɲ":"n","ŉ":"n","ꞑ":"n","ꞥ":"n","ԉ":"n","ǌ":"nj","ⓞ":"o","ｏ":"o","ò":"o","ó":"o","ô":"o","ồ":"o","ố":"o","ỗ":"o","ổ":"o","õ":"o","ṍ":"o","ȭ":"o","ṏ":"o","ō":"o","ṑ":"o","ṓ":"o","ŏ":"o","ȯ":"o","ȱ":"o","ö":"o","ȫ":"o","ỏ":"o","ő":"o","ǒ":"o","ȍ":"o","ȏ":"o","ơ":"o","ờ":"o","ớ":"o","ỡ":"o","ở":"o","ợ":"o","ọ":"o","ộ":"o","ǫ":"o","ǭ":"o","ø":"o","ǿ":"o","ꝋ":"o","ꝍ":"o","ɵ":"o","ɔ":"o","ᴑ":"o","œ":"oe","ƣ":"oi","ꝏ":"oo","ȣ":"ou","ⓟ":"p","ｐ":"p","ṕ":"p","ṗ":"p","ƥ":"p","ᵽ":"p","ꝑ":"p","ꝓ":"p","ꝕ":"p","ρ":"p","ⓠ":"q","ｑ":"q","ɋ":"q","ꝗ":"q","ꝙ":"q","ⓡ":"r","ｒ":"r","ŕ":"r","ṙ":"r","ř":"r","ȑ":"r","ȓ":"r","ṛ":"r","ṝ":"r","ŗ":"r","ṟ":"r","ɍ":"r","ɽ":"r","ꝛ":"r","ꞧ":"r","ꞃ":"r","ⓢ":"s","ｓ":"s","ś":"s","ṥ":"s","ŝ":"s","ṡ":"s","š":"s","ṧ":"s","ṣ":"s","ṩ":"s","ș":"s","ş":"s","ȿ":"s","ꞩ":"s","ꞅ":"s","ẛ":"s","ʂ":"s","ß":"ss","ⓣ":"t","ｔ":"t","ṫ":"t","ẗ":"t","ť":"t","ṭ":"t","ț":"t","ţ":"t","ṱ":"t","ṯ":"t","ŧ":"t","ƭ":"t","ʈ":"t","ⱦ":"t","ꞇ":"t","þ":"th","ꜩ":"tz","ⓤ":"u","ｕ":"u","ù":"u","ú":"u","û":"u","ũ":"u","ṹ":"u","ū":"u","ṻ":"u","ŭ":"u","ü":"u","ǜ":"u","ǘ":"u","ǖ":"u","ǚ":"u","ủ":"u","ů":"u","ű":"u","ǔ":"u","ȕ":"u","ȗ":"u","ư":"u","ừ":"u","ứ":"u","ữ":"u","ử":"u","ự":"u","ụ":"u","ṳ":"u","ų":"u","ṷ":"u","ṵ":"u","ʉ":"u","ⓥ":"v","ｖ":"v","ṽ":"v","ṿ":"v","ʋ":"v","ꝟ":"v","ʌ":"v","ꝡ":"vy","ⓦ":"w","ｗ":"w","ẁ":"w","ẃ":"w","ŵ":"w","ẇ":"w","ẅ":"w","ẘ":"w","ẉ":"w","ⱳ":"w","ⓧ":"x","ｘ":"x","ẋ":"x","ẍ":"x","ⓨ":"y","ｙ":"y","ỳ":"y","ý":"y","ŷ":"y","ỹ":"y","ȳ":"y","ẏ":"y","ÿ":"y","ỷ":"y","ẙ":"y","ỵ":"y","ƴ":"y","ɏ":"y","ỿ":"y","ⓩ":"z","ｚ":"z","ź":"z","ẑ":"z","ż":"z","ž":"z","ẓ":"z","ẕ":"z","ƶ":"z","ȥ":"z","ɀ":"z","ⱬ":"z","ꝣ":"z"}
 },{}],118:[function(require,module,exports){
 /*
@@ -42260,88 +42374,6 @@ module.exports = naturalSort ;
 
 
 
-/* All polyfill borrowed from MDN: developer.mozilla.org */
-
-
-
-var polyfill = {} ;
-module.exports = polyfill ;
-
-
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat
-polyfill.repeat = function( count ) {
-	if ( this === null ) {
-		throw new TypeError( 'can\'t convert ' + this + ' to object' ) ;
-	}
-	var str = '' + this ;
-	count = + count ;
-	if ( count !== count ) {
-		count = 0 ;
-	}
-	if ( count < 0 ) {
-		throw new RangeError( 'repeat count must be non-negative' ) ;
-	}
-	if ( count === Infinity ) {
-		throw new RangeError( 'repeat count must be less than infinity' ) ;
-	}
-	count = Math.floor( count ) ;
-	if ( str.length === 0 || count === 0 ) {
-		return '' ;
-	}
-	// Ensuring count is a 31-bit integer allows us to heavily optimize the
-	// main part. But anyway, most current (August 2014) browsers can't handle
-	// strings 1 << 28 chars or longer, so:
-	if ( str.length * count >= 1 << 28 ) {
-		throw new RangeError( 'repeat count must not overflow maximum string size' ) ;
-	}
-	var rpt = '' ;
-	for ( ;; ) {
-		if ( ( count & 1 ) === 1 ) {
-			rpt += str ;
-		}
-		count >>>= 1 ;
-		if ( count === 0 ) {
-			break ;
-		}
-		str += str ;
-	}
-	return rpt ;
-} ;
-
-
-
-},{}],122:[function(require,module,exports){
-/*
-	String Kit
-
-	Copyright (c) 2014 - 2021 Cédric Ronvel
-
-	The MIT License (MIT)
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in all
-	copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	SOFTWARE.
-*/
-
-"use strict" ;
-
-
-
 var escape = require( './escape.js' ) ;
 
 
@@ -42368,7 +42400,7 @@ exports.regexp.array2alternatives = function array2alternatives( array ) {
 
 
 
-},{"./escape.js":113}],123:[function(require,module,exports){
+},{"./escape.js":113}],122:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42404,15 +42436,16 @@ module.exports = stringKit ;
 
 
 
+/*
 // Tier 0: add polyfills to stringKit
-var fn_ ;
-var polyfill = require( './polyfill.js' ) ;
+const polyfill = require( './polyfill.js' ) ;
 
-for ( fn_ in polyfill ) {
-	stringKit[ fn_ ] = function( str , ... args ) {
-		return polyfill[ fn_ ].call( str , ... args ) ;
+for ( let fn_ in polyfill ) {
+	stringKit[ fn ] = function( str , ... args ) {
+		return polyfill[ fn ].call( str , ... args ) ;
 	} ;
 }
+//*/
 
 
 
@@ -42448,19 +42481,19 @@ Object.assign( stringKit ,
 
 
 
+/*
 // Install all polyfill into String.prototype
 stringKit.installPolyfills = function installPolyfills() {
-	var fn ;
-
-	for ( fn in polyfill ) {
+	for ( let fn in polyfill ) {
 		if ( ! String.prototype[ fn ] ) {
 			String.prototype[ fn ] = polyfill[ fn ] ;
 		}
 	}
 } ;
+//*/
 
 
-},{"./StringNumber.js":110,"./ansi.js":111,"./camel.js":112,"./escape.js":113,"./format.js":114,"./fuzzy.js":115,"./inspect.js":116,"./latinize.js":118,"./misc.js":119,"./naturalSort.js":120,"./polyfill.js":121,"./regexp.js":122,"./toTitleCase.js":124,"./unicode.js":125,"./wordwrap.js":126}],124:[function(require,module,exports){
+},{"./StringNumber.js":110,"./ansi.js":111,"./camel.js":112,"./escape.js":113,"./format.js":114,"./fuzzy.js":115,"./inspect.js":116,"./latinize.js":118,"./misc.js":119,"./naturalSort.js":120,"./regexp.js":121,"./toTitleCase.js":123,"./unicode.js":124,"./wordwrap.js":125}],123:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42514,7 +42547,7 @@ module.exports = function toTitleCase( str , options ) {
 
 
 
-},{}],125:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42551,6 +42584,9 @@ module.exports = function toTitleCase( str , options ) {
 
 	Since the punycode module is deprecated in Node.js v8.x, this is an adaptation of punycode.ucs2.x
 	as found on Aug 16th 2017 at: https://github.com/bestiejs/punycode.js/blob/master/punycode.js.
+
+	2021 note -- Modern Javascript is way more unicode friendly since many years, e.g. `Array.from( string )` and `for ( char of string )` are unicode aware.
+	Some methods here are now useless, but have been modernized to use the correct ES features.
 */
 
 
@@ -42563,159 +42599,45 @@ module.exports = unicode ;
 
 unicode.encode = array => String.fromCodePoint( ... array ) ;
 
+// Decode a string into an array of unicode codepoints.
+// The 2nd argument of Array.from() is a map function, it avoids creating intermediate array.
+unicode.decode = str => Array.from( str , c => c.codePointAt( 0 ) ) ;
 
+// DEPRECATED: This function is totally useless now, with modern JS.
+unicode.firstCodePoint = str => str.codePointAt( 0 ) ;
 
-// Decode a string into an array of unicode codepoints
-unicode.decode = str => {
-	var value , extra , counter = 0 , output = [] ,
-		length = str.length ;
+// Extract only the first char.
+unicode.firstChar = str => str.length ? String.fromCodePoint( str.codePointAt( 0 ) ) : undefined ;
 
-	while ( counter < length ) {
-		value = str.charCodeAt( counter ++ ) ;
-
-		if ( value >= 0xD800 && value <= 0xDBFF && counter < length ) {
-			// It's a high surrogate, and there is a next character.
-			extra = str.charCodeAt( counter ++ ) ;
-
-			if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-				output.push( ( ( value & 0x3FF ) << 10 ) + ( extra & 0x3FF ) + 0x10000 ) ;
-			}
-			else {
-				// It's an unmatched surrogate; only append this code unit, in case the
-				// next code unit is the high surrogate of a surrogate pair.
-				output.push( value ) ;
-				counter -- ;
-			}
-		}
-		else {
-			output.push( value ) ;
-		}
-	}
-
-	return output ;
-} ;
+// DEPRECATED: This function is totally useless now, with modern JS.
+unicode.toArray = str => Array.from( str ) ;
 
 
 
-// Decode only the first char
-// Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
-unicode.firstCodePoint = str => {
-	var extra ,
-		value = str.charCodeAt( 0 ) ;
-
-	if ( value >= 0xD800 && value <= 0xDBFF && str.length >= 2 ) {
-		// It's a high surrogate, and there is a next character.
-		extra = str.charCodeAt( 1 ) ;
-
-		if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-			return ( ( value & 0x3FF ) << 10 ) + ( extra & 0x3FF ) + 0x10000 ;
-		}
-	}
-
-	return value ;
-} ;
-
-
-
-// Extract only the first char
-// Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
-unicode.firstChar = str => {
-	var extra ,
-		value = str.charCodeAt( 0 ) ;
-
-	if ( value >= 0xD800 && value <= 0xDBFF && str.length >= 2 ) {
-		// It's a high surrogate, and there is a next character.
-		extra = str.charCodeAt( 1 ) ;
-
-		if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-			return str.slice( 0 , 2 ) ;
-		}
-	}
-
-	return str[ 0 ] ;
-} ;
-
-
-
-// Decode a string into an array of unicode characters
-// Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
-unicode.toArray = str => {
-	var value , extra , counter = 0 , output = [] ,
-		length = str.length ;
-
-	while ( counter < length ) {
-		value = str.charCodeAt( counter ++ ) ;
-
-		if ( value >= 0xD800 && value <= 0xDBFF && counter < length ) {
-			// It's a high surrogate, and there is a next character.
-			extra = str.charCodeAt( counter ++ ) ;
-
-			if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-				output.push( str.slice( counter - 2 , counter ) ) ;
-			}
-			else {
-				// It's an unmatched surrogate; only append this code unit, in case the
-				// next code unit is the high surrogate of a surrogate pair.
-				output.push( str[ counter - 2 ] ) ;
-				counter -- ;
-			}
-		}
-		else {
-			output.push( str[ counter - 1 ] ) ;
-		}
-	}
-
-	return output ;
-} ;
-
-
-
-// Decode a string into an array of unicode characters
+// Decode a string into an array of Cell (used by Terminal-kit).
 // Wide chars have an additionnal filler cell, so position is correct
-// Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
 unicode.toCells = ( Cell , str , tabWidth = 4 , linePosition = 0 , ... extraCellArgs ) => {
-	var value , extra , counter = 0 , output = [] ,
-		fillSize ,
-		length = str.length ;
+	var char , code , fillSize ,
+		output = [] ;
 
-	while ( counter < length ) {
-		value = str.charCodeAt( counter ++ ) ;
+	for ( char of str ) {
+		code = char.codePointAt( 0 ) ;
 
-		if ( value === 0x0a ) {	// New line
+		if ( code === 0x0a ) {	// New line
 			linePosition = 0 ;
 		}
-		else if ( value === 0x09 ) {	// Tab
+		else if ( code === 0x09 ) {	// Tab
 			// Depends upon the next tab-stop
 			fillSize = tabWidth - ( linePosition % tabWidth ) - 1 ;
 			output.push( new Cell( '\t' , ... extraCellArgs ) ) ;
 			linePosition += 1 + fillSize ;
 			while ( fillSize -- ) { output.push( new Cell( null , ... extraCellArgs ) ) ; }
 		}
-		else if ( value >= 0xD800 && value <= 0xDBFF && counter < length ) {
-			// It's a high surrogate, and there is a next character.
-			extra = str.charCodeAt( counter ++ ) ;
-
-			if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-				value = ( ( value & 0x3FF ) << 10 ) + ( extra & 0x3FF ) + 0x10000 ;
-				output.push(  new Cell( str.slice( counter - 2 , counter ) , ... extraCellArgs )  ) ;
-				linePosition ++ ;
-
-				if ( unicode.codePointWidth( value ) === 2 ) {
-					linePosition ++ ;
-					output.push( new Cell( null , ... extraCellArgs ) ) ;
-				}
-			}
-			else {
-				// It's an unmatched surrogate, remove it.
-				// Preserve current char in case the next code unit is the high surrogate of a surrogate pair.
-				counter -- ;
-			}
-		}
 		else {
-			output.push(  new Cell( str[ counter - 1 ] , ... extraCellArgs )  ) ;
+			output.push(  new Cell( char , ... extraCellArgs )  ) ;
 			linePosition ++ ;
 
-			if ( unicode.codePointWidth( value ) === 2 ) {
+			if ( unicode.codePointWidth( code ) === 2 ) {
 				output.push( new Cell( null , ... extraCellArgs ) ) ;
 				linePosition ++ ;
 			}
@@ -42735,36 +42657,21 @@ unicode.fromCells = ( cells ) => {
 
 // Get the length of an unicode string
 // Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
+// /!\ Use Array.from().length instead??? Not using it is potentially faster, but it needs benchmark to be sure.
 unicode.length = str => {
-	var value , extra , counter = 0 , uLength = 0 ,
-		length = str.length ;
-
-	while ( counter < length ) {
-		value = str.charCodeAt( counter ++ ) ;
-
-		if ( value >= 0xD800 && value <= 0xDBFF && counter < length ) {
-			// It's a high surrogate, and there is a next character.
-			extra = str.charCodeAt( counter ++ ) ;
-
-			if ( ( extra & 0xFC00 ) !== 0xDC00 ) {
-				// It's an unmatched surrogate; only append this code unit, in case the
-				// next code unit is the high surrogate of a surrogate pair.
-				counter -- ;
-			}
-		}
-
-		uLength ++ ;
-	}
-
-	return uLength ;
+	// for ... of is unicode-aware
+	var char , length = 0 ;
+	for ( char of str ) { length ++ ; }		/* eslint-disable-line no-unused-vars */
+	return length ;
 } ;
 
 
 
 // Return the width of a string in a terminal/monospace font
 unicode.width = str => {
-	var count = 0 ;
-	unicode.decode( str ).forEach( code => count += unicode.codePointWidth( code ) ) ;
+	// for ... of is unicode-aware
+	var char , count = 0 ;
+	for ( char of str ) { count += unicode.codePointWidth( char.codePointAt( 0 ) ) ; }
 	return count ;
 } ;
 
@@ -42792,40 +42699,23 @@ unicode.getLastTruncateWidth = () => lastTruncateWidth ;
 
 
 
-// Return a string that does not exceed the limit
-// Mostly an adaptation of .decode(), not factorized for performance's sake (used by Terminal-kit)
+// Return a string that does not exceed the limit.
 unicode.widthLimit =	// DEPRECATED
 unicode.truncateWidth = ( str , limit ) => {
-	var value , extra , charWidth , counter = 0 , lastCounter = 0 ,
-		length = str.length ;
+	var char , charWidth , position = 0 ;
 
+	// Module global:
 	lastTruncateWidth = 0 ;
 
-	while ( counter < length ) {
-		value = str.charCodeAt( counter ++ ) ;
-
-		if ( value >= 0xD800 && value <= 0xDBFF && counter < length ) {
-			// It's a high surrogate, and there is a next character.
-			extra = str.charCodeAt( counter ++ ) ;
-
-			if ( ( extra & 0xFC00 ) === 0xDC00 ) {	// Low surrogate.
-				value = ( ( value & 0x3FF ) << 10 ) + ( extra & 0x3FF ) + 0x10000 ;
-			}
-			else {
-				// It's an unmatched surrogate; only append this code unit, in case the
-				// next code unit is the high surrogate of a surrogate pair.
-				counter -- ;
-			}
-		}
-
-		charWidth = unicode.codePointWidth( value ) ;
+	for ( char of str ) {
+		charWidth = unicode.codePointWidth( char.codePointAt( 0 ) ) ;
 
 		if ( lastTruncateWidth + charWidth > limit ) {
-			return str.slice( 0 , lastCounter ) ;
+			return str.slice( 0 , position ) ;
 		}
 
 		lastTruncateWidth += charWidth ;
-		lastCounter = counter ;
+		position += char.length ;
 	}
 
 	// The string remains unchanged
@@ -42835,6 +42725,10 @@ unicode.truncateWidth = ( str , limit ) => {
 
 
 /*
+	** PROBABLY DEPRECATED **
+
+	Check if a UCS2 char is a surrogate pair.
+
 	Returns:
 		0: single char
 		1: leading surrogate
@@ -42852,20 +42746,11 @@ unicode.surrogatePair = char => {
 
 
 
-/*
-	Check if a character is a full-width char or not.
-*/
-unicode.isFullWidth = char => {
-	if ( char.length <= 1 ) { return unicode.isFullWidthCodePoint( char.codePointAt( 0 ) ) ; }
-	return unicode.isFullWidthCodePoint( unicode.firstCodePoint( char ) ) ;
-} ;
-
+// Check if a character is a full-width char or not.
+unicode.isFullWidth = char => unicode.isFullWidthCodePoint( char.codePointAt( 0 ) ) ;
 
 // Return the width of a char, leaner than .width() for one char
-unicode.charWidth = char => {
-	if ( char.length <= 1 ) { return unicode.codePointWidth( char.codePointAt( 0 ) ) ; }
-	return unicode.codePointWidth( unicode.firstCodePoint( char ) ) ;
-} ;
+unicode.charWidth = char => unicode.codePointWidth( char.codePointAt( 0 ) ) ;
 
 
 
@@ -42919,13 +42804,14 @@ unicode.isFullWidthCodePoint = code => unicode.codePointWidth( code ) === 2 ;
 
 // Convert normal ASCII chars to their full-width counterpart
 unicode.toFullWidth = str => {
-	return String.fromCodePoint( ... unicode.decode( str ).map( code =>
-		code >= 33 && code <= 126  ?  0xff00 + code - 0x20  :  code
-	) ) ;
+	return String.fromCodePoint( ... Array.from( str , char => {
+		var code = char.codePointAt( 0 ) ;
+		return code >= 33 && code <= 126  ?  0xff00 + code - 0x20  :  code ;
+	} ) ) ;
 } ;
 
 
-},{}],126:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 /*
 	String Kit
 
@@ -43129,7 +43015,7 @@ module.exports = function wordwrap( str , options ) {
 } ;
 
 
-},{"./unicode.js":125}],127:[function(require,module,exports){
+},{"./unicode.js":124}],126:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -43238,7 +43124,7 @@ clone.opaque = new Map() ;
 clone.opaque.set( Date.prototype , src => new Date( src ) ) ;
 
 
-},{}],128:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -43394,7 +43280,7 @@ function diff( left , right , options ) {
 exports.diff = diff ;
 
 
-},{}],129:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -43710,7 +43596,7 @@ dotPath.prepend = ( object , path , value ) => {
 } ;
 
 
-},{}],130:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -44034,7 +43920,7 @@ function extendOne( runtime , options , target , source , mask ) {
 }
 
 
-},{}],131:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -44090,7 +43976,7 @@ exports.defineLazyProperty = function defineLazyProperty( object , name , func )
 } ;
 
 
-},{}],132:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -44462,7 +44348,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 } ;
 
 
-},{"./tree.js":134,"util":202}],133:[function(require,module,exports){
+},{"./tree.js":133,"util":201}],132:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -44766,7 +44652,7 @@ treePath.upgrade = function( object ) {
 } ;
 
 
-},{}],134:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -44815,7 +44701,7 @@ Object.assign( tree ,
 ) ;
 
 
-},{"./clone.js":127,"./diff.js":128,"./dotPath.js":129,"./extend.js":130,"./lazy.js":131,"./mask.js":132,"./path.js":133}],135:[function(require,module,exports){
+},{"./clone.js":126,"./diff.js":127,"./dotPath.js":128,"./extend.js":129,"./lazy.js":130,"./mask.js":131,"./path.js":132}],134:[function(require,module,exports){
 "use strict"
 
 function unique_pred(list, compare) {
@@ -44874,9 +44760,9 @@ function unique(list, compare, sorted) {
 
 module.exports = unique
 
-},{}],136:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 
-},{}],137:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 
 /**
  * Array#filter.
@@ -44903,7 +44789,7 @@ module.exports = function (arr, fn, self) {
 
 var hasOwn = Object.prototype.hasOwnProperty;
 
-},{}],138:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -45413,7 +45299,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":165,"util/":141}],139:[function(require,module,exports){
+},{"object-assign":164,"util/":140}],138:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -45438,14 +45324,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],140:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],141:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -46035,7 +45921,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":140,"_process":179,"inherits":139}],142:[function(require,module,exports){
+},{"./support/isBuffer":139,"_process":178,"inherits":138}],141:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -46060,7 +45946,7 @@ module.exports = function availableTypedArrays() {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"array-filter":137}],143:[function(require,module,exports){
+},{"array-filter":136}],142:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -46212,9 +46098,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],144:[function(require,module,exports){
-arguments[4][136][0].apply(exports,arguments)
-},{"dup":136}],145:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
+arguments[4][135][0].apply(exports,arguments)
+},{"dup":135}],144:[function(require,module,exports){
 (function (process,Buffer){(function (){
 'use strict';
 /* eslint camelcase: "off" */
@@ -46626,7 +46512,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":179,"assert":138,"buffer":147,"pako/lib/zlib/constants":169,"pako/lib/zlib/deflate.js":171,"pako/lib/zlib/inflate.js":173,"pako/lib/zlib/zstream":177}],146:[function(require,module,exports){
+},{"_process":178,"assert":137,"buffer":146,"pako/lib/zlib/constants":168,"pako/lib/zlib/deflate.js":170,"pako/lib/zlib/inflate.js":172,"pako/lib/zlib/zstream":176}],145:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -47238,7 +47124,7 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this)}).call(this,require('_process'))
-},{"./binding":145,"_process":179,"assert":138,"buffer":147,"stream":181,"util":202}],147:[function(require,module,exports){
+},{"./binding":144,"_process":178,"assert":137,"buffer":146,"stream":180,"util":201}],146:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -49019,7 +48905,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":143,"buffer":147,"ieee754":159}],148:[function(require,module,exports){
+},{"base64-js":142,"buffer":146,"ieee754":158}],147:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -49036,7 +48922,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":149,"get-intrinsic":155}],149:[function(require,module,exports){
+},{"./":148,"get-intrinsic":154}],148:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -49085,7 +48971,7 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"function-bind":154,"get-intrinsic":155}],150:[function(require,module,exports){
+},{"function-bind":153,"get-intrinsic":154}],149:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -49102,7 +48988,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"get-intrinsic":155}],151:[function(require,module,exports){
+},{"get-intrinsic":154}],150:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -49580,7 +49466,7 @@ function once(emitter, name) {
   });
 }
 
-},{}],152:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 
 var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
@@ -49604,7 +49490,7 @@ module.exports = function forEach (obj, fn, ctx) {
 };
 
 
-},{}],153:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -49658,14 +49544,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],154:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":153}],155:[function(require,module,exports){
+},{"./implementation":152}],154:[function(require,module,exports){
 'use strict';
 
 var undefined;
@@ -49997,7 +49883,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"function-bind":154,"has":158,"has-symbols":156}],156:[function(require,module,exports){
+},{"function-bind":153,"has":157,"has-symbols":155}],155:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -50014,7 +49900,7 @@ module.exports = function hasNativeSymbols() {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./shams":157}],157:[function(require,module,exports){
+},{"./shams":156}],156:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
@@ -50058,14 +49944,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],158:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":154}],159:[function(require,module,exports){
+},{"function-bind":153}],158:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -50152,7 +50038,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],160:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -50181,7 +50067,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],161:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 'use strict';
 
 var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
@@ -50216,9 +50102,9 @@ isStandardArguments.isLegacyArguments = isLegacyArguments; // for tests
 
 module.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
 
-},{"call-bind/callBound":148}],162:[function(require,module,exports){
+},{"call-bind/callBound":147}],161:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],163:[function(require,module,exports){
+},{"dup":64}],162:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -50252,7 +50138,7 @@ module.exports = function isGeneratorFunction(fn) {
 	return getProto && getProto(fn) === GeneratorFunction;
 };
 
-},{}],164:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -50317,7 +50203,7 @@ module.exports = function isTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":142,"call-bind/callBound":148,"es-abstract/helpers/getOwnPropertyDescriptor":150,"foreach":152,"has-symbols":156}],165:[function(require,module,exports){
+},{"available-typed-arrays":141,"call-bind/callBound":147,"es-abstract/helpers/getOwnPropertyDescriptor":149,"foreach":151,"has-symbols":155}],164:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -50409,7 +50295,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],166:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -50460,7 +50346,7 @@ exports.homedir = function () {
 	return '/'
 };
 
-},{}],167:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 'use strict';
 
 
@@ -50567,7 +50453,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],168:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -50620,7 +50506,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],169:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -50690,7 +50576,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],170:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -50751,7 +50637,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],171:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -52627,7 +52513,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":167,"./adler32":168,"./crc32":170,"./messages":175,"./trees":176}],172:[function(require,module,exports){
+},{"../utils/common":166,"./adler32":167,"./crc32":169,"./messages":174,"./trees":175}],171:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -52974,7 +52860,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],173:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -54532,7 +54418,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":167,"./adler32":168,"./crc32":170,"./inffast":172,"./inftrees":174}],174:[function(require,module,exports){
+},{"../utils/common":166,"./adler32":167,"./crc32":169,"./inffast":171,"./inftrees":173}],173:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -54877,7 +54763,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":167}],175:[function(require,module,exports){
+},{"../utils/common":166}],174:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -54911,7 +54797,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],176:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -56135,7 +56021,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":167}],177:[function(require,module,exports){
+},{"../utils/common":166}],176:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -56184,7 +56070,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],178:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -56717,7 +56603,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":179}],179:[function(require,module,exports){
+},{"_process":178}],178:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -56903,7 +56789,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],180:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
@@ -56970,7 +56856,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":147}],181:[function(require,module,exports){
+},{"buffer":146}],180:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -57101,7 +56987,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":151,"inherits":160,"readable-stream/lib/_stream_duplex.js":183,"readable-stream/lib/_stream_passthrough.js":184,"readable-stream/lib/_stream_readable.js":185,"readable-stream/lib/_stream_transform.js":186,"readable-stream/lib/_stream_writable.js":187,"readable-stream/lib/internal/streams/end-of-stream.js":191,"readable-stream/lib/internal/streams/pipeline.js":193}],182:[function(require,module,exports){
+},{"events":150,"inherits":159,"readable-stream/lib/_stream_duplex.js":182,"readable-stream/lib/_stream_passthrough.js":183,"readable-stream/lib/_stream_readable.js":184,"readable-stream/lib/_stream_transform.js":185,"readable-stream/lib/_stream_writable.js":186,"readable-stream/lib/internal/streams/end-of-stream.js":190,"readable-stream/lib/internal/streams/pipeline.js":192}],181:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -57230,7 +57116,7 @@ createErrorType('ERR_UNKNOWN_ENCODING', function (arg) {
 createErrorType('ERR_STREAM_UNSHIFT_AFTER_END_EVENT', 'stream.unshift() after end event');
 module.exports.codes = codes;
 
-},{}],183:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -57372,7 +57258,7 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
   }
 });
 }).call(this)}).call(this,require('_process'))
-},{"./_stream_readable":185,"./_stream_writable":187,"_process":179,"inherits":160}],184:[function(require,module,exports){
+},{"./_stream_readable":184,"./_stream_writable":186,"_process":178,"inherits":159}],183:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -57412,7 +57298,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":186,"inherits":160}],185:[function(require,module,exports){
+},{"./_stream_transform":185,"inherits":159}],184:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -58539,7 +58425,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":182,"./_stream_duplex":183,"./internal/streams/async_iterator":188,"./internal/streams/buffer_list":189,"./internal/streams/destroy":190,"./internal/streams/from":192,"./internal/streams/state":194,"./internal/streams/stream":195,"_process":179,"buffer":147,"events":151,"inherits":160,"string_decoder/":196,"util":144}],186:[function(require,module,exports){
+},{"../errors":181,"./_stream_duplex":182,"./internal/streams/async_iterator":187,"./internal/streams/buffer_list":188,"./internal/streams/destroy":189,"./internal/streams/from":191,"./internal/streams/state":193,"./internal/streams/stream":194,"_process":178,"buffer":146,"events":150,"inherits":159,"string_decoder/":195,"util":143}],185:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -58741,7 +58627,7 @@ function done(stream, er, data) {
   if (stream._transformState.transforming) throw new ERR_TRANSFORM_ALREADY_TRANSFORMING();
   return stream.push(null);
 }
-},{"../errors":182,"./_stream_duplex":183,"inherits":160}],187:[function(require,module,exports){
+},{"../errors":181,"./_stream_duplex":182,"inherits":159}],186:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -59441,7 +59327,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":182,"./_stream_duplex":183,"./internal/streams/destroy":190,"./internal/streams/state":194,"./internal/streams/stream":195,"_process":179,"buffer":147,"inherits":160,"util-deprecate":199}],188:[function(require,module,exports){
+},{"../errors":181,"./_stream_duplex":182,"./internal/streams/destroy":189,"./internal/streams/state":193,"./internal/streams/stream":194,"_process":178,"buffer":146,"inherits":159,"util-deprecate":198}],187:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -59651,7 +59537,7 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 
 module.exports = createReadableStreamAsyncIterator;
 }).call(this)}).call(this,require('_process'))
-},{"./end-of-stream":191,"_process":179}],189:[function(require,module,exports){
+},{"./end-of-stream":190,"_process":178}],188:[function(require,module,exports){
 'use strict';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -59862,7 +59748,7 @@ function () {
 
   return BufferList;
 }();
-},{"buffer":147,"util":144}],190:[function(require,module,exports){
+},{"buffer":146,"util":143}],189:[function(require,module,exports){
 (function (process){(function (){
 'use strict'; // undocumented cb() API, needed for core, not for public API
 
@@ -59970,7 +59856,7 @@ module.exports = {
   errorOrDestroy: errorOrDestroy
 };
 }).call(this)}).call(this,require('_process'))
-},{"_process":179}],191:[function(require,module,exports){
+},{"_process":178}],190:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/end-of-stream with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -60075,12 +59961,12 @@ function eos(stream, opts, callback) {
 }
 
 module.exports = eos;
-},{"../../../errors":182}],192:[function(require,module,exports){
+},{"../../../errors":181}],191:[function(require,module,exports){
 module.exports = function () {
   throw new Error('Readable.from is not available in the browser')
 };
 
-},{}],193:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/pump with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -60178,7 +60064,7 @@ function pipeline() {
 }
 
 module.exports = pipeline;
-},{"../../../errors":182,"./end-of-stream":191}],194:[function(require,module,exports){
+},{"../../../errors":181,"./end-of-stream":190}],193:[function(require,module,exports){
 'use strict';
 
 var ERR_INVALID_OPT_VALUE = require('../../../errors').codes.ERR_INVALID_OPT_VALUE;
@@ -60206,10 +60092,10 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 module.exports = {
   getHighWaterMark: getHighWaterMark
 };
-},{"../../../errors":182}],195:[function(require,module,exports){
+},{"../../../errors":181}],194:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":151}],196:[function(require,module,exports){
+},{"events":150}],195:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60506,7 +60392,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":180}],197:[function(require,module,exports){
+},{"safe-buffer":179}],196:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -60585,7 +60471,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":179,"timers":197}],198:[function(require,module,exports){
+},{"process/browser.js":178,"timers":196}],197:[function(require,module,exports){
 exports.isatty = function () { return false; };
 
 function ReadStream() {
@@ -60598,7 +60484,7 @@ function WriteStream() {
 }
 exports.WriteStream = WriteStream;
 
-},{}],199:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 (function (global){(function (){
 
 /**
@@ -60669,9 +60555,9 @@ function config (name) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],200:[function(require,module,exports){
-arguments[4][140][0].apply(exports,arguments)
-},{"dup":140}],201:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
+arguments[4][139][0].apply(exports,arguments)
+},{"dup":139}],200:[function(require,module,exports){
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
@@ -61005,7 +60891,7 @@ exports.isAnyArrayBuffer = isAnyArrayBuffer;
   });
 });
 
-},{"is-arguments":161,"is-generator-function":163,"is-typed-array":164,"which-typed-array":203}],202:[function(require,module,exports){
+},{"is-arguments":160,"is-generator-function":162,"is-typed-array":163,"which-typed-array":202}],201:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -61724,7 +61610,7 @@ function callbackify(original) {
 exports.callbackify = callbackify;
 
 }).call(this)}).call(this,require('_process'))
-},{"./support/isBuffer":200,"./support/types":201,"_process":179,"inherits":160}],203:[function(require,module,exports){
+},{"./support/isBuffer":199,"./support/types":200,"_process":178,"inherits":159}],202:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -61784,5 +61670,5 @@ module.exports = function whichTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":142,"call-bind/callBound":148,"es-abstract/helpers/getOwnPropertyDescriptor":150,"foreach":152,"has-symbols":156,"is-typed-array":164}]},{},[9])(9)
+},{"available-typed-arrays":141,"call-bind/callBound":147,"es-abstract/helpers/getOwnPropertyDescriptor":149,"foreach":151,"has-symbols":155,"is-typed-array":163}]},{},[9])(9)
 });
