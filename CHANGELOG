@@ -1,4 +1,10 @@
 
+v2.2.1
+------
+
+Support for ^[#<color>] markup in inline term()
+
+
 v2.2.0
 ------
 

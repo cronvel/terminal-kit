@@ -3986,7 +3986,7 @@ const termkit = require( './termkit.js' ) ;
 
 
 /*
-	Since there is a lot of hack with the Terminal instance creation, we can't use the 'new' operator at all...
+	Since there is a lot of hacks with the Terminal instance creation, we can't use the 'new' operator at all...
 */
 function Terminal( ... args ) { return Terminal.create( ... args ) ; }
 
@@ -4206,7 +4206,6 @@ Terminal.create = function( createOptions ) {
 	// Create methods for the 'chainable' prototype
 
 	Object.keys( term.esc ).forEach( ( key ) => {
-
 		if ( ! term.esc[ key ] || typeof term.esc[ key ] !== 'object' ) {
 			console.error( "Bad escape sequence entry '" + key + "' using termconfig: '" + term.termconfigFile + "'." ) ;
 			return ;
@@ -4317,7 +4316,8 @@ Terminal.create = function( createOptions ) {
 			"m": term.str.magenta() ,
 			"M": term.str.brightMagenta() ,
 			"r": term.str.red() ,
-			"R": term.str.brightRed() ,
+			//"R": term.str.brightRed() ,
+			"R": term.str.green() ,
 			"w": term.str.white() ,
 			"W": term.str.brightWhite() ,
 			"y": term.str.yellow() ,
@@ -4347,8 +4347,49 @@ Terminal.create = function( createOptions ) {
 				"y": term.str.bgYellow() ,
 				"Y": term.str.bgBrightYellow()
 			}
+		} ,
+		dataMarkup: {
+			fg: ( markupStack , key , value ) => {
+				var r , g , b , hex = value ;
+				if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }  // Strip the # if necessary
+				if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+				r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
+				g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
+				b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+				var str = term.optimized.color24bits( r , g , b ) ;
+				markupStack.push( str ) ;
+				return str ;
+			} ,
+			bg: ( markupStack , key , value ) => {
+				var r , g , b , hex = value ;
+				if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }  // Strip the # if necessary
+				if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+				r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
+				g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
+				b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+				var str = term.optimized.bgColor24bits( r , g , b ) ;
+				markupStack.push( str ) ;
+				return str ;
+			}
+		} ,
+		markupCatchAll: ( markupStack , key , value ) => {
+			term.optimized.bgColor24bits ;
+			var str = '' ;
+
+			if ( value === undefined ) {
+				if ( key[ 0 ] === '#' ) {
+					return term.formatConfig.dataMarkup.fg( markupStack , 'fg' , key ) ;
+				}
+			}
+
+			markupStack.push( str ) ;
+			return str ;
 		}
 	} ;
+
+	// Aliases...
+	term.formatConfig.dataMarkup.color = term.formatConfig.dataMarkup.fgColor = term.formatConfig.dataMarkup.c = term.formatConfig.dataMarkup.fg ;
+	term.formatConfig.dataMarkup.bgColor = term.formatConfig.dataMarkup.bg ;
 
 	term.formatConfig.rawMarkupConfig = Object.create( term.formatConfig ) ;
 	term.formatConfig.rawMarkupConfig.startingMarkupReset = false ;
@@ -4465,7 +4506,7 @@ function createOptimized( term ) {
 
 
 // CAUTION: 'options' MUST NOT BE OVERWRITTEN!
-// It is binded at the function creation and contains function specificities!
+// It is bound at the function creation and contains function specificities!
 function applyEscape( options , ... args ) {
 	var fn , newOptions , wrapOptions ;
 

@@ -123,20 +123,10 @@ terminal.getDetectedTerminal( ( error , term ) => {
 
 
 
-	// Test markup
-
-	term.styleReset() ;
-	term( '\n\n' ) ;
-	term( "This is ^+bold^:.\n" ) ;
-	term( "This is ^[fg:#aaee55]green^:.\n" ) ;
-
-
-
 	// Reset before exiting...
 
 	term.styleReset() ;
 	term( '\n' ) ;
 	term( 'Reset...\n' ) ;
-	
 } ) ;
 
