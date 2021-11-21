@@ -4316,8 +4316,7 @@ Terminal.create = function( createOptions ) {
 			"m": term.str.magenta() ,
 			"M": term.str.brightMagenta() ,
 			"r": term.str.red() ,
-			//"R": term.str.brightRed() ,
-			"R": term.str.green() ,
+			"R": term.str.brightRed() ,
 			"w": term.str.white() ,
 			"W": term.str.brightWhite() ,
 			"y": term.str.yellow() ,
@@ -28716,6 +28715,11 @@ var JpegImage = (function jpegImage() {
             resetInterval = readUint16();
             break;
 
+          case 0xFFDC: // Number of Lines marker
+            readUint16() // skip data length
+            readUint16() // Ignore this data since it represents the image height
+            break;
+            
           case 0xFFDA: // SOS (Start of Scan)
             var scanLength = readUint16();
             var selectorsCount = data[offset++];
@@ -29034,7 +29038,7 @@ function decode(jpegData, userOpts = {}) {
       exifBuffer: decoder.exifBuffer,
       data: opts.useTArray ?
         new Uint8Array(bytesNeeded) :
-        new Buffer(bytesNeeded)
+        Buffer.alloc(bytesNeeded)
     };
     if(decoder.comments.length > 0) {
       image["comments"] = decoder.comments;
@@ -29094,7 +29098,7 @@ Basic GUI blocking jpeg encoder
 */
 
 var btoa = btoa || function(buf) {
-  return new Buffer(buf).toString('base64');
+  return Buffer.from(buf).toString('base64');
 };
 
 function JPEGEncoder(quality) {
@@ -29772,7 +29776,7 @@ function JPEGEncoder(quality) {
 			writeWord(0xFFD9); //EOI
 
 			if (typeof module === 'undefined') return new Uint8Array(byteout);
-      return new Buffer(byteout);
+      return Buffer.from(byteout);
 
 			var jpegDataUri = 'data:image/jpeg;base64,' + btoa(byteout.join(''));
 			
