@@ -4349,24 +4349,38 @@ Terminal.create = function( createOptions ) {
 		} ,
 		dataMarkup: {
 			fg: ( markupStack , key , value ) => {
-				var r , g , b , hex = value ;
-				if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }  // Strip the # if necessary
-				if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
-				r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
-				g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
-				b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
-				var str = term.optimized.color24bits( r , g , b ) ;
+				var str ;
+
+				if ( typeof value === 'string' && value[ 0 ] === '#' ) {
+					let hex = value.slice( 1 ) ;
+					if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+					let r = parseInt( hex.slice( 0 , 2 ) , 16 ) || 0 ;
+					let g = parseInt( hex.slice( 2 , 4 ) , 16 ) || 0 ;
+					let b = parseInt( hex.slice( 4 , 6 ) , 16 ) || 0 ;
+					str = term.optimized.color24bits( r , g , b ) ;
+				}
+				else {
+					str = term.str.color( value ) ;
+				}
+
 				markupStack.push( str ) ;
 				return str ;
 			} ,
 			bg: ( markupStack , key , value ) => {
-				var r , g , b , hex = value ;
-				if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }  // Strip the # if necessary
-				if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
-				r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
-				g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
-				b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
-				var str = term.optimized.bgColor24bits( r , g , b ) ;
+				var str ;
+
+				if ( typeof value === 'string' && value[ 0 ] === '#' ) {
+					let hex = value.slice( 1 ) ;
+					if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
+					let r = parseInt( hex.slice( 0 , 2 ) , 16 ) || 0 ;
+					let g = parseInt( hex.slice( 2 , 4 ) , 16 ) || 0 ;
+					let b = parseInt( hex.slice( 4 , 6 ) , 16 ) || 0 ;
+					str = term.optimized.bgColor24bits( r , g , b ) ;
+				}
+				else {
+					str = term.str.bgColor( value ) ;
+				}
+
 				markupStack.push( str ) ;
 				return str ;
 			}
@@ -4378,6 +4392,29 @@ Terminal.create = function( createOptions ) {
 			if ( value === undefined ) {
 				if ( key[ 0 ] === '#' ) {
 					return term.formatConfig.dataMarkup.fg( markupStack , 'fg' , key ) ;
+				}
+				else if ( termkit.markupCatchAllKeywords[ key ] ) {
+					switch ( termkit.markupCatchAllKeywords[ key ][ 0 ] ) {
+						case 'color' :
+							return term.formatConfig.dataMarkup.fg( markupStack , 'fg' , termkit.markupCatchAllKeywords[ key ][ 1 ] ) ;
+						case 'bgColor' :
+							return term.formatConfig.dataMarkup.bg( markupStack , 'bg' , termkit.markupCatchAllKeywords[ key ][ 1 ] ) ;
+						case 'dim' :
+							str = term.str.dim() ;
+							break ;
+						case 'bold' :
+							str = term.str.bold() ;
+							break ;
+						case 'underline' :
+							str = term.str.underline() ;
+							break ;
+						case 'italic' :
+							str = term.str.italic() ;
+							break ;
+						case 'inverse' :
+							str = term.str.inverse() ;
+							break ;
+					}
 				}
 			}
 
@@ -19079,10 +19116,10 @@ misc.hexToRgba = hex => {
 	}
 
 	return {
-		r: parseInt( hex.slice( 0 , 2 ) , 16 ) ,
-		g: parseInt( hex.slice( 2 , 4 ) , 16 ) ,
-		b: parseInt( hex.slice( 4 , 6 ) , 16 ) ,
-		a: hex.length > 6 ? parseInt( hex.slice( 6 , 8 ) , 16 ) : 255
+		r: parseInt( hex.slice( 0 , 2 ) , 16 ) || 0 ,
+		g: parseInt( hex.slice( 2 , 4 ) , 16 ) || 0 ,
+		b: parseInt( hex.slice( 4 , 6 ) , 16 ) || 0 ,
+		a: hex.length > 6 ? parseInt( hex.slice( 6 , 8 ) , 16 ) || 0 : 255
 	} ;
 } ;
 
@@ -19362,6 +19399,62 @@ misc.preserveMarkupFormat = string.createFormatter( {
 
 
 
+// Catch-all keywords to key:value
+const CATCH_ALL_KEYWORDS = {
+	// Foreground colors
+	defaultColor: [ 'color' , 'default' ] ,
+	black: [ 'color' , 'black' ] ,
+	red: [ 'color' , 'red' ] ,
+	green: [ 'color' , 'green' ] ,
+	yellow: [ 'color' , 'yellow' ] ,
+	blue: [ 'color' , 'blue' ] ,
+	magenta: [ 'color' , 'magenta' ] ,
+	cyan: [ 'color' , 'cyan' ] ,
+	white: [ 'color' , 'white' ] ,
+	grey: [ 'color' , 'grey' ] ,
+	gray: [ 'color' , 'gray' ] ,
+	brightBlack: [ 'color' , 'brightBlack' ] ,
+	brightRed: [ 'color' , 'brightRed' ] ,
+	brightGreen: [ 'color' , 'brightGreen' ] ,
+	brightYellow: [ 'color' , 'brightYellow' ] ,
+	brightBlue: [ 'color' , 'brightBlue' ] ,
+	brightMagenta: [ 'color' , 'brightMagenta' ] ,
+	brightCyan: [ 'color' , 'brightCyan' ] ,
+	brightWhite: [ 'color' , 'brightWhite' ] ,
+
+	// Background colors
+	defaultBgColor: [ 'bgColor' , 'default' ] ,
+	bgBlack: [ 'bgColor' , 'black' ] ,
+	bgRed: [ 'bgColor' , 'red' ] ,
+	bgGreen: [ 'bgColor' , 'green' ] ,
+	bgYellow: [ 'bgColor' , 'yellow' ] ,
+	bgBlue: [ 'bgColor' , 'blue' ] ,
+	bgMagenta: [ 'bgColor' , 'magenta' ] ,
+	bgCyan: [ 'bgColor' , 'cyan' ] ,
+	bgWhite: [ 'bgColor' , 'white' ] ,
+	bgGrey: [ 'bgColor' , 'grey' ] ,
+	bgGray: [ 'bgColor' , 'gray' ] ,
+	bgBrightBlack: [ 'bgColor' , 'brightBlack' ] ,
+	bgBrightRed: [ 'bgColor' , 'brightRed' ] ,
+	bgBrightGreen: [ 'bgColor' , 'brightGreen' ] ,
+	bgBrightYellow: [ 'bgColor' , 'brightYellow' ] ,
+	bgBrightBlue: [ 'bgColor' , 'brightBlue' ] ,
+	bgBrightMagenta: [ 'bgColor' , 'brightMagenta' ] ,
+	bgBrightCyan: [ 'bgColor' , 'brightCyan' ] ,
+	bgBrightWhite: [ 'bgColor' , 'brightWhite' ] ,
+
+	// Other styles
+	dim: [ 'dim' , true ] ,
+	bold: [ 'bold' , true ] ,
+	underline: [ 'underline' , true ] ,
+	italic: [ 'italic' , true ] ,
+	inverse: [ 'inverse' , true ]
+} ;
+
+misc.markupCatchAllKeywords = CATCH_ALL_KEYWORDS ;
+
+
+
 misc.markupOptions = {
 	parse: true ,
 	shiftMarkup: {
@@ -19443,8 +19536,16 @@ misc.markupOptions = {
 		var attr = {} ;
 
 		if ( value === undefined ) {
-			//if ( key[ 0 ] === '#' ) {}
-			attr = { color: key } ;
+			if ( key[ 0 ] === '#' ) {
+				attr.color = key ;
+			}
+			else if ( CATCH_ALL_KEYWORDS[ key ] ) {
+				attr[ CATCH_ALL_KEYWORDS[ key ][ 0 ] ] = CATCH_ALL_KEYWORDS[ key ][ 1 ] ;
+			}
+			else {
+				// Fallback: it's a foreground color
+				attr.color = key ;
+			}
 		}
 
 		markupStack.push( attr ) ;
@@ -28715,11 +28816,6 @@ var JpegImage = (function jpegImage() {
             resetInterval = readUint16();
             break;
 
-          case 0xFFDC: // Number of Lines marker
-            readUint16() // skip data length
-            readUint16() // Ignore this data since it represents the image height
-            break;
-            
           case 0xFFDA: // SOS (Start of Scan)
             var scanLength = readUint16();
             var selectorsCount = data[offset++];
@@ -29038,7 +29134,7 @@ function decode(jpegData, userOpts = {}) {
       exifBuffer: decoder.exifBuffer,
       data: opts.useTArray ?
         new Uint8Array(bytesNeeded) :
-        Buffer.alloc(bytesNeeded)
+        new Buffer(bytesNeeded)
     };
     if(decoder.comments.length > 0) {
       image["comments"] = decoder.comments;
@@ -29098,7 +29194,7 @@ Basic GUI blocking jpeg encoder
 */
 
 var btoa = btoa || function(buf) {
-  return Buffer.from(buf).toString('base64');
+  return new Buffer(buf).toString('base64');
 };
 
 function JPEGEncoder(quality) {
@@ -29776,7 +29872,7 @@ function JPEGEncoder(quality) {
 			writeWord(0xFFD9); //EOI
 
 			if (typeof module === 'undefined') return new Uint8Array(byteout);
-      return Buffer.from(byteout);
+      return new Buffer(byteout);
 
 			var jpegDataUri = 'data:image/jpeg;base64,' + btoa(byteout.join(''));
 			

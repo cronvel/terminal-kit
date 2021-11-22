@@ -82,7 +82,8 @@ var textTable = new termkit.TextTable( {
 
 //*
 setTimeout( () => {
-	textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
+	//textTable.setCellContent( 2 , 3 , "New ^R^+content^:! And BTW... We have to force some line break and so on..." ) ;
+	textTable.setCellContent( 2 , 3 , "New ^[fg:*pink]^[bg:*crimson]content^:! And BTW... We have to force some line break and so on..." ) ;
 } , 1000 ) ;
 //*/
 

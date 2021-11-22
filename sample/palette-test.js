@@ -76,11 +76,13 @@ term.styleReset( '\n' ) ;
 //term.raw( palette.bgEscape[ register ] + '  ' ) ;
 
 var buffer = termkit.ScreenBuffer.create( { dst: term , width: 8 , height: 8 , x: term.width - 10 , y: 10 , palette: palette } ) ;
+//var buffer = termkit.ScreenBufferHD.create( { dst: term , width: 8 , height: 8 , x: term.width - 10 , y: 10 , palette: palette } ) ;
 
 buffer.fill( { attr: { bgColor: '@yellow~--' } } ) ;
 buffer.put( { x:1 , y:1 , markup: true } , '^[fg:*crimson]^[bg:*pink]BOB' ) ;
 buffer.put( { x:3 , y:3 , attr: { bgColor: 241 } , markup: true } , '^[fg:red]BOB' ) ;
 buffer.put( { x:1 , y:4 , attr: { bgColor: 'default' } , markup: 'ansi' } , 'w\x1b[31mred\x1b[92m\x1b[1mG\x1b[41m\x1b[34mB' ) ;
+//buffer.put( { x:3 , y:3 , markup: true } , '^[fg:#a50]BOB' ) ;	// Only works with ScreenBufferHD ATM
 term.saveCursor() ;
 buffer.draw() ;
 term.restoreCursor() ;
