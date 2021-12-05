@@ -1,4 +1,10 @@
 
+v2.2.4
+------
+
+Fix .contentWidth/.contentHeight bug in TextTable, creating new (private props) .rawContentWidth/.rawContentHeight to store the content size before shrinking/expanding (#189)
+
+
 v2.2.3
 ------
 

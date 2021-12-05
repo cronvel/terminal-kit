@@ -12095,7 +12095,6 @@ Element.prototype.recursiveFixAttachment = function( document , id = this.id ) {
 	}
 
 	for ( i = 0 , iMax = this.children.length ; i < iMax ; i ++ ) {
-		//console.error( ">>>" , i , iMax ) ;
 		this.children[ i ].recursiveFixAttachment( document ) ;
 	}
 } ;
@@ -12504,7 +12503,6 @@ Element.prototype.redraw = function( force = false ) {
 
 	var container = this.getParentContainer() ;
 
-	//console.error( "parentContainer:" , container ) ;
 	if ( ! container ) { this.draw() ; }
 	else { container.draw() ; }
 
@@ -12529,7 +12527,6 @@ Element.prototype.descendantDraw = function( isSubcall ) {
 	if ( this.hidden ) { return this ; }
 
 	if ( this.preDrawSelf ) {
-		//console.error( 'preDrawSelf: ' , this.elementType , this.id ) ;
 		this.preDrawSelf( ! isSubcall ) ;
 	}
 
@@ -12539,7 +12536,6 @@ Element.prototype.descendantDraw = function( isSubcall ) {
 	}
 
 	if ( isSubcall && this.postDrawSelf ) {
-		//console.error( 'postDrawSelf: ' , this.elementType , this.id ) ;
 		this.postDrawSelf( ! isSubcall ) ;
 	}
 
@@ -12550,11 +12546,9 @@ Element.prototype.descendantDraw = function( isSubcall ) {
 
 // Post-draw from the current element through all the ancestor chain
 Element.prototype.ascendantDraw = function() {
-	//console.error( '\nascendantDraw: ' , this.elementType , this.id ) ;
 	var currentElement ;
 
 	if ( this.postDrawSelf && ! this.hidden ) {
-		//console.error( 'postDrawSelf: ' , this.elementType , this.id ) ;
 		this.postDrawSelf( true ) ;
 	}
 
@@ -12564,7 +12558,6 @@ Element.prototype.ascendantDraw = function() {
 		currentElement = currentElement.parent ;
 
 		if ( currentElement.outputDst !== currentElement.inputDst && currentElement.postDrawSelf && ! currentElement.hidden ) {
-			//console.error( 'postDrawSelf: ' , currentElement.elementType , currentElement.id ) ;
 			currentElement.postDrawSelf( false ) ;
 		}
 	}
@@ -12642,10 +12635,6 @@ Element.createInline = async function( term , Type , options ) {
 
 	if ( ! element.strictInline ) {
 		let scrollY = position.y + element.outputHeight - term.height ;
-		//console.error( "INLINE -- element.outputWidth" , element.outputWidth ) ;
-		//console.error( "INLINE -- element.outputHeight" , element.outputHeight ) ;
-		//console.error( "INLINE -- element.outputY" , element.outputY ) ;
-		//console.error( "INLINE -- scrollY" , scrollY ) ;
 
 		if ( scrollY > 0 ) {
 			term.scrollUp( scrollY ) ;
@@ -16342,6 +16331,11 @@ function TextTable( options ) {
 	Element.call( this , options ) ;
 
 	this.cellContents = options.cellContents ;	// Should be an array of array of text
+
+	// This replace .contentWidth/.contentHeight for cell-only size (without shrinking/expanding/fitting)
+	this.rawContentWidth = 0 ;
+	this.rawContentHeight = 0 ;
+
 	this.contentHasMarkup = options.contentHasMarkup ;
 
 	this.textBoxes = null ;				// Same format: array of array of textBoxes
@@ -16623,7 +16617,7 @@ TextTable.prototype.computeCells = function() {
 TextTable.prototype.computeColumnWidths = function() {
 	var x , y , textBox , max , width ;
 
-	this.contentWidth = + this.hasBorder ;	// +true = 1
+	this.rawContentWidth = + this.hasBorder ;	// +true = 1
 
 	for ( x = 0 ; x < this.columnCount ; x ++ ) {
 		max = 0 ;
@@ -16634,14 +16628,18 @@ TextTable.prototype.computeColumnWidths = function() {
 			if ( width > max ) { max = width ; }
 		}
 		this.columnWidths[ x ] = max ;
-		this.contentWidth += max + this.hasBorder ;	// +true = 1
+		this.rawContentWidth += max + this.hasBorder ;	// +true = 1
 	}
 
-	if ( this.expandToWidth && this.contentWidth < this.outputWidth ) {
-		this.expand( this.contentWidth , this.outputWidth , this.columnWidths ) ;
+	this.contentWidth = this.rawContentWidth ;
+
+	if ( this.expandToWidth && this.rawContentWidth < this.outputWidth ) {
+		this.expand( this.rawContentWidth , this.outputWidth , this.columnWidths ) ;
+		this.contentWidth = this.outputWidth ;
 	}
-	else if ( this.shrinkToWidth && this.contentWidth > this.outputWidth ) {
-		this.shrink( this.contentWidth , this.outputWidth , this.columnWidths ) ;
+	else if ( this.shrinkToWidth && this.rawContentWidth > this.outputWidth ) {
+		this.shrink( this.rawContentWidth , this.outputWidth , this.columnWidths ) ;
+		this.contentWidth = this.outputWidth ;
 		return true ;
 	}
 
@@ -16653,7 +16651,7 @@ TextTable.prototype.computeColumnWidths = function() {
 TextTable.prototype.computeRowHeights = function() {
 	var x , y , textBox , max , height ;
 
-	this.contentHeight = + this.hasBorder ;	// +true = 1
+	this.rawContentHeight = + this.hasBorder ;	// +true = 1
 
 	for ( y = 0 ; y < this.rowCount ; y ++ ) {
 		max = 0 ;
@@ -16664,16 +16662,22 @@ TextTable.prototype.computeRowHeights = function() {
 			if ( height > max ) { max = height ; }
 		}
 		this.rowHeights[ y ] = max ;
-		this.contentHeight += max + this.hasBorder ;	// +true = 1
+		this.rawContentHeight += max + this.hasBorder ;	// +true = 1
 	}
 
-	if ( this.expandToHeight && this.contentHeight < this.outputHeight ) {
-		this.expand( this.contentHeight , this.outputHeight , this.rowHeights ) ;
+	this.contentHeight = this.rawContentHeight ;
+
+	if ( this.expandToHeight && this.rawContentHeight < this.outputHeight ) {
+		this.expand( this.rawContentHeight , this.outputHeight , this.rowHeights ) ;
+		this.contentHeight = this.outputHeight ;
 	}
-	else if ( this.shrinkToHeight && this.contentHeight > this.outputHeight ) {
-		this.shrink( this.contentHeight , this.outputHeight , this.rowHeights ) ;
+	else if ( this.shrinkToHeight && this.rawContentHeight > this.outputHeight ) {
+		this.shrink( this.rawContentHeight , this.outputHeight , this.rowHeights ) ;
+		this.contentHeight = this.outputHeight ;
 		return true ;
 	}
+
+	return false ;
 } ;
 
 
@@ -16709,8 +16713,6 @@ TextTable.prototype.shrink = function( contentSize , outputSize , sizeArray ) {
 		count = sizeArray.length ,
 		floatColumnDelta , columnDelta , partialColumn ,
 		delta = contentSize - outputSize ;
-
-	//console.log( contentSize , outputSize , delta ) ;
 
 	while ( delta > 0 ) {
 		max = 0 ;
@@ -16813,8 +16815,6 @@ TextTable.prototype.preDrawSelf = function() {
 	if ( ! this.hasBorder ) { return ; }
 
 	var i , j , x , y ;
-
-	//console.log( this.columnWidths , this.rowHeights , this.columnCount , this.rowCount ) ;
 
 	y = this.outputY ;
 
@@ -21390,6 +21390,7 @@ const ENLARGING_BLOCK = [ ' ' , '▏' , '▎' , '▍' , '▌' , '▋' , '▊' , 
 
 module.exports = {
 	password: '●' ,		// Currently: the same as blackCircle
+	ellispsis: '…' ,
 
 	forwardSingleQuote: '´' ,	// Altgr + ,
 	overscore: '¯' ,	// Altgr + Shift + $
