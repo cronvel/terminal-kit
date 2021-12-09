@@ -47,7 +47,7 @@ var textTable = new termkit.TextTable( {
 		[ 'header #1' , 'header #2' , 'header #3' ] ,
 		[ 'row #1' , 'a much bigger cell '.repeat( 10 ) , 'cell' ] ,
 		[ 'row #2' , 'cell' , 'a medium cell' ] ,
-		[ 'row #3' , 'cell' , 'cell' ] ,
+		[ 'row #3' , 'with wide char 🔴' , 'cell' ] ,
 		[ 'row #4' , 'cell\nwith\nnew\nlines' , 'cell' ]
 		//*/
 		/*

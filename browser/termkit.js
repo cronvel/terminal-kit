@@ -6231,9 +6231,11 @@ TextBuffer.prototype.parseMarkup = string.markupMethod.bind( misc.markupOptions 
 
 
 
-function Cell( char = ' ' , attr = null , misc_ = null ) {
-	this.char = char || ' ' ;
-	this.filler = char === null ;
+// Special: if positive or 0, it's the width of the char, if -1 it's an anti-filler, if -2 it's a filler
+function Cell( char = ' ' , special = 1 , attr = null , misc_ = null ) {
+	this.char = char ;
+	this.width = special >= 0 ? special : -special - 1 ;
+	this.filler = special < 0 ;		// note: antiFiller ARE filler
 	this.attr = attr ;
 	this.misc = misc_ ;
 }
@@ -6304,7 +6306,7 @@ TextBuffer.prototype.setText = function( text , hasMarkup , baseAttr ) {
 
 		// /!\ Warning /!\ string.unicode.toCells() strips '\n', so we need to restore it at the end of the line
 		if ( line[ line.length - 1 ] === '\n' ) {
-			this.buffer[ index ].push( new Cell( '\n' , baseAttr ) ) ;
+			this.buffer[ index ].push( new Cell( '\n' , 1 , baseAttr ) ) ;
 		}
 
 		// word-wrap the current line, which is always the last line of the array (=faster)
@@ -6398,7 +6400,7 @@ TextBuffer.prototype.getCursorOffset = function() {
 
 
 
-// Set the cursor position (cx,cy) depending on the offset in the text-content (excludind fillers)
+// Set the cursor position (cx,cy) depending on the offset in the text-content (excluding fillers)
 TextBuffer.prototype.setCursorOffset = function( offset ) {
 	var line ;
 
@@ -6461,9 +6463,7 @@ TextBuffer.prototype.reTabLine = function( startAt = 0 ) {
 			linePosition += 1 + fillSize ;
 
 			while ( fillSize -- ) {
-				// /!\ First or second?
-				//output.push( new Cell( null ) ) ;
-				output.push( new Cell( null , cell.attr , cell.misc ) ) ;
+				output.push( new Cell( ' ' , -2 , cell.attr , cell.misc ) ) ;
 			}
 
 			// Skip input filler
@@ -6731,7 +6731,7 @@ TextBuffer.prototype.setAttrAt = function( attr , x , y ) {
 TextBuffer.prototype.setAttrCodeAt = function( attr , x , y ) {
 	if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
 
-	if ( ! this.buffer[ y ][ x ] ) { this.buffer[ y ][ x ] = new Cell( ' ' , attr ) ; }
+	if ( ! this.buffer[ y ][ x ] ) { this.buffer[ y ][ x ] = new Cell( ' ' , 1 , attr ) ; }
 	else { this.buffer[ y ][ x ].attr = attr ; }
 } ;
 
@@ -6922,9 +6922,18 @@ TextBuffer.prototype.iterate = function( options , callback ) {
 
 
 
+// Move to the left to the leading cell of a full-width char
+TextBuffer.prototype.moveToLeadingFullWidth = function() {
+	var currentLine = this.buffer[ this.cy ] ;
+	while ( this.cx && currentLine?.[ this.cx ]?.filler && currentLine?.[ this.cx ]?.width === 0 ) { this.cx -- ; }
+} ;
+
+
+
 TextBuffer.prototype.moveTo = function( x , y ) {
 	this.cx = x >= 0 ? x : 0 ;
 	this.cy = y >= 0 ? y : 0 ;
+	this.moveToLeadingFullWidth() ;
 } ;
 
 
@@ -6937,6 +6946,7 @@ TextBuffer.prototype.moveToLine = TextBuffer.prototype.moveToRow = function( y )
 
 TextBuffer.prototype.moveUp = function() {
 	this.cy = this.cy > 0 ? this.cy - 1 : 0 ;
+	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
 } ;
 
@@ -6944,6 +6954,7 @@ TextBuffer.prototype.moveUp = function() {
 
 TextBuffer.prototype.moveDown = function() {
 	this.cy ++ ;
+	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
 } ;
 
@@ -6951,6 +6962,7 @@ TextBuffer.prototype.moveDown = function() {
 
 TextBuffer.prototype.moveLeft = function() {
 	this.cx = this.cx > 0 ? this.cx - 1 : 0 ;
+	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
 } ;
 
@@ -6958,6 +6970,10 @@ TextBuffer.prototype.moveLeft = function() {
 
 TextBuffer.prototype.moveRight = function() {
 	this.cx ++ ;
+
+	var currentLine = this.buffer[ this.cy ] ;
+	while ( currentLine?.[ this.cx ]?.filler && currentLine?.[ this.cx ]?.width === 0 ) { this.cx ++ ; }
+
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
 } ;
 
@@ -6985,7 +7001,15 @@ TextBuffer.prototype.moveForward = function( testFn , justSkipFiller ) {
 
 		this.cx ++ ;
 
-		if ( ! currentLine[ this.cx ] || ( ! currentLine[ this.cx ].filler && ( ! testFn || testFn( currentLine[ this.cx ].char ) ) ) ) { break ; }
+		if (
+			! currentLine[ this.cx ]
+			|| (
+				! currentLine[ this.cx ].filler
+				&& ( ! testFn || testFn( currentLine[ this.cx ].char ) )
+			)
+		) {
+			break ;
+		}
 	}
 
 	if ( this.forceInBound ) { this.moveInBound() ; }
@@ -7018,7 +7042,7 @@ TextBuffer.prototype.moveBackward = function( testFn , justSkipFiller ) {
 		if (
 			! currentLine || ! currentLine[ this.cx ]
 			|| (
-				( ! currentLine[ this.cx ].filler || currentLine[ this.cx ].char !== '\n' )
+				! currentLine[ this.cx ].filler
 				&& ( ! testFn || testFn( currentLine[ this.cx ].char ) )
 			)
 		) {
@@ -7200,7 +7224,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	if ( this.cy >= this.buffer.length ) {
 		// Create all missing lines, if any
 		while ( this.buffer.length < this.cy ) {
-			this.buffer.push( [ new Cell( '\n' , this.defaultAttr ) ] ) ;
+			this.buffer.push( [ new Cell( '\n' , 1 , this.defaultAttr ) ] ) ;
 		}
 
 		// Add a '\n' to the last line, if it is missing
@@ -7210,7 +7234,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 				this.buffer[ this.cy - 1 ][ this.buffer[ this.cy - 1 ].length - 1 ].char !== '\n'
 			)
 		) {
-			this.buffer[ this.cy - 1 ].push( new Cell( '\n' , this.defaultAttr ) ) ;
+			this.buffer[ this.cy - 1 ].push( new Cell( '\n' , 1 , this.defaultAttr ) ) ;
 		}
 
 		this.buffer[ this.cy ] = [] ;
@@ -7223,7 +7247,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	// Apply
 	if ( this.cx === currentLineLength ) {
 		if ( hasNL ) {
-			currentLine.splice( currentLineLength - 1 , 0 , new Cell( ' ' , this.defaultAttr ) , ... cells ) ;
+			currentLine.splice( currentLineLength - 1 , 0 , new Cell( ' ' , 1 , this.defaultAttr ) , ... cells ) ;
 		}
 		else {
 			currentLine.push( ... cells ) ;
@@ -7236,12 +7260,12 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	else if ( hasNL ) {
 		fillSize = this.cx - currentLineLength + 1 ;
 		nlCell = currentLine.pop() ;
-		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , this.defaultAttr ) ) ; }
+		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ; }
 		currentLine.push( ... cells , nlCell ) ;
 	}
 	else {
 		fillSize = this.cx - currentLineLength ;
-		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , this.defaultAttr ) ) ; }
+		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ; }
 		currentLine.push( ... cells ) ;
 	}
 
@@ -7436,7 +7460,7 @@ TextBuffer.prototype.newLine = function( internalCall ) {
 		currentLine.length = this.cx ;
 	}
 
-	currentLine.push( new Cell( '\n' , this.defaultAttr ) ) ;
+	currentLine.push( new Cell( '\n' , 1 , this.defaultAttr ) ) ;
 
 	this.buffer.splice( this.cy + 1 , 0 , nextLine ) ;
 
@@ -7596,7 +7620,7 @@ TextBuffer.prototype.blitter = function( p ) {
 
 TextBuffer.prototype.blitterLineIterator = function( p ) {
 	//console.error( "blitter line" , p.srcY ) ;
-	var srcRShift , srcX , srcXmax , srcExistingXmax , dstOffset , cells , cell , attr , charCode ;
+	var srcRShift , srcX , srcXmax , srcExistingXmax , dstOffset , cells , cell , attr , char , charCode ;
 
 	//if ( ! global.deb ) { global.deb = [] ; }
 	//global.deb.push( p ) ;
@@ -7619,21 +7643,25 @@ TextBuffer.prototype.blitterLineIterator = function( p ) {
 			if ( srcX < 0 ) { continue ; }	// right-shifted
 			cell = cells[ srcX ] ;
 
-			// Write the attributes
-			p.context.writeAttr( p.context.dstBuffer , cell.attr , dstOffset ) ;
-
 			if ( p.context.forceChar ) {
-				// Write the forced character (i.e. hidden)
-				p.context.dstBuffer.write( p.context.forceChar , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
-			}
-			else if ( ( charCode = cell.char.charCodeAt( 0 ) ) < 0x20 || charCode === 0x7f ) {
-				// Replace the control char by a white space
-				p.context.dstBuffer.write( ' ' , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
+				// Use a forced character (i.e. hidden)
+				attr = cell.attr ;
+				char = p.context.forceChar ;
 			}
 			else {
-				// Write the character
-				p.context.dstBuffer.write( cell.char , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
+				attr =
+					cell.width === 2 ? cell.attr | this.ScreenBuffer.prototype.LEADING_FULLWIDTH :
+					cell.width === 0 ? cell.attr | this.ScreenBuffer.prototype.TRAILING_FULLWIDTH :
+					cell.attr ;
+				char =
+					( ( charCode = cell.char.charCodeAt( 0 ) ) < 0x20 || charCode === 0x7f ) ? ' ' :
+					cell.char ;
 			}
+
+			// Write the attributes
+			p.context.writeAttr( p.context.dstBuffer , attr , dstOffset ) ;
+			// Write the char
+			p.context.dstBuffer.write( char , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
 		}
 	}
 
@@ -7652,17 +7680,18 @@ TextBuffer.prototype.blitterLineIterator = function( p ) {
 				if ( srcX < 0 ) { continue ; }	// right-shifted
 				cell = cells[ srcX ] ;
 
-				// Write the attributes
-				p.context.writeAttr( p.context.dstBuffer , cell.attr , dstOffset ) ;
+				attr =
+					cell.width === 2 ? cell.attr | this.ScreenBuffer.prototype.LEADING_FULLWIDTH :
+					cell.width === 0 ? cell.attr | this.ScreenBuffer.prototype.TRAILING_FULLWIDTH :
+					cell.attr ;
+				char =
+					( ( charCode = cell.char.charCodeAt( 0 ) ) < 0x20 || charCode === 0x7f ) ? ' ' :
+					cell.char ;
 
-				if ( ( charCode = cell.char.charCodeAt( 0 ) ) < 0x20 || charCode === 0x7f ) {
-					// Replace the control char by a white space
-					p.context.dstBuffer.write( ' ' , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
-				}
-				else {
-					// Write the character
-					p.context.dstBuffer.write( cell.char , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
-				}
+				// Write the attributes
+				p.context.writeAttr( p.context.dstBuffer , attr , dstOffset ) ;
+				// Write the char
+				p.context.dstBuffer.write( char , dstOffset + this.ScreenBuffer.prototype.ATTR_SIZE , this.ScreenBuffer.prototype.CHAR_SIZE ) ;
 			}
 		}
 	}
@@ -7689,7 +7718,7 @@ TextBuffer.prototype.load = function( path , callback ) {
 	this.buffer[ 0 ] = [] ;
 	this.buffer.length = 1 ;
 
-	// Naive file loading, optimization are for later
+	// Naive file loading, should be optimized later
 	fs.readFile( path , ( error , data ) => {
 		if ( error ) { callback( error ) ; return ; }
 		this.setText( data.toString() ) ;
@@ -16125,10 +16154,12 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 			this.textBuffer.prepend( content , this.contentHasMarkup , this.textAttr ) ;
 			break ;
 		case 'appendLog' :
+			// Like 'append' but add a newLine if the last line is not empty, and also check if we need to scroll
 			scroll = this.textBuffer.buffer.length <= this.textAreaHeight || this.scrollY <= this.textAreaHeight - this.textBuffer.buffer.length ;
-			content = '\n' + content ;
+			this.textBuffer.moveToEndOfBuffer() ;
+			if ( this.textBuffer.cx ) { content = '\n' + content ; }
 			this.content += content ;
-			this.textBuffer.append( content , this.contentHasMarkup , this.textAttr ) ;
+			this.textBuffer.insert( content , this.contentHasMarkup , this.textAttr ) ;
 			break ;
 		case 'append' :
 		default :
@@ -28817,6 +28848,11 @@ var JpegImage = (function jpegImage() {
             resetInterval = readUint16();
             break;
 
+          case 0xFFDC: // Number of Lines marker
+            readUint16() // skip data length
+            readUint16() // Ignore this data since it represents the image height
+            break;
+            
           case 0xFFDA: // SOS (Start of Scan)
             var scanLength = readUint16();
             var selectorsCount = data[offset++];
@@ -29135,7 +29171,7 @@ function decode(jpegData, userOpts = {}) {
       exifBuffer: decoder.exifBuffer,
       data: opts.useTArray ?
         new Uint8Array(bytesNeeded) :
-        new Buffer(bytesNeeded)
+        Buffer.alloc(bytesNeeded)
     };
     if(decoder.comments.length > 0) {
       image["comments"] = decoder.comments;
@@ -29195,7 +29231,7 @@ Basic GUI blocking jpeg encoder
 */
 
 var btoa = btoa || function(buf) {
-  return new Buffer(buf).toString('base64');
+  return Buffer.from(buf).toString('base64');
 };
 
 function JPEGEncoder(quality) {
@@ -29873,7 +29909,7 @@ function JPEGEncoder(quality) {
 			writeWord(0xFFD9); //EOI
 
 			if (typeof module === 'undefined') return new Uint8Array(byteout);
-      return new Buffer(byteout);
+      return Buffer.from(byteout);
 
 			var jpegDataUri = 'data:image/jpeg;base64,' + btoa(byteout.join(''));
 			
@@ -39765,14 +39801,62 @@ module.exports = ansi ;
 
 
 
+ansi.fgColor = {
+	defaultColor: ansi.defaultColor ,
+	black: ansi.black ,
+	red: ansi.red ,
+	green: ansi.green ,
+	yellow: ansi.yellow ,
+	blue: ansi.blue ,
+	magenta: ansi.magenta ,
+	cyan: ansi.cyan ,
+	white: ansi.white ,
+	grey: ansi.grey ,
+	gray: ansi.gray ,
+	brightBlack: ansi.brightBlack ,
+	brightRed: ansi.brightRed ,
+	brightGreen: ansi.brightGreen ,
+	brightYellow: ansi.brightYellow ,
+	brightBlue: ansi.brightBlue ,
+	brightMagenta: ansi.brightMagenta ,
+	brightCyan: ansi.brightCyan ,
+	brightWhite: ansi.brightWhite
+} ;
+
+
+
+ansi.bgColor = {
+	defaultColor: ansi.defaultBgColor ,
+	black: ansi.bgBlack ,
+	red: ansi.bgRed ,
+	green: ansi.bgGreen ,
+	yellow: ansi.bgYellow ,
+	blue: ansi.bgBlue ,
+	magenta: ansi.bgMagenta ,
+	cyan: ansi.bgCyan ,
+	white: ansi.bgWhite ,
+	grey: ansi.bgGrey ,
+	gray: ansi.bgGray ,
+	brightBlack: ansi.bgBrightBlack ,
+	brightRed: ansi.bgBrightRed ,
+	brightGreen: ansi.bgBrightGreen ,
+	brightYellow: ansi.bgBrightYellow ,
+	brightBlue: ansi.bgBrightBlue ,
+	brightMagenta: ansi.bgBrightMagenta ,
+	brightCyan: ansi.bgBrightCyan ,
+	brightWhite: ansi.bgBrightWhite
+} ;
+
+
+
 ansi.trueColor = ( r , g , b ) => {
 	if ( g === undefined && typeof r === 'string' ) {
 		let hex = r ;
 		if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }	// Strip the # if necessary
 		if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
-		r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
-		g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
-		b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+		r = parseInt( hex.slice( 0 , 2 ) , 16 ) || 0 ;
+		g = parseInt( hex.slice( 2 , 4 ) , 16 ) || 0 ;
+		b = parseInt( hex.slice( 4 , 6 ) , 16 ) || 0 ;
 	}
 
 	return '\x1b[38;2;' + r + ';' + g + ';' + b + 'm' ;
@@ -39785,9 +39869,9 @@ ansi.bgTrueColor = ( r , g , b ) => {
 		let hex = r ;
 		if ( hex[ 0 ] === '#' ) { hex = hex.slice( 1 ) ; }	// Strip the # if necessary
 		if ( hex.length === 3 ) { hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ] ; }
-		r = parseInt( hex.slice( 0 , 2 ) , 16 ) ;
-		g = parseInt( hex.slice( 2 , 4 ) , 16 ) ;
-		b = parseInt( hex.slice( 4 , 6 ) , 16 ) ;
+		r = parseInt( hex.slice( 0 , 2 ) , 16 ) || 0 ;
+		g = parseInt( hex.slice( 2 , 4 ) , 16 ) || 0 ;
+		b = parseInt( hex.slice( 4 , 6 ) , 16 ) || 0 ;
 	}
 
 	return '\x1b[48;2;' + r + ';' + g + ';' + b + 'm' ;
@@ -40434,6 +40518,8 @@ function markupReplace( runtime , match , markup ) {
 	return replacement ;
 }
 
+
+
 // internal method for markupReplace()
 function stackMarkup( runtime , replacement ) {
 	if ( Array.isArray( replacement ) ) {
@@ -40447,6 +40533,15 @@ function stackMarkup( runtime , replacement ) {
 		else { runtime.markupStack.push( replacement ) ; }
 	}
 }
+
+
+
+// Note: the closing bracket is optional to prevent ReDoS
+exports.stripMarkup = str => str.replace( /\^\[[^\]]*]?|\^./g , match =>
+	match === '^^' ? '^' :
+	match === '^ ' ? ' ' :
+	''
+) ;
 
 
 
@@ -40513,12 +40608,12 @@ const DEFAULT_FORMATTER = {
 	} ,
 	dataMarkup: {
 		fg: ( markupStack , key , value ) => {
-			var str = ansi.trueColor( value ) ;
+			var str = ansi.fgColor[ value ] || ansi.trueColor( value ) ;
 			markupStack.push( str ) ;
 			return str ;
 		} ,
 		bg: ( markupStack , key , value ) => {
-			var str = ansi.bgTrueColor( value ) ;
+			var str = ansi.bgColor[ value ] || ansi.bgTrueColor( value ) ;
 			markupStack.push( str ) ;
 			return str ;
 		}
@@ -40530,12 +40625,21 @@ const DEFAULT_FORMATTER = {
 			if ( key[ 0 ] === '#' ) {
 				str = ansi.trueColor( key ) ;
 			}
+			else if ( typeof ansi[ key ] === 'string' ) {
+				str = ansi[ key ] ;
+			}
 		}
 
 		markupStack.push( str ) ;
 		return str ;
 	}
 } ;
+
+// Aliases
+DEFAULT_FORMATTER.dataMarkup.color = DEFAULT_FORMATTER.dataMarkup.c = DEFAULT_FORMATTER.dataMarkup.fgColor = DEFAULT_FORMATTER.dataMarkup.fg ;
+DEFAULT_FORMATTER.dataMarkup.bgColor = DEFAULT_FORMATTER.dataMarkup.bg ;
+
+
 
 exports.createFormatter = ( options ) => exports.formatMethod.bind( Object.assign( {} , DEFAULT_FORMATTER , options ) ) ;
 exports.format = exports.formatMethod.bind( DEFAULT_FORMATTER ) ;
@@ -41572,6 +41676,7 @@ const TRIVIAL_CONSTRUCTOR = new Set( [ Object , Array ] ) ;
 			* 'color': colorful output suitable for terminal
 			* 'html': html output
 			* any object: full controle, inheriting from 'none'
+		* tab: `string` override the tab of the style
 		* depth: depth limit, default: 3
 		* maxLength: length limit for strings, default: 250
 		* outputMaxLength: length limit for the inspect output string, default: 5000
@@ -41642,6 +41747,8 @@ function inspect( options , variable ) {
 	return str ;
 }
 
+exports.inspect = inspect ;
+
 
 
 function inspect_( runtime , options , variable ) {
@@ -41649,11 +41756,11 @@ function inspect_( runtime , options , variable ) {
 		type , pre , indent , isArray , isFunc , specialObject ,
 		str = '' , key = '' , descriptorStr = '' , descriptor , nextAncestors ;
 
-
 	// Prepare things (indentation, key, descriptor, ... )
 
 	type = typeof variable ;
-	indent = options.style.tab.repeat( runtime.depth ) ;
+
+	indent = ( options.tab ?? options.style.tab ).repeat( runtime.depth ) ;
 
 	if ( type === 'function' && options.noFunc ) { return '' ; }
 
@@ -41925,8 +42032,6 @@ function inspect_( runtime , options , variable ) {
 
 	return str ;
 }
-
-exports.inspect = inspect ;
 
 
 
@@ -42759,7 +42864,7 @@ unicode.toArray = str => Array.from( str ) ;
 // Decode a string into an array of Cell (used by Terminal-kit).
 // Wide chars have an additionnal filler cell, so position is correct
 unicode.toCells = ( Cell , str , tabWidth = 4 , linePosition = 0 , ... extraCellArgs ) => {
-	var char , code , fillSize ,
+	var char , code , fillSize , width ,
 		output = [] ;
 
 	for ( char of str ) {
@@ -42771,18 +42876,20 @@ unicode.toCells = ( Cell , str , tabWidth = 4 , linePosition = 0 , ... extraCell
 		else if ( code === 0x09 ) {	// Tab
 			// Depends upon the next tab-stop
 			fillSize = tabWidth - ( linePosition % tabWidth ) - 1 ;
-			output.push( new Cell( '\t' , ... extraCellArgs ) ) ;
+			//output.push( new Cell( '\t' , ... extraCellArgs ) ) ;
+			output.push( new Cell( '\t' , 1 , ... extraCellArgs ) ) ;
 			linePosition += 1 + fillSize ;
-			while ( fillSize -- ) { output.push( new Cell( null , ... extraCellArgs ) ) ; }
+
+			// Add a filler cell
+			while ( fillSize -- ) { output.push( new Cell( ' ' , -2 , ... extraCellArgs ) ) ; }
 		}
 		else {
-			output.push(  new Cell( char , ... extraCellArgs )  ) ;
-			linePosition ++ ;
+			width = unicode.codePointWidth( code ) ,
+			output.push( new Cell( char , width , ... extraCellArgs ) ) ;
+			linePosition += width ;
 
-			if ( unicode.codePointWidth( code ) === 2 ) {
-				output.push( new Cell( null , ... extraCellArgs ) ) ;
-				linePosition ++ ;
-			}
+			// Add an anti-filler cell (a cell with 0 width, following a wide char)
+			while ( -- width > 0 ) { output.push( new Cell( ' ' , -1 , ... extraCellArgs ) ) ; }
 		}
 	}
 
@@ -42792,7 +42899,13 @@ unicode.toCells = ( Cell , str , tabWidth = 4 , linePosition = 0 , ... extraCell
 
 
 unicode.fromCells = ( cells ) => {
-	return cells.map( cell => cell.filler ? '' : cell.char ).join( '' ) ;
+	var cell , str = '' ;
+
+	for ( cell of cells ) {
+		if ( ! cell.filler ) { str += cell.char ; }
+	}
+
+	return str ;
 } ;
 
 
@@ -42888,7 +43001,7 @@ unicode.surrogatePair = char => {
 
 
 
-// Check if a character is a full-width char or not.
+// Check if a character is a full-width char or not
 unicode.isFullWidth = char => unicode.isFullWidthCodePoint( char.codePointAt( 0 ) ) ;
 
 // Return the width of a char, leaner than .width() for one char
@@ -42898,41 +43011,43 @@ unicode.charWidth = char => unicode.codePointWidth( char.codePointAt( 0 ) ) ;
 
 /*
 	Check if a codepoint represent a full-width char or not.
-
-	Borrowed from Node.js source, from readline.js.
 */
 unicode.codePointWidth = code => {
+	// Assuming all emoji are wide here
+	if ( unicode.isEmojiCodePoint( code ) ) { return 2 ; }
+
 	// Code points are derived from:
 	// http://www.unicode.org/Public/UNIDATA/EastAsianWidth.txt
 	if ( code >= 0x1100 && (
 		code <= 0x115f ||	// Hangul Jamo
-			0x2329 === code || // LEFT-POINTING ANGLE BRACKET
-			0x232a === code || // RIGHT-POINTING ANGLE BRACKET
-			// CJK Radicals Supplement .. Enclosed CJK Letters and Months
-			( 0x2e80 <= code && code <= 0x3247 && code !== 0x303f ) ||
-			// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
-			0x3250 <= code && code <= 0x4dbf ||
-			// CJK Unified Ideographs .. Yi Radicals
-			0x4e00 <= code && code <= 0xa4c6 ||
-			// Hangul Jamo Extended-A
-			0xa960 <= code && code <= 0xa97c ||
-			// Hangul Syllables
-			0xac00 <= code && code <= 0xd7a3 ||
-			// CJK Compatibility Ideographs
-			0xf900 <= code && code <= 0xfaff ||
-			// Vertical Forms
-			0xfe10 <= code && code <= 0xfe19 ||
-			// CJK Compatibility Forms .. Small Form Variants
-			0xfe30 <= code && code <= 0xfe6b ||
-			// Halfwidth and Fullwidth Forms
-			0xff01 <= code && code <= 0xff60 ||
-			0xffe0 <= code && code <= 0xffe6 ||
-			// Kana Supplement
-			0x1b000 <= code && code <= 0x1b001 ||
-			// Enclosed Ideographic Supplement
-			0x1f200 <= code && code <= 0x1f251 ||
-			// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
-			0x20000 <= code && code <= 0x3fffd ) ) {
+		code === 0x2329 || // LEFT-POINTING ANGLE BRACKET
+		code === 0x232a || // RIGHT-POINTING ANGLE BRACKET
+		// CJK Radicals Supplement .. Enclosed CJK Letters and Months
+		( 0x2e80 <= code && code <= 0x3247 && code !== 0x303f ) ||
+		// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
+		( 0x3250 <= code && code <= 0x4dbf ) ||
+		// CJK Unified Ideographs .. Yi Radicals
+		( 0x4e00 <= code && code <= 0xa4c6 ) ||
+		// Hangul Jamo Extended-A
+		( 0xa960 <= code && code <= 0xa97c ) ||
+		// Hangul Syllables
+		( 0xac00 <= code && code <= 0xd7a3 ) ||
+		// CJK Compatibility Ideographs
+		( 0xf900 <= code && code <= 0xfaff ) ||
+		// Vertical Forms
+		( 0xfe10 <= code && code <= 0xfe19 ) ||
+		// CJK Compatibility Forms .. Small Form Variants
+		( 0xfe30 <= code && code <= 0xfe6b ) ||
+		// Halfwidth and Fullwidth Forms
+		( 0xff01 <= code && code <= 0xff60 ) ||
+		( 0xffe0 <= code && code <= 0xffe6 ) ||
+		// Kana Supplement
+		( 0x1b000 <= code && code <= 0x1b001 ) ||
+		// Enclosed Ideographic Supplement
+		( 0x1f200 <= code && code <= 0x1f251 ) ||
+		// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
+		( 0x20000 <= code && code <= 0x3fffd )
+	) ) {
 		return 2 ;
 	}
 
@@ -42951,6 +43066,26 @@ unicode.toFullWidth = str => {
 		return code >= 33 && code <= 126  ?  0xff00 + code - 0x20  :  code ;
 	} ) ) ;
 } ;
+
+
+
+// Check if a character is an emoji or not
+unicode.isEmoji = char => unicode.isEmojiCodePoint( char.codePointAt( 0 ) ) ;
+
+// Some doc found here: https://stackoverflow.com/questions/30470079/emoji-value-range
+unicode.isEmojiCodePoint = code =>
+	// Miscellaneous symbols
+	( 0x2600 <= code && code <= 0x26ff ) ||
+	// Dingbats
+	( 0x2700 <= code && code <= 0x27bf ) ||
+	// Emoji
+	( 0x1f000 <= code && code <= 0x1f1ff ) ||
+	( 0x1f300 <= code && code <= 0x1f3fa ) ||
+	( 0x1f400 <= code && code <= 0x1faff ) ;
+
+// Emoji modifier (Fitzpatrick): https://en.wikipedia.org/wiki/Miscellaneous_Symbols_and_Pictographs#Emoji_modifiers
+unicode.isEmojiModifier = char => unicode.isEmojiModifierCodePoint( char.codePointAt( 0 ) ) ;
+unicode.isEmojiModifierCodePoint = code => 0x1f3fb <= code && code <= 0x1f3ff ;
 
 
 },{}],125:[function(require,module,exports){

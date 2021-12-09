@@ -1,4 +1,10 @@
 
+v2.3.0
+------
+
+TextBuffer now supports wide characters (aka full-width char), so does class depending on it like TextTable (#193)
+
+
 v2.2.4
 ------
 
