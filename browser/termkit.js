@@ -8112,7 +8112,12 @@ exports.guessTerminal = function( unpipe ) {
 		process.env.TERM_PROGRAM ? process.env.TERM_PROGRAM :
 		process.env.TERM ;
 
-	if ( platform === 'darwin' ) { appId = path.parse( appId ).name ; }
+	if ( platform === 'darwin' ) {
+		appId = path.parse( appId ).name ;
+	}
+	else if ( platform === 'android' && process.env.TERMUX_VERSION ) {
+		appId = 'termux' ;
+	}
 
 	// safe is true if we are sure about our guess
 	var safe =
@@ -8216,6 +8221,11 @@ exports.guessTerminal = function( unpipe ) {
 		case 'terminal' :
 		case 'Apple_Terminal' :
 			appId = 'osx-256color' ;
+			break ;
+
+			// Android
+
+		case 'termux' :
 			break ;
 
 		default :
@@ -28848,11 +28858,6 @@ var JpegImage = (function jpegImage() {
             resetInterval = readUint16();
             break;
 
-          case 0xFFDC: // Number of Lines marker
-            readUint16() // skip data length
-            readUint16() // Ignore this data since it represents the image height
-            break;
-            
           case 0xFFDA: // SOS (Start of Scan)
             var scanLength = readUint16();
             var selectorsCount = data[offset++];
@@ -29171,7 +29176,7 @@ function decode(jpegData, userOpts = {}) {
       exifBuffer: decoder.exifBuffer,
       data: opts.useTArray ?
         new Uint8Array(bytesNeeded) :
-        Buffer.alloc(bytesNeeded)
+        new Buffer(bytesNeeded)
     };
     if(decoder.comments.length > 0) {
       image["comments"] = decoder.comments;
@@ -29231,7 +29236,7 @@ Basic GUI blocking jpeg encoder
 */
 
 var btoa = btoa || function(buf) {
-  return Buffer.from(buf).toString('base64');
+  return new Buffer(buf).toString('base64');
 };
 
 function JPEGEncoder(quality) {
@@ -29909,7 +29914,7 @@ function JPEGEncoder(quality) {
 			writeWord(0xFFD9); //EOI
 
 			if (typeof module === 'undefined') return new Uint8Array(byteout);
-      return Buffer.from(byteout);
+      return new Buffer(byteout);
 
 			var jpegDataUri = 'data:image/jpeg;base64,' + btoa(byteout.join(''));
 			

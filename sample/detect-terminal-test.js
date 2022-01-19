@@ -88,6 +88,7 @@ async function detect() {
 	term( '$COLORTERM: %s\n' , process.env.COLORTERM ) ;
 	term( '$VTE_VERSION: %s\n' , process.env.VTE_VERSION ) ;
 	term( '$TERM_PROGRAM: %s\n' , process.env.TERM_PROGRAM ) ;
+	term( '$TERMUX_VERSION: %s\n' , process.env.TERMUX_VERSION ) ;
 	term( '\n' ) ;
 
 
