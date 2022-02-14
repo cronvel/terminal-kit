@@ -65,5 +65,11 @@
       2021
     ],
     "owner": "Cédric Ronvel"
-  }
+  },
+  "files": [
+    "browser/",
+    "lib/",
+    "LICENSE",
+    "README.md"
+  ],
 }
