@@ -13,7 +13,8 @@ log
 _build
 _templates
 _static
-
+emoji-width.map.json
+emoji-width.ranges.json
 
 # gitignore / Node.gitignore #
 ##############################
