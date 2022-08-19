@@ -42,7 +42,9 @@ var document = term.createDocument( {
 
 
 
-var placeHolder = 'console.log( "Hello world!" ) ;' ;
+//var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\n\n' ;
+var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
+//var placeHolder = 'fn( 1 ) ;\n\n' ;
 
 try {
 	var StateMachine = require( 'text-machine' ) ;
@@ -53,7 +55,12 @@ try {
 	} ) ;
 }
 catch( error ) {
-	placeHolder = 'Try to:\n"npm install text-machine"\n... to enjoy a mini demo of\na Javascript syntax highlighter!' ;
+	if ( error.code === 'MODULE_NOT_FOUND' ) {
+		placeHolder = 'Try to:\n"npm install text-machine"\n... to enjoy a mini demo of\na Javascript syntax highlighter!' ;
+	}
+	else {
+		throw error ;
+	}
 }
 
 
