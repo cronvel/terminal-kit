@@ -43,9 +43,9 @@ var document = term.createDocument( {
 
 
 //var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\n\n' ;
-//var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
+var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
 //var placeHolder = 'fn( 1 ) ;\n\n' ;
-var placeHolder = '\n' ;
+//var placeHolder = '\n' ;
 
 try {
 	var StateMachine = require( 'text-machine' ) ;
