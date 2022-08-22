@@ -43,15 +43,17 @@ var document = term.createDocument( {
 
 
 //var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\n\n' ;
-var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
+//var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
 //var placeHolder = 'fn( 1 ) ;\n\n' ;
+//var placeHolder = 're = /^some regexp (bob|bill) [a-zA-Z_-]+$/g ;\n' ;
+var placeHolder = 're = {\n  prop: "value" ,\n  key: 3\n} ;\n' ;
 //var placeHolder = '\n' ;
 
 try {
 	var StateMachine = require( 'text-machine' ) ;
 
 	var stateMachine = new StateMachine( {
-		program: require( 'text-machine/sample/javascript.js' ) ,
+		program: require( 'text-machine/languages/javascript.js' ) ,
 		api: termkit.TextBuffer.TextMachineApi
 	} ) ;
 }

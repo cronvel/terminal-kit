@@ -564,20 +564,24 @@ It updates the cursor position so the user know where he is typing.
 
 
 <a name="ref.TextBuffer.load"></a>
-### .load( filepath , callback )
+### .load( filepath , [callback] )
 
 * filepath `string` the path of the file to load
-* callback `Function( error )` completion callback
+* callback `Function( error )` completion callback, DEPRECATED: prefer the Promise interface.
+
+**If callback is omitted**, it returns a Promise on completion.
 
 This erases all contents (text, attr and misc) and loads the content of the file (which is a text file).
 
 
 
 <a name="ref.TextBuffer.save"></a>
-### .save( filepath , callback )
+### .save( filepath , [callback] )
 
 * filepath `string` the path of the file to save into
-* callback `Function( error )` completion callback
+* callback `Function( error )` completion callback, DEPRECATED: prefer the Promise interface.
+
+**If callback is omitted**, it returns a Promise on completion.
 
 This saves the raw text content into a file.
 

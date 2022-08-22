@@ -54,10 +54,10 @@ var text = new termkit.Text( {
 
 /*
 setTimeout( () => {
-	text.setContent( ['^RS'] , true ) ;
-	//text.setContent( ['^RChanged!^ ljsdlkfjsmlkdjfmlksjflkjdslkfj','bob'] , true ) ;
-} , 1200 ) ;
-*/
+	//text.setContent( ['^RS'] , true ) ;
+	text.setContent( ['^RChanged!^ some very very very long text','bob'] , true ) ;
+} , 800 ) ;
+//*/
 
 term.on( 'key' , function( key ) {
 	switch( key ) {
