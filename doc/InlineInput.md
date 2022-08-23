@@ -85,7 +85,7 @@ This event is triggered when the user cancels the input, if the *inlineInput* is
 * *endOfWord*: move the cursor to the end of the next word, default: CTRL_RIGHT
 * *startOfLine*: move the cursor at the begining of input, default: HOME
 * *endOfLine*: move the cursor at the end of input, default: END
-* *copyClipboard*: copy to clipboard (rely on xclip), default: CTRL_O
+* *copyClipboard*: copy to clipboard (rely on xclip), default: CTRL_Y
 * *pasteClipboard*: paste from clipboard (rely on xclip), default: CTRL_P
 
 

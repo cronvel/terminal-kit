@@ -68,7 +68,7 @@ See [Element's key event](Element.md#ref.Element.event.key).
 * *scrollBottom*: scroll to the bottom, default: END
 * *scrollLeft*: scroll left, default: LEFT
 * *scrollRight*: scroll right, default: RIGHT
-* *copyClipboard*: copy to clipboard, default: CTRL_O
+* *copyClipboard*: copy to clipboard, default: CTRL_Y
 
 
 

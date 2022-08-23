@@ -1,4 +1,10 @@
 
+v2.7.0
+------
+
+MINOR: now all document widgets that support copy and paste will use Ctrl-Y (by default) for copy instead of Ctrl-O (vi/vim use 'y' for copying, aka 'yank'), it still use Ctrl-P for paste (vi/vim use 'p' for paste, aka 'put')
+
+
 v2.6.0
 ------
 
