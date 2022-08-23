@@ -52,6 +52,17 @@ var inlineInput = new termkit.InlineFileInput( {
     //*/
     //firstLineRightShift: 8 ,
     //width: 36 ,
+    
+    noEmpty: true ,
+
+    //* Set what is accepted, default to all and unexistant
+    accept: {
+    	unexistant: true ,
+    	file: true ,
+    	//directory: true
+	} ,
+	//*/
+    
     width: 100 ,
     cancelable: true ,
 	baseDir: './' ,

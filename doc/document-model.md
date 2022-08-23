@@ -37,6 +37,7 @@ it manages widget keyboard focus, event dispatching, widget cycling, **with mous
 	* [EditableTextBox](EditableTextBox.md#top)
 	* [Form](Form.md#top)
 	* [InlineInput](InlineInput.md#top)
+	* [InlineFileInput](InlineFileInput.md#top)
 	* [LabeledInput](LabeledInput.md#top)
 	* [Layout](Layout.md#top)
 	* [RowMenu](RowMenu.md#top)

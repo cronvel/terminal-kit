@@ -1,4 +1,10 @@
 
+v2.8.0
+------
+
+New Document widget - InlineFileInput: an InlineInput that autocomplete for files and/or directories, accepting or not unexisting files, etc...
+
+
 v2.7.0
 ------
 
