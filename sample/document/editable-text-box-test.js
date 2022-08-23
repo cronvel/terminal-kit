@@ -97,7 +97,7 @@ term.on( 'key' , function( key ) {
 			process.exit() ;
 			break ;
 		
-		case 'CTRL_K' :
+		case 'CTRL_D' :
 			term.saveCursor() ;
 			term.moveTo( 1 , 25 ) ;
 			term.styleReset() ;

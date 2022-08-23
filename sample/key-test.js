@@ -64,6 +64,7 @@ term.on( 'key' , ( name , matches , data ) => {
 		", all matches:" , matches ,
 		", is character:" , data.isCharacter ,
 		", codepoint:" , data.codepoint ? data.codepoint.toString( 16 ) : '' ,
+		", meta:" , data.meta ,
 		", buffer:" , Buffer.isBuffer( data.code ) ? data.code : data.code.toString( 16 )
 	) ;
 
@@ -73,10 +74,15 @@ term.on( 'key' , ( name , matches , data ) => {
 			terminate() ;
 			break ;
 
-		case 'CTRL_K' :
+		case 'CTRL_ALT_K' :
 			applicationKeypad = ! applicationKeypad ;
 			term.applicationKeypad( applicationKeypad ) ;
-			term.green( 'CTRL-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
+			term.green( 'CTRL-ALT-K received, switching application keypad mode %s...\n' , applicationKeypad ? 'on' : 'off' ) ;
+			break ;
+
+		case 'CTRL_K' :
+			term.setMetaKeyPrefix( 'META' ) ;
+			term.green( 'CTRL-K received, set meta prefix...\n' ) ;
 			break ;
 	}
 } ) ;

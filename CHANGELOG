@@ -1,4 +1,13 @@
 
+v2.8.3
+------
+
+EditableTextBox: Fix bug introduced in 2.8.x that prevent content passed to the constructor to be set
+Add methods term.setMetaKeyPrefix() and Document#setMetaKeyPrefix() to handle meta key combo, use it on various widget (NOT DOCUMENTED ATM)
+Add methods Document#getCopyBuffer()/.setCopyBuffer() and differentiate between OS clipboard and internal application clipboard (NOT DOCUMENTED ATM)
+Add startOfSelection/endOfSelection to widgets/TextBuffer (NOT DOCUMENTED ATM)
+
+
 v2.8.2
 ------
 

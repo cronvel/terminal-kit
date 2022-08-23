@@ -4042,6 +4042,7 @@ Terminal.create = function( createOptions ) {
 
 	term.onStdin = onStdin.bind( term ) ;	// bindings...
 	term.prependStdinChunk = null ;
+	term.metaKeyPrefix = '' ;
 
 	term.lock = {} ;
 
@@ -5129,7 +5130,7 @@ function onStdin( chunk ) {
 					}
 					else {
 						bytes = i ;
-						this.emit( 'key' , keymap.name , keymap.matches , { isCharacter: false , code: startBuffer } ) ;
+						this.emitKey( keymap.name , keymap.matches , { isCharacter: false , code: startBuffer } ) ;
 					}
 
 					break ;
@@ -5200,12 +5201,12 @@ function onStdin( chunk ) {
 			if ( bytes > 2 ) { codepoint = string.unicode.firstCodePoint( char ) ; }
 			else { codepoint = char.charCodeAt( 0 ) ; }
 
-			this.emit( 'key' , char , [ char ] , { isCharacter: true , codepoint: codepoint , code: buffer } ) ;
+			this.emitKey( char , [ char ] , { isCharacter: true , codepoint: codepoint , code: buffer } ) ;
 		}
 		else {
 			// Standard ASCII
 			char = String.fromCharCode( chunk[ index ] ) ;
-			this.emit( 'key' , char , [ char ] , { isCharacter: true , codepoint: chunk[ index ] , code: chunk[ index ] } ) ;
+			this.emitKey( char , [ char ] , { isCharacter: true , codepoint: chunk[ index ] , code: chunk[ index ] } ) ;
 		}
 
 		index += bytes ;
@@ -5218,6 +5219,27 @@ function onStdin( chunk ) {
 		this.prependStdinChunk = null ;
 	}
 }
+
+
+
+// Internal?
+notChainable.emitKey = function( name , matches , data ) {
+	if ( this.metaKeyPrefix ) {
+		data.meta = this.metaKeyPrefix ;
+		data.isCharacter = false ;
+		name = this.metaKeyPrefix + '_' + name.toUpperCase() ;
+		this.metaKeyPrefix = null ;
+	}
+
+	this.emit( 'key' , name , matches , data ) ;
+} ;
+
+
+
+// TODOC
+notChainable.setMetaKeyPrefix = function( prefix ) {
+	this.metaKeyPrefix = prefix && typeof prefix === 'string' ? prefix : '' ;
+} ;
 
 
 
@@ -5248,7 +5270,7 @@ notChainable.grabInput = function( options , safe ) {
 
 	// Disable grabInput mode
 	var disable = () => {
-		// Very important: removing all listeners don't switch back to pause mode.
+		// Very important: removing all listeners doesn't switch back to pause mode.
 		// This is some nasty Node.js quirks (the documentation pleads for backward compatibility).
 		this.stdin.pause() ;
 
@@ -6789,6 +6811,42 @@ TextBuffer.prototype.setSelectionRegion = function( region ) {
 		this.selectionRegion.xmax = region.xmax ;
 		this.selectionRegion.ymax = region.ymax ;
 	}
+
+	this.hilightSelection() ;
+} ;
+
+
+
+// TODOC
+TextBuffer.prototype.startOfSelection = function() {
+	if ( this.selectionRegion ) {
+		// Start by unhilighting existing selection
+		this.hilightSelection( false ) ;
+	}
+	else {
+		this.selectionRegion = {} ;
+	}
+
+	this.selectionRegion.xmin = this.cx ;
+	this.selectionRegion.ymin = this.cy ;
+
+	this.hilightSelection() ;
+} ;
+
+
+
+// TODOC
+TextBuffer.prototype.endOfSelection = function() {
+	if ( this.selectionRegion ) {
+		// Start by unhilighting existing selection
+		this.hilightSelection( false ) ;
+	}
+	else {
+		this.selectionRegion = {} ;
+	}
+
+	this.selectionRegion.xmax = this.cx - 1 ;
+	this.selectionRegion.ymax = this.cy ;
 
 	this.hilightSelection() ;
 } ;
@@ -10724,6 +10782,7 @@ function Document( options ) {
 	}
 
 	this.elementByShortcut = {} ;
+	this.copyBuffer = {} ;
 
 	//*
 	this.setClipboard = Promise.debounceUpdate( async ( str , source ) => {
@@ -11004,6 +11063,13 @@ Document.prototype.defaultKeyHandling = function( key , altKeys , data ) {
 			break ;
 	}
 } ;
+
+
+
+// TODOC
+Document.prototype.setMetaKeyPrefix = function( prefix ) { this.eventSource.setMetaKeyPrefix( prefix ) ; } ;
+Document.prototype.getCopyBuffer = function( key = 'content' ) { return this.copyBuffer[ key ] ; } ;
+Document.prototype.setCopyBuffer = function( value , key = 'content' ) { this.copyBuffer[ key ] = value ; } ;
 
 
 
@@ -11588,6 +11654,10 @@ function EditableTextBox( options ) {
 	this.on( 'focus' , this.onFocus ) ;
 	this.on( 'middleClick' , this.onMiddleClick ) ;
 
+	if ( this.setContent === EditableTextBox.prototype.setContent ) {
+		this.setContent( options.content , options.contentHasMarkup , true ) ;
+	}
+
 	// Only draw if we are not a superclass of the object
 	if ( this.elementType === 'EditableTextBox' && ! options.noDraw ) { this.draw() ; }
 }
@@ -11618,9 +11688,14 @@ EditableTextBox.prototype.keyBindings = {
 	TAB: 'tab' ,
 	PAGE_UP: 'scrollUp' ,
 	PAGE_DOWN: 'scrollDown' ,
+	CTRL_B: 'startOfSelection' ,
+	CTRL_E: 'endOfSelection' ,
+	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copyClipboard' ,
-	CTRL_P: 'pasteClipboard'
+	CTRL_Y: 'copy' ,
+	META_Y: 'copyClipboard' ,
+	CTRL_P: 'paste' ,
+	META_P: 'pasteClipboard'
 } ;
 
 
@@ -11739,6 +11814,45 @@ EditableTextBox.prototype.onKey = function( key , trash , data ) {
 				this.scroll( 0 , dy ) ;
 				break ;
 
+			case 'startOfSelection' :
+				this.textBuffer.startOfSelection() ;
+				this.draw() ;
+				break ;
+
+			case 'endOfSelection' :
+				this.textBuffer.endOfSelection() ;
+				this.draw() ;
+				break ;
+
+			case 'meta' :
+				if ( this.document ) {
+					this.document.setMetaKeyPrefix( 'META' ) ;
+				}
+				break ;
+
+			case 'copy' :
+				if ( this.document ) {
+					this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
+				}
+				break ;
+
+			case 'paste' :
+				if ( this.document ) {
+					let str = this.document.getCopyBuffer() ;
+					if ( str && typeof str === 'string' ) {
+						this.textBuffer.insert( str , this.textAttr ) ;
+						this.textBuffer.runStateMachine() ;
+						this.autoScrollAndDraw() ;
+					}
+				}
+				break ;
+
+			case 'copyClipboard' :
+				if ( this.document ) {
+					this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
+				}
+				break ;
+
 			case 'pasteClipboard' :
 				if ( this.document ) {
 					this.document.getClipboard()
@@ -11750,12 +11864,6 @@ EditableTextBox.prototype.onKey = function( key , trash , data ) {
 							}
 						} )
 						.catch( () => undefined ) ;
-				}
-				break ;
-
-			case 'copyClipboard' :
-				if ( this.document ) {
-					this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
 				}
 				break ;
 
@@ -13328,9 +13436,14 @@ InlineInput.prototype.keyBindings = {
 	CTRL_RIGHT: 'endOfWord' ,
 	HOME: 'startOfLine' ,
 	END: 'endOfLine' ,
+	CTRL_B: 'startOfSelection' ,
+	CTRL_E: 'endOfSelection' ,
+	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copyClipboard' ,
-	CTRL_P: 'pasteClipboard'
+	CTRL_Y: 'copy' ,
+	META_Y: 'copyClipboard' ,
+	CTRL_P: 'paste' ,
+	META_P: 'pasteClipboard'
 } ;
 
 
@@ -13631,23 +13744,58 @@ InlineInput.prototype.onKey = function( key , trash , data ) {
 				this.autoResizeAndDrawCursor() ;
 				break ;
 
-			case 'pasteClipboard' :
+			case 'startOfSelection' :
+				this.textBuffer.startOfSelection() ;
+				this.draw() ;
+				break ;
+
+			case 'endOfSelection' :
+				this.textBuffer.endOfSelection() ;
+				this.draw() ;
+				break ;
+
+			case 'meta' :
 				if ( this.document ) {
-					this.document.getClipboard().then( str => {
-						if ( str ) {
-							this.textBuffer.insert( str , this.textAttr ) ;
-							this.textBuffer.runStateMachine() ;
-							if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-							else { this.autoResizeAndDraw() ; }
-						}
-					} )
-						.catch( () => undefined ) ;
+					this.document.setMetaKeyPrefix( 'META' ) ;
+				}
+				break ;
+
+			case 'copy' :
+				if ( this.document ) {
+					this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
+				}
+				break ;
+
+			case 'paste' :
+				if ( this.document ) {
+					let str = this.document.getCopyBuffer() ;
+					if ( str && typeof str === 'string' ) {
+						this.textBuffer.insert( str , this.textAttr ) ;
+						this.textBuffer.runStateMachine() ;
+						if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+						else { this.autoResizeAndDraw() ; }
+					}
 				}
 				break ;
 
 			case 'copyClipboard' :
 				if ( this.document ) {
 					this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
+				}
+				break ;
+
+			case 'pasteClipboard' :
+				if ( this.document ) {
+					this.document.getClipboard()
+						.then( str => {
+							if ( str ) {
+								this.textBuffer.insert( str , this.textAttr ) ;
+								this.textBuffer.runStateMachine() ;
+								if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+								else { this.autoResizeAndDraw() ; }
+							}
+						} )
+						.catch( () => undefined ) ;
 				}
 				break ;
 
@@ -13850,9 +13998,14 @@ LabeledInput.prototype.editableTextBoxKeyBindings = {
 	CTRL_RIGHT: 'endOfWord' ,
 	HOME: 'startOfLine' ,
 	END: 'endOfLine' ,
+	CTRL_B: 'startOfSelection' ,
+	CTRL_E: 'endOfSelection' ,
+	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copyClipboard' ,
-	CTRL_P: 'pasteClipboard'
+	CTRL_Y: 'copy' ,
+	META_Y: 'copyClipboard' ,
+	CTRL_P: 'paste' ,
+	META_P: 'pasteClipboard'
 } ;
 
 
@@ -13864,9 +14017,14 @@ LabeledInput.prototype.multiLineEditableTextBoxKeyBindings = Object.assign( {} ,
 	DOWN: 'down' ,
 	PAGE_UP: 'scrollUp' ,
 	PAGE_DOWN: 'scrollDown' ,
+	CTRL_B: 'startOfSelection' ,
+	CTRL_E: 'endOfSelection' ,
+	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copyClipboard' ,
-	CTRL_P: 'pasteClipboard'
+	CTRL_Y: 'copy' ,
+	META_Y: 'copyClipboard' ,
+	CTRL_P: 'paste' ,
+	META_P: 'pasteClipboard'
 } ) ;
 
 
@@ -15827,8 +15985,10 @@ TextBox.prototype.keyBindings = {
 	END: 'scrollBottom' ,
 	LEFT: 'scrollLeft' ,
 	RIGHT: 'scrollRight' ,
+	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copyClipboard'
+	CTRL_Y: 'copy' ,
+	META_Y: 'copyClipboard'
 } ;
 
 
@@ -16251,6 +16411,18 @@ TextBox.prototype.onKey = function( key , trash , data ) {
 
 		case 'scrollBottom' :
 			this.scrollToBottom() ;
+			break ;
+
+		case 'meta' :
+			if ( this.document ) {
+				this.document.setMetaKeyPrefix( 'META' ) ;
+			}
+			break ;
+
+		case 'copy' :
+			if ( this.document ) {
+				this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
+			}
 			break ;
 
 		case 'copyClipboard' :
