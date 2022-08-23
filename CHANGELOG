@@ -1,4 +1,10 @@
 
+v2.8.1
+------
+
+Document widgets: fix issues when destroying widgets, and issues with event listener + inheritance
+
+
 v2.8.0
 ------
 

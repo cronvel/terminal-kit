@@ -8914,10 +8914,6 @@ BaseMenu.prototype.destroy = function( isSubDestroy , noDraw = false ) {
 	if ( this.destroyed ) { return ; }
 	if ( this.submenu ) { this.submenu.destroy( true ) ; }
 
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'wheel' , this.onWheel ) ;
-	this.off( 'focus' , this.onFocus ) ;
-
 	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
 } ;
 
@@ -9434,20 +9430,6 @@ Button.prototype.actionKeyBindings = {} ;
 
 
 
-Button.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'shortcut' , this.onShortcut ) ;
-	this.off( 'focus' , this.onFocus ) ;
-	this.off( 'click' , this.onClick ) ;
-	this.off( 'hover' , this.onHover ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 Button.prototype.setContent = function( content , hasMarkup , dontDraw = false , dontResize = false ) {
 	Element.prototype.setContent.call( this , content , hasMarkup , true , true ) ;
 
@@ -9742,18 +9724,6 @@ ColumnMenu.prototype.defaultOptions = {
 	turnedOnFocusAttr: { bgColor: 'brightCyan' , bold: true } ,
 	turnedOffBlurAttr: { bgColor: 'gray' , dim: true } ,
 	turnedOffFocusAttr: { bgColor: 'white' , color: 'black' , bold: true }
-} ;
-
-
-
-ColumnMenu.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'focus' , this.onFocus ) ;
-	this.off( 'parentResize' , this.onParentResize ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
 } ;
 
 
@@ -10376,19 +10346,6 @@ Container.prototype.isContainer = true ;
 Container.prototype.containerBorderSize = 0 ;
 
 const termkit = require( '../termkit.js' ) ;
-
-
-
-Container.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'click' , this.onClick ) ;
-	this.off( 'drag' , this.onDrag ) ;
-	this.off( 'wheel' , this.onWheel ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
 
 
 
@@ -11428,16 +11385,6 @@ DropDownMenu.prototype.elementType = 'DropDownMenu' ;
 
 
 
-DropDownMenu.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'clickOut' , this.onClickOut ) ;
-
-	RowMenu.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 DropDownMenu.prototype.keyBindings = {
 	LEFT: 'previous' ,
 	RIGHT: 'next' ,
@@ -11628,9 +11575,7 @@ function EditableTextBox( options ) {
 
 	TextBox.call( this , options ) ;
 
-	this.onKey = this.onKey.bind( this ) ;
 	this.onFocus = this.onFocus.bind( this ) ;
-	//this.onClick = this.onClick.bind( this ) ;
 	this.onMiddleClick = this.onMiddleClick.bind( this ) ;
 
 	if ( options.keyBindings ) { this.keyBindings = options.keyBindings ; }
@@ -11640,9 +11585,7 @@ function EditableTextBox( options ) {
 
 	this.updateStatus() ;
 
-	this.on( 'key' , this.onKey ) ;
 	this.on( 'focus' , this.onFocus ) ;
-	//this.on( 'click' , this.onClick ) ;
 	this.on( 'middleClick' , this.onMiddleClick ) ;
 
 	// Only draw if we are not a superclass of the object
@@ -11656,19 +11599,6 @@ EditableTextBox.prototype.constructor = EditableTextBox ;
 EditableTextBox.prototype.elementType = 'EditableTextBox' ;
 
 EditableTextBox.prototype.needInput = true ;
-
-
-
-EditableTextBox.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'focus' , this.onFocus ) ;
-	//this.off( 'click' , this.onClick ) ;
-	this.off( 'middleClick' , this.onMiddleClick ) ;
-
-	TextBox.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
 
 
 
@@ -11925,12 +11855,17 @@ const NextGenEvents = require( 'nextgen-events' ) ;
 // Avoid requiring Document at top-level, it could cause circular require troubles
 //const Document = require( './Document.js' ) ;
 
+var autoId = 0 ;
+
 
 
 function Element( options = {} ) {
 	this.setInterruptible( true ) ;
 
+	this.uid = autoId ++ ;	// Useful for debugging
 	this.parent = options.parent && options.parent.elementType ? options.parent : null ;
+	//console.error( "Creating " + this.elementType + " #" + this.uid + ( this.parent ? " (from parent " + this.parent.elementType + " #" + this.parent.uid + ")" : '' ) ) ;
+
 	this.document = null ;
 	this.destroyed = false ;
 	this.inlineTerm = options.inlineTerm || null ;	// inline mode, with this terminal as output
@@ -12031,6 +11966,7 @@ Element.prototype.destroy = function( isSubDestroy = false , noDraw = false ) {
 		this.children[ i ].destroy( true ) ;
 	}
 
+	this.removeAllListeners() ;
 	this.children.length = 0 ;
 	this.zChildren.length = 0 ;
 	this.document.removeElementShortcuts( this ) ;
@@ -12829,17 +12765,6 @@ Form.prototype.constructor = Form ;
 Form.prototype.elementType = 'Form' ;
 
 Form.prototype.needInput = true ;
-
-
-
-Form.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'focus' , this.onFocus ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
 
 
 
@@ -13907,19 +13832,6 @@ LabeledInput.prototype.propagateZ = true ;
 
 
 
-LabeledInput.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'focus' , this.onFocus ) ;
-	this.off( 'click' , this.onClick ) ;
-	if ( this.input ) { this.off( 'submit' , this.onInputSubmit ) ; }
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 LabeledInput.prototype.keyBindings = {
 	ENTER: 'submit' ,
 	KP_ENTER: 'submit' ,
@@ -14258,16 +14170,6 @@ module.exports = Layout ;
 Layout.prototype = Object.create( Element.prototype ) ;
 Layout.prototype.constructor = Layout ;
 Layout.prototype.elementType = 'Layout' ;
-
-
-
-Layout.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'parentResize' , this.onParentResize ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
 
 
 
@@ -14652,17 +14554,6 @@ RowMenu.prototype.defaultOptions = {
 	buttonFocusAttr: { bgColor: 'green' , color: 'blue' , dim: true } ,
 	buttonDisabledAttr: { bgColor: 'white' , color: 'brightBlack' } ,
 	buttonSubmittedAttr: { bgColor: 'brightWhite' , color: 'brightBlack' }
-} ;
-
-
-
-RowMenu.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'focus' , this.onFocus ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
 } ;
 
 
@@ -15052,16 +14943,6 @@ SelectList.prototype.defaultOptions = {
 
 
 
-SelectList.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'clickOut' , this.onClickOut ) ;
-
-	ColumnMenu.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 SelectList.prototype.toggle = function( showMenu = null , noDraw = false ) {
 	var i , iMax ;
 
@@ -15286,16 +15167,6 @@ SelectListMulti.prototype.defaultOptions = {
 
 
 
-SelectListMulti.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'clickOut' , this.onClickOut ) ;
-
-	ColumnMenuMulti.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 SelectListMulti.prototype.toggle = function( showMenu = null , noDraw = false ) {
 	var i , iMax ;
 
@@ -15467,18 +15338,6 @@ Slider.prototype.keyBindings = {
 Slider.prototype.buttonKeyBindings = {
 	ENTER: 'submit' ,
 	KP_ENTER: 'submit'
-} ;
-
-
-
-Slider.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'click' , this.onClick ) ;
-	this.off( 'drag' , this.onDrag ) ;
-	this.off( 'wheel' , this.onWheel ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
 } ;
 
 
@@ -15958,20 +15817,6 @@ TextBox.prototype.strictInlineSupport = true ;
 
 
 
-TextBox.prototype.destroy = function( isSubDestroy , noDraw = false ) {
-	if ( this.destroyed ) { return ; }
-
-	this.off( 'key' , this.onKey ) ;
-	this.off( 'click' , this.onClick ) ;
-	this.off( 'drag' , this.onDrag ) ;
-	this.off( 'wheel' , this.onWheel ) ;
-	this.off( 'parentResize' , this.onParentResize ) ;
-
-	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
-} ;
-
-
-
 TextBox.prototype.keyBindings = {
 	UP: 'tinyScrollUp' ,
 	DOWN: 'tinyScrollDown' ,
@@ -16375,6 +16220,7 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 
 
 TextBox.prototype.onKey = function( key , trash , data ) {
+	console.error( "Entering TextBox#onKey()" ) ;
 	switch( this.keyBindings[ key ] ) {
 		case 'tinyScrollUp' :
 			this.scroll( 0 , Math.ceil( this.textAreaHeight / 5 ) ) ;
