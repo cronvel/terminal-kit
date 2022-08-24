@@ -2,7 +2,7 @@
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -426,7 +426,7 @@ Palette.prototype.clStep = function( chromaColor , cAdjust , lAdjust , fixRgb = 
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -977,7 +977,7 @@ Rect.wrapIterator = function( p , iterator ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -2782,7 +2782,7 @@ ScreenBuffer.prototype.saveSync = ScreenBuffer.prototype.saveSyncV2 ;
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -3948,7 +3948,7 @@ ScreenBufferHD.prototype.saveSync = ScreenBufferHD.prototype.saveSyncV2 ;
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -6159,7 +6159,7 @@ notChainable.drawImage = function( filepath , options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -7888,7 +7888,7 @@ TextMachineApi.hint = function( context , buffer , hints ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -7965,7 +7965,7 @@ module.exports = function autoComplete( array , startString , returnAlternatives
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8044,7 +8044,7 @@ module.exports = function( value , options ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8119,7 +8119,7 @@ module.exports=[
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8529,7 +8529,7 @@ exports.getDetectedTerminal = async function( callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8556,6 +8556,7 @@ exports.getDetectedTerminal = async function( callback ) {
 
 
 
+const Element = require( './Element.js' ) ;
 const Text = require( './Text.js' ) ;
 const spChars = require( '../spChars.js' ) ;
 
@@ -8600,10 +8601,9 @@ function AnimatedText( options ) {
 }
 
 module.exports = AnimatedText ;
+Element.inherit( AnimatedText , Text ) ;
 
-AnimatedText.prototype = Object.create( Text.prototype ) ;
-AnimatedText.prototype.constructor = AnimatedText ;
-AnimatedText.prototype.elementType = 'AnimatedText' ;
+
 
 AnimatedText.prototype.inlineCursorRestoreAfterDraw = true ;
 
@@ -8634,11 +8634,11 @@ AnimatedText.prototype.autoUpdate = function() {
 } ;
 
 
-},{"../spChars.js":50,"./Text.js":33}],14:[function(require,module,exports){
+},{"../spChars.js":50,"./Element.js":23,"./Text.js":33}],14:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8703,10 +8703,7 @@ function Bar( options ) {
 }
 
 module.exports = Bar ;
-
-Bar.prototype = Object.create( Element.prototype ) ;
-Bar.prototype.constructor = Bar ;
-Bar.prototype.elementType = 'Bar' ;
+Element.inherit( Bar ) ;
 
 
 
@@ -8832,7 +8829,7 @@ Bar.prototype.setValue = function( value , internalAndNoDraw ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -8922,7 +8919,6 @@ function BaseMenu( options = {} ) {
 	this.onButtonFocus = this.onButtonFocus.bind( this ) ;
 	this.onButtonBlinked = this.onButtonBlinked.bind( this ) ;
 	this.onSubmenuSubmit = this.onSubmenuSubmit.bind( this ) ;
-	this.onKey = this.onKey.bind( this ) ;
 	this.onWheel = this.onWheel.bind( this ) ;
 	this.onFocus = this.onFocus.bind( this ) ;
 
@@ -8968,10 +8964,9 @@ function BaseMenu( options = {} ) {
 }
 
 module.exports = BaseMenu ;
+Element.inherit( BaseMenu ) ;
 
-BaseMenu.prototype = Object.create( Element.prototype ) ;
-BaseMenu.prototype.constructor = BaseMenu ;
-BaseMenu.prototype.elementType = 'BaseMenu' ;
+
 
 BaseMenu.prototype.needInput = true ;
 
@@ -9077,63 +9072,6 @@ BaseMenu.prototype.setItem = function( itemValue , itemOptions ) {
 	}
 
 	return true ;
-} ;
-
-
-
-BaseMenu.prototype.onKey = function( key , trash , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'previous' :
-			this.focusChild = this.focusPreviousChild( ! this.maxPage ) ;
-			if ( this.focusChild === this.children[ 0 ] && this.maxPage && this.page > 0 ) {
-				this.previousPage( 'backCycle' ) ;
-			}
-			break ;
-		case 'next' :
-			this.focusChild = this.focusNextChild( ! this.maxPage ) ;
-			if ( this.focusChild === this.children[ this.children.length - 1 ] && this.maxPage && this.page < this.maxPage ) {
-				this.nextPage( 'cycle' ) ;
-			}
-			break ;
-		case 'previousPage' :
-			if ( this.maxPage && this.page > 0 ) {
-				this.previousPage( 'backCycle' ) ;
-			}
-			break ;
-		case 'nextPage' :
-			if ( this.maxPage && this.page < this.maxPage ) {
-				this.nextPage( 'cycle' ) ;
-			}
-			break ;
-		case 'firstPage' :
-			if ( this.maxPage && this.page !== 0 ) {
-				this.toPage( 0 , 'backCycle' ) ;
-			}
-			break ;
-		case 'lastPage' :
-			if ( this.maxPage && this.page !== this.maxPage ) {
-				this.toPage( this.maxPage , 'cycle' ) ;
-			}
-			break ;
-		case 'parentMenu' :
-			if ( this.isSubmenu ) {
-				// Back up the parent, because current instance can be destroyed by parent.closeSubmenu()
-				let parent = this.parent ;
-				if ( this.parent.submenuOptions.hideParent ) { this.parent.closeSubmenu() ; }
-				parent.document.giveFocusTo( parent ) ;
-			}
-			break ;
-		case 'submenu' :
-			if ( this.hasSubmenu && this.focusChild?.def?.items ) {
-				this.openSubmenu( this.focusChild.value , this.focusChild ) ;
-				if ( this.submenu ) { this.document.giveFocusTo( this.submenu ) ; }
-			}
-			break ;
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;	// Do not bubble up
 } ;
 
 
@@ -9311,7 +9249,6 @@ BaseMenu.prototype.closeSubmenu = function() {
 
 // Should be redefined in the derivative class
 BaseMenu.prototype.defaultOptions = {} ;
-BaseMenu.prototype.keyBindings = {} ;
 BaseMenu.prototype.buttonKeyBindings = {} ;
 BaseMenu.prototype.buttonActionKeyBindings = {} ;
 BaseMenu.prototype.toggleButtonKeyBindings = {} ;
@@ -9321,12 +9258,70 @@ BaseMenu.prototype.onButtonToggle = function() {} ;
 BaseMenu.prototype.childUseParentKeyValue = false ;
 
 
+
+const userActions = BaseMenu.prototype.userActions ;
+
+userActions.previous = function() {
+	this.focusChild = this.focusPreviousChild( ! this.maxPage ) ;
+	if ( this.focusChild === this.children[ 0 ] && this.maxPage && this.page > 0 ) {
+		this.previousPage( 'backCycle' ) ;
+	}
+} ;
+
+userActions.next = function() {
+	this.focusChild = this.focusNextChild( ! this.maxPage ) ;
+	if ( this.focusChild === this.children[ this.children.length - 1 ] && this.maxPage && this.page < this.maxPage ) {
+		this.nextPage( 'cycle' ) ;
+	}
+} ;
+
+userActions.previousPage = function() {
+	if ( this.maxPage && this.page > 0 ) {
+		this.previousPage( 'backCycle' ) ;
+	}
+} ;
+
+userActions.nextPage = function() {
+	if ( this.maxPage && this.page < this.maxPage ) {
+		this.nextPage( 'cycle' ) ;
+	}
+} ;
+
+userActions.firstPage = function() {
+	if ( this.maxPage && this.page !== 0 ) {
+		this.toPage( 0 , 'backCycle' ) ;
+	}
+} ;
+
+userActions.lastPage = function() {
+	if ( this.maxPage && this.page !== this.maxPage ) {
+		this.toPage( this.maxPage , 'cycle' ) ;
+	}
+} ;
+
+userActions.parentMenu = function() {
+	if ( this.isSubmenu ) {
+		// Back up the parent, because current instance can be destroyed by parent.closeSubmenu()
+		let parent = this.parent ;
+		if ( this.parent.submenuOptions.hideParent ) { this.parent.closeSubmenu() ; }
+		parent.document.giveFocusTo( parent ) ;
+	}
+} ;
+
+userActions.submenu = function() {
+	if ( this.hasSubmenu && this.focusChild?.def?.items ) {
+		this.openSubmenu( this.focusChild.value , this.focusChild ) ;
+		if ( this.submenu ) { this.document.giveFocusTo( this.submenu ) ; }
+	}
+} ;
+
+
 }).call(this)}).call(this,require('_process'))
 },{"./Button.js":16,"./Element.js":23,"_process":182,"tree-kit":136}],16:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -9453,7 +9448,6 @@ function Button( options ) {
 	this.rightPadding = null ;
 	this.updateStatus() ;
 
-	this.onKey = this.onKey.bind( this ) ;
 	this.onShortcut = this.onShortcut.bind( this ) ;
 	this.onFocus = this.onFocus.bind( this ) ;
 	this.onClick = this.onClick.bind( this ) ;
@@ -9476,10 +9470,9 @@ function Button( options ) {
 }
 
 module.exports = Button ;
+Element.inherit( Button , Text ) ;
 
-Button.prototype = Object.create( Text.prototype ) ;
-Button.prototype.constructor = Button ;
-Button.prototype.elementType = 'Button' ;
+
 
 Button.prototype.needInput = true ;
 
@@ -9627,21 +9620,6 @@ Button.prototype.unsubmit = function() {
 
 
 
-Button.prototype.onKey = function( key , altKeys , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'submit' :
-			if ( this.disabled || this.submitted ) { break ; }
-			this.submit( this.actionKeyBindings[ key ] ) ;
-			break ;
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;	// Do not bubble up
-} ;
-
-
-
 Button.prototype.onHover = function( data ) {
 	if ( this.disabled || this.submitted ) { return ; }
 	this.document.giveFocusTo( this , 'hover' ) ;
@@ -9680,11 +9658,20 @@ Button.prototype.onShortcut = function() {
 } ;
 
 
+
+const userActions = Button.prototype.userActions ;
+
+userActions.submit = function( key ) {
+	if ( this.disabled || this.submitted ) { return ; }
+	this.submit( this.actionKeyBindings[ key ] ) ;
+} ;
+
+
 },{"./Element.js":23,"./Text.js":33}],17:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -9769,10 +9756,7 @@ function ColumnMenu( options ) {
 }
 
 module.exports = ColumnMenu ;
-
-ColumnMenu.prototype = Object.create( BaseMenu.prototype ) ;
-ColumnMenu.prototype.constructor = ColumnMenu ;
-ColumnMenu.prototype.elementType = 'ColumnMenu' ;
+Element.inherit( ColumnMenu , BaseMenu ) ;
 
 
 
@@ -10124,7 +10108,7 @@ ColumnMenu.prototype.onParentResize = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -10151,6 +10135,7 @@ ColumnMenu.prototype.onParentResize = function() {
 
 
 
+const Element = require( './Element.js' ) ;
 const ColumnMenu = require( './ColumnMenu.js' ) ;
 const ToggleButton = require( './ToggleButton.js' ) ;
 
@@ -10178,10 +10163,7 @@ function ColumnMenuMulti( options ) {
 }
 
 module.exports = ColumnMenuMulti ;
-
-ColumnMenuMulti.prototype = Object.create( ColumnMenu.prototype ) ;
-ColumnMenuMulti.prototype.constructor = ColumnMenuMulti ;
-ColumnMenuMulti.prototype.elementType = 'ColumnMenuMulti' ;
+Element.inherit( ColumnMenuMulti , ColumnMenu ) ;
 
 
 
@@ -10228,52 +10210,6 @@ ColumnMenuMulti.prototype.setValue = function( value , noDraw ) {
 
 
 
-ColumnMenuMulti.prototype.onKey = function( key , altKeys , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'previous' :
-			this.focusChild = this.focusPreviousChild( ! this.maxPage ) ;
-			if ( this.focusChild === this.children[ 0 ] && this.maxPage && this.page > 0 ) {
-				this.previousPage( 'backCycle' ) ;
-			}
-			break ;
-		case 'next' :
-			this.focusChild = this.focusNextChild( ! this.maxPage ) ;
-			if ( this.focusChild === this.children[ this.children.length - 1 ] && this.maxPage && this.page < this.maxPage ) {
-				this.nextPage( 'cycle' ) ;
-			}
-			break ;
-		case 'previousPage' :
-			if ( this.maxPage && this.page > 0 ) {
-				this.previousPage( 'backCycle' ) ;
-			}
-			break ;
-		case 'nextPage' :
-			if ( this.maxPage && this.page < this.maxPage ) {
-				this.nextPage( 'cycle' ) ;
-			}
-			break ;
-		case 'firstPage' :
-			if ( this.maxPage && this.page !== 0 ) {
-				this.toPage( 0 , 'backCycle' ) ;
-			}
-			break ;
-		case 'lastPage' :
-			if ( this.maxPage && this.page !== this.maxPage ) {
-				this.toPage( this.maxPage , 'cycle' ) ;
-			}
-			break ;
-		case 'submit' :
-			this.emit( 'submit' , this.value , undefined , this ) ;
-			break ;
-		default :
-			return ;    // Bubble up
-	}
-
-	return true ;   // Do not bubble up
-} ;
-
-
-
 ColumnMenuMulti.prototype.onButtonSubmit = function( buttonValue , action , button ) {
 	switch ( button.internalRole ) {
 		case 'previousPage' :
@@ -10299,11 +10235,57 @@ ColumnMenuMulti.prototype.onButtonToggle = function( buttonValue , action , butt
 } ;
 
 
-},{"./ColumnMenu.js":17,"./ToggleButton.js":36}],19:[function(require,module,exports){
+
+const userActions = ColumnMenuMulti.prototype.userActions ;
+
+userActions.previous = function() {
+	this.focusChild = this.focusPreviousChild( ! this.maxPage ) ;
+	if ( this.focusChild === this.children[ 0 ] && this.maxPage && this.page > 0 ) {
+		this.previousPage( 'backCycle' ) ;
+	}
+} ;
+
+userActions.next = function() {
+	this.focusChild = this.focusNextChild( ! this.maxPage ) ;
+	if ( this.focusChild === this.children[ this.children.length - 1 ] && this.maxPage && this.page < this.maxPage ) {
+		this.nextPage( 'cycle' ) ;
+	}
+} ;
+
+userActions.previousPage = function() {
+	if ( this.maxPage && this.page > 0 ) {
+		this.previousPage( 'backCycle' ) ;
+	}
+} ;
+
+userActions.nextPage = function() {
+	if ( this.maxPage && this.page < this.maxPage ) {
+		this.nextPage( 'cycle' ) ;
+	}
+} ;
+
+userActions.firstPage = function() {
+	if ( this.maxPage && this.page !== 0 ) {
+		this.toPage( 0 , 'backCycle' ) ;
+	}
+} ;
+
+userActions.lastPage = function() {
+	if ( this.maxPage && this.page !== this.maxPage ) {
+		this.toPage( this.maxPage , 'cycle' ) ;
+	}
+} ;
+
+userActions.submit = function() {
+	this.emit( 'submit' , this.value , undefined , this ) ;
+} ;
+
+
+},{"./ColumnMenu.js":17,"./Element.js":23,"./ToggleButton.js":36}],19:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -10349,7 +10331,6 @@ function Container( options ) {
 
 	Element.call( this , options ) ;
 
-	this.onKey = this.onKey.bind( this ) ;
 	this.onClick = this.onClick.bind( this ) ;
 	this.onDrag = this.onDrag.bind( this ) ;
 	this.onWheel = this.onWheel.bind( this ) ;
@@ -10404,10 +10385,9 @@ function Container( options ) {
 }
 
 module.exports = Container ;
+Element.inherit( Container ) ;
 
-Container.prototype = Object.create( Element.prototype ) ;
-Container.prototype.constructor = Container ;
-Container.prototype.elementType = 'Container' ;
+
 
 Container.prototype.isContainer = true ;
 Container.prototype.containerBorderSize = 0 ;
@@ -10611,49 +10591,6 @@ Container.prototype.drawSelfCursor = function( elementTargeted ) {
 
 
 
-Container.prototype.onKey = function( key , trash , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'tinyScrollUp' :
-			this.scroll( 0 , Math.ceil( this.viewportHeight / 5 ) ) ;
-			break ;
-
-		case 'tinyScrollDown' :
-			this.scroll( 0 , -Math.ceil( this.viewportHeight / 5 ) ) ;
-			break ;
-
-		case 'scrollUp' :
-			this.scroll( 0 , Math.ceil( this.viewportHeight / 2 ) ) ;
-			break ;
-
-		case 'scrollDown' :
-			this.scroll( 0 , -Math.ceil( this.viewportHeight / 2 ) ) ;
-			break ;
-
-		case 'scrollLeft' :
-			this.scroll( Math.ceil( this.viewportWidth / 2 ) , 0 ) ;
-			break ;
-
-		case 'scrollRight' :
-			this.scroll( -Math.ceil( this.viewportWidth / 2 ) , 0 ) ;
-			break ;
-
-		case 'scrollTop' :
-			this.scrollToTop() ;
-			break ;
-
-		case 'scrollBottom' :
-			this.scrollToBottom() ;
-			break ;
-
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;		// Do not bubble up
-} ;
-
-
-
 Container.prototype.onClick = function( data ) {
 	// It is susceptible to click event only when it is scrollable
 	if ( this.scrollable && ! this.hasFocus ) {
@@ -10682,11 +10619,47 @@ Container.prototype.onDrag = function( data ) {
 } ;
 
 
+
+const userActions = Container.prototype.userActions ;
+
+userActions.tinyScrollUp = function() {
+	this.scroll( 0 , Math.ceil( this.viewportHeight / 5 ) ) ;
+} ;
+
+userActions.tinyScrollDown = function() {
+	this.scroll( 0 , -Math.ceil( this.viewportHeight / 5 ) ) ;
+} ;
+
+userActions.scrollUp = function() {
+	this.scroll( 0 , Math.ceil( this.viewportHeight / 2 ) ) ;
+} ;
+
+userActions.scrollDown = function() {
+	this.scroll( 0 , -Math.ceil( this.viewportHeight / 2 ) ) ;
+} ;
+
+userActions.scrollLeft = function() {
+	this.scroll( Math.ceil( this.viewportWidth / 2 ) , 0 ) ;
+} ;
+
+userActions.scrollRight = function() {
+	this.scroll( -Math.ceil( this.viewportWidth / 2 ) , 0 ) ;
+} ;
+
+userActions.scrollTop = function() {
+	this.scrollToTop() ;
+} ;
+
+userActions.scrollBottom = function() {
+	this.scrollToBottom() ;
+} ;
+
+
 },{"../ScreenBuffer.js":3,"../termkit.js":52,"./Element.js":23}],20:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -10817,11 +10790,7 @@ function Document( options ) {
 }
 
 module.exports = Document ;
-
-//Document.prototype = Object.create( Element.prototype ) ;
-Document.prototype = Object.create( Container.prototype ) ;
-Document.prototype.constructor = Document ;
-Document.prototype.elementType = 'Document' ;
+Element.inherit( Document , Container ) ;
 
 
 
@@ -11387,7 +11356,7 @@ Document.prototype.onEventSourceResize = function( width , height ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -11414,7 +11383,7 @@ Document.prototype.onEventSourceResize = function( width , height ) {
 
 
 
-//const Element = require( './Element.js' ) ;
+const Element = require( './Element.js' ) ;
 const RowMenu = require( './RowMenu.js' ) ;
 const ColumnMenu = require( './ColumnMenu.js' ) ;
 
@@ -11453,10 +11422,7 @@ function DropDownMenu( options ) {
 }
 
 module.exports = DropDownMenu ;
-
-DropDownMenu.prototype = Object.create( RowMenu.prototype ) ;
-DropDownMenu.prototype.constructor = DropDownMenu ;
-DropDownMenu.prototype.elementType = 'DropDownMenu' ;
+Element.inherit( DropDownMenu , RowMenu ) ;
 
 
 
@@ -11579,37 +11545,35 @@ DropDownMenu.prototype.onColumnMenuSubmit = function( buttonValue , action , but
 
 
 
-DropDownMenu.prototype.onKey = function( key , trash , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'previous' :
-			this.focusChild = this.focusPreviousChild() ;
-			//this.clearColumnMenu() ;
-			break ;
-		case 'next' :
-			this.focusChild = this.focusNextChild() ;
-			//this.clearColumnMenu() ;
-			break ;
-		case 'dropDown' :
-			if ( this.columnMenu ) { this.columnMenu.focusNextChild() ; }
-			//this.focusChild = this.focusNextChild() ;
-			//this.clearColumnMenu() ;
-			break ;
-		case 'clearColumnMenu' :
-			// Bubble up only if something was cleared
-			return this.clearColumnMenu() ;
-		default :
-			return ;	// Bubble up
-	}
+const userActions = DropDownMenu.prototype.userActions ;
 
-	return true ;	// Do not bubble up
+userActions.previous = function() {
+	this.focusChild = this.focusPreviousChild() ;
+	//this.clearColumnMenu() ;
+} ;
+
+userActions.next = function() {
+	this.focusChild = this.focusNextChild() ;
+	//this.clearColumnMenu() ;
+} ;
+
+userActions.dropDown = function() {
+	if ( this.columnMenu ) { this.columnMenu.focusNextChild() ; }
+	//this.focusChild = this.focusNextChild() ;
+	//this.clearColumnMenu() ;
+} ;
+
+userActions.clearColumnMenu = function() {
+	// Bubble up only if something was cleared
+	return this.clearColumnMenu() ;
 } ;
 
 
-},{"./ColumnMenu.js":17,"./RowMenu.js":29}],22:[function(require,module,exports){
+},{"./ColumnMenu.js":17,"./Element.js":23,"./RowMenu.js":29}],22:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -11636,6 +11600,7 @@ DropDownMenu.prototype.onKey = function( key , trash , data ) {
 
 
 
+const Element = require( './Element.js' ) ;
 const TextBox = require( './TextBox.js' ) ;
 const string = require( 'string-kit' ) ;
 
@@ -11672,10 +11637,9 @@ function EditableTextBox( options ) {
 }
 
 module.exports = EditableTextBox ;
+Element.inherit( EditableTextBox , TextBox ) ;
 
-EditableTextBox.prototype = Object.create( TextBox.prototype ) ;
-EditableTextBox.prototype.constructor = EditableTextBox ;
-EditableTextBox.prototype.elementType = 'EditableTextBox' ;
+
 
 EditableTextBox.prototype.needInput = true ;
 
@@ -11721,167 +11685,6 @@ EditableTextBox.prototype.getValue = TextBox.prototype.getContent ;
 
 EditableTextBox.prototype.setValue = EditableTextBox.prototype.setContent = function( value , dontDraw ) {
 	return TextBox.prototype.setContent.call( this , value , false , dontDraw ) ;
-} ;
-
-
-
-EditableTextBox.prototype.onKey = function( key , trash , data ) {
-	var dy ;
-
-	if ( data && data.isCharacter ) {
-		this.textBuffer.insert( key , this.textAttr ) ;
-		this.textBuffer.runStateMachine() ;
-		this.autoScrollAndDraw() ;
-	}
-	else {
-		// Here we have a special key
-
-		switch( this.keyBindings[ key ] ) {
-			case 'newLine' :
-				this.textBuffer.newLine() ;
-				this.textBuffer.runStateMachine() ;
-				this.autoScrollAndDraw() ;
-				break ;
-
-			case 'backDelete' :
-				this.textBuffer.backDelete() ;
-				this.textBuffer.runStateMachine() ;
-				this.autoScrollAndDraw() ;
-				break ;
-
-			case 'delete' :
-				this.textBuffer.delete() ;
-				this.textBuffer.runStateMachine() ;
-				this.autoScrollAndDraw() ;
-				break ;
-
-			case 'backward' :
-				this.textBuffer.moveBackward() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'forward' :
-				this.textBuffer.moveForward() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'startOfWord' :
-				this.textBuffer.moveToStartOfWord() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'endOfWord' :
-				this.textBuffer.moveToEndOfWord() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'startOfLine' :
-				this.textBuffer.moveToColumn( 0 ) ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'endOfLine' :
-				this.textBuffer.moveToEndOfLine() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'down' :
-				this.textBuffer.moveDown() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'up' :
-				this.textBuffer.moveUp() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'left' :
-				this.textBuffer.moveLeft() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'right' :
-				this.textBuffer.moveRight() ;
-				this.autoScrollAndDrawCursor() ;
-				break ;
-
-			case 'tab' :
-				this.textBuffer.insert( '\t' , this.textAttr ) ;
-				this.textBuffer.runStateMachine() ;
-				this.autoScrollAndDraw() ;
-				break ;
-
-			case 'scrollUp' :
-				dy = Math.ceil( this.outputHeight / 2 ) ;
-				this.textBuffer.move( 0 , -dy ) ;
-				this.scroll( 0 , dy ) ;
-				break ;
-
-			case 'scrollDown' :
-				dy = -Math.ceil( this.outputHeight / 2 ) ;
-				this.textBuffer.move( 0 , -dy ) ;
-				this.scroll( 0 , dy ) ;
-				break ;
-
-			case 'startOfSelection' :
-				this.textBuffer.startOfSelection() ;
-				this.draw() ;
-				break ;
-
-			case 'endOfSelection' :
-				this.textBuffer.endOfSelection() ;
-				this.draw() ;
-				break ;
-
-			case 'meta' :
-				if ( this.document ) {
-					this.document.setMetaKeyPrefix( 'META' , 'CTRL' ) ;
-				}
-				break ;
-
-			case 'copy' :
-				if ( this.document ) {
-					this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
-				}
-				break ;
-
-			case 'paste' :
-				if ( this.document ) {
-					let str = this.document.getCopyBuffer() ;
-					if ( str && typeof str === 'string' ) {
-						this.textBuffer.insert( str , this.textAttr ) ;
-						this.textBuffer.runStateMachine() ;
-						this.autoScrollAndDraw() ;
-					}
-				}
-				break ;
-
-			case 'copyClipboard' :
-				if ( this.document ) {
-					this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
-				}
-				break ;
-
-			case 'pasteClipboard' :
-				if ( this.document ) {
-					this.document.getClipboard()
-						.then( str => {
-							if ( str ) {
-								this.textBuffer.insert( str , this.textAttr ) ;
-								this.textBuffer.runStateMachine() ;
-								this.autoScrollAndDraw() ;
-							}
-						} )
-						.catch( () => undefined ) ;
-				}
-				break ;
-
-			default :
-				return ;	// Bubble up
-		}
-	}
-
-	return true ;		// Do not bubble up
 } ;
 
 
@@ -11934,11 +11737,161 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 EditableTextBox.prototype.updateStatus = function() {} ;
 
 
-},{"./TextBox.js":34,"string-kit":124}],23:[function(require,module,exports){
+
+const userActions = EditableTextBox.prototype.userActions ;
+
+userActions.character = function( key , trash , data ) {
+	this.textBuffer.insert( key , this.textAttr ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+	this.emit( 'change' ) ;
+} ;
+
+userActions.newLine = function() {
+	this.textBuffer.newLine() ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+	this.emit( 'change' ) ;
+} ;
+
+userActions.backDelete = function() {
+	this.textBuffer.backDelete() ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+	this.emit( 'change' ) ;
+} ;
+
+userActions.delete = function() {
+	this.textBuffer.delete() ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+	this.emit( 'change' ) ;
+} ;
+
+userActions.backward = function() {
+	this.textBuffer.moveBackward() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.forward = function() {
+	this.textBuffer.moveForward() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.startOfWord = function() {
+	this.textBuffer.moveToStartOfWord() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.endOfWord = function() {
+	this.textBuffer.moveToEndOfWord() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.startOfLine = function() {
+	this.textBuffer.moveToColumn( 0 ) ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.endOfLine = function() {
+	this.textBuffer.moveToEndOfLine() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.down = function() {
+	this.textBuffer.moveDown() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.up = function() {
+	this.textBuffer.moveUp() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.left = function() {
+	this.textBuffer.moveLeft() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.right = function() {
+	this.textBuffer.moveRight() ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.tab = function() {
+	this.textBuffer.insert( '\t' , this.textAttr ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollUp = function() {
+	var dy = Math.ceil( this.outputHeight / 2 ) ;
+	this.textBuffer.move( 0 , -dy ) ;
+	this.scroll( 0 , dy ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollDown = function() {
+	var dy = -Math.ceil( this.outputHeight / 2 ) ;
+	this.textBuffer.move( 0 , -dy ) ;
+	this.scroll( 0 , dy ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.startOfSelection = function() {
+	this.textBuffer.startOfSelection() ;
+	this.draw() ;
+} ;
+
+userActions.endOfSelection = function() {
+	this.textBuffer.endOfSelection() ;
+	this.draw() ;
+} ;
+
+userActions.paste = function() {
+	if ( this.document ) {
+		let str = this.document.getCopyBuffer() ;
+		if ( str && typeof str === 'string' ) {
+			this.textBuffer.insert( str , this.textAttr ) ;
+			this.textBuffer.runStateMachine() ;
+			this.autoScrollAndDraw() ;
+			this.emit( 'change' ) ;
+		}
+	}
+} ;
+
+userActions.pasteClipboard = function() {
+	if ( this.document ) {
+		this.document.getClipboard()
+			.then( str => {
+				if ( str ) {
+					this.textBuffer.insert( str , this.textAttr ) ;
+					this.textBuffer.runStateMachine() ;
+					this.autoScrollAndDraw() ;
+					this.emit( 'change' ) ;
+				}
+			} )
+			.catch( () => undefined ) ;
+	}
+} ;
+
+
+},{"./Element.js":23,"./TextBox.js":34,"string-kit":124}],23:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -11985,6 +11938,10 @@ function Element( options = {} ) {
 
 	this.document = null ;
 	this.destroyed = false ;
+
+	// Event handler bindings
+	this.onKey = this.onKey.bind( this ) ;
+
 	this.inlineTerm = options.inlineTerm || null ;	// inline mode, with this terminal as output
 	this.strictInline = !! (
 		this.inlineTerm && this.strictInlineSupport
@@ -12045,7 +12002,6 @@ function Element( options = {} ) {
 	this.hasFocus = false ;
 	this.children = [] ;
 	this.zChildren = [] ;	// like children, but ordered by zIndex
-	//this.onKey = this.onKey.bind( this ) , writable: true } ,
 
 	// Children needs an inputDst, by default, everything is the same as for output (except for Container)
 	this.inputDst = this.outputDst ;
@@ -12100,6 +12056,16 @@ Element.prototype.destroy = function( isSubDestroy = false , noDraw = false ) {
 	}
 
 	this.destroyed = true ;
+} ;
+
+
+
+Element.inherit = function( Class , FromClass = Element ) {
+	Class.prototype = Object.create( FromClass.prototype ) ;
+	Class.prototype.constructor = Class ;
+	Class.prototype.elementType = Class.name ;
+
+	Class.prototype.userActions = Object.create( FromClass.prototype.userActions ) ;
 } ;
 
 
@@ -12776,6 +12742,35 @@ Element.createInline = async function( term , Type , options ) {
 
 
 
+// Default 'key' event management, suitable for almost all use-case, but could be derivated if needed
+Element.prototype.onKey = function( key , trash , data ) {
+	var action = this.keyBindings[ key ] ;
+
+	if ( action ) {
+		if ( action === 'meta' ) {
+			if ( this.document ) {
+				this.document.setMetaKeyPrefix( 'META' , 'CTRL' ) ;
+			}
+			return true ;	// Do not bubble up
+		}
+		else if ( this.userActions[ action ] ) {
+			this.userActions[ action ].call( this , key , trash , data ) ;
+			return true ;	// Do not bubble up
+		}
+	}
+	else if ( data && data.isCharacter ) {
+		if ( this.userActions.character ) {
+			this.userActions.character.call( this , key , trash , data ) ;
+			return true ;	// Do not bubble up
+		}
+	}
+
+	// Nothing found, bubble up
+	return ;
+} ;
+
+
+
 // Should be redefined
 Element.prototype.isContainer = false ;	// boolean, true if it's a container, having a different inputDst and outputDst and local coords
 Element.prototype.forceContentArray = false ;	// boolean, true if content should be an array of string instead of a string
@@ -12792,13 +12787,16 @@ Element.prototype.staticInline = false ;	// boolean, true if the inline version 
 Element.prototype.inlineCursorRestoreAfterDraw = false ;	// when set, save/restore cursor in inline mode (forced when strictInline is true)
 Element.prototype.needInput = false ;	// no need for input by default (used to configure inline mode)
 
+Element.prototype.keyBindings = {} ;	// object, store key bindings, the key is a Terminal Kit key code, the value is an user-action name
+Element.prototype.userActions = {} ;	// object, the key is an user-action name, the value is a function... THIS IS INHERITED
+
 
 },{"../misc.js":44,"../termkit.js":52,"nextgen-events":74,"string-kit":124}],24:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -12848,7 +12846,6 @@ function Form( options ) {
 	this.buttons = [] ;
 	this.focusChild = null ;
 	this.onButtonSubmit = this.onButtonSubmit.bind( this ) ;
-	this.onKey = this.onKey.bind( this ) ;
 	this.onFocus = this.onFocus.bind( this ) ;
 
 	// Global default attributes
@@ -12876,10 +12873,9 @@ function Form( options ) {
 }
 
 module.exports = Form ;
+Element.inherit( Form ) ;
 
-Form.prototype = Object.create( Element.prototype ) ;
-Form.prototype.constructor = Form ;
-Form.prototype.elementType = 'Form' ;
+
 
 Form.prototype.needInput = true ;
 
@@ -13071,23 +13067,6 @@ Form.prototype.getValue = function() {
 
 
 
-Form.prototype.onKey = function( key , altKeys , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'previous' :
-			this.focusChild = this.focusPreviousChild() ;
-			break ;
-		case 'next' :
-			this.focusChild = this.focusNextChild() ;
-			break ;
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;	// Do not bubble up
-} ;
-
-
-
 Form.prototype.onFocus = function( focus , type ) {
 	if ( type === 'cycle' || type === 'backCycle' ) { return ; }
 
@@ -13108,12 +13087,24 @@ Form.prototype.onButtonSubmit = function( buttonValue , action ) {
 } ;
 
 
+
+const userActions = Form.prototype.userActions ;
+
+userActions.previous = function() {
+	this.focusChild = this.focusPreviousChild() ;
+} ;
+
+userActions.next = function() {
+	this.focusChild = this.focusNextChild() ;
+} ;
+
+
 }).call(this)}).call(this,require('_process'))
 },{"./Button.js":16,"./Element.js":23,"./LabeledInput.js":27,"_process":182}],25:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -13140,6 +13131,7 @@ Form.prototype.onButtonSubmit = function( buttonValue , action ) {
 
 
 
+const Element = require( './Element.js' ) ;
 const InlineInput = require( './InlineInput.js' ) ;
 const fileHelpers = require( '../fileHelpers.js' ) ;
 
@@ -13178,10 +13170,7 @@ function InlineFileInput( options ) {
 }
 
 module.exports = InlineFileInput ;
-
-InlineFileInput.prototype = Object.create( InlineInput.prototype ) ;
-InlineFileInput.prototype.constructor = InlineFileInput ;
-InlineFileInput.prototype.elementType = 'InlineFileInput' ;
+Element.inherit( InlineFileInput , InlineInput ) ;
 
 
 
@@ -13248,11 +13237,11 @@ InlineFileInput.prototype.submit = async function() {
 } ;
 
 
-},{"../fileHelpers.js":39,"./InlineInput.js":26,"fs":138,"path":181}],26:[function(require,module,exports){
+},{"../fileHelpers.js":39,"./Element.js":23,"./InlineInput.js":26,"fs":138,"path":181}],26:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -13279,10 +13268,12 @@ InlineFileInput.prototype.submit = async function() {
 
 
 
-const Promise = require( 'seventh' ) ;
+const Element = require( './Element.js' ) ;
 const TextBox = require( './TextBox.js' ) ;
 const EditableTextBox = require( './EditableTextBox.js' ) ;
 const RowMenu = require( './RowMenu.js' ) ;
+
+const Promise = require( 'seventh' ) ;
 const string = require( 'string-kit' ) ;
 const computeAutoCompleteArray = require( '../autoComplete.js' ) ;
 
@@ -13402,10 +13393,9 @@ function InlineInput( options ) {
 }
 
 module.exports = InlineInput ;
+Element.inherit( InlineInput , EditableTextBox ) ;
 
-InlineInput.prototype = Object.create( EditableTextBox.prototype ) ;
-InlineInput.prototype.constructor = InlineInput ;
-InlineInput.prototype.elementType = 'InlineInput' ;
+
 
 // Has a fallback textBuffer for hint/placeholder
 InlineInput.prototype.useAltTextBuffer = true ;
@@ -13644,236 +13634,113 @@ InlineInput.prototype.onKey = function( key , trash , data ) {
 		this.autoCompleteMenu.emit( 'cancel' ) ;
 	}
 
-	if ( data && data.isCharacter ) {
-		if ( this.placeholder ) {
-			// Remove the placeholder on the first input
-			this.placeholder = null ;
-			this.setAltContent( '' , false , true ) ;
-		}
-
-		this.textBuffer.insert( key , this.textAttr ) ;
-		this.textBuffer.runStateMachine() ;
-
-		if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-		else { this.autoResizeAndDraw() ; }
-	}
-	else {
-		// Here we have a special key
-
-		switch( this.keyBindings[ key ] ) {
-			case 'submit' :
-				this.submit() ;
-				break ;
-
-			case 'cancel' :
-				if ( ! this.cancelable || this.disabled || this.canceled ) { break ; }
-				//this.canceled = true ;
-				this.emit( 'cancel' , this ) ;
-				break ;
-
-			case 'autoComplete' :
-				if ( ! this.autoComplete ) { break ; }
-				this.runAutoComplete( this.autoComplete ) ;
-				break ;
-
-			case 'historyAutoComplete' :
-				if ( ! this.autoComplete ) { break ; }
-				this.runAutoComplete( this.history ) ;
-				break ;
-
-			case 'historyPrevious' :
-				if ( this.contentIndex <= 0 ) { break ; }
-				this.contentArray[ this.contentIndex ] = this.getContent() ;
-				this.contentIndex -- ;
-				this.setContent( this.contentArray[ this.contentIndex ] ) ;
-				this.textBuffer.runStateMachine() ;
-				this.autoResizeAndDraw() ;
-				break ;
-
-			case 'historyNext' :
-				if ( this.contentIndex >= this.contentArray.length - 1 ) { break ; }
-				this.contentArray[ this.contentIndex ] = this.getContent() ;
-				this.contentIndex ++ ;
-				this.setContent( this.contentArray[ this.contentIndex ] ) ;
-				this.textBuffer.runStateMachine() ;
-				this.autoResizeAndDraw() ;
-				break ;
-
-			case 'backDelete' :
-				this.textBuffer.backDelete() ;
-				this.textBuffer.runStateMachine() ;
-				if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-				else { this.autoResizeAndDraw() ; }
-				break ;
-
-			case 'delete' :
-				this.textBuffer.delete() ;
-				this.textBuffer.runStateMachine() ;
-				if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-				else { this.autoResizeAndDraw() ; }
-				break ;
-
-			case 'backward' :
-				this.textBuffer.moveBackward() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'forward' :
-				this.textBuffer.moveForward() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'startOfWord' :
-				this.textBuffer.moveToStartOfWord() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'endOfWord' :
-				this.textBuffer.moveToEndOfWord() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'startOfLine' :
-				this.textBuffer.moveToColumn( 0 ) ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'endOfLine' :
-				this.textBuffer.moveToEndOfLine() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'left' :
-				this.textBuffer.moveLeft() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'right' :
-				this.textBuffer.moveRight() ;
-				this.autoResizeAndDrawCursor() ;
-				break ;
-
-			case 'startOfSelection' :
-				this.textBuffer.startOfSelection() ;
-				this.draw() ;
-				break ;
-
-			case 'endOfSelection' :
-				this.textBuffer.endOfSelection() ;
-				this.draw() ;
-				break ;
-
-			case 'meta' :
-				if ( this.document ) {
-					this.document.setMetaKeyPrefix( 'META' , 'CTRL' ) ;
-				}
-				break ;
-
-			case 'copy' :
-				if ( this.document ) {
-					this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
-				}
-				break ;
-
-			case 'paste' :
-				if ( this.document ) {
-					let str = this.document.getCopyBuffer() ;
-					if ( str && typeof str === 'string' ) {
-						this.textBuffer.insert( str , this.textAttr ) ;
-						this.textBuffer.runStateMachine() ;
-						if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-						else { this.autoResizeAndDraw() ; }
-					}
-				}
-				break ;
-
-			case 'copyClipboard' :
-				if ( this.document ) {
-					this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
-				}
-				break ;
-
-			case 'pasteClipboard' :
-				if ( this.document ) {
-					this.document.getClipboard()
-						.then( str => {
-							if ( str ) {
-								this.textBuffer.insert( str , this.textAttr ) ;
-								this.textBuffer.runStateMachine() ;
-								if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-								else { this.autoResizeAndDraw() ; }
-							}
-						} )
-						.catch( () => undefined ) ;
-				}
-				break ;
-
-			default :
-				return ;	// Bubble up
-		}
-	}
-
-	return true ;		// Do not bubble up
+	return Element.prototype.onKey.call( this , key , trash , data ) ;
 } ;
 
 
 
-/*
-InlineInput.prototype.onFocus = function( focus , type ) {
-	this.hasFocus = focus ;
-	this.updateStatus() ;
-	this.draw() ;
+const userActions = InlineInput.prototype.userActions ;
+
+userActions.character = function( key , trash , data ) {
+	if ( this.placeholder ) {
+		// Remove the placeholder on the first input
+		this.placeholder = null ;
+		this.setAltContent( '' , false , true ) ;
+	}
+
+	this.textBuffer.insert( key , this.textAttr ) ;
+	this.textBuffer.runStateMachine() ;
+
+	if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+	else { this.autoResizeAndDraw() ; }
 } ;
-*/
 
-
-/*
-InlineInput.prototype.onClick = function( data ) {
-	if ( ! this.hasFocus ) {
-		this.document.giveFocusTo( this , 'select' ) ;
-	}
-	else {
-		this.textBuffer.moveTo( data.x - this.scrollX , data.y - this.scrollY ) ;
-		this.drawCursor() ;
-	}
+userActions.submit = function() {
+	this.submit() ;
 } ;
-*/
 
-/*
-InlineInput.prototype.onMiddleClick = function( data ) {
-	if ( ! this.hasFocus ) {
-		this.document.giveFocusTo( this , 'select' ) ;
-	}
+userActions.cancel = function() {
+	if ( ! this.cancelable || this.disabled || this.canceled ) { return ; }
+	//this.canceled = true ;
+	this.emit( 'cancel' , this ) ;
+} ;
 
-	// Do not moveTo, it's quite boring
-	//this.textBuffer.moveTo( data.x , data.y ) ;
+userActions.autoComplete = function() {
+	if ( ! this.autoComplete ) { return ; }
+	this.runAutoComplete( this.autoComplete ) ;
+} ;
 
+userActions.historyAutoComplete = function() {
+	if ( ! this.autoComplete ) { return ; }
+	this.runAutoComplete( this.history ) ;
+} ;
+
+userActions.historyPrevious = function() {
+	if ( this.contentIndex <= 0 ) { return ; }
+	this.contentArray[ this.contentIndex ] = this.getContent() ;
+	this.contentIndex -- ;
+	this.setContent( this.contentArray[ this.contentIndex ] ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoResizeAndDraw() ;
+} ;
+
+userActions.historyNext = function() {
+	if ( this.contentIndex >= this.contentArray.length - 1 ) { return ; }
+	this.contentArray[ this.contentIndex ] = this.getContent() ;
+	this.contentIndex ++ ;
+	this.setContent( this.contentArray[ this.contentIndex ] ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoResizeAndDraw() ;
+} ;
+
+userActions.backDelete = function() {
+	this.textBuffer.backDelete() ;
+	this.textBuffer.runStateMachine() ;
+	if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+	else { this.autoResizeAndDraw() ; }
+} ;
+
+userActions.delete = function() {
+	this.textBuffer.delete() ;
+	this.textBuffer.runStateMachine() ;
+	if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+	else { this.autoResizeAndDraw() ; }
+} ;
+
+userActions.paste = function() {
 	if ( this.document ) {
-		this.document.getClipboard( 'primary' ).then( str => {
-			if ( str ) {
-				this.textBuffer.insert( str , this.textAttr ) ;
-				this.textBuffer.runStateMachine() ;
-				this.autoResizeAndDraw() ;
-			}
-			//else { this.drawCursor() ; }
-		} )
+		let str = this.document.getCopyBuffer() ;
+		if ( str && typeof str === 'string' ) {
+			this.textBuffer.insert( str , this.textAttr ) ;
+			this.textBuffer.runStateMachine() ;
+			if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+			else { this.autoResizeAndDraw() ; }
+		}
+	}
+} ;
+
+userActions.pasteClipboard = function() {
+	if ( this.document ) {
+		this.document.getClipboard()
+			.then( str => {
+				if ( str ) {
+					this.textBuffer.insert( str , this.textAttr ) ;
+					this.textBuffer.runStateMachine() ;
+					if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+					else { this.autoResizeAndDraw() ; }
+				}
+			} )
 			.catch( () => undefined ) ;
 	}
-	//else { this.drawCursor() ; }
 } ;
-*/
 
 
-// There isn't much to do ATM
-//InlineInput.prototype.updateStatus = function() {} ;
-
-
-},{"../autoComplete.js":7,"./EditableTextBox.js":22,"./RowMenu.js":29,"./TextBox.js":34,"seventh":110,"string-kit":124}],27:[function(require,module,exports){
+},{"../autoComplete.js":7,"./EditableTextBox.js":22,"./Element.js":23,"./RowMenu.js":29,"./TextBox.js":34,"seventh":110,"string-kit":124}],27:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -13961,7 +13828,6 @@ function LabeledInput( options ) {
 
 	this.inputType = options.type || 'text' ;
 
-	this.onKey = this.onKey.bind( this ) ;
 	this.onFocus = this.onFocus.bind( this ) ;
 	this.onClick = this.onClick.bind( this ) ;
 	this.onInputSubmit = this.onInputSubmit.bind( this ) ;
@@ -13978,10 +13844,9 @@ function LabeledInput( options ) {
 }
 
 module.exports = LabeledInput ;
+Element.inherit( LabeledInput ) ;
 
-LabeledInput.prototype = Object.create( Element.prototype ) ;
-LabeledInput.prototype.constructor = LabeledInput ;
-LabeledInput.prototype.elementType = 'LabeledInput' ;
+
 
 LabeledInput.prototype.needInput = true ;
 LabeledInput.prototype.noChildFocus = true ;
@@ -14200,7 +14065,9 @@ LabeledInput.prototype.setContent = function( content , hasMarkup , dontDraw ) {
 
 
 LabeledInput.prototype.drawSelfCursor = function() {
-	if ( this.input.drawSelfCursor ) { this.input.drawSelfCursor() ; }
+	// This cas happens when the input is still building itself, BUT IT SHOULD NOT
+	// Temporary fix, check for this.input
+	if ( this.input && this.input.drawSelfCursor ) { this.input.drawSelfCursor() ; }
 } ;
 
 
@@ -14209,16 +14076,7 @@ LabeledInput.prototype.onKey = function( key , altKeys , data ) {
 	// Give full priority to the child input
 	if ( this.input.emit( 'key' , key , altKeys , data ).interrupt ) { return true ; }
 
-	switch( this.keyBindings[ key ] ) {
-		case 'submit' :
-			this.emit( 'submit' , this.getValue() , undefined , this ) ;
-			break ;
-
-		default :
-			return ;
-	}
-
-	return true ;		// Do not bubble up
+	return Element.prototype.onKey.call( this , key , altKeys , data ) ;
 } ;
 
 
@@ -14263,12 +14121,20 @@ LabeledInput.prototype.onClick = function( data ) {
 } ;
 
 
+
+const userActions = LabeledInput.prototype.userActions ;
+
+userActions.submit = function() {
+	this.emit( 'submit' , this.getValue() , undefined , this ) ;
+} ;
+
+
 }).call(this)}).call(this,require('_process'))
 },{"./EditableTextBox.js":22,"./Element.js":23,"./SelectList.js":30,"./SelectListMulti.js":31,"./Text.js":33,"_process":182,"string-kit":124}],28:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -14333,10 +14199,7 @@ function Layout( options ) {
 }
 
 module.exports = Layout ;
-
-Layout.prototype = Object.create( Element.prototype ) ;
-Layout.prototype.constructor = Layout ;
-Layout.prototype.elementType = 'Layout' ;
+Element.inherit( Layout ) ;
 
 
 
@@ -14636,7 +14499,7 @@ Layout.prototype.onParentResize = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -14704,10 +14567,7 @@ function RowMenu( options ) {
 }
 
 module.exports = RowMenu ;
-
-RowMenu.prototype = Object.create( BaseMenu.prototype ) ;
-RowMenu.prototype.constructor = RowMenu ;
-RowMenu.prototype.elementType = 'RowMenu' ;
+Element.inherit( RowMenu , BaseMenu ) ;
 
 
 
@@ -14994,7 +14854,7 @@ RowMenu.prototype.preDrawSelf = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -15077,10 +14937,7 @@ function SelectList( options ) {
 }
 
 module.exports = SelectList ;
-
-SelectList.prototype = Object.create( ColumnMenu.prototype ) ;
-SelectList.prototype.constructor = SelectList ;
-SelectList.prototype.elementType = 'SelectList' ;
+Element.inherit( SelectList , ColumnMenu ) ;
 
 
 
@@ -15225,7 +15082,7 @@ SelectList.prototype.getValue = function() { return this.value ; } ;
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -15301,10 +15158,7 @@ function SelectListMulti( options ) {
 }
 
 module.exports = SelectListMulti ;
-
-SelectListMulti.prototype = Object.create( ColumnMenuMulti.prototype ) ;
-SelectListMulti.prototype.constructor = SelectListMulti ;
-SelectListMulti.prototype.elementType = 'SelectListMulti' ;
+Element.inherit( SelectListMulti , ColumnMenuMulti ) ;
 
 
 
@@ -15398,7 +15252,7 @@ SelectListMulti.prototype.getValue = function() { return this.value ; } ;
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -15478,10 +15332,9 @@ function Slider( options ) {
 }
 
 module.exports = Slider ;
+Element.inherit( Slider ) ;
 
-Slider.prototype = Object.create( Element.prototype ) ;
-Slider.prototype.constructor = Slider ;
-Slider.prototype.elementType = 'Slider' ;
+
 
 Slider.prototype.needInput = true ;
 
@@ -15727,7 +15580,7 @@ Slider.prototype.onWheel = function( data ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -15787,10 +15640,9 @@ function Text( options ) {
 }
 
 module.exports = Text ;
+Element.inherit( Text ) ;
 
-Text.prototype = Object.create( Element.prototype ) ;
-Text.prototype.constructor = Text ;
-Text.prototype.elementType = 'Text' ;
+
 
 Text.prototype.forceContentArray = true ;
 
@@ -15870,7 +15722,7 @@ Text.prototype.postDrawSelf = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -15915,7 +15767,6 @@ function TextBox( options ) {
 
 	Element.call( this , options ) ;
 
-	this.onKey = this.onKey.bind( this ) ;
 	this.onClick = this.onClick.bind( this ) ;
 	this.onDrag = this.onDrag.bind( this ) ;
 	this.onWheel = this.onWheel.bind( this ) ;
@@ -15972,10 +15823,7 @@ function TextBox( options ) {
 }
 
 module.exports = TextBox ;
-
-TextBox.prototype = Object.create( Element.prototype ) ;
-TextBox.prototype.constructor = TextBox ;
-TextBox.prototype.elementType = 'TextBox' ;
+Element.inherit( TextBox ) ;
 
 
 
@@ -15985,6 +15833,7 @@ TextBox.prototype.strictInlineSupport = true ;
 
 
 TextBox.prototype.keyBindings = {
+	CTRL_K: 'meta' ,
 	UP: 'tinyScrollUp' ,
 	DOWN: 'tinyScrollDown' ,
 	PAGE_UP: 'scrollUp' ,
@@ -15994,7 +15843,6 @@ TextBox.prototype.keyBindings = {
 	END: 'scrollBottom' ,
 	LEFT: 'scrollLeft' ,
 	RIGHT: 'scrollRight' ,
-	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
 	CTRL_Y: 'copy' ,
 	META_Y: 'copyClipboard'
@@ -16388,67 +16236,6 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 
 
 
-TextBox.prototype.onKey = function( key , trash , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'tinyScrollUp' :
-			this.scroll( 0 , Math.ceil( this.textAreaHeight / 5 ) ) ;
-			break ;
-
-		case 'tinyScrollDown' :
-			this.scroll( 0 , -Math.ceil( this.textAreaHeight / 5 ) ) ;
-			break ;
-
-		case 'scrollUp' :
-			this.scroll( 0 , Math.ceil( this.textAreaHeight / 2 ) ) ;
-			break ;
-
-		case 'scrollDown' :
-			this.scroll( 0 , -Math.ceil( this.textAreaHeight / 2 ) ) ;
-			break ;
-
-		case 'scrollLeft' :
-			this.scroll( Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
-			break ;
-
-		case 'scrollRight' :
-			this.scroll( -Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
-			break ;
-
-		case 'scrollTop' :
-			this.scrollToTop() ;
-			break ;
-
-		case 'scrollBottom' :
-			this.scrollToBottom() ;
-			break ;
-
-		case 'meta' :
-			if ( this.document ) {
-				this.document.setMetaKeyPrefix( 'META' , 'CTRL' ) ;
-			}
-			break ;
-
-		case 'copy' :
-			if ( this.document ) {
-				this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
-			}
-			break ;
-
-		case 'copyClipboard' :
-			if ( this.document ) {
-				this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
-			}
-			break ;
-
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;		// Do not bubble up
-} ;
-
-
-
 TextBox.prototype.onClick = function( data ) {
 	// It is susceptible to click event only when it is scrollable
 	if ( this.scrollable && ! this.hasFocus ) {
@@ -16525,11 +16312,67 @@ TextBox.prototype.onParentResize = function() {
 } ;
 
 
+
+const userActions = TextBox.prototype.userActions ;
+
+userActions.tinyScrollUp = function() {
+	this.scroll( 0 , Math.ceil( this.textAreaHeight / 5 ) ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.tinyScrollDown = function() {
+	this.scroll( 0 , -Math.ceil( this.textAreaHeight / 5 ) ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollUp = function() {
+	this.scroll( 0 , Math.ceil( this.textAreaHeight / 2 ) ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollDown = function() {
+	this.scroll( 0 , -Math.ceil( this.textAreaHeight / 2 ) ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollLeft = function() {
+	this.scroll( Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollRight = function() {
+	this.scroll( -Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollTop = function() {
+	this.scrollToTop() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.scrollBottom = function() {
+	this.scrollToBottom() ;
+	this.emit( 'cursorChange' ) ;
+} ;
+
+userActions.copy = function() {
+	if ( this.document ) {
+		this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
+	}
+} ;
+
+userActions.copyClipboard = function() {
+	if ( this.document ) {
+		this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
+	}
+} ;
+
+
 },{"../Rect.js":2,"../ScreenBuffer.js":3,"../TextBuffer.js":6,"./Element.js":23,"./Slider.js":32,"string-kit":124}],35:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -16653,10 +16496,7 @@ function TextTable( options ) {
 }
 
 module.exports = TextTable ;
-
-TextTable.prototype = Object.create( Element.prototype ) ;
-TextTable.prototype.constructor = TextTable ;
-TextTable.prototype.elementType = 'TextTable' ;
+Element.inherit( TextTable ) ;
 
 
 
@@ -17116,7 +16956,7 @@ TextTable.prototype.preDrawSelf = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -17164,10 +17004,7 @@ function ToggleButton( options ) {
 }
 
 module.exports = ToggleButton ;
-
-ToggleButton.prototype = Object.create( Button.prototype ) ;
-ToggleButton.prototype.constructor = ToggleButton ;
-ToggleButton.prototype.elementType = 'ToggleButton' ;
+Element.inherit( ToggleButton , Button ) ;
 
 
 
@@ -17234,25 +17071,6 @@ ToggleButton.prototype.updateStatus = function() {
 
 
 
-ToggleButton.prototype.onKey = function( key , altKeys , data ) {
-	switch( this.keyBindings[ key ] ) {
-		case 'toggle' :
-			if ( this.disabled ) { break ; }
-			this.toggle() ;
-			break ;
-		case 'submit' :
-			if ( this.disabled ) { break ; }
-			this.emit( 'submit' , this.key ? { [ this.key ]: this.value } : this.value , this.actionKeyBindings[ key ] , this ) ;
-			break ;
-		default :
-			return ;	// Bubble up
-	}
-
-	return true ;	// Do not bubble up
-} ;
-
-
-
 ToggleButton.prototype.onHover = function( data ) {
 	if ( this.disabled ) { return ; }
 	this.document.giveFocusTo( this , 'hover' ) ;
@@ -17275,11 +17093,25 @@ ToggleButton.prototype.onShortcut = function() {
 } ;
 
 
+
+const userActions = ToggleButton.prototype.userActions ;
+
+userActions.toggle = function() {
+	if ( this.disabled ) { return ; }
+	this.toggle() ;
+} ;
+
+userActions.submit = function( key ) {
+	if ( this.disabled ) { return ; }
+	this.emit( 'submit' , this.key ? { [ this.key ]: this.value } : this.value , this.actionKeyBindings[ key ] , this ) ;
+} ;
+
+
 },{"./Button.js":16,"./Element.js":23,"./Text.js":33}],37:[function(require,module,exports){
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -17339,10 +17171,9 @@ function Window( options ) {
 }
 
 module.exports = Window ;
+Element.inherit( Window , Container ) ;
 
-Window.prototype = Object.create( Container.prototype ) ;
-Window.prototype.constructor = Window ;
-Window.prototype.elementType = 'Window' ;
+
 
 Window.prototype.containerBorderSize = 1 ;
 
@@ -17398,7 +17229,7 @@ Window.prototype.preDrawSelf = function() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -17483,7 +17314,7 @@ else {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -17627,7 +17458,7 @@ exports.autoCompleteFile = async ( inputString , params ) => {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -17704,7 +17535,7 @@ module.exports = async function fileInput( options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -18101,7 +17932,7 @@ module.exports = function gridMenu( menuItems_ , options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -18243,7 +18074,7 @@ image.shrinkNdarrayImage = function shrinkNdarrayImage( pixels , options ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -19314,7 +19145,7 @@ module.exports = function inputField( options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -19839,7 +19670,7 @@ exports.markupOptions = {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -19876,7 +19707,7 @@ Promise.promisifyNodeApi( require( 'child_process' ) ) ;
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -20351,7 +20182,7 @@ module.exports = function progressBar_( options ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -21055,7 +20886,7 @@ module.exports = function singleColumnMenu( menuItemsArg , options , callback ) 
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -21534,7 +21365,7 @@ module.exports = function singleLineMenu( menuItems_ , options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -21633,7 +21464,7 @@ module.exports = function slowTyping( str , options , callback ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -21923,7 +21754,7 @@ module.exports = {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -22066,7 +21897,7 @@ lazy.properties( termkit , {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -22222,7 +22053,7 @@ lazy.properties( termkit , {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -22382,7 +22213,7 @@ tty_.getOutput = function getOutput() {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -22736,7 +22567,7 @@ SequencesReader.prototype.streamToEvent = async function( stream ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -23744,7 +23575,7 @@ Vte.prototype.onChildOutputOSC = function( type , args ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -23998,7 +23829,7 @@ exports.OSC = {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -24198,7 +24029,7 @@ exports.reports = {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -24239,7 +24070,7 @@ module.exports = function( termkit ) {
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 

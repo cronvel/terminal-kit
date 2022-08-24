@@ -1,4 +1,12 @@
 
+v2.8.5
+------
+
+Fix LabeledInput init troubles
+Document widget -- key bindings / .onKey() refacto: everything is inherted now and user actions are inside Element#userAction name => method
+Now inheriting Widget from another must be done with Element.inherit()
+
+
 v2.8.4
 ------
 
