@@ -81,7 +81,8 @@ term.on( 'key' , ( name , matches , data ) => {
 			break ;
 
 		case 'CTRL_K' :
-			term.setMetaKeyPrefix( 'META' ) ;
+			//term.setMetaKeyPrefix( 'META' ) ;
+			term.setMetaKeyPrefix( 'META' , 'CTRL' ) ;
 			term.green( 'CTRL-K received, set meta prefix...\n' ) ;
 			break ;
 	}
