@@ -11683,8 +11683,8 @@ EditableTextBox.prototype.getValue = TextBox.prototype.getContent ;
 
 
 
-EditableTextBox.prototype.setValue = EditableTextBox.prototype.setContent = function( value , dontDraw ) {
-	return TextBox.prototype.setContent.call( this , value , false , dontDraw ) ;
+EditableTextBox.prototype.setValue = function( value , dontDraw ) {
+	return this.setContent( value , false , dontDraw ) ;
 } ;
 
 
@@ -14065,9 +14065,7 @@ LabeledInput.prototype.setContent = function( content , hasMarkup , dontDraw ) {
 
 
 LabeledInput.prototype.drawSelfCursor = function() {
-	// This cas happens when the input is still building itself, BUT IT SHOULD NOT
-	// Temporary fix, check for this.input
-	if ( this.input && this.input.drawSelfCursor ) { this.input.drawSelfCursor() ; }
+	if ( this.input.drawSelfCursor ) { this.input.drawSelfCursor() ; }
 } ;
 
 

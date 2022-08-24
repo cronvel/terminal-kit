@@ -1,4 +1,10 @@
 
+v2.8.6
+------
+
+Fix bug introduced in 2.6.0 (drawing bug on EditableTextBox creation, happens too soon)
+
+
 v2.8.5
 ------
 
