@@ -2,7 +2,7 @@
 /*
 	Terminal Kit
 
-	Copyright (c) 2009 - 2021 Cédric Ronvel
+	Copyright (c) 2009 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
