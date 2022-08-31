@@ -6296,6 +6296,15 @@ TextBuffer.prototype.getText = function() {
 
 
 // TODOC
+TextBuffer.prototype.getLineText = function( y = this.cy ) {
+	if ( y >= this.buffer.length ) { return null ; }
+	if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
+	return string.unicode.fromCells( this.buffer[ y ] ) ;
+} ;
+
+
+
+// TODOC
 // Get the text, but separate before the cursor and after the cursor
 TextBuffer.prototype.getCursorSplittedText = function() {
 	var y , line , before = '' , after = '' ;
@@ -6934,11 +6943,36 @@ TextBuffer.prototype.getRegionText = function( region ) {
 
 		for ( x = xmin ; x <= xmax ; x ++ ) {
 			cell = this.buffer[ y ][ x ] ;
-			str += cell.filler ? '' : cell.char ;
+			if ( ! cell.filler ) { str += cell.char ; }
 		}
 	}
 
 	return str ;
+} ;
+
+
+
+// TODOC
+// Get the indentation part of the line, return null if the line is empty (no char or no non-space char)
+TextBuffer.prototype.getLineIndent = function( y = this.cy ) {
+	if ( ! this.buffer[ y ] ) { return null ; }
+
+	var x , xmin , xmax , cell ,
+		indent = '' ;
+
+	for ( x = 0 , xmax = this.buffer[ y ].length - 1 ; x <= xmax ; x ++ ) {
+		cell = this.buffer[ y ][ x ] ;
+		if ( ! cell.filler ) {
+			if ( cell.char === '\t' || cell.char === ' ' ) {
+				indent += cell.char ;
+			}
+			else {
+				return indent ;
+			}
+		}
+	}
+
+	return null ;
 } ;
 
 
@@ -11696,6 +11730,9 @@ function EditableTextBox( options ) {
 	this.onFocus = this.onFocus.bind( this ) ;
 	this.onMiddleClick = this.onMiddleClick.bind( this ) ;
 
+	// Hooks
+	this.newLineAutoIndentHook = options.newLineAutoIndentHook ?? null ;
+
 	if ( options.keyBindings ) { this.keyBindings = options.keyBindings ; }
 
 	// Editable textbox get extraScrolling by default
@@ -11835,15 +11872,21 @@ userActions.character = function( key ) {
 } ;
 
 userActions.newLine = function() {
-	var x = this.textBuffer.cx ,
+	var str = '\n' ,
+		x = this.textBuffer.cx ,
 		y = this.textBuffer.cy ;
 
 	this.textBuffer.newLine() ;
+
+	if ( this.newLineAutoIndentHook ) {
+		str += this.newLineAutoIndentHook() ;
+	}
+
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
-		insertedString: '\n' ,
+		insertedString: str ,
 		count: 1 ,
 		startPosition: { x , y } ,
 		endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }

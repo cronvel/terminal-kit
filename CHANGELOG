@@ -1,4 +1,10 @@
 
+v2.8.9
+------
+
+EditableTextBox: support for newline auto-indent hook
+
+
 v2.8.8
 ------
 
