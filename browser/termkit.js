@@ -6910,9 +6910,15 @@ TextBuffer.prototype.hilightSelection = function( turnOn = true ) {
 
 
 TextBuffer.prototype.getSelectionText = function() {
+	return this.getRegionText( this.selectionRegion ) ;
+} ;
+
+
+
+// TODOC
+TextBuffer.prototype.getRegionText = function( region ) {
 	var x , y , xmin , xmax , ymax , cell ,
-		str = '' ,
-		region = this.selectionRegion ;
+		str = '' ;
 
 	if ( ! region || region.xmin === undefined || region.ymin === undefined || region.xmax === undefined || region.ymax === undefined ) {
 		return str ;
@@ -7151,7 +7157,6 @@ TextBuffer.prototype.wordBoundary_ = function( method , checkInitial ) {
 
 		nonBoundarySeen = true ;
 		return false ;
-
 	} ) ;
 } ;
 
@@ -7237,9 +7242,10 @@ TextBuffer.prototype.moveInBound = function( ignoreCx ) {
 
 // .insert( text , [[hasMarkup] , attr ] )
 TextBuffer.prototype.insert = function( text , hasMarkup , attr ) {
-	var lines , index , length ;
+	var lines , index , length ,
+		count = 0 ;
 
-	if ( ! text ) { return ; }
+	if ( ! text ) { return count ; }
 
 	if ( typeof hasMarkup !== 'boolean' && typeof hasMarkup !== 'string' ) {
 		attr = hasMarkup ;
@@ -7262,12 +7268,15 @@ TextBuffer.prototype.insert = function( text , hasMarkup , attr ) {
 
 	if ( this.forceInBound ) { this.moveInBound() ; }
 
-	this.inlineInsert( lines[ 0 ] , parser , attr ) ;
+	count += this.inlineInsert( lines[ 0 ] , parser , attr ) ;
 
 	for ( index = 1 ; index < length ; index ++ ) {
 		this.newLine( true ) ;
-		this.inlineInsert( lines[ index ] , parser , attr , legacyColor ) ;
+		count ++ ;
+		count += this.inlineInsert( lines[ index ] , parser , attr , legacyColor ) ;
 	}
+
+	return count ;
 } ;
 
 
@@ -7289,7 +7298,8 @@ TextBuffer.prototype.append = function( text , hasMarkup , attr ) {
 // Internal API:
 // Insert inline chars (no control chars)
 TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor = false ) {
-	var currentLine , currentLineLength , hasNL , nlCell , tabIndex , fillSize , cells ;
+	var currentLine , currentLineLength , hasNL , nlCell , tabIndex , fillSize , cells ,
+		count = 0 ;
 
 	this.moveForward( undefined , true ) ;	// just skip filler char
 
@@ -7302,6 +7312,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 		// Create all missing lines, if any
 		while ( this.buffer.length < this.cy ) {
 			this.buffer.push( [ new Cell( '\n' , 1 , this.defaultAttr ) ] ) ;
+			count ++ ;
 		}
 
 		// Add a '\n' to the last line, if it is missing
@@ -7312,6 +7323,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 			)
 		) {
 			this.buffer[ this.cy - 1 ].push( new Cell( '\n' , 1 , this.defaultAttr ) ) ;
+			count ++ ;
 		}
 
 		this.buffer[ this.cy ] = [] ;
@@ -7325,25 +7337,40 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	if ( this.cx === currentLineLength ) {
 		if ( hasNL ) {
 			currentLine.splice( currentLineLength - 1 , 0 , new Cell( ' ' , 1 , this.defaultAttr ) , ... cells ) ;
+			count += 1 + cells.length ;
 		}
 		else {
 			currentLine.push( ... cells ) ;
+			count += cells.length ;
 		}
 	}
 	else if ( this.cx < currentLineLength ) {
 		currentLine.splice( this.cx , 0 , ... cells ) ;
+		count += cells.length ;
 	}
 	// this.cx > currentLineLength
 	else if ( hasNL ) {
 		fillSize = this.cx - currentLineLength + 1 ;
 		nlCell = currentLine.pop() ;
-		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ; }
+
+		while ( fillSize -- ) {
+			currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ;
+			count ++ ;
+		}
+
 		currentLine.push( ... cells , nlCell ) ;
+		count += cells.length ;
 	}
 	else {
 		fillSize = this.cx - currentLineLength ;
-		while ( fillSize -- ) { currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ; }
+
+		while ( fillSize -- ) {
+			currentLine.push( new Cell( ' ' , 1 , this.defaultAttr ) ) ;
+			count ++ ;
+		}
+
 		currentLine.push( ... cells ) ;
+		count += cells.length ;
 	}
 
 	// Patch tab if needed
@@ -7354,6 +7381,8 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	if ( this.lineWrapWidth ) { this.wrapLine() ; }
 
 	if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
+
+	return count ;
 } ;
 
 
@@ -7372,11 +7401,10 @@ TextBuffer.prototype.indexOfCharInLine = function( line , char , index = 0 ) {
 
 
 
-// /!\ Bug with tabs and count > 1 !!! /!\
-
 // Delete chars
-TextBuffer.prototype.delete = function( count ) {
-	var currentLine , inlineCount ;
+TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
+	var currentLine , inlineCount , fillerCount , hasNL , removedCells ,
+		deletedString = getDeletedString ? '' : undefined ;
 
 	if ( count === undefined ) { count = 1 ; }
 
@@ -7394,7 +7422,7 @@ TextBuffer.prototype.delete = function( count ) {
 		// If we are already at the end of the buffer...
 		if ( this.cy >= this.buffer.length ||
 			( this.cy === this.buffer.length - 1 && this.cx >= currentLine.length ) ) {
-			return ;
+			return deletedString ;
 		}
 
 		if ( currentLine ) {
@@ -7403,20 +7431,29 @@ TextBuffer.prototype.delete = function( count ) {
 
 			if ( currentLine[ this.cx ] && currentLine[ this.cx ].char !== '\n' ) {
 				// Compute inline delete
-				//inlineCount = Math.min( count , currentLine.length - this.cx ) ;
-				inlineCount = this.countInlineForward( count ) ;
+				hasNL = currentLine[ currentLine.length - 1 ]?.char === '\n' ;
+				fillerCount = this.countInlineForwardFiller( count ) ;
+				inlineCount = Math.min( count + fillerCount , currentLine.length - hasNL - this.cx ) ;
 
 				// Apply inline delete
 				if ( inlineCount > 0 ) {
-					currentLine.splice( this.cx , inlineCount ) ;
+					removedCells = currentLine.splice( this.cx , inlineCount ) ;
+					if ( getDeletedString ) {
+						deletedString += removedCells.filter( cell => ! cell.filler ).map( cell => cell.char ).join( '' ) ;
+					}
 				}
 
-				count -= inlineCount ;
+				count -= inlineCount - fillerCount ;
 			}
 		}
 
 		if ( count > 0 ) {
-			if ( this.joinLine( true ) ) { count -- ; }
+			if ( this.joinLine( true ) ) {
+				count -- ;
+				if ( getDeletedString ) {
+					deletedString += '\n' ;
+				}
+			}
 		}
 	}
 
@@ -7427,15 +7464,17 @@ TextBuffer.prototype.delete = function( count ) {
 	//tabIndex = currentLine.indexOf( '\t' , this.cx ) ;
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine() ;	// Do it every time, before finding a better way to do it
+
+	return deletedString ;
 } ;
 
 
 
-// /!\ Bug with tabs and count > 1 !!! /!\
-
 // Delete backward chars
-TextBuffer.prototype.backDelete = function( count ) {
-	var currentLine , inlineCount , tabIndex ;
+TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
+	//console.error( ">>> backDelete:" , count ) ;
+	var currentLine , inlineCount , fillerCount , tabIndex , removedCells ,
+		deletedString = getDeletedString ? '' : undefined ;
 
 	if ( count === undefined ) { count = 1 ; }
 
@@ -7451,7 +7490,7 @@ TextBuffer.prototype.backDelete = function( count ) {
 		currentLine = this.buffer[ this.cy ] ;
 
 		// If we are already at the begining of the buffer...
-		if ( this.cy === 0 && this.cx === 0 ) { return ; }
+		if ( this.cy === 0 && this.cx === 0 ) { return deletedString ; }
 
 		if ( currentLine ) {
 			// If the cursor is to far away, move it at the end of the line, it will cost one 'count'
@@ -7466,21 +7505,31 @@ TextBuffer.prototype.backDelete = function( count ) {
 			}
 
 			// Compute inline delete
-			inlineCount = this.countInlineBackward( count ) ;
+			fillerCount = this.countInlineBackwardFiller( count ) ;
+			inlineCount = Math.min( count + fillerCount , this.cx ) ;
+			//console.error( "inlineCount:" , inlineCount , fillerCount , this.cx , this.cx - inlineCount ) ;
 
 			// Apply inline delete
 			if ( inlineCount > 0 ) {
-				currentLine.splice( this.cx - inlineCount , inlineCount ) ;
+				removedCells = currentLine.splice( this.cx - inlineCount , inlineCount ) ;
+				if ( getDeletedString ) {
+					deletedString = removedCells.filter( cell => ! cell.filler ).map( cell => cell.char ).join( '' ) + deletedString ;
+				}
 				this.cx -= inlineCount ;
 			}
 
-			count -= inlineCount ;
+			count -= inlineCount - fillerCount ;
 		}
 
 		if ( count > 0 ) {
 			this.cy -- ;
 			this.cx = currentLine ? currentLine.length : 0 ;
-			if ( this.joinLine( true ) ) { count -- ; }
+			if ( this.joinLine( true ) ) {
+				count -- ;
+				if ( getDeletedString ) {
+					deletedString = '\n' + deletedString ;
+				}
+			}
 		}
 	}
 
@@ -7491,32 +7540,51 @@ TextBuffer.prototype.backDelete = function( count ) {
 	//tabIndex = currentLine.indexOf( '\t' , this.cx ) ;
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine( tabIndex ) ;	// Do it every time, before finding a better way to do it
+
+	return deletedString ;
 } ;
 
 
 
 // Fix a backward counter, get an additional count for each null char encountered
-TextBuffer.prototype.countInlineBackward = function( count ) {
-	var c , x ;
+TextBuffer.prototype.countInlineBackwardFiller = function( count ) {
+	var x , cell ,
+		filler = 0 ;
 
-	for ( x = this.cx - 1 , c = 0 ; x >= 0 && c < count ; x -- , c ++ ) {
-		if ( this.buffer[ this.cy ][ x ] && this.buffer[ this.cy ][ x ].filler ) { count ++ ; }
+	for ( x = this.cx - 1 ; x >= 0 && count ; x -- ) {
+		cell = this.buffer[ this.cy ][ x ] ;
+
+		if ( cell && cell.filler ) {
+			filler ++ ;
+		}
+		else {
+			count -- ;
+		}
 	}
 
-	return c ;
+	return filler ;
 } ;
 
 
 
 // Fix a forward counter, get an additional count for each null char encountered
-TextBuffer.prototype.countInlineForward = function( count ) {
-	var c , x , xMax = this.buffer[ this.cy ].length ;
+TextBuffer.prototype.countInlineForwardFiller = function( count ) {
+	var x , cell ,
+		xMax = this.buffer[ this.cy ].length ,
+		filler = 0 ;
 
-	for ( x = this.cx , c = 0 ; x < xMax && c < count ; x ++ , c ++ ) {
-		if ( this.buffer[ this.cy ][ x + 1 ] && this.buffer[ this.cy ][ x + 1 ].filler ) { count ++ ; }
+	for ( x = this.cx ; x < xMax && count ; x ++ ) {
+		cell = this.buffer[ this.cy ][ x + 1 ] ;
+
+		if ( cell && cell.filler ) {
+			filler ++ ;
+		}
+		else {
+			count -- ;
+		}
 	}
 
-	return c ;
+	return filler ;
 } ;
 
 
@@ -11750,113 +11818,164 @@ EditableTextBox.prototype.updateStatus = function() {} ;
 
 const userActions = EditableTextBox.prototype.userActions ;
 
-userActions.character = function( key , trash , data ) {
-	this.textBuffer.insert( key , this.textAttr ) ;
+userActions.character = function( key ) {
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	var count = this.textBuffer.insert( key , this.textAttr ) ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
-	this.emit( 'change' ) ;
+	this.emit( 'change' , {
+		type: 'insert' ,
+		insertedString: key ,
+		count ,
+		startPosition: { x , y } ,
+		endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+	} ) ;
 } ;
 
 userActions.newLine = function() {
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
 	this.textBuffer.newLine() ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
-	this.emit( 'change' ) ;
+	this.emit( 'change' , {
+		type: 'insert' ,
+		insertedString: '\n' ,
+		count: 1 ,
+		startPosition: { x , y } ,
+		endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+	} ) ;
 } ;
 
-userActions.backDelete = function() {
-	this.textBuffer.backDelete() ;
+userActions.tab = function() {
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	this.textBuffer.insert( '\t' , this.textAttr ) ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
-	this.emit( 'change' ) ;
+	this.emit( 'change' , {
+		type: 'insert' ,
+		insertedString: '\t' ,
+		count: 1 ,
+		startPosition: { x , y } ,
+		endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+	} ) ;
 } ;
 
 userActions.delete = function() {
-	this.textBuffer.delete() ;
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	var deletedString = this.textBuffer.delete( 1 , true ) ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
-	this.emit( 'change' ) ;
+
+	if ( deletedString ) {
+		this.emit( 'change' , {
+			type: 'delete' ,
+			count: 1 ,
+			deletedString ,
+			startPosition: { x , y } ,
+			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+		} ) ;
+	}
+} ;
+
+userActions.backDelete = function() {
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	var deletedString = this.textBuffer.backDelete( 1 , true ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+
+	if ( deletedString ) {
+		this.emit( 'change' , {
+			type: 'backDelete' ,
+			count: 1 ,
+			deletedString ,
+			startPosition: { x , y } ,
+			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+		} ) ;
+	}
 } ;
 
 userActions.backward = function() {
 	this.textBuffer.moveBackward() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.forward = function() {
 	this.textBuffer.moveForward() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.startOfWord = function() {
 	this.textBuffer.moveToStartOfWord() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.endOfWord = function() {
 	this.textBuffer.moveToEndOfWord() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.startOfLine = function() {
 	this.textBuffer.moveToColumn( 0 ) ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.endOfLine = function() {
 	this.textBuffer.moveToEndOfLine() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.down = function() {
 	this.textBuffer.moveDown() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.up = function() {
 	this.textBuffer.moveUp() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.left = function() {
 	this.textBuffer.moveLeft() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.right = function() {
 	this.textBuffer.moveRight() ;
 	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorChange' ) ;
-} ;
-
-userActions.tab = function() {
-	this.textBuffer.insert( '\t' , this.textAttr ) ;
-	this.textBuffer.runStateMachine() ;
-	this.autoScrollAndDraw() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.scrollUp = function() {
 	var dy = Math.ceil( this.outputHeight / 2 ) ;
 	this.textBuffer.move( 0 , -dy ) ;
 	this.scroll( 0 , dy ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.scrollDown = function() {
 	var dy = -Math.ceil( this.outputHeight / 2 ) ;
 	this.textBuffer.move( 0 , -dy ) ;
 	this.scroll( 0 , dy ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.startOfSelection = function() {
@@ -11873,10 +11992,19 @@ userActions.paste = function() {
 	if ( this.document ) {
 		let str = this.document.getCopyBuffer() ;
 		if ( str && typeof str === 'string' ) {
-			this.textBuffer.insert( str , this.textAttr ) ;
+			let x = this.textBuffer.cx ,
+				y = this.textBuffer.cy ;
+
+			let count = this.textBuffer.insert( str , this.textAttr ) ;
 			this.textBuffer.runStateMachine() ;
 			this.autoScrollAndDraw() ;
-			this.emit( 'change' ) ;
+			this.emit( 'change' , {
+				type: 'insert' ,
+				insertedString: str ,
+				count ,
+				startPosition: { x , y } ,
+				endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+			} ) ;
 		}
 	}
 } ;
@@ -11886,10 +12014,19 @@ userActions.pasteClipboard = function() {
 		this.document.getClipboard()
 			.then( str => {
 				if ( str ) {
-					this.textBuffer.insert( str , this.textAttr ) ;
+					let x = this.textBuffer.cx ,
+						y = this.textBuffer.cy ;
+
+					let count = this.textBuffer.insert( str , this.textAttr ) ;
 					this.textBuffer.runStateMachine() ;
 					this.autoScrollAndDraw() ;
-					this.emit( 'change' ) ;
+					this.emit( 'change' , {
+						type: 'insert' ,
+						insertedString: str ,
+						count ,
+						startPosition: { x , y } ,
+						endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+					} ) ;
 				}
 			} )
 			.catch( () => undefined ) ;
@@ -12076,6 +12213,7 @@ Element.inherit = function( Class , FromClass = Element ) {
 	Class.prototype.elementType = Class.name ;
 
 	Class.prototype.userActions = Object.create( FromClass.prototype.userActions ) ;
+	Class.prototype.userActions.__parent = FromClass.prototype.userActions ;
 } ;
 
 
@@ -12755,6 +12893,7 @@ Element.createInline = async function( term , Type , options ) {
 // Default 'key' event management, suitable for almost all use-case, but could be derivated if needed
 Element.prototype.onKey = function( key , trash , data ) {
 	var action = this.keyBindings[ key ] ;
+	//console.error( this.elementType + '#' + this.uid , "Key:" , key , "Actions:" , action , action && this.userActions[ action ] ? "fn: " + this.userActions[ action ].toString() : '' ) ;
 
 	if ( action ) {
 		if ( action === 'meta' ) {

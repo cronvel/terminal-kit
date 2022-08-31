@@ -1,4 +1,10 @@
 
+v2.8.8
+------
+
+Fix TextBuffer's .delete() and .backDelete() bugs when count > 1 and there are filler chars
+
+
 v2.8.7
 ------
 
