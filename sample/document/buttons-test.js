@@ -78,6 +78,7 @@ var button2 = new termkit.Button( {
 var toggleButton1 = new termkit.ToggleButton( {
 	parent: document ,
 	content: 'toggle#1' ,
+	turnedOnContent: 'TOGGLE#1' ,
 	//turnedOnLeftPadding: '☑ ' , turnedOffLeftPadding: '☐ ' ,
 	turnedOnLeftPadding: '✓ ' , turnedOffLeftPadding: '✗ ' ,
 	//value: true ,

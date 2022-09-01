@@ -9472,42 +9472,6 @@ function Button( options ) {
 
 	if ( ! Array.isArray( options.content ) ) { options.content = [ options.content || '' ] ; }
 
-	this.blurContent =
-		options.blurContent ? ( Array.isArray( options.blurContent ) ? options.blurContent : [ options.blurContent ] ) :
-		options.content ;
-
-	this.focusContent =
-		options.focusContent ? ( Array.isArray( options.focusContent ) ? options.focusContent : [ options.focusContent ] ) :
-		options.content ;
-
-	this.disabledContent =
-		options.disabledContent ? ( Array.isArray( options.disabledContent ) ? options.disabledContent : [ options.disabledContent ] ) :
-		options.content ;
-
-	this.submittedContent =
-		options.submittedContent ? ( Array.isArray( options.submittedContent ) ? options.submittedContent : [ options.submittedContent ] ) :
-		options.content ;
-
-	this.turnedOnBlurContent =
-		options.turnedOnBlurContent ? ( Array.isArray( options.turnedOnBlurContent ) ? options.turnedOnBlurContent : [ options.turnedOnBlurContent ] ) :
-		options.turnedOnContent ? ( Array.isArray( options.turnedOnContent ) ? options.turnedOnContent : [ options.turnedOnContent ] ) :
-		options.content ;
-
-	this.turnedOffBlurContent =
-		options.turnedOffBlurContent ? ( Array.isArray( options.turnedOffBlurContent ) ? options.turnedOffBlurContent : [ options.turnedOffBlurContent ] ) :
-		options.turnedOffContent ? ( Array.isArray( options.turnedOffContent ) ? options.turnedOffContent : [ options.turnedOffContent ] ) :
-		options.content ;
-
-	this.turnedOnFocusContent =
-		options.turnedOnFocusContent ? ( Array.isArray( options.turnedOnFocusContent ) ? options.turnedOnFocusContent : [ options.turnedOnFocusContent ] ) :
-		options.turnedOnContent ? ( Array.isArray( options.turnedOnContent ) ? options.turnedOnContent : [ options.turnedOnContent ] ) :
-		options.content ;
-
-	this.turnedOffFocusContent =
-		options.turnedOffFocusContent ? ( Array.isArray( options.turnedOffFocusContent ) ? options.turnedOffFocusContent : [ options.turnedOffFocusContent ] ) :
-		options.turnedOffContent ? ( Array.isArray( options.turnedOffContent ) ? options.turnedOffContent : [ options.turnedOffContent ] ) :
-		options.content ;
-
 	this.blurLeftPadding = options.blurLeftPadding || options.leftPadding || '' ;
 	this.blurRightPadding = options.blurRightPadding || options.rightPadding || '' ;
 	this.focusLeftPadding = options.focusLeftPadding || options.leftPadding || '' ;
@@ -9527,7 +9491,20 @@ function Button( options ) {
 	this.turnedOffFocusLeftPadding = options.turnedOffFocusLeftPadding || options.turnedOffLeftPadding || options.leftPadding || '' ;
 	this.turnedOffFocusRightPadding = options.turnedOffFocusRightPadding || options.turnedOffRightPadding || options.rightPadding || '' ;
 
+	this.contentHasMarkup = !! options.contentHasMarkup ;	// Force this now, instead of Element behavior
 	this.paddingHasMarkup = !! options.paddingHasMarkup ;
+
+	// Set by .setContent()
+	this.content =
+		this.blurContent = this.focusContent =
+		this.disabledContent = this.submittedContent =
+		this.turnedOnBlurContent = this.turnedOffBlurContent =
+		this.turnedOnFocusContent = this.turnedOffFocusContent = '' ;
+
+	// We need to compute that now
+	if ( this.setContent === Button.prototype.setContent ) {
+		this.setContent( options , this.contentHasMarkup , true , true ) ;
+	}
 
 	// Used by menus, to assign nextPage/previousPage action
 	this.internalRole = options.internalRole || null ;
@@ -9537,10 +9514,6 @@ function Button( options ) {
 	delete options.height ;
 
 	Text.call( this , options ) ;
-
-	if ( this.setContent === Button.prototype.setContent ) {
-		this.setContent( options.content || '' , options.contentHasMarkup , true , true ) ;
-	}
 
 	this.blurAttr = options.blurAttr || { bgColor: 'brightBlack' } ;
 	this.focusAttr = options.focusAttr || { bgColor: 'blue' } ;
@@ -9602,17 +9575,74 @@ Button.prototype.actionKeyBindings = {} ;
 
 
 
-Button.prototype.setContent = function( content , hasMarkup , dontDraw = false , dontResize = false ) {
-	Element.prototype.setContent.call( this , content , hasMarkup , true , true ) ;
+// Utility function
+Button.prototype._toContentArray = function( content ) {
+	return ! this.forceContentArray || Array.isArray( content ) ? content : [ content || '' ] ;
+} ;
 
-	this.blurContent = this.focusContent =
-		this.disabledContent = this.submittedContent =
-		this.turnedOnBlurContent = this.turnedOffBlurContent =
-		this.turnedOnFocusContent = this.turnedOffFocusContent =
-		this.content ;
+
+
+Button.prototype.setContent = function( content , hasMarkup , dontDraw = false , dontResize = false ) {
+	this.contentHasMarkup = hasMarkup ;
+
+	if ( ! content || typeof content !== 'object' || Array.isArray( content ) ) {
+		this.content = this._toContentArray( content ) ;
+		this.contentWidth = Element.computeContentWidth( this.content , this.contentHasMarkup ) ;
+
+		this.blurContent = this.focusContent =
+			this.disabledContent = this.submittedContent =
+			this.turnedOnBlurContent = this.turnedOffBlurContent =
+			this.turnedOnFocusContent = this.turnedOffFocusContent =
+			this.content ;
+	}
+	else {
+		if ( content.internal ) {
+			// This is called from the constructor using the options argument
+			this.content = this._toContentArray( content.content ) ;
+			this.blurContent = this._toContentArray( content.blurContent ?? this.content ) ;
+			this.focusContent = this._toContentArray( content.focusContent ?? this.content ) ;
+			this.disabledContent = this._toContentArray( content.disabledContent ?? this.content ) ;
+			this.submittedContent = this._toContentArray( content.submittedContent ?? this.content ) ;
+			this.turnedOnBlurContent = this._toContentArray( content.turnedOnBlurContent ?? content.turnedOnContent ?? this.content ) ;
+			this.turnedOffBlurContent = this._toContentArray( content.turnedOffBlurContent ?? content.turnedOffContent ?? this.content ) ;
+			this.turnedOnFocusContent = this._toContentArray( content.turnedOnFocusContent ?? content.turnedOnContent ?? this.content ) ;
+			this.turnedOffFocusContent = this._toContentArray( content.turnedOffFocusContent ?? content.turnedOffContent ?? this.content ) ;
+		}
+		else {
+			// Regular call (user, normal case)
+			this.content = this._toContentArray( content.default ) ;
+			this.blurContent = this._toContentArray( content.blur ?? this.content ) ;
+			this.focusContent = this._toContentArray( content.focus ?? this.content ) ;
+			this.disabledContent = this._toContentArray( content.disabled ?? this.content ) ;
+			this.submittedContent = this._toContentArray( content.submitted ?? this.content ) ;
+			this.turnedOnBlurContent = this._toContentArray( content.turnedOnBlur ?? content.turnedOn ?? this.content ) ;
+			this.turnedOffBlurContent = this._toContentArray( content.turnedOffBlur ?? content.turnedOff ?? this.content ) ;
+			this.turnedOnFocusContent = this._toContentArray( content.turnedOnFocus ?? content.turnedOn ?? this.content ) ;
+			this.turnedOffFocusContent = this._toContentArray( content.turnedOffFocus ?? content.turnedOff ?? this.content ) ;
+		}
+
+		this.computeContentWidth( content , this.contentHasMarkup ) ;
+	}
 
 	if ( ! dontResize && this.resizeOnContent ) { this.resizeOnContent() ; }
 	if ( ! dontDraw ) { this.redraw() ; }
+} ;
+
+
+
+Button.prototype.computeContentWidth = function() {
+	this.contentWidth = Math.max(
+		Element.computeContentWidth( this.blurContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.focusContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.disabledContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.submittedContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnFocusContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffFocusContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnBlurContent , this.contentHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffBlurContent , this.contentHasMarkup )
+	) ;
+
+	return this.contentWidth ;
 } ;
 
 
@@ -12154,9 +12184,10 @@ function Element( options = {} ) {
 	this.hidden = !! options.hidden ;	// hidden: not visible and no interaction possible with this element, it also affects children
 	this.disabled = !! options.disabled ;	// disabled: mostly for user-input, the element is often grayed and unselectable, effect depends on the element's type
 
-	this.content = '' ;
-	this.contentHasMarkup = false ;
-	this.contentWidth = 0 ;
+	// Default value (ensure it's not already set)
+	this.content = this.content ?? '' ;
+	this.contentHasMarkup = this.contentHasMarkup ?? false ;
+	this.contentWidth = this.contentWidth ?? 0 ;
 
 	if ( this.setContent === Element.prototype.setContent ) {
 		this.setContent( options.content || '' , options.contentHasMarkup , true , true ) ;
@@ -15814,8 +15845,9 @@ function Text( options ) {
 	if ( ! Array.isArray( options.content ) ) { options.content = [ options.content || '' ] ; }
 
 	// Usually done by the Element's constructor, but it's required now
-	this.content = options.content ;
-	this.contentHasMarkup = options.contentHasMarkup ;
+	// Also check that sub-class hasn't defined it yet...
+	this.content = this.content ?? options.content ;
+	this.contentHasMarkup = this.contentHasMarkup ?? options.contentHasMarkup ;
 
 	// For width and height, we centralize here works for sub-class having animations
 	if ( ! options.width ) {
@@ -17232,28 +17264,33 @@ ToggleButton.prototype.toggle = function( noDraw ) {
 ToggleButton.prototype.updateStatus = function() {
 	if ( this.disabled ) {
 		this.attr = this.disabledAttr ;
+		this.content = this.disabledContent ;
 		this.leftPadding = this.disabledLeftPadding ;
 		this.rightPadding = this.disabledRightPadding ;
 	}
 	else if ( this.hasFocus ) {
 		if ( this.value ) {
 			this.attr = this.turnedOnFocusAttr ;
+			this.content = this.turnedOnFocusContent ;
 			this.leftPadding = this.turnedOnFocusLeftPadding ;
 			this.rightPadding = this.turnedOnFocusRightPadding ;
 		}
 		else {
 			this.attr = this.turnedOffFocusAttr ;
+			this.content = this.turnedOffFocusContent ;
 			this.leftPadding = this.turnedOffFocusLeftPadding ;
 			this.rightPadding = this.turnedOffFocusRightPadding ;
 		}
 	}
 	else if ( this.value ) {
 		this.attr = this.turnedOnBlurAttr ;
+		this.content = this.turnedOnBlurContent ;
 		this.leftPadding = this.turnedOnBlurLeftPadding ;
 		this.rightPadding = this.turnedOnBlurRightPadding ;
 	}
 	else {
 		this.attr = this.turnedOffBlurAttr ;
+		this.content = this.turnedOffBlurContent ;
 		this.leftPadding = this.turnedOffBlurLeftPadding ;
 		this.rightPadding = this.turnedOffBlurRightPadding ;
 	}

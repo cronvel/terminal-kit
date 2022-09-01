@@ -1,4 +1,10 @@
 
+v2.8.10
+-------
+
+Button/ToggleButton: fix content variation depending on things like focus/blur/turned on/turned off/etc...
+
+
 v2.8.9
 ------
 
