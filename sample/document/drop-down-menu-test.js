@@ -66,6 +66,7 @@ var dropDownMenu = new termkit.DropDownMenu( {
 				{ content: 'Paste' , value: 'paste' } ,
 				{ content: 'Undo' , value: 'undo' } ,
 				{ content: 'Redo' , value: 'redo' } ,
+				{ content: 'Auto-indent' , key: 'autoIndent' , type: 'toggle' } ,
 			]
 		} ,
 		{
@@ -100,13 +101,13 @@ var dropDownMenu = new termkit.DropDownMenu( {
 
 
 
-//dropDownMenu.on( 'submit' , onSubmit ) ;
-dropDownMenu.on( 'blinked' , onSubmit ) ;
+dropDownMenu.on( 'submit' , onSubmit ) ;
+//dropDownMenu.on( 'blinked' , onSubmit ) ;
 
-function onSubmit( buttonValue ) {
+function onSubmit( buttonValue , action ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s\n' , buttonValue ) ;
+	term.moveTo.styleReset.eraseLine( 1 , 22 , 'Submitted: %s %s\n' , buttonValue , action ) ;
 	term.restoreCursor() ;
 	
 	if ( buttonValue === 'decrunch' ) {
