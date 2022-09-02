@@ -46,8 +46,9 @@ var columnMenuMixed = new termkit.ColumnMenuMixed( {
 	y: 5 ,
 	width: 20 ,
 	pageMaxHeight: 5 ,
-	blurLeftPadding: '  ' ,
-	focusLeftPadding: '^R> ' ,
+	leftPadding: '  ' ,
+	turnedOnLeftPadding: '^G✓ ' ,
+	turnedOffLeftPadding: '^R✗ ' ,
 	disabledLeftPadding: '  ' ,
 	paddingHasMarkup: true ,
 	multiLineItems: true ,
@@ -58,7 +59,7 @@ var columnMenuMixed = new termkit.ColumnMenuMixed( {
 	items: [
 		{
 			content: 'normal #1' ,
-			value: 'normal #1'
+			key: 'normal #1'
 		} ,
 		{
 			content: 'light' ,
@@ -78,7 +79,15 @@ var columnMenuMixed = new termkit.ColumnMenuMixed( {
 			content: 'Disabled button' ,
 			disabled: true ,
 			key: 'disabled'
-		}
+		} ,
+		{
+			content: 'more #1' ,
+			value: 'more #1'
+		} ,
+		{
+			content: 'more #2' ,
+			value: 'more #2'
+		} ,
 	]
 } ) ;
 
