@@ -47,6 +47,10 @@ var dropDownMenu = new termkit.DropDownMenu( {
 	y: 0 ,
 	clearColumnMenuOnSubmit: true ,
 	//width: 50 ,
+	value: {
+		autoIndent: true ,
+		autoSave: true
+	} ,
 	items: [
 		{
 			content: 'File' ,
@@ -67,6 +71,8 @@ var dropDownMenu = new termkit.DropDownMenu( {
 				{ content: 'Undo' , value: 'undo' } ,
 				{ content: 'Redo' , value: 'redo' } ,
 				{ content: 'Auto-indent' , key: 'autoIndent' , type: 'toggle' } ,
+				{ content: 'Auto-clean' , key: 'autoClean' , type: 'toggle' } ,
+				{ content: 'Auto-save' , key: 'autoSave' , type: 'toggle' } ,
 			]
 		} ,
 		{
@@ -99,8 +105,6 @@ var dropDownMenu = new termkit.DropDownMenu( {
 	]
 } ) ;
 
-
-
 dropDownMenu.on( 'submit' , onSubmit ) ;
 //dropDownMenu.on( 'blinked' , onSubmit ) ;
 
@@ -117,6 +121,18 @@ function onSubmit( buttonValue , action ) {
 		dropDownMenu.setDropDownItem( 'tools' , 'crunch' , { content: 'Decrunch' , value: 'decrunch' } ) ;
 	}
 }
+
+
+
+/*
+setInterval( () => {
+	var value = Math.random() < 0.5 ;
+	term.saveCursor() ;
+	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Set autoClean to: %s\n' , value ) ;
+	term.restoreCursor() ;
+	dropDownMenu.setKeyValue( 'autoClean' , value ) ;
+} , 1000 ) ;
+//*/
 
 
 
