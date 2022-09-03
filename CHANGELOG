@@ -1,4 +1,15 @@
 
+v2.8.11
+-------
+
+Various bugfixes
+Document's widget emitting a 'submit' event have a fourth argument: the original widget that triggered the submit (usually a Button)
+new ColumnMenuMixed widget
+Fix ToggleButton and ColumnMenuMulti constructor's params: blurLeftPadding/focusLeftPadding/etc now set default values for turned
+On/turnedOff*Padding
+DropDownMenu now fully works with togglable entries
+
+
 v2.8.10
 -------
 
