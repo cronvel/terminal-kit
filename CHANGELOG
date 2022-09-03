@@ -1,4 +1,11 @@
 
+v2.8.12
+-------
+
+New: TextBuffer#deleteLine()
+EditableTextBox now support deleteLine action
+
+
 v2.8.11
 -------
 

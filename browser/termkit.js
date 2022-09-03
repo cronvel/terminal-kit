@@ -6305,6 +6305,23 @@ TextBuffer.prototype.getLineText = function( y = this.cy ) {
 
 
 // TODOC
+// Count characters in this line, excluding fillers
+TextBuffer.prototype.getLineCharCount = function( y = this.cy ) {
+	if ( y >= this.buffer.length ) { return null ; }
+	if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
+
+	var count = 0 ;
+
+	for ( let cell of this.buffer[ y ] ) {
+		if ( ! cell.filler ) { count ++ ; }
+	}
+
+	return count ;
+} ;
+
+
+
+// TODOC
 // Get the text, but separate before the cursor and after the cursor
 TextBuffer.prototype.getCursorSplittedText = function() {
 	var y , line , before = '' , after = '' ;
@@ -7439,9 +7456,9 @@ TextBuffer.prototype.indexOfCharInLine = function( line , char , index = 0 ) {
 
 
 // Delete chars
-TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
+TextBuffer.prototype.delete = function( count , getDeleted = false ) {
 	var currentLine , inlineCount , fillerCount , hasNL , removedCells ,
-		deletedString = getDeletedString ? '' : undefined ;
+		deleted = getDeleted ? { string: '' , count: 0 } : undefined ;
 
 	if ( count === undefined ) { count = 1 ; }
 
@@ -7459,7 +7476,7 @@ TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
 		// If we are already at the end of the buffer...
 		if ( this.cy >= this.buffer.length ||
 			( this.cy === this.buffer.length - 1 && this.cx >= currentLine.length ) ) {
-			return deletedString ;
+			return deleted ;
 		}
 
 		if ( currentLine ) {
@@ -7475,8 +7492,10 @@ TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
 				// Apply inline delete
 				if ( inlineCount > 0 ) {
 					removedCells = currentLine.splice( this.cx , inlineCount ) ;
-					if ( getDeletedString ) {
-						deletedString += removedCells.filter( cell => ! cell.filler ).map( cell => cell.char ).join( '' ) ;
+					if ( getDeleted ) {
+						removedCells = removedCells.filter( cell => ! cell.filler ) ;
+						deleted.string += removedCells.map( cell => cell.char ).join( '' ) ;
+						deleted.count += removedCells.length ;
 					}
 				}
 
@@ -7487,8 +7506,9 @@ TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
 		if ( count > 0 ) {
 			if ( this.joinLine( true ) ) {
 				count -- ;
-				if ( getDeletedString ) {
-					deletedString += '\n' ;
+				if ( getDeleted ) {
+					deleted.string += '\n' ;
+					deleted.count ++ ;
 				}
 			}
 		}
@@ -7502,16 +7522,16 @@ TextBuffer.prototype.delete = function( count , getDeletedString = false ) {
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine() ;	// Do it every time, before finding a better way to do it
 
-	return deletedString ;
+	return deleted ;
 } ;
 
 
 
 // Delete backward chars
-TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
+TextBuffer.prototype.backDelete = function( count , getDeleted = false ) {
 	//console.error( ">>> backDelete:" , count ) ;
 	var currentLine , inlineCount , fillerCount , tabIndex , removedCells ,
-		deletedString = getDeletedString ? '' : undefined ;
+		deleted = getDeleted ? { string: '' , count: 0 } : undefined ;
 
 	if ( count === undefined ) { count = 1 ; }
 
@@ -7527,7 +7547,7 @@ TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
 		currentLine = this.buffer[ this.cy ] ;
 
 		// If we are already at the begining of the buffer...
-		if ( this.cy === 0 && this.cx === 0 ) { return deletedString ; }
+		if ( this.cy === 0 && this.cx === 0 ) { return deleted ; }
 
 		if ( currentLine ) {
 			// If the cursor is to far away, move it at the end of the line, it will cost one 'count'
@@ -7549,8 +7569,10 @@ TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
 			// Apply inline delete
 			if ( inlineCount > 0 ) {
 				removedCells = currentLine.splice( this.cx - inlineCount , inlineCount ) ;
-				if ( getDeletedString ) {
-					deletedString = removedCells.filter( cell => ! cell.filler ).map( cell => cell.char ).join( '' ) + deletedString ;
+				if ( getDeleted ) {
+					removedCells = removedCells.filter( cell => ! cell.filler ) ;
+					deleted.string = removedCells.map( cell => cell.char ).join( '' ) + deleted.string ;
+					deleted.count += removedCells.length ;
 				}
 				this.cx -= inlineCount ;
 			}
@@ -7563,8 +7585,9 @@ TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
 			this.cx = currentLine ? currentLine.length : 0 ;
 			if ( this.joinLine( true ) ) {
 				count -- ;
-				if ( getDeletedString ) {
-					deletedString = '\n' + deletedString ;
+				if ( getDeleted ) {
+					deleted.string = '\n' + deleted.string ;
+					deleted.count ++ ;
 				}
 			}
 		}
@@ -7578,7 +7601,7 @@ TextBuffer.prototype.backDelete = function( count , getDeletedString = false ) {
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine( tabIndex ) ;	// Do it every time, before finding a better way to do it
 
-	return deletedString ;
+	return deleted ;
 } ;
 
 
@@ -7694,6 +7717,27 @@ TextBuffer.prototype.joinLine = function( internalCall ) {
 	}
 
 	return hasDeleted ;
+} ;
+
+
+
+// TODOC
+// Delete current line
+TextBuffer.prototype.deleteLine = function( getDeleted = false ) {
+	var currentLine , inlineCount , fillerCount , hasNL , removedCells , deleted ;
+
+	if ( this.forceInBound ) { this.moveInBound() ; }
+	if ( this.cy >= this.buffer.length ) { return ; }
+
+	if ( getDeleted ) {
+		deleted = {
+			count: this.getLineCharCount() ,
+			string: this.getLineText()
+		} ;
+	}
+	this.buffer.splice( this.cy , 1 ) ;
+
+	return deleted ;
 } ;
 
 
@@ -11977,6 +12021,7 @@ EditableTextBox.prototype.keyBindings = {
 	KP_ENTER: 'newLine' ,
 	BACKSPACE: 'backDelete' ,
 	DELETE: 'delete' ,
+	CTRL_DELETE: 'deleteLine' ,
 	LEFT: 'backward' ,
 	RIGHT: 'forward' ,
 	CTRL_LEFT: 'startOfWord' ,
@@ -12130,15 +12175,15 @@ userActions.delete = function() {
 	var x = this.textBuffer.cx ,
 		y = this.textBuffer.cy ;
 
-	var deletedString = this.textBuffer.delete( 1 , true ) ;
+	var deleted = this.textBuffer.delete( 1 , true ) ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
 
-	if ( deletedString ) {
+	if ( deleted && deleted.count ) {
 		this.emit( 'change' , {
 			type: 'delete' ,
-			count: 1 ,
-			deletedString ,
+			count: deleted.count ,
+			deletedString: deleted.string ,
 			startPosition: { x , y } ,
 			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
 		} ) ;
@@ -12149,17 +12194,35 @@ userActions.backDelete = function() {
 	var x = this.textBuffer.cx ,
 		y = this.textBuffer.cy ;
 
-	var deletedString = this.textBuffer.backDelete( 1 , true ) ;
+	var deleted = this.textBuffer.backDelete( 1 , true ) ;
 	this.textBuffer.runStateMachine() ;
 	this.autoScrollAndDraw() ;
 
-	if ( deletedString ) {
+	if ( deleted && deleted.count ) {
 		this.emit( 'change' , {
 			type: 'backDelete' ,
-			count: 1 ,
-			deletedString ,
+			count: deleted.count ,
+			deletedString: deleted.string ,
 			startPosition: { x , y } ,
 			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+		} ) ;
+	}
+} ;
+
+userActions.deleteLine = function() {
+	var y = this.textBuffer.cy ;
+
+	var deleted = this.textBuffer.deleteLine( true ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+
+	if ( deleted && deleted.count ) {
+		this.emit( 'change' , {
+			type: 'delete' ,
+			count: deleted.count ,
+			deletedString: deleted.string ,
+			startPosition: { x: 0 , y } ,
+			endPosition: { x: 0 , y: this.textBuffer.cy }
 		} ) ;
 	}
 } ;
