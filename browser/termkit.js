@@ -6844,6 +6844,23 @@ TextBuffer.prototype.setAttrCodeRegion = function( attr , region = WHOLE_BUFFER_
 
 
 
+TextBuffer.prototype.isInSelection = function( x = this.cx , y = this.cy ) {
+	if ( ! this.selectionRegion ) { return false ; }
+	return this.isInRegion( this.selectionRegion , x , y ) ;
+} ;
+
+
+
+TextBuffer.prototype.isInRegion = function( region , x = this.cx , y = this.cy ) {
+	return (
+		y >= region.ymin && y <= region.ymax
+		&& ( y !== region.ymin || x >= region.xmin )
+		&& ( y !== region.ymax || x <= region.xmax )
+	) ;
+} ;
+
+
+
 TextBuffer.prototype.setSelectionRegion = function( region ) {
 	if ( this.selectionRegion ) {
 		// Start by unhilighting existing selection
@@ -6914,7 +6931,7 @@ TextBuffer.prototype.resetSelectionRegion = function() {
 
 
 
-// Internal
+// Internal or maybe useful for userland?
 TextBuffer.prototype.hilightSelection = function( turnOn = true ) {
 	var x , y , xmin , xmax , ymax ,
 		region = this.selectionRegion ;
@@ -6982,7 +6999,10 @@ TextBuffer.prototype.getRegionText = function( region , structured = false ) {
 
 // TODOC
 TextBuffer.prototype.deleteSelection = function( getDeleted = false ) {
-	return this.deleteRegion( this.selectionRegion , getDeleted ) ;
+	if ( ! this.selectionRegion ) { return ; }
+	var deleted = this.deleteRegion( this.selectionRegion , getDeleted ) ;
+	this.selectionRegion = null ;	// unselect now
+	return deleted ;
 } ;
 
 
@@ -12115,10 +12135,12 @@ EditableTextBox.prototype.keyBindings = {
 	CTRL_B: 'startOfSelection' ,
 	CTRL_E: 'endOfSelection' ,
 	CTRL_X: 'deleteSelection' ,
-	SHIFT_LEFT: 'extendSelectionBackward' ,
-	SHIFT_RIGHT: 'extendSelectionForward' ,
-	SHIFT_UP: 'extendSelectionUp' ,
-	SHIFT_DOWN: 'extendSelectionDown' ,
+	SHIFT_LEFT: 'expandSelectionBackward' ,
+	SHIFT_RIGHT: 'expandSelectionForward' ,
+	SHIFT_UP: 'expandSelectionUp' ,
+	SHIFT_DOWN: 'expandSelectionDown' ,
+	CTRL_SHIFT_LEFT: 'expandSelectionStartOfWord' ,
+	CTRL_SHIFT_RIGHT: 'expandSelectionEndOfWord' ,
 	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
 	CTRL_Y: 'copy' ,
@@ -12177,7 +12199,10 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 		this.document.getClipboard( 'primary' ).then( str => {
 			if ( str ) {
 				this.textBuffer.insert( str , this.textAttr ) ;
-				this.textBuffer.runStateMachine() ;
+				if ( this.stateMachine ) {
+					this.textBuffer.runStateMachine() ;
+					this.textBuffer.hilightSelection() ;
+				}
 				this.autoScrollAndDraw() ;
 			}
 			//else { this.drawCursor() ; }
@@ -12201,7 +12226,10 @@ userActions.character = function( key ) {
 		y = this.textBuffer.cy ;
 
 	var count = this.textBuffer.insert( key , this.textAttr ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12228,7 +12256,10 @@ userActions.newLine = function() {
 		}
 	}
 
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12244,7 +12275,10 @@ userActions.tab = function() {
 		y = this.textBuffer.cy ;
 
 	this.textBuffer.insert( '\t' , this.textAttr ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12260,7 +12294,10 @@ userActions.delete = function() {
 		y = this.textBuffer.cy ;
 
 	var deleted = this.textBuffer.delete( 1 , true ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12279,7 +12316,10 @@ userActions.backDelete = function() {
 		y = this.textBuffer.cy ;
 
 	var deleted = this.textBuffer.backDelete( 1 , true ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12297,7 +12337,10 @@ userActions.deleteLine = function() {
 	var y = this.textBuffer.cy ;
 
 	var deleted = this.textBuffer.deleteLine( true ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
+	}
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12316,7 +12359,10 @@ userActions.deleteSelection = function() {
 		y = this.textBuffer.cy ;
 
 	var deleted = this.textBuffer.deleteSelection( true ) ;
-	this.textBuffer.runStateMachine() ;
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+		// No .hilightSelection() here, cause we just deleted it
+	}
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12404,13 +12450,13 @@ userActions.scrollDown = function() {
 	this.emit( 'cursorMove' ) ;
 } ;
 
-userActions.extendSelectionBackward = function() {
+userActions.expandSelectionBackward = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
 		cy = this.textBuffer.cy ;
 
 	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
-		// Can extend
+		// Can expand
 		this.textBuffer.moveBackward() ;
 		this.textBuffer.startOfSelection() ;
 	}
@@ -12430,13 +12476,39 @@ userActions.extendSelectionBackward = function() {
 	this.emit( 'cursorMove' ) ;
 } ;
 
-userActions.extendSelectionUp = function() {
+userActions.expandSelectionStartOfWord = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
 		cy = this.textBuffer.cy ;
 
 	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
-		// Can extend
+		// Can expand
+		this.textBuffer.moveToStartOfWord() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+		// Can contract
+		this.textBuffer.moveToStartOfWord() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.endOfSelection() ;
+		this.textBuffer.moveToStartOfWord() ;
+		this.textBuffer.startOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.expandSelectionUp = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
+		// Can expand
 		this.textBuffer.moveUp() ;
 		this.textBuffer.startOfSelection() ;
 	}
@@ -12458,13 +12530,13 @@ userActions.extendSelectionUp = function() {
 	this.emit( 'cursorMove' ) ;
 } ;
 
-userActions.extendSelectionForward = function() {
+userActions.expandSelectionForward = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
 		cy = this.textBuffer.cy ;
 
 	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
-		// Can extend
+		// Can expand
 		this.textBuffer.moveForward() ;
 		this.textBuffer.endOfSelection() ;
 	}
@@ -12484,13 +12556,39 @@ userActions.extendSelectionForward = function() {
 	this.emit( 'cursorMove' ) ;
 } ;
 
-userActions.extendSelectionDown = function() {
+userActions.expandSelectionEndOfWord = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
 		cy = this.textBuffer.cy ;
 
 	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
-		// Can extend
+		// Can expand
+		this.textBuffer.moveToEndOfWord() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else if ( selection && selection.xmin === cx && selection.ymin === cy ) {
+		// Can contract
+		this.textBuffer.moveToEndOfWord() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.startOfSelection() ;
+		this.textBuffer.moveToEndOfWord() ;
+		this.textBuffer.endOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.expandSelectionDown = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+		// Can expand
 		this.textBuffer.moveDown() ;
 		this.textBuffer.endOfSelection() ;
 	}
@@ -12530,7 +12628,10 @@ userActions.paste = function() {
 				y = this.textBuffer.cy ;
 
 			let count = this.textBuffer.insert( str , this.textAttr ) ;
-			this.textBuffer.runStateMachine() ;
+			if ( this.stateMachine ) {
+				this.textBuffer.runStateMachine() ;
+				this.textBuffer.hilightSelection() ;
+			}
 			this.autoScrollAndDraw() ;
 			this.emit( 'change' , {
 				type: 'insert' ,
@@ -12552,7 +12653,10 @@ userActions.pasteClipboard = function() {
 						y = this.textBuffer.cy ;
 
 					let count = this.textBuffer.insert( str , this.textAttr ) ;
-					this.textBuffer.runStateMachine() ;
+					if ( this.stateMachine ) {
+						this.textBuffer.runStateMachine() ;
+						this.textBuffer.hilightSelection() ;
+					}
 					this.autoScrollAndDraw() ;
 					this.emit( 'change' , {
 						type: 'insert' ,
@@ -16898,6 +17002,7 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
+		this.textBuffer.hilightSelection() ;
 	}
 
 	// Move the cursor at the end of the input
