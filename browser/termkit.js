@@ -6309,10 +6309,16 @@ TextBuffer.prototype.getLineText = function( y = this.cy ) {
 TextBuffer.prototype.getLineCharCount = function( y = this.cy ) {
 	if ( y >= this.buffer.length ) { return null ; }
 	if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
+	return this.getCellsCharCount( this.buffer[ y ] ) ;
+} ;
 
+
+
+// internal
+TextBuffer.prototype.getCellsCharCount = function( cells ) {
 	var count = 0 ;
 
-	for ( let cell of this.buffer[ y ] ) {
+	for ( let cell of cells ) {
 		if ( ! cell.filler ) { count ++ ; }
 	}
 
@@ -7416,7 +7422,7 @@ TextBuffer.prototype.append = function( text , hasMarkup , attr ) {
 // Internal API:
 // Insert inline chars (no control chars)
 TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor = false ) {
-	var currentLine , currentLineLength , hasNL , nlCell , tabIndex , fillSize , cells ,
+	var currentLine , currentLineLength , hasNL , nlCell , tabIndex , fillSize , cells , cellsCharCount ,
 		count = 0 ;
 
 	this.moveForward( undefined , true ) ;	// just skip filler char
@@ -7424,6 +7430,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	// Should come after moving forward (rely on this.cx)
 	//cells = string.unicode.toCells( Cell , text , this.tabWidth , this.cx , attr ) ;
 	cells = this.lineToCells( text , parser , attr , this.cx , legacyColor ) ;
+	cellsCharCount = this.getCellsCharCount( cells ) ;
 
 	// Is this a new line?
 	if ( this.cy >= this.buffer.length ) {
@@ -7455,16 +7462,16 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 	if ( this.cx === currentLineLength ) {
 		if ( hasNL ) {
 			currentLine.splice( currentLineLength - 1 , 0 , new Cell( ' ' , 1 , this.defaultAttr ) , ... cells ) ;
-			count += 1 + cells.length ;
+			count += 1 + cellsCharCount ;
 		}
 		else {
 			currentLine.push( ... cells ) ;
-			count += cells.length ;
+			count += cellsCharCount ;
 		}
 	}
 	else if ( this.cx < currentLineLength ) {
 		currentLine.splice( this.cx , 0 , ... cells ) ;
-		count += cells.length ;
+		count += cellsCharCount ;
 	}
 	// this.cx > currentLineLength
 	else if ( hasNL ) {
@@ -7477,7 +7484,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 		}
 
 		currentLine.push( ... cells , nlCell ) ;
-		count += cells.length ;
+		count += cellsCharCount ;
 	}
 	else {
 		fillSize = this.cx - currentLineLength ;
@@ -7488,7 +7495,7 @@ TextBuffer.prototype.inlineInsert = function( text , parser , attr , legacyColor
 		}
 
 		currentLine.push( ... cells ) ;
-		count += cells.length ;
+		count += cellsCharCount ;
 	}
 
 	// Patch tab if needed

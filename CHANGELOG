@@ -1,4 +1,10 @@
 
+v2.9.1
+------
+
+Fix .insert()/.inlineInsert() char count reporting
+
+
 v2.9.0
 ------
 
