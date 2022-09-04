@@ -1,4 +1,11 @@
 
+v2.9.0
+------
+
+TextBuffer: new .deleteSelection()/.deleteRegion()
+EditableTextBox: supports for deleteSelection and extendSelection* actions
+
+
 v2.8.12
 -------
 

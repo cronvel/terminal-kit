@@ -6511,13 +6511,13 @@ TextBuffer.prototype.setCursorOffset = function( offset ) {
 
 
 // Recompute tabs
-TextBuffer.prototype.reTabLine = function( startAt = 0 ) {
+TextBuffer.prototype.reTabLine = function( startAt = 0 , y = this.cy ) {
 	var length , cell , index , fillSize , input , output ,
 		linePosition = startAt ;
 
-	if ( this.buffer[ this.cy ] === undefined ) { this.buffer[ this.cy ] = [] ; }
+	if ( this.buffer[ y ] === undefined ) { this.buffer[ y ] = [] ; }
 
-	input = this.buffer[ this.cy ] ;
+	input = this.buffer[ y ] ;
 	output = input.slice( 0 , startAt ) ;
 	length = input.length ;
 
@@ -6542,7 +6542,7 @@ TextBuffer.prototype.reTabLine = function( startAt = 0 ) {
 		}
 	}
 
-	this.buffer[ this.cy ] = output ;
+	this.buffer[ y ] = output ;
 } ;
 
 
@@ -6942,12 +6942,13 @@ TextBuffer.prototype.getSelectionText = function() {
 
 
 // TODOC
-TextBuffer.prototype.getRegionText = function( region ) {
+TextBuffer.prototype.getRegionText = function( region , structured = false ) {
 	var x , y , xmin , xmax , ymax , cell ,
+		count = 0 ,
 		str = '' ;
 
 	if ( ! region || region.xmin === undefined || region.ymin === undefined || region.xmax === undefined || region.ymax === undefined ) {
-		return str ;
+		return ;
 	}
 
 	ymax = Math.min( region.ymax , this.buffer.length - 1 ) ;
@@ -6960,11 +6961,74 @@ TextBuffer.prototype.getRegionText = function( region ) {
 
 		for ( x = xmin ; x <= xmax ; x ++ ) {
 			cell = this.buffer[ y ][ x ] ;
-			if ( ! cell.filler ) { str += cell.char ; }
+			if ( ! cell.filler ) {
+				str += cell.char ;
+				count ++ ;
+			}
 		}
 	}
 
+	if ( structured ) { return { string: str , count } ; }
 	return str ;
+} ;
+
+
+
+// TODOC
+TextBuffer.prototype.deleteSelection = function( getDeleted = false ) {
+	return this.deleteRegion( this.selectionRegion , getDeleted ) ;
+} ;
+
+
+
+// TODOC
+// Delete current line
+TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
+	var x , y , xmin , xmax , ymax , currentLine , tabIndex , deleted ;
+
+	if ( ! region || region.xmin === undefined || region.ymin === undefined || region.xmax === undefined || region.ymax === undefined ) {
+		return ;
+	}
+
+	if ( getDeleted ) {
+		deleted = this.getRegionText( region , true ) ;
+	}
+
+	ymax = Math.min( region.ymax , this.buffer.length - 1 ) ;
+	y = region.ymin ;
+	currentLine = this.buffer[ y ] ;
+
+	if ( y === ymax ) {
+		if ( ! this.buffer[ y ] ) { return deleted ; }
+
+		xmin = region.xmin ;
+		xmax = Math.min( region.xmax , currentLine.length - 1 ) ;
+		currentLine.splice( xmin , xmax - xmin + 1 ) ;
+
+		if ( y < this.buffer.length - 1 && currentLine[ currentLine.length - 1 ].char !== '\n' ) {
+			this.joinLine( true , y ) ;
+		}
+	}
+	else {
+		let lastLine = this.buffer[ ymax ] ;
+
+		// First, remove next lines
+		this.buffer.splice( y + 1 , ymax - y ) ;
+
+		xmin = region.xmin ;
+		currentLine.splice( xmin , currentLine.length - xmin ) ;
+
+		if ( lastLine ) {
+			xmax = Math.min( region.xmax , lastLine.length - 1 ) ;
+			lastLine.splice( 0 , xmax + 1 ) ;
+			currentLine.splice( currentLine.length , 0 , ... lastLine ) ;
+		}
+	}
+
+	tabIndex = this.indexOfCharInLine( currentLine , '\t' , region.xmin ) ;
+	if ( tabIndex !== -1 ) { this.reTabLine( tabIndex , y ) ; }
+
+	return deleted ;
 } ;
 
 
@@ -7684,16 +7748,23 @@ TextBuffer.prototype.newLine = function( internalCall ) {
 
 
 
-TextBuffer.prototype.joinLine = function( internalCall ) {
-	var tabIndex , currentLine ,
+// If y is specified, we are not joining on current cursor
+TextBuffer.prototype.joinLine = function( internalCall , y ) {
+	var tabIndex , currentLine , x ,
+		updateCursor = false ,
 		hasDeleted = false ;
+
+	if ( y === undefined ) {
+		y = this.cy ;
+		updateCursor = true ;
+	}
 
 	if ( ! internalCall && this.forceInBound ) { this.moveInBound() ; }
 
-	if ( this.buffer[ this.cy ] === undefined ) { this.buffer[ this.cy ] = [] ; }
-	if ( this.buffer[ this.cy + 1 ] === undefined ) { this.buffer[ this.cy + 1 ] = [] ; }
+	if ( this.buffer[ y ] === undefined ) { this.buffer[ y ] = [] ; }
+	if ( this.buffer[ y + 1 ] === undefined ) { this.buffer[ y + 1 ] = [] ; }
 
-	currentLine = this.buffer[ this.cy ] ;
+	currentLine = this.buffer[ y ] ;
 
 	if ( currentLine.length && currentLine[ currentLine.length - 1 ].char === '\n' ) {
 		// Remove the last '\n' if any
@@ -7701,19 +7772,20 @@ TextBuffer.prototype.joinLine = function( internalCall ) {
 		hasDeleted = true ;
 	}
 
-	this.cx = currentLine.length ;
+	x = currentLine.length ;
+	if ( updateCursor ) { this.cx = x ; }
 
-	currentLine.splice( currentLine.length , 0 , ... this.buffer[ this.cy + 1 ] ) ;
+	currentLine.splice( currentLine.length , 0 , ... this.buffer[ y + 1 ] ) ;
 
-	this.buffer.splice( this.cy + 1 , 1 ) ;
+	this.buffer.splice( y + 1 , 1 ) ;
 
 	// Patch tab if needed
 	if ( ! internalCall ) {
 		// word-wrap the current line, which is always the last line of the array (=faster)
 		if ( this.lineWrapWidth ) { this.wrapLine() ; }
 
-		tabIndex = this.indexOfCharInLine( currentLine , '\t' , this.cx ) ;
-		if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
+		tabIndex = this.indexOfCharInLine( currentLine , '\t' , x ) ;
+		if ( tabIndex !== -1 ) { this.reTabLine( tabIndex , y ) ; }
 	}
 
 	return hasDeleted ;
@@ -12035,6 +12107,11 @@ EditableTextBox.prototype.keyBindings = {
 	PAGE_DOWN: 'scrollDown' ,
 	CTRL_B: 'startOfSelection' ,
 	CTRL_E: 'endOfSelection' ,
+	CTRL_X: 'deleteSelection' ,
+	SHIFT_LEFT: 'extendSelectionBackward' ,
+	SHIFT_RIGHT: 'extendSelectionForward' ,
+	SHIFT_UP: 'extendSelectionUp' ,
+	SHIFT_DOWN: 'extendSelectionDown' ,
 	CTRL_K: 'meta' ,
 	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
 	CTRL_Y: 'copy' ,
@@ -12227,6 +12304,25 @@ userActions.deleteLine = function() {
 	}
 } ;
 
+userActions.deleteSelection = function() {
+	var x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	var deleted = this.textBuffer.deleteSelection( true ) ;
+	this.textBuffer.runStateMachine() ;
+	this.autoScrollAndDraw() ;
+
+	if ( deleted && deleted.count ) {
+		this.emit( 'change' , {
+			type: 'delete' ,
+			count: deleted.count ,
+			deletedString: deleted.string ,
+			startPosition: { x , y } ,
+			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+		} ) ;
+	}
+} ;
+
 userActions.backward = function() {
 	this.textBuffer.moveBackward() ;
 	this.autoScrollAndDrawCursor() ;
@@ -12298,6 +12394,114 @@ userActions.scrollDown = function() {
 	var dy = -Math.ceil( this.outputHeight / 2 ) ;
 	this.textBuffer.move( 0 , -dy ) ;
 	this.scroll( 0 , dy ) ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.extendSelectionBackward = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
+		// Can extend
+		this.textBuffer.moveBackward() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+		// Can contract
+		this.textBuffer.moveBackward() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.endOfSelection() ;
+		this.textBuffer.moveBackward() ;
+		this.textBuffer.startOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.extendSelectionUp = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
+		// Can extend
+		this.textBuffer.moveUp() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy
+		&& ( selection.ymin < cy - 1 || ( selection.ymin === cy - 1 && selection.xmin <= cx ) )
+	) {
+		// Can contract
+		this.textBuffer.moveUp() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.endOfSelection() ;
+		this.textBuffer.moveUp() ;
+		this.textBuffer.startOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.extendSelectionForward = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+		// Can extend
+		this.textBuffer.moveForward() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else if ( selection && selection.xmin === cx && selection.ymin === cy ) {
+		// Can contract
+		this.textBuffer.moveForward() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.startOfSelection() ;
+		this.textBuffer.moveForward() ;
+		this.textBuffer.endOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.extendSelectionDown = function() {
+	var selection = this.textBuffer.selectionRegion ,
+		cx = this.textBuffer.cx ,
+		cy = this.textBuffer.cy ;
+
+	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+		// Can extend
+		this.textBuffer.moveDown() ;
+		this.textBuffer.endOfSelection() ;
+	}
+	else if ( selection && selection.xmin === cx && selection.ymin === cy
+		&& ( selection.ymax > cy + 1 || ( selection.ymax === cy + 1 && selection.xmax >= cx - 1 ) )
+	) {
+		// Can contract
+		this.textBuffer.moveDown() ;
+		this.textBuffer.startOfSelection() ;
+	}
+	else {
+		// Start a new selection
+		this.textBuffer.startOfSelection() ;
+		this.textBuffer.moveDown() ;
+		this.textBuffer.endOfSelection() ;
+	}
+
+	this.autoScrollAndDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
