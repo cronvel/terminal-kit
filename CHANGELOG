@@ -1,4 +1,10 @@
 
+v2.9.3
+------
+
+TextBuffer: fix a lot of selection issue when editing
+
+
 v2.9.2
 ------
 
