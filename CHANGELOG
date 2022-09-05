@@ -1,4 +1,10 @@
 
+v2.9.5
+------
+
+TextBuffer/EditableTextBox/TextBox: lot of copy/paste from/to selection/documentClipboard/systemClipboard improvements and fixes
+
+
 v2.9.4
 ------
 

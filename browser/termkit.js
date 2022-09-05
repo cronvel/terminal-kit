@@ -6940,7 +6940,8 @@ TextBuffer.prototype.endOfSelection = function() {
 
 // TODOC
 // Reset the region by scanning for the starting and ending cell
-TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false ) {
+// If cursorCell is set, set cursor position to this cell
+TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false , cursorCell = null ) {
 	if ( ! this.selectionRegion ) { return ; }
 	if ( ! this.selectionRegion.cellMin || ! this.selectionRegion.cellMax ) {
 		if ( ! noHilight ) { this.hilightSelection( false ) ; }
@@ -6964,6 +6965,11 @@ TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false ) {
 				xmax = x ;
 				ymax = y ;
 			}
+
+			if ( cursorCell && currentLine[ x ] === cursorCell ) {
+				this.cx = x ;
+				this.cy = y ;
+			}
 		}
 	}
 
@@ -6979,6 +6985,24 @@ TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false ) {
 	this.selectionRegion.ymax = ymax ;
 
 	if ( ! noHilight ) { this.hilightSelection() ; }
+} ;
+
+
+
+// TODOC
+TextBuffer.prototype.updateCursorFromCell = function( cursorCell ) {
+	for ( let y = 0 ; y < this.buffer.length ; y ++ ) {
+		let currentLine = this.buffer[ y ] ;
+		if ( ! currentLine ) { continue ; }
+
+		for ( let x = 0 ; x < currentLine.length ; x ++ ) {
+			if ( cursorCell && currentLine[ x ] === cursorCell ) {
+				this.cx = x ;
+				this.cy = y ;
+				return ;
+			}
+		}
+	}
 } ;
 
 
@@ -7072,11 +7096,13 @@ TextBuffer.prototype.deleteSelection = function( getDeleted = false ) {
 // TODOC
 // Delete current line
 TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
-	var x , y , xmin , xmax , ymax , currentLine , tabIndex , deleted ;
+	var x , y , xmin , xmax , ymax , currentLine , tabIndex , deleted , cursorCell ;
 
 	if ( ! region || region.xmin === undefined || region.ymin === undefined || region.xmax === undefined || region.ymax === undefined ) {
 		return ;
 	}
+
+	cursorCell = this.buffer[ this.cy ]?.[ this.cx ] ?? null ;
 
 	if ( getDeleted ) {
 		deleted = this.getRegionText( region , true ) ;
@@ -7093,9 +7119,6 @@ TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
 		xmax = Math.min( region.xmax , currentLine.length - 1 ) ;
 		currentLine.splice( xmin , xmax - xmin + 1 ) ;
 
-		if ( y < this.buffer.length - 1 && currentLine[ currentLine.length - 1 ].char !== '\n' ) {
-			this.joinLine( true , y ) ;
-		}
 	}
 	else {
 		let lastLine = this.buffer[ ymax ] ;
@@ -7106,17 +7129,28 @@ TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
 		xmin = region.xmin ;
 		currentLine.splice( xmin , currentLine.length - xmin ) ;
 
-		if ( lastLine ) {
+		if ( lastLine && lastLine.length ) {
 			xmax = Math.min( region.xmax , lastLine.length - 1 ) ;
 			lastLine.splice( 0 , xmax + 1 ) ;
-			currentLine.splice( currentLine.length , 0 , ... lastLine ) ;
+			if ( lastLine.length ) {
+				currentLine.splice( currentLine.length , 0 , ... lastLine ) ;
+			}
 		}
+	}
+
+	if ( y < this.buffer.length - 1 && ( ! currentLine.length || currentLine[ currentLine.length - 1 ].char !== '\n' ) ) {
+		this.joinLine( true , y ) ;
 	}
 
 	tabIndex = this.indexOfCharInLine( currentLine , '\t' , region.xmin ) ;
 	if ( tabIndex !== -1 ) { this.reTabLine( tabIndex , y ) ; }
 
-	if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+	if ( this.selectionRegion ) {
+		this.updateSelectionFromCells( true , cursorCell ) ;
+	}
+	else if ( cursorCell ) {
+		this.updateCursorFromCell( cursorCell ) ;
+	}
 
 	return deleted ;
 } ;
@@ -11283,10 +11317,15 @@ function Document( options ) {
 	}
 
 	this.elementByShortcut = {} ;
-	this.copyBuffer = {} ;
+	this.documentClipboards = {} ;
 
 	//*
-	this.setClipboard = Promise.debounceUpdate( async ( str , source ) => {
+	this.getSystemClipboard = Promise.debounceDelay( 500 , async ( source ) => {
+		if ( ! this.outputDst.getClipboard ) { return '' ; }
+		return this.outputDst.getClipboard( source ) ;
+	} ) ;
+
+	this.setSystemClipboard = Promise.debounceUpdate( async ( str , source ) => {
 		if ( ! this.outputDst.setClipboard ) { return ; }
 		await this.outputDst.setClipboard( str , source ) ;
 
@@ -11294,9 +11333,12 @@ function Document( options ) {
 		await Promise.resolveTimeout( 500 ) ;
 	} ) ;
 
-	this.getClipboard = Promise.debounceDelay( 500 , async ( source ) => {
-		if ( ! this.outputDst.getClipboard ) { return '' ; }
-		return this.outputDst.getClipboard( source ) ;
+	this.clearSystemClipboard = Promise.debounceUpdate( async ( str , source ) => {
+		if ( ! this.outputDst.setClipboard ) { return ; }
+		await this.outputDst.setClipboard( '' , source ) ;
+
+		// Avoid running too much xclip shell command
+		await Promise.resolveTimeout( 500 ) ;
 	} ) ;
 	//*/
 
@@ -11323,8 +11365,8 @@ Document.prototype.destroy = function( isSubDestroy , noDraw = false ) {
 	Element.prototype.destroy.call( this , isSubDestroy , noDraw ) ;
 
 	this.eventSource = null ;
-	this.setClipboard = null ;
-	this.getClipboard = null ;
+	this.setSystemClipboard = null ;
+	this.getSystemClipboard = null ;
 } ;
 
 
@@ -11569,8 +11611,9 @@ Document.prototype.defaultKeyHandling = function( key , altKeys , data ) {
 
 // TODOC
 Document.prototype.setMetaKeyPrefix = function( prefix , remove ) { this.eventSource.setMetaKeyPrefix( prefix , remove ) ; } ;
-Document.prototype.getCopyBuffer = function( key = 'content' ) { return this.copyBuffer[ key ] ; } ;
-Document.prototype.setCopyBuffer = function( value , key = 'content' ) { this.copyBuffer[ key ] = value ; } ;
+Document.prototype.getDocumentClipboard = function( key = 'content' ) { return this.documentClipboards[ key ] ; } ;
+Document.prototype.setDocumentClipboard = function( value , key = 'content' ) { this.documentClipboards[ key ] = '' + value ; } ;
+Document.prototype.clearDocumentClipboard = function( value , key = 'content' ) { delete this.documentClipboards[ key ] ; } ;
 
 
 
@@ -12247,6 +12290,7 @@ EditableTextBox.prototype.needInput = true ;
 
 
 EditableTextBox.prototype.keyBindings = {
+	CTRL_K: 'meta' ,
 	ENTER: 'newLine' ,
 	KP_ENTER: 'newLine' ,
 	BACKSPACE: 'backDelete' ,
@@ -12263,21 +12307,99 @@ EditableTextBox.prototype.keyBindings = {
 	TAB: 'tab' ,
 	PAGE_UP: 'scrollUp' ,
 	PAGE_DOWN: 'scrollDown' ,
+	META_HOME: 'scrollToCursor' ,
 	CTRL_B: 'startOfSelection' ,
 	CTRL_E: 'endOfSelection' ,
-	CTRL_X: 'deleteSelection' ,
 	SHIFT_LEFT: 'expandSelectionBackward' ,
 	SHIFT_RIGHT: 'expandSelectionForward' ,
 	SHIFT_UP: 'expandSelectionUp' ,
 	SHIFT_DOWN: 'expandSelectionDown' ,
 	CTRL_SHIFT_LEFT: 'expandSelectionStartOfWord' ,
 	CTRL_SHIFT_RIGHT: 'expandSelectionEndOfWord' ,
-	CTRL_K: 'meta' ,
-	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copy' ,
-	META_Y: 'copyClipboard' ,
-	CTRL_P: 'paste' ,
-	META_P: 'pasteClipboard'
+
+	// T for Transfer
+	CTRL_T: 'moveSelection' ,
+	ALT_T: 'copyToDocumentClipboard' ,
+	META_T: 'copyToSystemClipboard' ,
+	// P for Paste / Put
+	CTRL_P: 'pasteSelection' ,
+	ALT_P: 'pasteDocumentClipboard' ,
+	META_P: 'pasteSystemClipboard' ,
+	// D for Delete
+	CTRL_D: 'deleteSelection' ,
+	ALT_D: 'clearDocumentClipboard' ,
+	META_D: 'clearSystemClipboard'
+} ;
+
+
+
+EditableTextBox.prototype.insert = function( str , selectIt = false , internal = false ) {
+	let x = this.textBuffer.cx ,
+		y = this.textBuffer.cy ;
+
+	let count = this.textBuffer.insert( str , this.textAttr ) ;
+
+
+	if ( ! internal ) {
+		if ( this.stateMachine ) {
+			this.textBuffer.runStateMachine() ;
+		}
+
+		if ( selectIt ) {
+			// It calls .hilightSelection()
+			this.textBuffer.setSelectionRegion( {
+				xmin: x , ymin: y , xmax: this.textBuffer.cx , ymax: this.textBuffer.cy
+			} ) ;
+		}
+		else {
+			this.textBuffer.hilightSelection() ;
+		}
+
+		this.autoScrollAndDraw() ;
+	}
+	else if ( selectIt ) {
+		this.textBuffer.setSelectionRegion( {
+			xmin: x , ymin: y , xmax: this.textBuffer.cx , ymax: this.textBuffer.cy
+		} ) ;
+	}
+
+	this.emit( 'change' , {
+		type: 'insert' ,
+		insertedString: str ,
+		count ,
+		startPosition: { x , y } ,
+		endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
+	} ) ;
+} ;
+
+
+
+EditableTextBox.prototype.deleteSelection = function( internal = false ) {
+	if ( ! this.textBuffer.selectionRegion ) { return ; }
+
+	var { xmin , xmax , ymin , ymax } = this.textBuffer.selectionRegion ;
+	var deleted = this.textBuffer.deleteSelection( true ) ;
+
+	if ( deleted && deleted.count ) {
+		if ( ! internal ) {
+			this.textBuffer.cx = xmin ;
+			this.textBuffer.cy = ymin ;
+
+			if ( this.stateMachine ) {
+				this.textBuffer.runStateMachine() ;
+			}
+			// No .hilightSelection() here, cause we just deleted it
+			this.autoScrollAndDraw() ;
+		}
+
+		this.emit( 'change' , {
+			type: 'delete' ,
+			count: deleted.count ,
+			deletedString: deleted.string ,
+			startPosition: { x: xmin , y: ymin } ,
+			endPosition: { x: xmin , y: ymin }
+		} ) ;
+	}
 } ;
 
 
@@ -12334,7 +12456,7 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 	//this.textBuffer.moveTo( data.x , data.y ) ;
 
 	if ( this.document ) {
-		this.document.getClipboard( 'primary' ).then( str => {
+		this.document.getSystemClipboard( 'primary' ).then( str => {
 			if ( str ) {
 				this.textBuffer.insert( str , this.textAttr ) ;
 				if ( this.stateMachine ) {
@@ -12492,28 +12614,6 @@ userActions.deleteLine = function() {
 	}
 } ;
 
-userActions.deleteSelection = function() {
-	var x = this.textBuffer.cx ,
-		y = this.textBuffer.cy ;
-
-	var deleted = this.textBuffer.deleteSelection( true ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	// No .hilightSelection() here, cause we just deleted it
-	this.autoScrollAndDraw() ;
-
-	if ( deleted && deleted.count ) {
-		this.emit( 'change' , {
-			type: 'delete' ,
-			count: deleted.count ,
-			deletedString: deleted.string ,
-			startPosition: { x , y } ,
-			endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
-		} ) ;
-	}
-} ;
-
 userActions.backward = function() {
 	this.textBuffer.moveBackward() ;
 	this.autoScrollAndDrawCursor() ;
@@ -12586,6 +12686,10 @@ userActions.scrollDown = function() {
 	this.textBuffer.move( 0 , -dy ) ;
 	this.scroll( 0 , dy ) ;
 	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.scrollToCursor = function() {
+	this.autoScrollAndDraw() ;
 } ;
 
 userActions.expandSelectionBackward = function() {
@@ -12766,57 +12870,55 @@ userActions.endOfSelection = function() {
 	this.draw() ;
 } ;
 
-userActions.paste = function() {
-	if ( this.document ) {
-		let str = this.document.getCopyBuffer() ;
-		if ( str && typeof str === 'string' ) {
-			let x = this.textBuffer.cx ,
-				y = this.textBuffer.cy ;
+userActions.moveSelection = function() {
+	var str = this.textBuffer.getSelectionText() ;
+	if ( ! str ) { return ; }
 
-			let count = this.textBuffer.insert( str , this.textAttr ) ;
-			if ( this.stateMachine ) {
-				this.textBuffer.runStateMachine() ;
-			}
-			this.textBuffer.hilightSelection() ;
-			this.autoScrollAndDraw() ;
-			this.emit( 'change' , {
-				type: 'insert' ,
-				insertedString: str ,
-				count ,
-				startPosition: { x , y } ,
-				endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
-			} ) ;
+	this.deleteSelection( true ) ;
+	this.insert( str , true ) ;
+} ;
+
+userActions.pasteSelection = function() {
+	var str = this.textBuffer.getSelectionText() ;
+	if ( str ) { this.insert( str ) ; }
+} ;
+
+userActions.pasteDocumentClipboard = function() {
+	if ( this.document ) {
+		let str = this.document.getDocumentClipboard() ;
+		if ( str && typeof str === 'string' ) {
+			this.insert( str ) ;
 		}
 	}
 } ;
 
-userActions.pasteClipboard = function() {
+userActions.pasteSystemClipboard = function() {
 	if ( this.document ) {
-		this.document.getClipboard()
+		this.document.getSystemClipboard()
 			.then( str => {
-				if ( str ) {
-					let x = this.textBuffer.cx ,
-						y = this.textBuffer.cy ;
-
-					let count = this.textBuffer.insert( str , this.textAttr ) ;
-					if ( this.stateMachine ) {
-						this.textBuffer.runStateMachine() ;
-					}
-					this.textBuffer.hilightSelection() ;
-					this.autoScrollAndDraw() ;
-					this.emit( 'change' , {
-						type: 'insert' ,
-						insertedString: str ,
-						count ,
-						startPosition: { x , y } ,
-						endPosition: { x: this.textBuffer.cx , y: this.textBuffer.cy }
-					} ) ;
+				if ( str && typeof str === 'string' ) {
+					this.insert( str ) ;
 				}
 			} )
 			.catch( () => undefined ) ;
 	}
 } ;
 
+userActions.deleteSelection = function() {
+	this.deleteSelection() ;
+} ;
+
+userActions.clearDocumentClipboard = function() {
+	if ( this.document ) {
+		this.document.clearDocumentClipboard( this.textBuffer.getSelectionText() ) ;
+	}
+} ;
+
+userActions.clearSystemClipboard = function() {
+	if ( this.document ) {
+		this.document.clearSystemClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
+	}
+} ;
 
 },{"./Element.js":24,"./TextBox.js":35,"string-kit":125}],24:[function(require,module,exports){
 /*
@@ -14361,6 +14463,7 @@ InlineInput.prototype.defaultMenuOptions = {
 
 
 InlineInput.prototype.keyBindings = {
+	CTRL_K: 'meta' ,
 	ENTER: 'submit' ,
 	KP_ENTER: 'submit' ,
 	ESCAPE: 'cancel' ,
@@ -14378,12 +14481,28 @@ InlineInput.prototype.keyBindings = {
 	END: 'endOfLine' ,
 	CTRL_B: 'startOfSelection' ,
 	CTRL_E: 'endOfSelection' ,
-	CTRL_K: 'meta' ,
-	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copy' ,
-	META_Y: 'copyClipboard' ,
-	CTRL_P: 'paste' ,
-	META_P: 'pasteClipboard'
+
+	// T for Transfer
+	//CTRL_T: 'moveSelection' ,		// TODO
+	ALT_T: 'copyToDocumentClipboard' ,
+	META_T: 'copyToSystemClipboard' ,
+	// P for Paste / Put
+	CTRL_P: 'pasteSelection' ,
+	ALT_P: 'pasteDocumentClipboard' ,
+	META_P: 'pasteSystemClipboard' ,
+	// D for Delete
+	//CTRL_D: 'deleteSelection' ,	// TODO
+	ALT_D: 'clearDocumentClipboard' ,
+	META_D: 'clearSystemClipboard'
+} ;
+
+
+
+InlineInput.prototype.insert = function( str ) {
+	this.textBuffer.insert( str , this.textAttr ) ;
+	this.textBuffer.runStateMachine() ;
+	if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
+	else { this.autoResizeAndDraw() ; }
 } ;
 
 
@@ -14648,33 +14767,6 @@ userActions.delete = function() {
 	else { this.autoResizeAndDraw() ; }
 } ;
 
-userActions.paste = function() {
-	if ( this.document ) {
-		let str = this.document.getCopyBuffer() ;
-		if ( str && typeof str === 'string' ) {
-			this.textBuffer.insert( str , this.textAttr ) ;
-			this.textBuffer.runStateMachine() ;
-			if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-			else { this.autoResizeAndDraw() ; }
-		}
-	}
-} ;
-
-userActions.pasteClipboard = function() {
-	if ( this.document ) {
-		this.document.getClipboard()
-			.then( str => {
-				if ( str ) {
-					this.textBuffer.insert( str , this.textAttr ) ;
-					this.textBuffer.runStateMachine() ;
-					if ( this.useAutoCompleteHint ) { this.runAutoCompleteHint( this.autoComplete ) ; }
-					else { this.autoResizeAndDraw() ; }
-				}
-			} )
-			.catch( () => undefined ) ;
-	}
-} ;
-
 
 },{"../autoComplete.js":7,"./EditableTextBox.js":23,"./Element.js":24,"./RowMenu.js":30,"./TextBox.js":35,"seventh":111,"string-kit":125}],28:[function(require,module,exports){
 (function (process){(function (){
@@ -14805,6 +14897,7 @@ LabeledInput.prototype.keyBindings = {
 
 
 LabeledInput.prototype.editableTextBoxKeyBindings = {
+	CTRL_K: 'meta' ,
 	BACKSPACE: 'backDelete' ,
 	DELETE: 'delete' ,
 	LEFT: 'backward' ,
@@ -14815,12 +14908,19 @@ LabeledInput.prototype.editableTextBoxKeyBindings = {
 	END: 'endOfLine' ,
 	CTRL_B: 'startOfSelection' ,
 	CTRL_E: 'endOfSelection' ,
-	CTRL_K: 'meta' ,
-	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copy' ,
-	META_Y: 'copyClipboard' ,
-	CTRL_P: 'paste' ,
-	META_P: 'pasteClipboard'
+
+	// T for Transfer
+	CTRL_T: 'moveSelection' ,
+	ALT_T: 'copyToDocumentClipboard' ,
+	META_T: 'copyToSystemClipboard' ,
+	// P for Paste / Put
+	CTRL_P: 'pasteSelection' ,
+	ALT_P: 'pasteDocumentClipboard' ,
+	META_P: 'pasteSystemClipboard' ,
+	// D for Delete
+	CTRL_D: 'deleteSelection' ,
+	ALT_D: 'clearDocumentClipboard' ,
+	META_D: 'clearSystemClipboard'
 } ;
 
 
@@ -16782,9 +16882,10 @@ TextBox.prototype.keyBindings = {
 	END: 'scrollBottom' ,
 	LEFT: 'scrollLeft' ,
 	RIGHT: 'scrollRight' ,
-	// We copy vi/vim here, that use 'y' for copy (yank) and 'p' for paste (put)
-	CTRL_Y: 'copy' ,
-	META_Y: 'copyClipboard'
+
+	// T for Transfer
+	ALT_T: 'copyToDocumentClipboard' ,
+	META_T: 'copyToSystemClipboard'
 } ;
 
 
@@ -17235,7 +17336,7 @@ TextBox.prototype.onDrag = function( data ) {
 	} ) ;
 
 	if ( this.document ) {
-		this.document.setClipboard( this.textBuffer.getSelectionText() , 'primary' ).catch( () => undefined ) ;
+		this.document.setSystemClipboard( this.textBuffer.getSelectionText() , 'primary' ).catch( () => undefined ) ;
 	}
 
 	this.draw() ;
@@ -17304,15 +17405,15 @@ userActions.scrollBottom = function() {
 	this.emit( 'cursorChange' ) ;
 } ;
 
-userActions.copy = function() {
+userActions.copyToDocumentClipboard = function() {
 	if ( this.document ) {
-		this.document.setCopyBuffer( this.textBuffer.getSelectionText() ) ;
+		this.document.setDocumentClipboard( this.textBuffer.getSelectionText() ) ;
 	}
 } ;
 
-userActions.copyClipboard = function() {
+userActions.copyToSystemClipboard = function() {
 	if ( this.document ) {
-		this.document.setClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
+		this.document.setSystemClipboard( this.textBuffer.getSelectionText() ).catch( () => undefined ) ;
 	}
 } ;
 
