@@ -9494,8 +9494,14 @@ BaseMenu.prototype.onFocus = function( focus , type ) {
 	if ( focus ) {
 		// Defer to the next tick to avoid recursive events producing wrong listener order
 		process.nextTick( () => {
-			if ( this.focusChild && ! this.focusChild.destroyed ) { this.document.giveFocusTo( this.focusChild , 'delegate' ) ; }
-			else { this.focusChild = this.focusNextChild() ; }
+			let forceType = type === 'clear' ? type : undefined ;
+
+			if ( this.focusChild && ! this.focusChild.destroyed ) {
+				this.document.giveFocusTo( this.focusChild , forceType || 'delegate' ) ;
+			}
+			else {
+				this.focusChild = this.focusNextChild( undefined , forceType ) ;
+			}
 		} ) ;
 	}
 } ;
@@ -9710,12 +9716,18 @@ userActions.parentMenu = function() {
 		if ( this.parent.submenuOptions.hideParent ) { this.parent.closeSubmenu() ; }
 		parent.document.giveFocusTo( parent ) ;
 	}
+	else {
+		return false ;
+	}
 } ;
 
 userActions.submenu = function() {
 	if ( this.hasSubmenu && this.focusChild?.def?.items ) {
 		this.openSubmenu( this.focusChild.value , this.focusChild ) ;
 		if ( this.submenu ) { this.document.giveFocusTo( this.submenu ) ; }
+	}
+	else {
+		return false ;
 	}
 } ;
 
@@ -12000,6 +12012,8 @@ function DropDownMenu( options ) {
 
 	this.clearColumnMenuOnSubmit = !! options.clearColumnMenuOnSubmit ;
 
+	this.lastFocusButton = null ;
+
 	this.onClickOut = this.onClickOut.bind( this ) ;
 	this.onColumnMenuSubmit = this.onColumnMenuSubmit.bind( this ) ;
 	//this.onColumnMenuFocus = this.onColumnMenuFocus.bind( this ) ;
@@ -12092,10 +12106,15 @@ DropDownMenu.prototype.dropDown = function( index , x , y , submittedButtonValue
 
 
 
-DropDownMenu.prototype.clearColumnMenu = function() {
+DropDownMenu.prototype.clearColumnMenu = function( focusHeadButton = false ) {
 	if ( ! this.columnMenu ) { return false ; }
 	this.columnMenu.destroy() ;
 	this.columnMenu = null ;
+
+	if ( focusHeadButton && this.lastFocusButton ) {
+		this.document.giveFocusTo( this.lastFocusButton , 'clear' ) ;
+	}
+
 	return true ;
 } ;
 
@@ -12155,7 +12174,9 @@ DropDownMenu.prototype.onButtonSubmit = function( buttonValue , action , button 
 
 
 DropDownMenu.prototype.onButtonFocus = function( focus , type , button ) {
-	if ( focus ) {
+	this.lastFocusButton = button ;
+
+	if ( focus && type !== 'clear' ) {
 		this.dropDown( button.childId , button.outputX , button.outputY + 1 ) ;
 	}
 } ;
@@ -12171,12 +12192,12 @@ DropDownMenu.prototype.onColumnMenuSubmit = function( buttonValue , action , col
 		}
 
 		if ( this.clearColumnMenuOnSubmit ) {
-			setTimeout( () => this.clearColumnMenu() , 400 ) ;
+			setTimeout( () => this.clearColumnMenu( true ) , 400 ) ;
 		}
 	}
 	else {
 		columnMenu.once( 'blinked' , ( buttonValue_ , reserved , columnMenu_ , button_ ) => {
-			if ( this.clearColumnMenuOnSubmit ) { this.clearColumnMenu() ; }
+			if ( this.clearColumnMenuOnSubmit ) { this.clearColumnMenu( true ) ; }
 			this.emit( 'blinked' , buttonValue_ , reserved , this , button_ ) ;
 		} ) ;
 	}
@@ -12199,14 +12220,20 @@ userActions.next = function() {
 } ;
 
 userActions.dropDown = function() {
-	if ( this.columnMenu ) { this.columnMenu.focusNextChild() ; }
+	if ( this.columnMenu ) {
+		this.columnMenu.focusNextChild() ;
+	}
+	else if ( this.lastFocusButton ) {
+		this.dropDown( this.lastFocusButton.childId , this.lastFocusButton.outputX , this.lastFocusButton.outputY + 1 ) ;
+	}
+
 	//this.focusChild = this.focusNextChild() ;
 	//this.clearColumnMenu() ;
 } ;
 
 userActions.clearColumnMenu = function() {
 	// Bubble up only if something was cleared
-	return this.clearColumnMenu() ;
+	return this.clearColumnMenu( true ) ;
 } ;
 
 
@@ -13480,7 +13507,7 @@ Element.prototype.getFocusBranchIndex = function() {
 
 
 
-Element.prototype.focusNextChild = function( loop = true ) {
+Element.prototype.focusNextChild = function( loop = true , type = 'cycle' ) {
 	var index , startingIndex , focusAware ;
 
 	if ( ! this.children.length || ! this.document ) { return null ; }
@@ -13499,7 +13526,7 @@ Element.prototype.focusNextChild = function( loop = true ) {
 			else { index = this.children.length - 1 ; break ; }
 		}
 
-		focusAware = this.document.giveFocusTo_( this.children[ index ] , 'cycle' ) ;
+		focusAware = this.document.giveFocusTo_( this.children[ index ] , type ) ;
 
 		// Exit if the focus was given to a focus-aware element or if we have done a full loop already
 		if ( focusAware || startingIndex === index ) { break ; }
@@ -13822,7 +13849,7 @@ Element.createInline = async function( term , Type , options ) {
 // Default 'key' event management, suitable for almost all use-case, but could be derivated if needed
 Element.prototype.onKey = function( key , trash , data ) {
 	var action = this.keyBindings[ key ] ;
-	//console.error( this.elementType + '#' + this.uid , "Key:" , key , "Actions:" , action , action && this.userActions[ action ] ? "fn: " + this.userActions[ action ].toString() : '' ) ;
+	//console.error( this.debugId() , "Key:" , key , "Actions:" , action , !! this.userActions?.[ action ] ) ; // action && this.userActions[ action ] ? "fn: " + this.userActions[ action ].toString() : '' ) ;
 
 	if ( action ) {
 		if ( action === 'meta' ) {
@@ -13832,14 +13859,14 @@ Element.prototype.onKey = function( key , trash , data ) {
 			return true ;	// Do not bubble up
 		}
 		else if ( this.userActions[ action ] ) {
-			this.userActions[ action ].call( this , key , trash , data ) ;
-			return true ;	// Do not bubble up
+			// Do not bubble up except if explicitly false
+			return ( this.userActions[ action ].call( this , key , trash , data ) ?? true ) || undefined ;
 		}
 	}
 	else if ( data && data.isCharacter ) {
 		if ( this.userActions.character ) {
-			this.userActions.character.call( this , key , trash , data ) ;
-			return true ;	// Do not bubble up
+			// Do not bubble up except if explicitly false
+			return ( this.userActions.character.call( this , key , trash , data ) ?? true ) || undefined ;
 		}
 	}
 
@@ -18106,6 +18133,8 @@ ToggleButton.prototype.keyBindings = {
 ToggleButton.prototype.blink = function() {} ;
 
 
+
+ToggleButton.prototype.getValue = function() { return this.value ; } ;
 
 ToggleButton.prototype.setValue = function( value , noDraw , noEmit ) {
 	value = !! value ;
