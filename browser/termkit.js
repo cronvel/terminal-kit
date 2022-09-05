@@ -12257,6 +12257,7 @@ function EditableTextBox( options ) {
 	TextBox.call( this , options ) ;
 
 	this.onFocus = this.onFocus.bind( this ) ;
+	this.onDragEnd = this.onDragEnd.bind( this ) ;
 	this.onMiddleClick = this.onMiddleClick.bind( this ) ;
 
 	// Hooks
@@ -12270,6 +12271,7 @@ function EditableTextBox( options ) {
 	this.updateStatus() ;
 
 	this.on( 'focus' , this.onFocus ) ;
+	this.on( 'dragEnd' , this.onDragEnd ) ;
 	this.on( 'middleClick' , this.onMiddleClick ) ;
 
 	if ( this.setContent === EditableTextBox.prototype.setContent ) {
@@ -12447,6 +12449,23 @@ EditableTextBox.prototype.onClick = function( data ) {
 
 
 
+EditableTextBox.prototype.onDragEnd = function( data ) {
+	if ( this.hasFocus ) {
+		if ( data.yFrom < data.y || ( data.yFrom === data.y && data.xFrom <= data.x ) ) {
+			// Forward selection, put the cursor one cell to the right
+			this.textBuffer.moveTo( data.x - this.scrollX + 1 , data.y - this.scrollY ) ;
+		}
+		else {
+			// Backward selection, put the cursor one the current cell
+			this.textBuffer.moveTo( data.x - this.scrollX , data.y - this.scrollY ) ;
+		}
+
+		this.drawCursor() ;
+	}
+} ;
+
+
+
 EditableTextBox.prototype.onMiddleClick = function( data ) {
 	if ( ! this.hasFocus ) {
 		this.document.giveFocusTo( this , 'select' ) ;
@@ -12551,7 +12570,14 @@ userActions.tab = function() {
 
 userActions.delete = function() {
 	var x = this.textBuffer.cx ,
-		y = this.textBuffer.cy ;
+		y = this.textBuffer.cy ,
+		selectionRegion = this.textBuffer.selectionRegion ;
+
+	if ( selectionRegion && selectionRegion.ymin === y && selectionRegion.xmin === x ) {
+		// Instead, delete the whole selection
+		this.deleteSelection() ;
+		return ;
+	}
 
 	var deleted = this.textBuffer.delete( 1 , true ) ;
 	if ( this.stateMachine ) {
@@ -12573,7 +12599,17 @@ userActions.delete = function() {
 
 userActions.backDelete = function() {
 	var x = this.textBuffer.cx ,
-		y = this.textBuffer.cy ;
+		y = this.textBuffer.cy ,
+		selectionRegion = this.textBuffer.selectionRegion ;
+
+	if ( selectionRegion ) {
+		let coord = this.textBuffer.oneStepBackward() ;
+		if ( selectionRegion.ymax === coord.y && selectionRegion.xmax === coord.x ) {
+			// Instead, delete the whole selection
+			this.deleteSelection() ;
+			return ;
+		}
+	}
 
 	var deleted = this.textBuffer.backDelete( 1 , true ) ;
 	if ( this.stateMachine ) {
