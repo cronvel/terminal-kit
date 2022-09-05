@@ -2777,7 +2777,7 @@ ScreenBuffer.prototype.saveSync = ScreenBuffer.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./misc.js":45,"./termkit.js":53,"buffer":149,"fs":139,"nextgen-events":75,"string-kit":125}],4:[function(require,module,exports){
+},{"./misc.js":45,"./termkit.js":53,"buffer":150,"fs":139,"nextgen-events":75,"string-kit":125}],4:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -3943,7 +3943,7 @@ ScreenBufferHD.prototype.saveSync = ScreenBufferHD.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./misc.js":45,"./termkit.js":53,"buffer":149,"fs":139,"string-kit":125}],5:[function(require,module,exports){
+},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./misc.js":45,"./termkit.js":53,"buffer":150,"fs":139,"string-kit":125}],5:[function(require,module,exports){
 (function (process,Buffer){(function (){
 /*
 	Terminal Kit
@@ -6165,7 +6165,7 @@ notChainable.drawImage = function( filepath , options , callback ) {
 
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":39,"./fileInput.js":41,"./gridMenu.js":42,"./inputField.js":44,"./progressBar.js":47,"./singleColumnMenu.js":48,"./singleLineMenu.js":49,"./slowTyping.js":50,"./termkit.js":53,"./yesOrNo.js":60,"_process":183,"buffer":149,"nextgen-events":75,"seventh":111,"string-kit":125,"tree-kit":137}],6:[function(require,module,exports){
+},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":39,"./fileInput.js":41,"./gridMenu.js":42,"./inputField.js":44,"./progressBar.js":47,"./singleColumnMenu.js":48,"./singleLineMenu.js":49,"./slowTyping.js":50,"./termkit.js":53,"./yesOrNo.js":60,"_process":182,"buffer":150,"nextgen-events":75,"seventh":111,"string-kit":125,"tree-kit":137}],6:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -6873,6 +6873,9 @@ TextBuffer.prototype.setSelectionRegion = function( region ) {
 	}
 
 	if ( region.xmin !== undefined && region.ymin !== undefined ) {
+		if ( region.xmin < 0 ) { region.xmin = 0 ; }
+		if ( region.ymin < 0 ) { region.ymin = 0 ; }
+
 		this.selectionRegion.xmin = region.xmin ;
 		this.selectionRegion.ymin = region.ymin ;
 		this.selectionRegion.cellMin = this.buffer[ region.ymin ]?.[ region.xmin ] ?? null ;
@@ -6910,6 +6913,8 @@ TextBuffer.prototype.startOfSelection = function() {
 
 // TODOC
 TextBuffer.prototype.endOfSelection = function() {
+	var coord = this.oneStepBackward() ;
+
 	if ( this.selectionRegion ) {
 		// Start by unhilighting existing selection
 		this.hilightSelection( false ) ;
@@ -6918,12 +6923,15 @@ TextBuffer.prototype.endOfSelection = function() {
 		this.selectionRegion = {} ;
 	}
 
-	this.selectionRegion.xmax = this.cx - 1 ;
-	this.selectionRegion.ymax = this.cy ;
-	this.selectionRegion.cellMax =
-		this.cx > 0 ? this.buffer[ this.cy ]?.[ this.cx - 1 ] ?? null :
-		// if xmax = -1, ref the whole line
-		this.buffer[ this.cy ] ;
+	if ( ! coord ) {
+		// Start of the file
+		this.selectionRegion = null ;
+		return ;
+	}
+
+	this.selectionRegion.xmax = coord.x ;
+	this.selectionRegion.ymax = coord.y ;
+	this.selectionRegion.cellMax = this.buffer[ coord.y ]?.[ coord.x ] ?? null ;
 
 	this.hilightSelection() ;
 } ;
@@ -6945,11 +6953,6 @@ TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false ) {
 	for ( let y = 0 ; y < this.buffer.length ; y ++ ) {
 		let currentLine = this.buffer[ y ] ;
 		if ( ! currentLine ) { continue ; }
-
-		if ( currentLine === this.selectionRegion.cellMax ) {
-			xmax = -1 ;
-			ymax = y ;
-		}
 
 		for ( let x = 0 ; x < currentLine.length ; x ++ ) {
 			if ( currentLine[ x ] === this.selectionRegion.cellMin ) {
@@ -8166,8 +8169,30 @@ TextBuffer.prototype.save = async function( path , callback ) {
 
 
 
+
+
+/* Utilities */
+
+
+
 TextBuffer.prototype.object2attr = function( attrObject , colorNameToIndex = this.palette?.colorNameToIndex , legacyColor = false ) {
 	return this.ScreenBuffer.object2attr( attrObject , colorNameToIndex , legacyColor ) ;
+} ;
+
+
+
+// TODOC
+// A small utility function that returns the coordinate one step backward, if needed it point to the end of the previous line
+TextBuffer.prototype.oneStepBackward = function( x = this.cx , y = this.cy ) {
+	x -- ;
+
+	if ( x < 0 ) {
+		y -- ;
+		if ( y < 0 ) { return null ; }
+		x = this.buffer[ y ].length - 1 ;
+	}
+
+	return { x , y } ;
 } ;
 
 
@@ -8870,7 +8895,7 @@ exports.getDetectedTerminal = async function( callback ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./termkit.js":53,"_process":183,"child_process":139,"os":170,"path":182,"seventh":111}],13:[function(require,module,exports){
+},{"./termkit.js":53,"_process":182,"child_process":139,"os":169,"path":181,"seventh":111}],13:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -9662,7 +9687,7 @@ userActions.submenu = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":16,"./Element.js":24,"_process":183,"tree-kit":137}],16:[function(require,module,exports){
+},{"./Button.js":16,"./Element.js":24,"_process":182,"tree-kit":137}],16:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -9942,7 +9967,6 @@ Button.prototype.blink = function( special = null , animationCountdown = 4 ) {
 
 
 Button.prototype.onFocus = function( focus , type ) {
-	this.hasFocus = focus ;
 	this.updateStatus() ;
 	this.draw() ;
 } ;
@@ -11333,9 +11357,8 @@ Document.prototype.unassignId = function( element , id ) {
 
 
 
-Document.prototype.giveFocusTo = function( element , type ) {
+Document.prototype.giveFocusTo = function( element , type = 'direct' ) {
 	if ( ! ( element instanceof Element ) ) { throw new TypeError( '' + element + ' is not an instance of Element.' ) ; }
-	if ( ! type ) { type = 'direct' ; }
 	if ( this.isAncestorOf( element ) ) { return this.giveFocusTo_( element , type ) ; }
 } ;
 
@@ -11345,8 +11368,13 @@ Document.prototype.giveFocusTo_ = function( element , type ) {
 	var ancestor , focusAware ;
 
 	if ( this.focusElement !== element ) {
-		if ( this.focusElement ) { this.focusElement.emit( 'focus' , false , type , this.focusElement ) ; }
+		if ( this.focusElement ) {
+			this.focusElement.hasFocus = false ;
+			this.focusElement.emit( 'focus' , false , type , this.focusElement ) ;
+		}
+
 		this.focusElement = element ;
+		this.focusElement.hasFocus = true ;
 		this.focusElement.emit( 'focus' , true , type , this.focusElement ) ;
 	}
 
@@ -11655,29 +11683,6 @@ Document.prototype.mouseClick = function( data , clickType = 'click' ) {
 
 
 
-Document.prototype.mouseMotionStart = function( data ) {
-	var matches ;
-
-	this.motionData.motion = true ;
-	this.motionData.xFrom = data.xFrom ;
-	this.motionData.yFrom = data.yFrom ;
-	this.motionData.x = data.xFrom ;		// We use xFrom/yFrom, .mouseMotion() will update it using x/y, setting dx/dy to the delta
-	this.motionData.y = data.yFrom ;
-
-	//this.motionData.element = matches[ 0 ].element ;
-	//this.motionData.localDx = matches[ 0 ].x - data.xFrom ;
-	//this.motionData.localDy = matches[ 0 ].y - data.yFrom ;
-	//matches[ 0 ].element.emit( 'motionStart' , { x: matches[ 0 ].x , y: matches[ 0 ].y } , matches[ 0 ].element ) ;
-} ;
-
-
-
-Document.prototype.mouseMotionEnd = function() {
-	this.motionData.motion = false ;
-} ;
-
-
-
 // Also called from within .mouseDrag()
 Document.prototype.mouseMotion = function( data , exclude = null ) {
 	var starting = false ;
@@ -11727,7 +11732,81 @@ Document.prototype.mouseMotion = function( data , exclude = null ) {
 
 
 
+Document.prototype.mouseMotionStart = function( data ) {
+	var matches ;
+
+	this.motionData.motion = true ;
+	this.motionData.xFrom = data.xFrom ;
+	this.motionData.yFrom = data.yFrom ;
+	this.motionData.x = data.xFrom ;		// We use xFrom/yFrom, .mouseMotion() will update it using x/y, setting dx/dy to the delta
+	this.motionData.y = data.yFrom ;
+
+	//this.motionData.element = matches[ 0 ].element ;
+	//this.motionData.localDx = matches[ 0 ].x - data.xFrom ;
+	//this.motionData.localDy = matches[ 0 ].y - data.yFrom ;
+	//matches[ 0 ].element.emit( 'motionStart' , { x: matches[ 0 ].x , y: matches[ 0 ].y } , matches[ 0 ].element ) ;
+} ;
+
+
+
+Document.prototype.mouseMotionEnd = function() {
+	this.motionData.motion = false ;
+} ;
+
+
+
+Document.prototype.mouseDrag = function( data ) {
+	var starting = false ;
+
+	//console.error( "Drag event:" , JSON.stringify( data ) ) ;
+	if ( ! this.draggingData.dragging ) {
+		starting = true ;
+		this.mouseDragStart( data ) ;
+	}
+
+	this.draggingData.dx = data.x - this.draggingData.x ;
+	this.draggingData.dy = data.y - this.draggingData.y ;
+	this.draggingData.x = data.x ;
+	this.draggingData.y = data.y ;
+
+	// Newest Gnome-Terminal send drag event even when no progress have been made, this check avoid useless computing.
+	if ( ! starting && ! this.draggingData.dx && ! this.draggingData.dy ) { return ; }
+
+
+	// To send a 'drag' event, the origin of the drag should be on the same element
+	if ( this.draggingData.element ) {
+		let emitDrag = true ;
+
+		if ( ! this.draggingData.element.outerDrag ) {
+			let matches = this.childrenAt( data.x - this.outputX , data.y - this.outputY , COMMON_MOUSE_AWARE_FILTER ) ;
+			//console.error( "\tDrag event test:" , this.draggingData.element.debugId() , matches.map( m => m.element.debugId() ) ) ;
+			emitDrag = matches.some( m => m.element === this.draggingData.element ) ;
+		}
+
+		if ( emitDrag ) {
+			this.draggingData.element.emit(
+				'drag' ,
+				{
+					xFrom: this.draggingData.xFrom + this.draggingData.localDx ,
+					yFrom: this.draggingData.yFrom + this.draggingData.localDy ,
+					x: data.x + this.draggingData.localDx ,
+					y: data.y + this.draggingData.localDy ,
+					dx: this.draggingData.dx ,
+					dy: this.draggingData.dy
+				} ,
+				this.draggingData.element
+			) ;
+		}
+	}
+
+	// Call .mouseMotion() but exclude the current dragged element
+	this.mouseMotion( data , this.draggingData.element ) ;
+} ;
+
+
+
 Document.prototype.mouseDragStart = function( data ) {
+	//console.error( "Drag START event:" , JSON.stringify( data ) ) ;
 	var matches ;
 
 	this.draggingData.dragging = true ;
@@ -11739,6 +11818,10 @@ Document.prototype.mouseDragStart = function( data ) {
 	matches = this.childrenAt( data.xFrom - this.outputX , data.yFrom - this.outputY , COMMON_MOUSE_AWARE_FILTER ) ;
 
 	if ( ! matches.length ) {
+		this.draggingData.element = null ;
+		this.draggingData.localDx = null ;
+		this.draggingData.localDy = null ;
+
 		if ( this.hoverElement ) {
 			this.hoverElement.emit( 'leave' ) ;
 			this.hoverElement = null ;
@@ -11757,6 +11840,7 @@ Document.prototype.mouseDragStart = function( data ) {
 
 
 Document.prototype.mouseDragEnd = function( data ) {
+	//console.error( "Drag END event:" , JSON.stringify( data ) ) ;
 	if ( this.draggingData.element ) {
 		this.draggingData.element.emit(
 			'dragEnd' ,
@@ -11771,46 +11855,6 @@ Document.prototype.mouseDragEnd = function( data ) {
 	}
 
 	this.draggingData.dragging = false ;
-} ;
-
-
-
-Document.prototype.mouseDrag = function( data ) {
-	var starting = false ;
-
-	if ( ! this.draggingData.dragging ) {
-		starting = true ;
-		this.mouseDragStart( data ) ;
-	}
-
-	//console.error( "mouseDrag" , data ) ;
-
-	this.draggingData.dx = data.x - this.draggingData.x ;
-	this.draggingData.dy = data.y - this.draggingData.y ;
-	this.draggingData.x = data.x ;
-	this.draggingData.y = data.y ;
-
-	// Newest Gnome-Terminal send drag event even when no progress have been made, this check avoid useless computing.
-	if ( ! starting && ! this.draggingData.dx && ! this.draggingData.dy ) { return ; }
-
-	// To send a 'drag' event, the origin of the drag should be on the same element
-	if ( this.draggingData.element ) {
-		this.draggingData.element.emit(
-			'drag' ,
-			{
-				xFrom: this.draggingData.xFrom + this.draggingData.localDx ,
-				yFrom: this.draggingData.yFrom + this.draggingData.localDy ,
-				x: data.x + this.draggingData.localDx ,
-				y: data.y + this.draggingData.localDy ,
-				dx: this.draggingData.dx ,
-				dy: this.draggingData.dy
-			} ,
-			this.draggingData.element
-		) ;
-	}
-
-	// Call .mouseMotion() but exclude the current dragged element
-	this.mouseMotion( data , this.draggingData.element ) ;
 } ;
 
 
@@ -12255,7 +12299,6 @@ EditableTextBox.prototype.setValue = function( value , dontDraw ) {
 
 
 EditableTextBox.prototype.onFocus = function( focus , type ) {
-	this.hasFocus = focus ;
 	this.updateStatus() ;
 	this.draw() ;
 } ;
@@ -12263,12 +12306,20 @@ EditableTextBox.prototype.onFocus = function( focus , type ) {
 
 
 EditableTextBox.prototype.onClick = function( data ) {
-	if ( ! this.hasFocus ) {
-		this.document.giveFocusTo( this , 'select' ) ;
+	//console.error( "ETB Click:" , data ) ;
+	if ( this.hasFocus ) {
+		this.textBuffer.moveTo( data.x - this.scrollX , data.y - this.scrollY ) ;
+
+		if ( this.textBuffer.selectionRegion ) {
+			this.textBuffer.resetSelectionRegion() ;
+			this.draw() ;
+		}
+		else {
+			this.drawCursor() ;
+		}
 	}
 	else {
-		this.textBuffer.moveTo( data.x - this.scrollX , data.y - this.scrollY ) ;
-		this.drawCursor() ;
+		this.document.giveFocusTo( this , 'select' ) ;
 	}
 } ;
 
@@ -12540,14 +12591,15 @@ userActions.scrollDown = function() {
 userActions.expandSelectionBackward = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
 	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
 		// Can expand
 		this.textBuffer.moveBackward() ;
 		this.textBuffer.startOfSelection() ;
 	}
-	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+	else if ( selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y ) {
 		// Can contract
 		this.textBuffer.moveBackward() ;
 		this.textBuffer.endOfSelection() ;
@@ -12566,14 +12618,15 @@ userActions.expandSelectionBackward = function() {
 userActions.expandSelectionStartOfWord = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
 	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
 		// Can expand
 		this.textBuffer.moveToStartOfWord() ;
 		this.textBuffer.startOfSelection() ;
 	}
-	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+	else if ( selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y ) {
 		// Can contract
 		this.textBuffer.moveToStartOfWord() ;
 		this.textBuffer.endOfSelection() ;
@@ -12592,15 +12645,18 @@ userActions.expandSelectionStartOfWord = function() {
 userActions.expandSelectionUp = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
 	if ( selection && selection.xmin === cx && selection.ymin === cy ) {
 		// Can expand
 		this.textBuffer.moveUp() ;
 		this.textBuffer.startOfSelection() ;
 	}
-	else if ( selection && selection.xmax === cx - 1 && selection.ymax === cy
-		&& ( selection.ymin < cy - 1 || ( selection.ymin === cy - 1 && selection.xmin <= cx ) )
+	else if (
+		selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y
+		// Check that there is at least one line of selection
+		&& ( selection.ymin < oneStepBackward.y - 1 || ( selection.ymin === oneStepBackward.y - 1 && selection.xmin <= oneStepBackward.x ) )
 	) {
 		// Can contract
 		this.textBuffer.moveUp() ;
@@ -12620,9 +12676,10 @@ userActions.expandSelectionUp = function() {
 userActions.expandSelectionForward = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
-	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+	if ( selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y ) {
 		// Can expand
 		this.textBuffer.moveForward() ;
 		this.textBuffer.endOfSelection() ;
@@ -12646,9 +12703,10 @@ userActions.expandSelectionForward = function() {
 userActions.expandSelectionEndOfWord = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
-	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+	if ( selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y ) {
 		// Can expand
 		this.textBuffer.moveToEndOfWord() ;
 		this.textBuffer.endOfSelection() ;
@@ -12672,9 +12730,10 @@ userActions.expandSelectionEndOfWord = function() {
 userActions.expandSelectionDown = function() {
 	var selection = this.textBuffer.selectionRegion ,
 		cx = this.textBuffer.cx ,
-		cy = this.textBuffer.cy ;
+		cy = this.textBuffer.cy ,
+		oneStepBackward = this.textBuffer.oneStepBackward() ;
 
-	if ( selection && selection.xmax === cx - 1 && selection.ymax === cy ) {
+	if ( selection && selection.xmax === oneStepBackward.x && selection.ymax === oneStepBackward.y ) {
 		// Can expand
 		this.textBuffer.moveDown() ;
 		this.textBuffer.endOfSelection() ;
@@ -12942,6 +13001,11 @@ Element.inherit = function( Class , FromClass = Element ) {
 	Class.prototype.userActions = Object.create( FromClass.prototype.userActions ) ;
 	Class.prototype.userActions.__parent = FromClass.prototype.userActions ;
 } ;
+
+
+
+// Debug function
+Element.prototype.debugId = function() { return this.elementType + '#' + this.uid ; } ;
 
 
 
@@ -13662,6 +13726,7 @@ Element.prototype.strictInlineSupport = false ;	// no support for strictInline m
 Element.prototype.staticInline = false ;	// boolean, true if the inline version is static and could be destroyed immediately after been drawn
 Element.prototype.inlineCursorRestoreAfterDraw = false ;	// when set, save/restore cursor in inline mode (forced when strictInline is true)
 Element.prototype.needInput = false ;	// no need for input by default (used to configure inline mode)
+Element.prototype.outerDrag = false ;	// boolean, true if drag event are sent when out of bounds (e.g. useful for moving windows)
 
 Element.prototype.keyBindings = {} ;	// object, store key bindings, the key is a Terminal Kit key code, the value is an user-action name
 Element.prototype.userActions = {} ;	// object, the key is an user-action name, the value is a function... THIS IS INHERITED
@@ -13976,7 +14041,7 @@ userActions.next = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":16,"./Element.js":24,"./LabeledInput.js":28,"_process":183}],26:[function(require,module,exports){
+},{"./Button.js":16,"./Element.js":24,"./LabeledInput.js":28,"_process":182}],26:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -14113,7 +14178,7 @@ InlineFileInput.prototype.submit = async function() {
 } ;
 
 
-},{"../fileHelpers.js":40,"./Element.js":24,"./InlineInput.js":27,"fs":139,"path":182}],27:[function(require,module,exports){
+},{"../fileHelpers.js":40,"./Element.js":24,"./InlineInput.js":27,"fs":139,"path":181}],27:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -14962,8 +15027,6 @@ LabeledInput.prototype.onInputSubmit = function( data ) {
 
 
 LabeledInput.prototype.onFocus = function( focus , type ) {
-	this.hasFocus = focus ;
-
 	if ( type === 'delegate' ) { return ; }
 
 	if ( focus && type !== 'backCycle' && this.input ) {
@@ -15004,7 +15067,7 @@ userActions.submit = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./EditableTextBox.js":23,"./Element.js":24,"./SelectList.js":31,"./SelectListMulti.js":32,"./Text.js":34,"_process":183,"string-kit":125}],29:[function(require,module,exports){
+},{"./EditableTextBox.js":23,"./Element.js":24,"./SelectList.js":31,"./SelectListMulti.js":32,"./Text.js":34,"_process":182,"string-kit":125}],29:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16211,6 +16274,7 @@ Element.inherit( Slider ) ;
 
 
 Slider.prototype.needInput = true ;
+Slider.prototype.outerDrag = true ;
 
 
 
@@ -17112,15 +17176,6 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 
 
 
-TextBox.prototype.onClick = function( data ) {
-	// It is susceptible to click event only when it is scrollable
-	if ( this.scrollable && ! this.hasFocus ) {
-		this.document.giveFocusTo( this , 'select' ) ;
-	}
-} ;
-
-
-
 TextBox.prototype.onWheel = function( data ) {
 	// It's a "tiny" scroll
 	if ( ! this.hasFocus ) {
@@ -17134,7 +17189,25 @@ TextBox.prototype.onWheel = function( data ) {
 
 
 
+TextBox.prototype.onClick = function( data ) {
+	if ( this.hasFocus ) {
+		if ( this.textBuffer.selectionRegion ) {
+			this.textBuffer.resetSelectionRegion() ;
+			this.draw() ;
+		}
+	}
+	else {
+		if ( this.scrollable ) {
+			// It is susceptible to click event only when it is scrollable
+			this.document.giveFocusTo( this , 'select' ) ;
+		}
+	}
+} ;
+
+
+
 TextBox.prototype.onDrag = function( data ) {
+	//console.error( "TB Drag:" , data ) ;
 	var xmin , ymin , xmax , ymax ;
 
 	if ( ! this.hasFocus ) {
@@ -18061,6 +18134,7 @@ Element.inherit( Window , Container ) ;
 
 
 Window.prototype.containerBorderSize = 1 ;
+Window.prototype.outerDrag = false ;
 
 
 
@@ -18194,7 +18268,7 @@ else {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./patches.js":46,"_process":183,"child_process":139,"seventh":111,"string-kit":125}],40:[function(require,module,exports){
+},{"./patches.js":46,"_process":182,"child_process":139,"seventh":111,"string-kit":125}],40:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -18339,7 +18413,7 @@ exports.autoCompleteFile = async ( inputString , params ) => {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./autoComplete.js":7,"_process":183,"fs":139,"path":182,"seventh":111}],41:[function(require,module,exports){
+},{"./autoComplete.js":7,"_process":182,"fs":139,"path":181,"seventh":111}],41:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18416,7 +18490,7 @@ module.exports = async function fileInput( options , callback ) {
 } ;
 
 
-},{"./fileHelpers.js":40,"path":182}],42:[function(require,module,exports){
+},{"./fileHelpers.js":40,"path":181}],42:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -22778,7 +22852,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Button.js":16,"./document/ColumnMenu.js":17,"./document/ColumnMenuMixed.js":18,"./document/ColumnMenuMulti.js":19,"./document/Container.js":20,"./document/Document.js":21,"./document/DropDownMenu.js":22,"./document/EditableTextBox.js":23,"./document/Element.js":24,"./document/Form.js":25,"./document/InlineFileInput.js":26,"./document/InlineInput.js":27,"./document/LabeledInput.js":28,"./document/Layout.js":29,"./document/RowMenu.js":30,"./document/SelectList.js":31,"./document/SelectListMulti.js":32,"./document/Slider.js":33,"./document/Text.js":34,"./document/TextBox.js":35,"./document/TextTable.js":36,"./document/ToggleButton.js":37,"./document/Window.js":38,"./image.js":43,"./misc.js":45,"./spChars.js":51,"./tty.js":54,"./vte/Vte.js":56,"./windows.js":59,"_process":183,"chroma-js":62,"lazyness":71}],53:[function(require,module,exports){
+},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Button.js":16,"./document/ColumnMenu.js":17,"./document/ColumnMenuMixed.js":18,"./document/ColumnMenuMulti.js":19,"./document/Container.js":20,"./document/Document.js":21,"./document/DropDownMenu.js":22,"./document/EditableTextBox.js":23,"./document/Element.js":24,"./document/Form.js":25,"./document/InlineFileInput.js":26,"./document/InlineInput.js":27,"./document/LabeledInput.js":28,"./document/Layout.js":29,"./document/RowMenu.js":30,"./document/SelectList.js":31,"./document/SelectListMulti.js":32,"./document/Slider.js":33,"./document/Text.js":34,"./document/TextBox.js":35,"./document/TextTable.js":36,"./document/ToggleButton.js":37,"./document/Window.js":38,"./image.js":43,"./misc.js":45,"./spChars.js":51,"./tty.js":54,"./vte/Vte.js":56,"./windows.js":59,"_process":182,"chroma-js":62,"lazyness":71}],53:[function(require,module,exports){
 (function (process,__dirname){(function (){
 /*
 	Terminal Kit
@@ -22935,7 +23009,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'),"/lib")
-},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":45,"./termkit-no-lazy-require.js":52,"./windows.js":59,"_process":183,"lazyness":71,"path":182}],54:[function(require,module,exports){
+},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":45,"./termkit-no-lazy-require.js":52,"./windows.js":59,"_process":182,"lazyness":71,"path":181}],54:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -23095,7 +23169,7 @@ tty_.getOutput = function getOutput() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":183,"child_process":139,"fs":139,"tty":202}],55:[function(require,module,exports){
+},{"_process":182,"child_process":139,"fs":139,"tty":201}],55:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -23450,7 +23524,7 @@ SequencesReader.prototype.streamToEvent = async function( stream ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./fromOutputSequence.js":57,"buffer":149,"nextgen-events":75,"seventh":111,"string-kit":125}],56:[function(require,module,exports){
+},{"./fromOutputSequence.js":57,"buffer":150,"nextgen-events":75,"seventh":111,"string-kit":125}],56:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25201,8 +25275,8 @@ module.exports = function getPixels(url, type, cb) {
   }
 }
 
-}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":165,"fs":139,"jpeg-js":68,"ndarray":74,"ndarray-pack":72,"node-bitmap":78,"omggif":80,"path":182,"pngjs":100}],62:[function(require,module,exports){
+}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":165,"fs":139,"jpeg-js":68,"ndarray":74,"ndarray-pack":72,"node-bitmap":78,"omggif":80,"path":181,"pngjs":100}],62:[function(require,module,exports){
 /**
  * chroma.js - JavaScript library for color conversions
  *
@@ -30545,7 +30619,7 @@ function decode(jpegData, userOpts = {}) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":149}],70:[function(require,module,exports){
+},{"buffer":150}],70:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
   Copyright (c) 2008, Adobe Systems Incorporated
@@ -31363,7 +31437,7 @@ function getImageDataFromImage(idOrElement){
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":149}],71:[function(require,module,exports){
+},{"buffer":150}],71:[function(require,module,exports){
 /*
 	Lazyness
 
@@ -32744,9 +32818,11 @@ NextGenEvents.emitToOneListener = function( event , listener , removedListeners 
 	}
 
 
-	if ( listener.once ) {
+	if ( listener.once && self.__ngev.listeners[ event.name ] ) {
 		// We should remove the current listener RIGHT NOW because of recursive .emit() issues:
 		// one listener may eventually fire this very same event synchronously during the current loop.
+		// ALSO another listener may have called .removeAllListeners(), so we first check that there are still
+		// a listener array for this event.
 		self.__ngev.listeners[ event.name ] = self.__ngev.listeners[ event.name ].filter(
 			NextGenEvents.filterOutCallback.bind( undefined , listener )
 		) ;
@@ -33383,7 +33459,7 @@ NextGenEvents.Proxy = require( './Proxy.js' ) ;
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"../package.json":77,"./Proxy.js":76,"_process":183,"timers":201}],76:[function(require,module,exports){
+},{"../package.json":77,"./Proxy.js":76,"_process":182,"timers":200}],76:[function(require,module,exports){
 /*
 	Next-Gen Events
 
@@ -33933,7 +34009,7 @@ RemoteService.prototype.receiveAckEmit = function( message ) {
 },{"./NextGenEvents.js":75}],77:[function(require,module,exports){
 module.exports={
   "name": "nextgen-events",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "The next generation of events handling for javascript! New: abstract away the network!",
   "main": "lib/NextGenEvents.js",
   "engines": {
@@ -34598,7 +34674,7 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":149}],80:[function(require,module,exports){
+},{"buffer":150}],80:[function(require,module,exports){
 // (c) Dean McNamee <dean@gmail.com>, 2013.
 //
 // https://github.com/deanm/omggif
@@ -35678,7 +35754,7 @@ exports.dataToBitMap = function (data, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":91,"buffer":149}],82:[function(require,module,exports){
+},{"./interlace":91,"buffer":150}],82:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -35840,7 +35916,7 @@ module.exports = function (dataIn, width, height, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":84,"buffer":149}],83:[function(require,module,exports){
+},{"./constants":84,"buffer":150}],83:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -36033,7 +36109,7 @@ ChunkStream.prototype._process = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":183,"buffer":149,"stream":185,"util":206}],84:[function(require,module,exports){
+},{"_process":182,"buffer":150,"stream":184,"util":205}],84:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -36284,7 +36360,7 @@ module.exports = function (pxData, width, height, options, bpp) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./paeth-predictor":95,"buffer":149}],87:[function(require,module,exports){
+},{"./paeth-predictor":95,"buffer":150}],87:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36312,7 +36388,7 @@ let FilterAsync = (module.exports = function (bitmapInfo) {
 util.inherits(FilterAsync, ChunkStream);
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./chunkstream":83,"./filter-parse":89,"buffer":149,"util":206}],88:[function(require,module,exports){
+},{"./chunkstream":83,"./filter-parse":89,"buffer":150,"util":205}],88:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36337,7 +36413,7 @@ exports.process = function (inBuffer, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./filter-parse":89,"./sync-reader":102,"buffer":149}],89:[function(require,module,exports){
+},{"./filter-parse":89,"./sync-reader":102,"buffer":150}],89:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36518,7 +36594,7 @@ Filter.prototype._reverseFilterLine = function (rawData) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":91,"./paeth-predictor":95,"buffer":149}],90:[function(require,module,exports){
+},{"./interlace":91,"./paeth-predictor":95,"buffer":150}],90:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36615,7 +36691,7 @@ module.exports = function (indata, imageData, skipRescale = false) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":149}],91:[function(require,module,exports){
+},{"buffer":150}],91:[function(require,module,exports){
 "use strict";
 
 // Adam 7
@@ -36766,7 +36842,7 @@ PackerAsync.prototype.pack = function (data, width, height, gamma) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":84,"./packer":94,"buffer":149,"stream":185,"util":206}],93:[function(require,module,exports){
+},{"./constants":84,"./packer":94,"buffer":150,"stream":184,"util":205}],93:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36826,7 +36902,7 @@ module.exports = function (metaData, opt) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":84,"./packer":94,"buffer":149,"zlib":148}],94:[function(require,module,exports){
+},{"./constants":84,"./packer":94,"buffer":150,"zlib":149}],94:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36959,7 +37035,7 @@ Packer.prototype.packIEND = function () {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitpacker":82,"./constants":84,"./crc":85,"./filter-pack":86,"buffer":149,"zlib":148}],95:[function(require,module,exports){
+},{"./bitpacker":82,"./constants":84,"./crc":85,"./filter-pack":86,"buffer":150,"zlib":149}],95:[function(require,module,exports){
 "use strict";
 
 module.exports = function paethPredictor(left, above, upLeft) {
@@ -37148,7 +37224,7 @@ ParserAsync.prototype._complete = function (filteredData) {
   this.emit("parsed", normalisedBitmapData);
 };
 
-},{"./bitmapper":81,"./chunkstream":83,"./filter-parse-async":87,"./format-normaliser":90,"./parser":98,"util":206,"zlib":148}],97:[function(require,module,exports){
+},{"./bitmapper":81,"./chunkstream":83,"./filter-parse-async":87,"./format-normaliser":90,"./parser":98,"util":205,"zlib":149}],97:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37264,7 +37340,7 @@ module.exports = function (buffer, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitmapper":81,"./filter-parse-sync":88,"./format-normaliser":90,"./parser":98,"./sync-inflate":101,"./sync-reader":102,"buffer":149,"zlib":148}],98:[function(require,module,exports){
+},{"./bitmapper":81,"./filter-parse-sync":88,"./format-normaliser":90,"./parser":98,"./sync-inflate":101,"./sync-reader":102,"buffer":150,"zlib":149}],98:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37558,7 +37634,7 @@ Parser.prototype._parseIEND = function (data) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":84,"./crc":85,"buffer":149}],99:[function(require,module,exports){
+},{"./constants":84,"./crc":85,"buffer":150}],99:[function(require,module,exports){
 "use strict";
 
 let parse = require("./parser-sync");
@@ -37770,7 +37846,7 @@ PNG.prototype.adjustGamma = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./packer-async":92,"./parser-async":96,"./png-sync":99,"_process":183,"buffer":149,"stream":185,"util":206}],101:[function(require,module,exports){
+},{"./packer-async":92,"./parser-async":96,"./png-sync":99,"_process":182,"buffer":150,"stream":184,"util":205}],101:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -37942,7 +38018,7 @@ exports.createInflate = createInflate;
 exports.inflateSync = inflateSync;
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":183,"assert":140,"buffer":149,"util":206,"zlib":148}],102:[function(require,module,exports){
+},{"_process":182,"assert":141,"buffer":150,"util":205,"zlib":149}],102:[function(require,module,exports){
 "use strict";
 
 let SyncReader = (module.exports = function (buffer) {
@@ -38179,7 +38255,7 @@ SyncReader.prototype.process = function () {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":183}],104:[function(require,module,exports){
+},{"_process":182}],104:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39860,7 +39936,7 @@ if ( process.browser ) {
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":183,"setimmediate":103,"timers":201}],108:[function(require,module,exports){
+},{"_process":182,"setimmediate":103,"timers":200}],108:[function(require,module,exports){
 /*
 	Seventh
 
@@ -40466,7 +40542,7 @@ Promise.resolveSafeTimeout = function( timeout , value ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./seventh.js":111,"_process":183}],110:[function(require,module,exports){
+},{"./seventh.js":111,"_process":182}],110:[function(require,module,exports){
 /*
 	Seventh
 
@@ -42817,7 +42893,7 @@ function round( v , step ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./StringNumber.js":113,"./ansi.js":114,"./escape.js":116,"./inspect.js":119,"./naturalSort.js":123,"./unicode.js":128,"buffer":149}],118:[function(require,module,exports){
+},{"./StringNumber.js":113,"./ansi.js":114,"./escape.js":116,"./inspect.js":119,"./naturalSort.js":123,"./unicode.js":128,"buffer":150}],118:[function(require,module,exports){
 /*
 	String Kit
 
@@ -43874,8 +43950,8 @@ inspectStyle.html = Object.assign( {} , inspectStyle.none , {
 } ) ;
 
 
-}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")},require('_process'))
-},{"../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":165,"./ansi.js":114,"./escape.js":116,"_process":183}],120:[function(require,module,exports){
+}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")},require('_process'))
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":165,"./ansi.js":114,"./escape.js":116,"_process":182}],120:[function(require,module,exports){
 module.exports={"߀":"0","́":""," ":" ","Ⓐ":"A","Ａ":"A","À":"A","Á":"A","Â":"A","Ầ":"A","Ấ":"A","Ẫ":"A","Ẩ":"A","Ã":"A","Ā":"A","Ă":"A","Ằ":"A","Ắ":"A","Ẵ":"A","Ẳ":"A","Ȧ":"A","Ǡ":"A","Ä":"A","Ǟ":"A","Ả":"A","Å":"A","Ǻ":"A","Ǎ":"A","Ȁ":"A","Ȃ":"A","Ạ":"A","Ậ":"A","Ặ":"A","Ḁ":"A","Ą":"A","Ⱥ":"A","Ɐ":"A","Ꜳ":"AA","Æ":"AE","Ǽ":"AE","Ǣ":"AE","Ꜵ":"AO","Ꜷ":"AU","Ꜹ":"AV","Ꜻ":"AV","Ꜽ":"AY","Ⓑ":"B","Ｂ":"B","Ḃ":"B","Ḅ":"B","Ḇ":"B","Ƀ":"B","Ɓ":"B","ｃ":"C","Ⓒ":"C","Ｃ":"C","Ꜿ":"C","Ḉ":"C","Ç":"C","Ⓓ":"D","Ｄ":"D","Ḋ":"D","Ď":"D","Ḍ":"D","Ḑ":"D","Ḓ":"D","Ḏ":"D","Đ":"D","Ɗ":"D","Ɖ":"D","ᴅ":"D","Ꝺ":"D","Ð":"Dh","Ǳ":"DZ","Ǆ":"DZ","ǲ":"Dz","ǅ":"Dz","ɛ":"E","Ⓔ":"E","Ｅ":"E","È":"E","É":"E","Ê":"E","Ề":"E","Ế":"E","Ễ":"E","Ể":"E","Ẽ":"E","Ē":"E","Ḕ":"E","Ḗ":"E","Ĕ":"E","Ė":"E","Ë":"E","Ẻ":"E","Ě":"E","Ȅ":"E","Ȇ":"E","Ẹ":"E","Ệ":"E","Ȩ":"E","Ḝ":"E","Ę":"E","Ḙ":"E","Ḛ":"E","Ɛ":"E","Ǝ":"E","ᴇ":"E","ꝼ":"F","Ⓕ":"F","Ｆ":"F","Ḟ":"F","Ƒ":"F","Ꝼ":"F","Ⓖ":"G","Ｇ":"G","Ǵ":"G","Ĝ":"G","Ḡ":"G","Ğ":"G","Ġ":"G","Ǧ":"G","Ģ":"G","Ǥ":"G","Ɠ":"G","Ꞡ":"G","Ᵹ":"G","Ꝿ":"G","ɢ":"G","Ⓗ":"H","Ｈ":"H","Ĥ":"H","Ḣ":"H","Ḧ":"H","Ȟ":"H","Ḥ":"H","Ḩ":"H","Ḫ":"H","Ħ":"H","Ⱨ":"H","Ⱶ":"H","Ɥ":"H","Ⓘ":"I","Ｉ":"I","Ì":"I","Í":"I","Î":"I","Ĩ":"I","Ī":"I","Ĭ":"I","İ":"I","Ï":"I","Ḯ":"I","Ỉ":"I","Ǐ":"I","Ȉ":"I","Ȋ":"I","Ị":"I","Į":"I","Ḭ":"I","Ɨ":"I","Ⓙ":"J","Ｊ":"J","Ĵ":"J","Ɉ":"J","ȷ":"J","Ⓚ":"K","Ｋ":"K","Ḱ":"K","Ǩ":"K","Ḳ":"K","Ķ":"K","Ḵ":"K","Ƙ":"K","Ⱪ":"K","Ꝁ":"K","Ꝃ":"K","Ꝅ":"K","Ꞣ":"K","Ⓛ":"L","Ｌ":"L","Ŀ":"L","Ĺ":"L","Ľ":"L","Ḷ":"L","Ḹ":"L","Ļ":"L","Ḽ":"L","Ḻ":"L","Ł":"L","Ƚ":"L","Ɫ":"L","Ⱡ":"L","Ꝉ":"L","Ꝇ":"L","Ꞁ":"L","Ǉ":"LJ","ǈ":"Lj","Ⓜ":"M","Ｍ":"M","Ḿ":"M","Ṁ":"M","Ṃ":"M","Ɱ":"M","Ɯ":"M","ϻ":"M","Ꞥ":"N","Ƞ":"N","Ⓝ":"N","Ｎ":"N","Ǹ":"N","Ń":"N","Ñ":"N","Ṅ":"N","Ň":"N","Ṇ":"N","Ņ":"N","Ṋ":"N","Ṉ":"N","Ɲ":"N","Ꞑ":"N","ᴎ":"N","Ǌ":"NJ","ǋ":"Nj","Ⓞ":"O","Ｏ":"O","Ò":"O","Ó":"O","Ô":"O","Ồ":"O","Ố":"O","Ỗ":"O","Ổ":"O","Õ":"O","Ṍ":"O","Ȭ":"O","Ṏ":"O","Ō":"O","Ṑ":"O","Ṓ":"O","Ŏ":"O","Ȯ":"O","Ȱ":"O","Ö":"O","Ȫ":"O","Ỏ":"O","Ő":"O","Ǒ":"O","Ȍ":"O","Ȏ":"O","Ơ":"O","Ờ":"O","Ớ":"O","Ỡ":"O","Ở":"O","Ợ":"O","Ọ":"O","Ộ":"O","Ǫ":"O","Ǭ":"O","Ø":"O","Ǿ":"O","Ɔ":"O","Ɵ":"O","Ꝋ":"O","Ꝍ":"O","Œ":"OE","Ƣ":"OI","Ꝏ":"OO","Ȣ":"OU","Ⓟ":"P","Ｐ":"P","Ṕ":"P","Ṗ":"P","Ƥ":"P","Ᵽ":"P","Ꝑ":"P","Ꝓ":"P","Ꝕ":"P","Ⓠ":"Q","Ｑ":"Q","Ꝗ":"Q","Ꝙ":"Q","Ɋ":"Q","Ⓡ":"R","Ｒ":"R","Ŕ":"R","Ṙ":"R","Ř":"R","Ȑ":"R","Ȓ":"R","Ṛ":"R","Ṝ":"R","Ŗ":"R","Ṟ":"R","Ɍ":"R","Ɽ":"R","Ꝛ":"R","Ꞧ":"R","Ꞃ":"R","Ⓢ":"S","Ｓ":"S","ẞ":"S","Ś":"S","Ṥ":"S","Ŝ":"S","Ṡ":"S","Š":"S","Ṧ":"S","Ṣ":"S","Ṩ":"S","Ș":"S","Ş":"S","Ȿ":"S","Ꞩ":"S","Ꞅ":"S","Ⓣ":"T","Ｔ":"T","Ṫ":"T","Ť":"T","Ṭ":"T","Ț":"T","Ţ":"T","Ṱ":"T","Ṯ":"T","Ŧ":"T","Ƭ":"T","Ʈ":"T","Ⱦ":"T","Ꞇ":"T","Þ":"Th","Ꜩ":"TZ","Ⓤ":"U","Ｕ":"U","Ù":"U","Ú":"U","Û":"U","Ũ":"U","Ṹ":"U","Ū":"U","Ṻ":"U","Ŭ":"U","Ü":"U","Ǜ":"U","Ǘ":"U","Ǖ":"U","Ǚ":"U","Ủ":"U","Ů":"U","Ű":"U","Ǔ":"U","Ȕ":"U","Ȗ":"U","Ư":"U","Ừ":"U","Ứ":"U","Ữ":"U","Ử":"U","Ự":"U","Ụ":"U","Ṳ":"U","Ų":"U","Ṷ":"U","Ṵ":"U","Ʉ":"U","Ⓥ":"V","Ｖ":"V","Ṽ":"V","Ṿ":"V","Ʋ":"V","Ꝟ":"V","Ʌ":"V","Ꝡ":"VY","Ⓦ":"W","Ｗ":"W","Ẁ":"W","Ẃ":"W","Ŵ":"W","Ẇ":"W","Ẅ":"W","Ẉ":"W","Ⱳ":"W","Ⓧ":"X","Ｘ":"X","Ẋ":"X","Ẍ":"X","Ⓨ":"Y","Ｙ":"Y","Ỳ":"Y","Ý":"Y","Ŷ":"Y","Ỹ":"Y","Ȳ":"Y","Ẏ":"Y","Ÿ":"Y","Ỷ":"Y","Ỵ":"Y","Ƴ":"Y","Ɏ":"Y","Ỿ":"Y","Ⓩ":"Z","Ｚ":"Z","Ź":"Z","Ẑ":"Z","Ż":"Z","Ž":"Z","Ẓ":"Z","Ẕ":"Z","Ƶ":"Z","Ȥ":"Z","Ɀ":"Z","Ⱬ":"Z","Ꝣ":"Z","ⓐ":"a","ａ":"a","ẚ":"a","à":"a","á":"a","â":"a","ầ":"a","ấ":"a","ẫ":"a","ẩ":"a","ã":"a","ā":"a","ă":"a","ằ":"a","ắ":"a","ẵ":"a","ẳ":"a","ȧ":"a","ǡ":"a","ä":"a","ǟ":"a","ả":"a","å":"a","ǻ":"a","ǎ":"a","ȁ":"a","ȃ":"a","ạ":"a","ậ":"a","ặ":"a","ḁ":"a","ą":"a","ⱥ":"a","ɐ":"a","ɑ":"a","ꜳ":"aa","æ":"ae","ǽ":"ae","ǣ":"ae","ꜵ":"ao","ꜷ":"au","ꜹ":"av","ꜻ":"av","ꜽ":"ay","ⓑ":"b","ｂ":"b","ḃ":"b","ḅ":"b","ḇ":"b","ƀ":"b","ƃ":"b","ɓ":"b","Ƃ":"b","ⓒ":"c","ć":"c","ĉ":"c","ċ":"c","č":"c","ç":"c","ḉ":"c","ƈ":"c","ȼ":"c","ꜿ":"c","ↄ":"c","C":"c","Ć":"c","Ĉ":"c","Ċ":"c","Č":"c","Ƈ":"c","Ȼ":"c","ⓓ":"d","ｄ":"d","ḋ":"d","ď":"d","ḍ":"d","ḑ":"d","ḓ":"d","ḏ":"d","đ":"d","ƌ":"d","ɖ":"d","ɗ":"d","Ƌ":"d","Ꮷ":"d","ԁ":"d","Ɦ":"d","ð":"dh","ǳ":"dz","ǆ":"dz","ⓔ":"e","ｅ":"e","è":"e","é":"e","ê":"e","ề":"e","ế":"e","ễ":"e","ể":"e","ẽ":"e","ē":"e","ḕ":"e","ḗ":"e","ĕ":"e","ė":"e","ë":"e","ẻ":"e","ě":"e","ȅ":"e","ȇ":"e","ẹ":"e","ệ":"e","ȩ":"e","ḝ":"e","ę":"e","ḙ":"e","ḛ":"e","ɇ":"e","ǝ":"e","ⓕ":"f","ｆ":"f","ḟ":"f","ƒ":"f","ﬀ":"ff","ﬁ":"fi","ﬂ":"fl","ﬃ":"ffi","ﬄ":"ffl","ⓖ":"g","ｇ":"g","ǵ":"g","ĝ":"g","ḡ":"g","ğ":"g","ġ":"g","ǧ":"g","ģ":"g","ǥ":"g","ɠ":"g","ꞡ":"g","ꝿ":"g","ᵹ":"g","ⓗ":"h","ｈ":"h","ĥ":"h","ḣ":"h","ḧ":"h","ȟ":"h","ḥ":"h","ḩ":"h","ḫ":"h","ẖ":"h","ħ":"h","ⱨ":"h","ⱶ":"h","ɥ":"h","ƕ":"hv","ⓘ":"i","ｉ":"i","ì":"i","í":"i","î":"i","ĩ":"i","ī":"i","ĭ":"i","ï":"i","ḯ":"i","ỉ":"i","ǐ":"i","ȉ":"i","ȋ":"i","ị":"i","į":"i","ḭ":"i","ɨ":"i","ı":"i","ⓙ":"j","ｊ":"j","ĵ":"j","ǰ":"j","ɉ":"j","ⓚ":"k","ｋ":"k","ḱ":"k","ǩ":"k","ḳ":"k","ķ":"k","ḵ":"k","ƙ":"k","ⱪ":"k","ꝁ":"k","ꝃ":"k","ꝅ":"k","ꞣ":"k","ⓛ":"l","ｌ":"l","ŀ":"l","ĺ":"l","ľ":"l","ḷ":"l","ḹ":"l","ļ":"l","ḽ":"l","ḻ":"l","ſ":"l","ł":"l","ƚ":"l","ɫ":"l","ⱡ":"l","ꝉ":"l","ꞁ":"l","ꝇ":"l","ɭ":"l","ǉ":"lj","ⓜ":"m","ｍ":"m","ḿ":"m","ṁ":"m","ṃ":"m","ɱ":"m","ɯ":"m","ⓝ":"n","ｎ":"n","ǹ":"n","ń":"n","ñ":"n","ṅ":"n","ň":"n","ṇ":"n","ņ":"n","ṋ":"n","ṉ":"n","ƞ":"n","ɲ":"n","ŉ":"n","ꞑ":"n","ꞥ":"n","ԉ":"n","ǌ":"nj","ⓞ":"o","ｏ":"o","ò":"o","ó":"o","ô":"o","ồ":"o","ố":"o","ỗ":"o","ổ":"o","õ":"o","ṍ":"o","ȭ":"o","ṏ":"o","ō":"o","ṑ":"o","ṓ":"o","ŏ":"o","ȯ":"o","ȱ":"o","ö":"o","ȫ":"o","ỏ":"o","ő":"o","ǒ":"o","ȍ":"o","ȏ":"o","ơ":"o","ờ":"o","ớ":"o","ỡ":"o","ở":"o","ợ":"o","ọ":"o","ộ":"o","ǫ":"o","ǭ":"o","ø":"o","ǿ":"o","ꝋ":"o","ꝍ":"o","ɵ":"o","ɔ":"o","ᴑ":"o","œ":"oe","ƣ":"oi","ꝏ":"oo","ȣ":"ou","ⓟ":"p","ｐ":"p","ṕ":"p","ṗ":"p","ƥ":"p","ᵽ":"p","ꝑ":"p","ꝓ":"p","ꝕ":"p","ρ":"p","ⓠ":"q","ｑ":"q","ɋ":"q","ꝗ":"q","ꝙ":"q","ⓡ":"r","ｒ":"r","ŕ":"r","ṙ":"r","ř":"r","ȑ":"r","ȓ":"r","ṛ":"r","ṝ":"r","ŗ":"r","ṟ":"r","ɍ":"r","ɽ":"r","ꝛ":"r","ꞧ":"r","ꞃ":"r","ⓢ":"s","ｓ":"s","ś":"s","ṥ":"s","ŝ":"s","ṡ":"s","š":"s","ṧ":"s","ṣ":"s","ṩ":"s","ș":"s","ş":"s","ȿ":"s","ꞩ":"s","ꞅ":"s","ẛ":"s","ʂ":"s","ß":"ss","ⓣ":"t","ｔ":"t","ṫ":"t","ẗ":"t","ť":"t","ṭ":"t","ț":"t","ţ":"t","ṱ":"t","ṯ":"t","ŧ":"t","ƭ":"t","ʈ":"t","ⱦ":"t","ꞇ":"t","þ":"th","ꜩ":"tz","ⓤ":"u","ｕ":"u","ù":"u","ú":"u","û":"u","ũ":"u","ṹ":"u","ū":"u","ṻ":"u","ŭ":"u","ü":"u","ǜ":"u","ǘ":"u","ǖ":"u","ǚ":"u","ủ":"u","ů":"u","ű":"u","ǔ":"u","ȕ":"u","ȗ":"u","ư":"u","ừ":"u","ứ":"u","ữ":"u","ử":"u","ự":"u","ụ":"u","ṳ":"u","ų":"u","ṷ":"u","ṵ":"u","ʉ":"u","ⓥ":"v","ｖ":"v","ṽ":"v","ṿ":"v","ʋ":"v","ꝟ":"v","ʌ":"v","ꝡ":"vy","ⓦ":"w","ｗ":"w","ẁ":"w","ẃ":"w","ŵ":"w","ẇ":"w","ẅ":"w","ẘ":"w","ẉ":"w","ⱳ":"w","ⓧ":"x","ｘ":"x","ẋ":"x","ẍ":"x","ⓨ":"y","ｙ":"y","ỳ":"y","ý":"y","ŷ":"y","ỹ":"y","ȳ":"y","ẏ":"y","ÿ":"y","ỷ":"y","ẙ":"y","ỵ":"y","ƴ":"y","ɏ":"y","ỿ":"y","ⓩ":"z","ｚ":"z","ź":"z","ẑ":"z","ż":"z","ž":"z","ẓ":"z","ẕ":"z","ƶ":"z","ȥ":"z","ɀ":"z","ⱬ":"z","ꝣ":"z"}
 },{}],121:[function(require,module,exports){
 /*
@@ -46250,7 +46326,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 } ;
 
 
-},{"./tree.js":137,"util":206}],136:[function(require,module,exports){
+},{"./tree.js":137,"util":205}],136:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46665,6 +46741,33 @@ module.exports = unique
 },{}],139:[function(require,module,exports){
 
 },{}],140:[function(require,module,exports){
+
+/**
+ * Array#filter.
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @param {Object=} self
+ * @return {Array}
+ * @throw TypeError
+ */
+
+module.exports = function (arr, fn, self) {
+  if (arr.filter) return arr.filter(fn, self);
+  if (void 0 === arr || null === arr) throw new TypeError;
+  if ('function' != typeof fn) throw new TypeError;
+  var ret = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (!hasOwn.call(arr, i)) continue;
+    var val = arr[i];
+    if (fn.call(self, val, i, arr)) ret.push(val);
+  }
+  return ret;
+};
+
+var hasOwn = Object.prototype.hasOwnProperty;
+
+},{}],141:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -47174,7 +47277,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":169,"util/":143}],141:[function(require,module,exports){
+},{"object-assign":168,"util/":144}],142:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -47199,14 +47302,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],142:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -47796,38 +47899,32 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":142,"_process":183,"inherits":141}],144:[function(require,module,exports){
+},{"./support/isBuffer":143,"_process":182,"inherits":142}],145:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var possibleNames = [
-	'BigInt64Array',
-	'BigUint64Array',
-	'Float32Array',
-	'Float64Array',
-	'Int16Array',
-	'Int32Array',
-	'Int8Array',
-	'Uint16Array',
-	'Uint32Array',
-	'Uint8Array',
-	'Uint8ClampedArray'
-];
-
-var g = typeof globalThis === 'undefined' ? global : globalThis;
+var filter = require('array-filter');
 
 module.exports = function availableTypedArrays() {
-	var out = [];
-	for (var i = 0; i < possibleNames.length; i++) {
-		if (typeof g[possibleNames[i]] === 'function') {
-			out[out.length] = possibleNames[i];
-		}
-	}
-	return out;
+	return filter([
+		'BigInt64Array',
+		'BigUint64Array',
+		'Float32Array',
+		'Float64Array',
+		'Int16Array',
+		'Int32Array',
+		'Int8Array',
+		'Uint16Array',
+		'Uint32Array',
+		'Uint8Array',
+		'Uint8ClampedArray'
+	], function (typedArray) {
+		return typeof global[typedArray] === 'function';
+	});
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],145:[function(require,module,exports){
+},{"array-filter":140}],146:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -47979,9 +48076,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"dup":139}],147:[function(require,module,exports){
+},{"dup":139}],148:[function(require,module,exports){
 (function (process,Buffer){(function (){
 'use strict';
 /* eslint camelcase: "off" */
@@ -48393,7 +48490,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":183,"assert":140,"buffer":149,"pako/lib/zlib/constants":173,"pako/lib/zlib/deflate.js":175,"pako/lib/zlib/inflate.js":177,"pako/lib/zlib/zstream":181}],148:[function(require,module,exports){
+},{"_process":182,"assert":141,"buffer":150,"pako/lib/zlib/constants":172,"pako/lib/zlib/deflate.js":174,"pako/lib/zlib/inflate.js":176,"pako/lib/zlib/zstream":180}],149:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -49005,7 +49102,7 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this)}).call(this,require('_process'))
-},{"./binding":147,"_process":183,"assert":140,"buffer":149,"stream":185,"util":206}],149:[function(require,module,exports){
+},{"./binding":148,"_process":182,"assert":141,"buffer":150,"stream":184,"util":205}],150:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -50786,7 +50883,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":145,"buffer":149,"ieee754":162}],150:[function(require,module,exports){
+},{"base64-js":146,"buffer":150,"ieee754":162}],151:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -50803,7 +50900,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":151,"get-intrinsic":157}],151:[function(require,module,exports){
+},{"./":152,"get-intrinsic":158}],152:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -50852,12 +50949,12 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"function-bind":156,"get-intrinsic":157}],152:[function(require,module,exports){
+},{"function-bind":157,"get-intrinsic":158}],153:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
 
-var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%', true);
+var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%');
 if ($gOPD) {
 	try {
 		$gOPD([], 'length');
@@ -50869,7 +50966,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"get-intrinsic":157}],153:[function(require,module,exports){
+},{"get-intrinsic":158}],154:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -51320,119 +51417,58 @@ function unwrapListeners(arr) {
 
 function once(emitter, name) {
   return new Promise(function (resolve, reject) {
-    function errorListener(err) {
-      emitter.removeListener(name, resolver);
-      reject(err);
-    }
-
-    function resolver() {
-      if (typeof emitter.removeListener === 'function') {
+    function eventListener() {
+      if (errorListener !== undefined) {
         emitter.removeListener('error', errorListener);
       }
       resolve([].slice.call(arguments));
     };
+    var errorListener;
 
-    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
+    // Adding an error listener is not optional because
+    // if an error is thrown on an event emitter we cannot
+    // guarantee that the actual event we are waiting will
+    // be fired. The result could be a silent way to create
+    // memory or file descriptor leaks, which is something
+    // we should avoid.
     if (name !== 'error') {
-      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
+      errorListener = function errorListener(err) {
+        emitter.removeListener(name, eventListener);
+        reject(err);
+      };
+
+      emitter.once('error', errorListener);
     }
+
+    emitter.once(name, eventListener);
   });
 }
 
-function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
-  if (typeof emitter.on === 'function') {
-    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
-  }
-}
+},{}],155:[function(require,module,exports){
 
-function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
-  if (typeof emitter.on === 'function') {
-    if (flags.once) {
-      emitter.once(name, listener);
-    } else {
-      emitter.on(name, listener);
-    }
-  } else if (typeof emitter.addEventListener === 'function') {
-    // EventTarget does not have `error` event semantics like Node
-    // EventEmitters, we do not listen for `error` events here.
-    emitter.addEventListener(name, function wrapListener(arg) {
-      // IE does not have builtin `{ once: true }` support so we
-      // have to do it manually.
-      if (flags.once) {
-        emitter.removeEventListener(name, wrapListener);
-      }
-      listener(arg);
-    });
-  } else {
-    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
-  }
-}
+var hasOwn = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
 
-},{}],154:[function(require,module,exports){
-'use strict';
-
-var isCallable = require('is-callable');
-
-var toStr = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-var forEachArray = function forEachArray(array, iterator, receiver) {
-    for (var i = 0, len = array.length; i < len; i++) {
-        if (hasOwnProperty.call(array, i)) {
-            if (receiver == null) {
-                iterator(array[i], i, array);
-            } else {
-                iterator.call(receiver, array[i], i, array);
-            }
-        }
-    }
-};
-
-var forEachString = function forEachString(string, iterator, receiver) {
-    for (var i = 0, len = string.length; i < len; i++) {
-        // no such thing as a sparse string.
-        if (receiver == null) {
-            iterator(string.charAt(i), i, string);
-        } else {
-            iterator.call(receiver, string.charAt(i), i, string);
-        }
-    }
-};
-
-var forEachObject = function forEachObject(object, iterator, receiver) {
-    for (var k in object) {
-        if (hasOwnProperty.call(object, k)) {
-            if (receiver == null) {
-                iterator(object[k], k, object);
-            } else {
-                iterator.call(receiver, object[k], k, object);
-            }
-        }
-    }
-};
-
-var forEach = function forEach(list, iterator, thisArg) {
-    if (!isCallable(iterator)) {
+module.exports = function forEach (obj, fn, ctx) {
+    if (toString.call(fn) !== '[object Function]') {
         throw new TypeError('iterator must be a function');
     }
-
-    var receiver;
-    if (arguments.length >= 3) {
-        receiver = thisArg;
-    }
-
-    if (toStr.call(list) === '[object Array]') {
-        forEachArray(list, iterator, receiver);
-    } else if (typeof list === 'string') {
-        forEachString(list, iterator, receiver);
+    var l = obj.length;
+    if (l === +l) {
+        for (var i = 0; i < l; i++) {
+            fn.call(ctx, obj[i], i, obj);
+        }
     } else {
-        forEachObject(list, iterator, receiver);
+        for (var k in obj) {
+            if (hasOwn.call(obj, k)) {
+                fn.call(ctx, obj[k], k, obj);
+            }
+        }
     }
 };
 
-module.exports = forEach;
 
-},{"is-callable":166}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -51486,14 +51522,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":155}],157:[function(require,module,exports){
+},{"./implementation":156}],158:[function(require,module,exports){
 'use strict';
 
 var undefined;
@@ -51698,7 +51734,6 @@ var $concat = bind.call(Function.call, Array.prototype.concat);
 var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
 var $replace = bind.call(Function.call, String.prototype.replace);
 var $strSlice = bind.call(Function.call, String.prototype.slice);
-var $exec = bind.call(Function.call, RegExp.prototype.exec);
 
 /* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
 var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
@@ -51754,9 +51789,6 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 		throw new $TypeError('"allowMissing" argument must be a boolean');
 	}
 
-	if ($exec(/^%?[^%]*%?$/g, name) === null) {
-		throw new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');
-	}
 	var parts = stringToPath(name);
 	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
 
@@ -51829,10 +51861,11 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"function-bind":156,"has":161,"has-symbols":158}],158:[function(require,module,exports){
+},{"function-bind":157,"has":161,"has-symbols":159}],159:[function(require,module,exports){
+(function (global){(function (){
 'use strict';
 
-var origSymbol = typeof Symbol !== 'undefined' && Symbol;
+var origSymbol = global.Symbol;
 var hasSymbolSham = require('./shams');
 
 module.exports = function hasNativeSymbols() {
@@ -51844,7 +51877,8 @@ module.exports = function hasNativeSymbols() {
 	return hasSymbolSham();
 };
 
-},{"./shams":159}],159:[function(require,module,exports){
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./shams":160}],160:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
@@ -51870,7 +51904,7 @@ module.exports = function hasSymbols() {
 
 	var symVal = 42;
 	obj[sym] = symVal;
-	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
+	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax
 	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
 
 	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
@@ -51888,23 +51922,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],160:[function(require,module,exports){
-'use strict';
-
-var hasSymbols = require('has-symbols/shams');
-
-module.exports = function hasToStringTagShams() {
-	return hasSymbols() && !!Symbol.toStringTag;
-};
-
-},{"has-symbols/shams":159}],161:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":156}],162:[function(require,module,exports){
+},{"function-bind":157}],162:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -52023,7 +52048,7 @@ if (typeof Object.create === 'function') {
 },{}],164:[function(require,module,exports){
 'use strict';
 
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
@@ -52055,91 +52080,15 @@ isStandardArguments.isLegacyArguments = isLegacyArguments; // for tests
 
 module.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
 
-},{"call-bind/callBound":150,"has-tostringtag/shams":160}],165:[function(require,module,exports){
+},{"call-bind/callBound":151}],165:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
 },{"dup":67}],166:[function(require,module,exports){
-'use strict';
-
-var fnToStr = Function.prototype.toString;
-var reflectApply = typeof Reflect === 'object' && Reflect !== null && Reflect.apply;
-var badArrayLike;
-var isCallableMarker;
-if (typeof reflectApply === 'function' && typeof Object.defineProperty === 'function') {
-	try {
-		badArrayLike = Object.defineProperty({}, 'length', {
-			get: function () {
-				throw isCallableMarker;
-			}
-		});
-		isCallableMarker = {};
-		// eslint-disable-next-line no-throw-literal
-		reflectApply(function () { throw 42; }, null, badArrayLike);
-	} catch (_) {
-		if (_ !== isCallableMarker) {
-			reflectApply = null;
-		}
-	}
-} else {
-	reflectApply = null;
-}
-
-var constructorRegex = /^\s*class\b/;
-var isES6ClassFn = function isES6ClassFunction(value) {
-	try {
-		var fnStr = fnToStr.call(value);
-		return constructorRegex.test(fnStr);
-	} catch (e) {
-		return false; // not a function
-	}
-};
-
-var tryFunctionObject = function tryFunctionToStr(value) {
-	try {
-		if (isES6ClassFn(value)) { return false; }
-		fnToStr.call(value);
-		return true;
-	} catch (e) {
-		return false;
-	}
-};
-var toStr = Object.prototype.toString;
-var fnClass = '[object Function]';
-var genClass = '[object GeneratorFunction]';
-var hasToStringTag = typeof Symbol === 'function' && !!Symbol.toStringTag; // better: use `has-tostringtag`
-/* globals document: false */
-var documentDotAll = typeof document === 'object' && typeof document.all === 'undefined' && document.all !== undefined ? document.all : {};
-
-module.exports = reflectApply
-	? function isCallable(value) {
-		if (value === documentDotAll) { return true; }
-		if (!value) { return false; }
-		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-		if (typeof value === 'function' && !value.prototype) { return true; }
-		try {
-			reflectApply(value, null, badArrayLike);
-		} catch (e) {
-			if (e !== isCallableMarker) { return false; }
-		}
-		return !isES6ClassFn(value);
-	}
-	: function isCallable(value) {
-		if (value === documentDotAll) { return true; }
-		if (!value) { return false; }
-		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-		if (typeof value === 'function' && !value.prototype) { return true; }
-		if (hasToStringTag) { return tryFunctionObject(value); }
-		if (isES6ClassFn(value)) { return false; }
-		var strClass = toStr.call(value);
-		return strClass === fnClass || strClass === genClass;
-	};
-
-},{}],167:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
 var fnToStr = Function.prototype.toString;
 var isFnRegex = /^\s*(?:function)?\*/;
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
 var getProto = Object.getPrototypeOf;
 var getGeneratorFunc = function () { // eslint-disable-line consistent-return
 	if (!hasToStringTag) {
@@ -52150,7 +52099,8 @@ var getGeneratorFunc = function () { // eslint-disable-line consistent-return
 	} catch (e) {
 	}
 };
-var GeneratorFunction;
+var generatorFunc = getGeneratorFunc();
+var GeneratorFunction = getProto && generatorFunc ? getProto(generatorFunc) : false;
 
 module.exports = function isGeneratorFunction(fn) {
 	if (typeof fn !== 'function') {
@@ -52163,28 +52113,21 @@ module.exports = function isGeneratorFunction(fn) {
 		var str = toStr.call(fn);
 		return str === '[object GeneratorFunction]';
 	}
-	if (!getProto) {
-		return false;
-	}
-	if (typeof GeneratorFunction === 'undefined') {
-		var generatorFunc = getGeneratorFunc();
-		GeneratorFunction = generatorFunc ? getProto(generatorFunc) : false;
-	}
-	return getProto(fn) === GeneratorFunction;
+	return getProto && getProto(fn) === GeneratorFunction;
 };
 
-},{"has-tostringtag/shams":160}],168:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var forEach = require('for-each');
+var forEach = require('foreach');
 var availableTypedArrays = require('available-typed-arrays');
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasSymbols = require('has-symbols')();
+var hasToStringTag = hasSymbols && typeof Symbol.toStringTag === 'symbol';
 
-var g = typeof globalThis === 'undefined' ? global : globalThis;
 var typedArrays = availableTypedArrays();
 
 var $indexOf = callBound('Array.prototype.indexOf', true) || function indexOf(array, value) {
@@ -52201,16 +52144,17 @@ var gOPD = require('es-abstract/helpers/getOwnPropertyDescriptor');
 var getPrototypeOf = Object.getPrototypeOf; // require('getprototypeof');
 if (hasToStringTag && gOPD && getPrototypeOf) {
 	forEach(typedArrays, function (typedArray) {
-		var arr = new g[typedArray]();
-		if (Symbol.toStringTag in arr) {
-			var proto = getPrototypeOf(arr);
-			var descriptor = gOPD(proto, Symbol.toStringTag);
-			if (!descriptor) {
-				var superProto = getPrototypeOf(proto);
-				descriptor = gOPD(superProto, Symbol.toStringTag);
-			}
-			toStrTags[typedArray] = descriptor.get;
+		var arr = new global[typedArray]();
+		if (!(Symbol.toStringTag in arr)) {
+			throw new EvalError('this engine has support for Symbol.toStringTag, but ' + typedArray + ' does not have the property! Please report this.');
 		}
+		var proto = getPrototypeOf(arr);
+		var descriptor = gOPD(proto, Symbol.toStringTag);
+		if (!descriptor) {
+			var superProto = getPrototypeOf(proto);
+			descriptor = gOPD(superProto, Symbol.toStringTag);
+		}
+		toStrTags[typedArray] = descriptor.get;
 	});
 }
 
@@ -52228,7 +52172,7 @@ var tryTypedArrays = function tryAllTypedArrays(value) {
 
 module.exports = function isTypedArray(value) {
 	if (!value || typeof value !== 'object') { return false; }
-	if (!hasToStringTag || !(Symbol.toStringTag in value)) {
+	if (!hasToStringTag) {
 		var tag = $slice($toString(value), 8, -1);
 		return $indexOf(typedArrays, tag) > -1;
 	}
@@ -52237,7 +52181,7 @@ module.exports = function isTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":144,"call-bind/callBound":150,"es-abstract/helpers/getOwnPropertyDescriptor":152,"for-each":154,"has-tostringtag/shams":160}],169:[function(require,module,exports){
+},{"available-typed-arrays":145,"call-bind/callBound":151,"es-abstract/helpers/getOwnPropertyDescriptor":153,"foreach":155,"has-symbols":159}],168:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -52329,7 +52273,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],170:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -52380,7 +52324,7 @@ exports.homedir = function () {
 	return '/'
 };
 
-},{}],171:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 'use strict';
 
 
@@ -52487,7 +52431,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],172:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -52540,7 +52484,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],173:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -52610,7 +52554,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],174:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -52671,7 +52615,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],175:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -54547,7 +54491,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":171,"./adler32":172,"./crc32":174,"./messages":179,"./trees":180}],176:[function(require,module,exports){
+},{"../utils/common":170,"./adler32":171,"./crc32":173,"./messages":178,"./trees":179}],175:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -54894,7 +54838,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],177:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -56452,7 +56396,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":171,"./adler32":172,"./crc32":174,"./inffast":176,"./inftrees":178}],178:[function(require,module,exports){
+},{"../utils/common":170,"./adler32":171,"./crc32":173,"./inffast":175,"./inftrees":177}],177:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -56797,7 +56741,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":171}],179:[function(require,module,exports){
+},{"../utils/common":170}],178:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -56831,7 +56775,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],180:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -58055,7 +57999,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":171}],181:[function(require,module,exports){
+},{"../utils/common":170}],180:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -58104,7 +58048,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],182:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -58637,7 +58581,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":183}],183:[function(require,module,exports){
+},{"_process":182}],182:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -58823,7 +58767,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],184:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
@@ -58890,7 +58834,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":149}],185:[function(require,module,exports){
+},{"buffer":150}],184:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -59021,7 +58965,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":153,"inherits":163,"readable-stream/lib/_stream_duplex.js":187,"readable-stream/lib/_stream_passthrough.js":188,"readable-stream/lib/_stream_readable.js":189,"readable-stream/lib/_stream_transform.js":190,"readable-stream/lib/_stream_writable.js":191,"readable-stream/lib/internal/streams/end-of-stream.js":195,"readable-stream/lib/internal/streams/pipeline.js":197}],186:[function(require,module,exports){
+},{"events":154,"inherits":163,"readable-stream/lib/_stream_duplex.js":186,"readable-stream/lib/_stream_passthrough.js":187,"readable-stream/lib/_stream_readable.js":188,"readable-stream/lib/_stream_transform.js":189,"readable-stream/lib/_stream_writable.js":190,"readable-stream/lib/internal/streams/end-of-stream.js":194,"readable-stream/lib/internal/streams/pipeline.js":196}],185:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -59150,7 +59094,7 @@ createErrorType('ERR_UNKNOWN_ENCODING', function (arg) {
 createErrorType('ERR_STREAM_UNSHIFT_AFTER_END_EVENT', 'stream.unshift() after end event');
 module.exports.codes = codes;
 
-},{}],187:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -59292,7 +59236,7 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
   }
 });
 }).call(this)}).call(this,require('_process'))
-},{"./_stream_readable":189,"./_stream_writable":191,"_process":183,"inherits":163}],188:[function(require,module,exports){
+},{"./_stream_readable":188,"./_stream_writable":190,"_process":182,"inherits":163}],187:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -59332,7 +59276,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":190,"inherits":163}],189:[function(require,module,exports){
+},{"./_stream_transform":189,"inherits":163}],188:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -60459,7 +60403,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":186,"./_stream_duplex":187,"./internal/streams/async_iterator":192,"./internal/streams/buffer_list":193,"./internal/streams/destroy":194,"./internal/streams/from":196,"./internal/streams/state":198,"./internal/streams/stream":199,"_process":183,"buffer":149,"events":153,"inherits":163,"string_decoder/":200,"util":146}],190:[function(require,module,exports){
+},{"../errors":185,"./_stream_duplex":186,"./internal/streams/async_iterator":191,"./internal/streams/buffer_list":192,"./internal/streams/destroy":193,"./internal/streams/from":195,"./internal/streams/state":197,"./internal/streams/stream":198,"_process":182,"buffer":150,"events":154,"inherits":163,"string_decoder/":199,"util":147}],189:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60661,7 +60605,7 @@ function done(stream, er, data) {
   if (stream._transformState.transforming) throw new ERR_TRANSFORM_ALREADY_TRANSFORMING();
   return stream.push(null);
 }
-},{"../errors":186,"./_stream_duplex":187,"inherits":163}],191:[function(require,module,exports){
+},{"../errors":185,"./_stream_duplex":186,"inherits":163}],190:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -61361,7 +61305,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":186,"./_stream_duplex":187,"./internal/streams/destroy":194,"./internal/streams/state":198,"./internal/streams/stream":199,"_process":183,"buffer":149,"inherits":163,"util-deprecate":203}],192:[function(require,module,exports){
+},{"../errors":185,"./_stream_duplex":186,"./internal/streams/destroy":193,"./internal/streams/state":197,"./internal/streams/stream":198,"_process":182,"buffer":150,"inherits":163,"util-deprecate":202}],191:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -61571,7 +61515,7 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 
 module.exports = createReadableStreamAsyncIterator;
 }).call(this)}).call(this,require('_process'))
-},{"./end-of-stream":195,"_process":183}],193:[function(require,module,exports){
+},{"./end-of-stream":194,"_process":182}],192:[function(require,module,exports){
 'use strict';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -61782,7 +61726,7 @@ function () {
 
   return BufferList;
 }();
-},{"buffer":149,"util":146}],194:[function(require,module,exports){
+},{"buffer":150,"util":147}],193:[function(require,module,exports){
 (function (process){(function (){
 'use strict'; // undocumented cb() API, needed for core, not for public API
 
@@ -61890,7 +61834,7 @@ module.exports = {
   errorOrDestroy: errorOrDestroy
 };
 }).call(this)}).call(this,require('_process'))
-},{"_process":183}],195:[function(require,module,exports){
+},{"_process":182}],194:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/end-of-stream with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -61995,12 +61939,12 @@ function eos(stream, opts, callback) {
 }
 
 module.exports = eos;
-},{"../../../errors":186}],196:[function(require,module,exports){
+},{"../../../errors":185}],195:[function(require,module,exports){
 module.exports = function () {
   throw new Error('Readable.from is not available in the browser')
 };
 
-},{}],197:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/pump with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -62098,7 +62042,7 @@ function pipeline() {
 }
 
 module.exports = pipeline;
-},{"../../../errors":186,"./end-of-stream":195}],198:[function(require,module,exports){
+},{"../../../errors":185,"./end-of-stream":194}],197:[function(require,module,exports){
 'use strict';
 
 var ERR_INVALID_OPT_VALUE = require('../../../errors').codes.ERR_INVALID_OPT_VALUE;
@@ -62126,10 +62070,10 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 module.exports = {
   getHighWaterMark: getHighWaterMark
 };
-},{"../../../errors":186}],199:[function(require,module,exports){
+},{"../../../errors":185}],198:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":153}],200:[function(require,module,exports){
+},{"events":154}],199:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -62426,7 +62370,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":184}],201:[function(require,module,exports){
+},{"safe-buffer":183}],200:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -62505,7 +62449,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":183,"timers":201}],202:[function(require,module,exports){
+},{"process/browser.js":182,"timers":200}],201:[function(require,module,exports){
 exports.isatty = function () { return false; };
 
 function ReadStream() {
@@ -62518,7 +62462,7 @@ function WriteStream() {
 }
 exports.WriteStream = WriteStream;
 
-},{}],203:[function(require,module,exports){
+},{}],202:[function(require,module,exports){
 (function (global){(function (){
 
 /**
@@ -62589,9 +62533,9 @@ function config (name) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],204:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"dup":142}],205:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
+arguments[4][143][0].apply(exports,arguments)
+},{"dup":143}],204:[function(require,module,exports){
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
@@ -62829,23 +62773,21 @@ function isDataView(value) {
 }
 exports.isDataView = isDataView;
 
-// Store a copy of SharedArrayBuffer in case it's deleted elsewhere
-var SharedArrayBufferCopy = typeof SharedArrayBuffer !== 'undefined' ? SharedArrayBuffer : undefined;
 function isSharedArrayBufferToString(value) {
   return ObjectToString(value) === '[object SharedArrayBuffer]';
 }
+isSharedArrayBufferToString.working = (
+  typeof SharedArrayBuffer !== 'undefined' &&
+  isSharedArrayBufferToString(new SharedArrayBuffer())
+);
 function isSharedArrayBuffer(value) {
-  if (typeof SharedArrayBufferCopy === 'undefined') {
+  if (typeof SharedArrayBuffer === 'undefined') {
     return false;
-  }
-
-  if (typeof isSharedArrayBufferToString.working === 'undefined') {
-    isSharedArrayBufferToString.working = isSharedArrayBufferToString(new SharedArrayBufferCopy());
   }
 
   return isSharedArrayBufferToString.working
     ? isSharedArrayBufferToString(value)
-    : value instanceof SharedArrayBufferCopy;
+    : value instanceof SharedArrayBuffer;
 }
 exports.isSharedArrayBuffer = isSharedArrayBuffer;
 
@@ -62927,7 +62869,7 @@ exports.isAnyArrayBuffer = isAnyArrayBuffer;
   });
 });
 
-},{"is-arguments":164,"is-generator-function":167,"is-typed-array":168,"which-typed-array":207}],206:[function(require,module,exports){
+},{"is-arguments":164,"is-generator-function":166,"is-typed-array":167,"which-typed-array":206}],205:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -63646,18 +63588,18 @@ function callbackify(original) {
 exports.callbackify = callbackify;
 
 }).call(this)}).call(this,require('_process'))
-},{"./support/isBuffer":204,"./support/types":205,"_process":183,"inherits":163}],207:[function(require,module,exports){
+},{"./support/isBuffer":203,"./support/types":204,"_process":182,"inherits":163}],206:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var forEach = require('for-each');
+var forEach = require('foreach');
 var availableTypedArrays = require('available-typed-arrays');
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasSymbols = require('has-symbols')();
+var hasToStringTag = hasSymbols && typeof Symbol.toStringTag === 'symbol';
 
-var g = typeof globalThis === 'undefined' ? global : globalThis;
 var typedArrays = availableTypedArrays();
 
 var $slice = callBound('String.prototype.slice');
@@ -63666,17 +63608,18 @@ var gOPD = require('es-abstract/helpers/getOwnPropertyDescriptor');
 var getPrototypeOf = Object.getPrototypeOf; // require('getprototypeof');
 if (hasToStringTag && gOPD && getPrototypeOf) {
 	forEach(typedArrays, function (typedArray) {
-		if (typeof g[typedArray] === 'function') {
-			var arr = new g[typedArray]();
-			if (Symbol.toStringTag in arr) {
-				var proto = getPrototypeOf(arr);
-				var descriptor = gOPD(proto, Symbol.toStringTag);
-				if (!descriptor) {
-					var superProto = getPrototypeOf(proto);
-					descriptor = gOPD(superProto, Symbol.toStringTag);
-				}
-				toStrTags[typedArray] = descriptor.get;
+		if (typeof global[typedArray] === 'function') {
+			var arr = new global[typedArray]();
+			if (!(Symbol.toStringTag in arr)) {
+				throw new EvalError('this engine has support for Symbol.toStringTag, but ' + typedArray + ' does not have the property! Please report this.');
 			}
+			var proto = getPrototypeOf(arr);
+			var descriptor = gOPD(proto, Symbol.toStringTag);
+			if (!descriptor) {
+				var superProto = getPrototypeOf(proto);
+				descriptor = gOPD(superProto, Symbol.toStringTag);
+			}
+			toStrTags[typedArray] = descriptor.get;
 		}
 	});
 }
@@ -63700,10 +63643,10 @@ var isTypedArray = require('is-typed-array');
 
 module.exports = function whichTypedArray(value) {
 	if (!isTypedArray(value)) { return false; }
-	if (!hasToStringTag || !(Symbol.toStringTag in value)) { return $slice($toString(value), 8, -1); }
+	if (!hasToStringTag) { return $slice($toString(value), 8, -1); }
 	return tryTypedArrays(value);
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":144,"call-bind/callBound":150,"es-abstract/helpers/getOwnPropertyDescriptor":152,"for-each":154,"has-tostringtag/shams":160,"is-typed-array":168}]},{},[9])(9)
+},{"available-typed-arrays":145,"call-bind/callBound":151,"es-abstract/helpers/getOwnPropertyDescriptor":153,"foreach":155,"has-symbols":159,"is-typed-array":167}]},{},[9])(9)
 });

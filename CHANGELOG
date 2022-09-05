@@ -1,4 +1,12 @@
 
+v2.9.4
+------
+
+Document widgets: fix focus and .hasFocus property, fix drag event handling (no more sending drag event outside the drag source element, except for widgets having outerDrag turned on) and bugs
+TextBuffer: fix region/selectionRegion
+TextBox/EditableTextBox fix mouse and keyboard selection bugs
+
+
 v2.9.3
 ------
 
