@@ -2546,9 +2546,8 @@ ScreenBuffer.prototype.attrAndObject = function( attr , object ) {
 	return ScreenBuffer.attrAndObject( attr , object , this.palette && this.palette.colorNameToIndex ) ;
 } ;
 
-// Add the selection flag, i.e. the INVERSE flag
-ScreenBuffer.attrSelect = ScreenBuffer.prototype.attrSelect = attr => attr | INVERSE ;
-ScreenBuffer.attrUnselect = ScreenBuffer.prototype.attrUnselect = attr => attr & ~ INVERSE ;
+// Used by TextBuffer for selection
+ScreenBuffer.attrInverse = ScreenBuffer.prototype.attrInverse = attr => attr ^ INVERSE ;
 
 
 
@@ -3740,9 +3739,8 @@ ScreenBufferHD.attrAndObject = function( attr , object ) {
 
 ScreenBufferHD.prototype.attrAndObject = ScreenBufferHD.attrAndObject ;
 
-// Add the selection flag, i.e. the INVERSE flag
-ScreenBufferHD.attrSelect = ScreenBufferHD.prototype.attrSelect = attr => { attr[ BPOS_STYLE ] |= INVERSE ; return attr ; } ;
-ScreenBufferHD.attrUnselect = ScreenBufferHD.prototype.attrUnselect = attr => { attr[ BPOS_STYLE ] &= ~ INVERSE ; return attr ; } ;
+// Used by TextBuffer for selection
+ScreenBufferHD.attrInverse = ScreenBufferHD.prototype.attrInverse = attr => { attr[ BPOS_STYLE ] ^= INVERSE ; return attr ; } ;
 
 
 
@@ -6880,11 +6878,7 @@ TextBuffer.prototype.isInRegion = function( region , x = this.cx , y = this.cy )
 
 
 TextBuffer.prototype.setSelectionRegion = function( region ) {
-	if ( this.selectionRegion ) {
-		// Start by unhilighting existing selection
-		this.hilightSelection( false ) ;
-	}
-	else {
+	if ( ! this.selectionRegion ) {
 		this.selectionRegion = {} ;
 	}
 
@@ -6902,27 +6896,19 @@ TextBuffer.prototype.setSelectionRegion = function( region ) {
 		this.selectionRegion.ymax = region.ymax ;
 		this.selectionRegion.cellMax = this.buffer[ region.ymax ]?.[ region.xmax ] ?? null ;
 	}
-
-	this.hilightSelection() ;
 } ;
 
 
 
 // TODOC
 TextBuffer.prototype.startOfSelection = function() {
-	if ( this.selectionRegion ) {
-		// Start by unhilighting existing selection
-		this.hilightSelection( false ) ;
-	}
-	else {
+	if ( ! this.selectionRegion ) {
 		this.selectionRegion = {} ;
 	}
 
 	this.selectionRegion.xmin = this.cx ;
 	this.selectionRegion.ymin = this.cy ;
 	this.selectionRegion.cellMin = this.buffer[ this.cy ]?.[ this.cx ] ?? null ;
-
-	this.hilightSelection() ;
 } ;
 
 
@@ -6931,11 +6917,7 @@ TextBuffer.prototype.startOfSelection = function() {
 TextBuffer.prototype.endOfSelection = function() {
 	var coord = this.oneStepBackward() ;
 
-	if ( this.selectionRegion ) {
-		// Start by unhilighting existing selection
-		this.hilightSelection( false ) ;
-	}
-	else {
+	if ( ! this.selectionRegion ) {
 		this.selectionRegion = {} ;
 	}
 
@@ -6948,8 +6930,6 @@ TextBuffer.prototype.endOfSelection = function() {
 	this.selectionRegion.xmax = coord.x ;
 	this.selectionRegion.ymax = coord.y ;
 	this.selectionRegion.cellMax = this.buffer[ coord.y ]?.[ coord.x ] ?? null ;
-
-	this.hilightSelection() ;
 } ;
 
 
@@ -6957,10 +6937,9 @@ TextBuffer.prototype.endOfSelection = function() {
 // TODOC
 // Reset the region by scanning for the starting and ending cell
 // If cursorCell is set, set cursor position to this cell
-TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false , cursorCell = null ) {
+TextBuffer.prototype.updateSelectionFromCells = function( cursorCell = null ) {
 	if ( ! this.selectionRegion ) { return ; }
 	if ( ! this.selectionRegion.cellMin || ! this.selectionRegion.cellMax ) {
-		if ( ! noHilight ) { this.hilightSelection( false ) ; }
 		this.selectionRegion = null ;
 		return ;
 	}
@@ -6990,7 +6969,6 @@ TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false , cu
 	}
 
 	if ( ymin === undefined || ymax === undefined ) {
-		if ( ! noHilight ) { this.hilightSelection( false ) ; }
 		this.selectionRegion = null ;
 		return ;
 	}
@@ -6999,8 +6977,6 @@ TextBuffer.prototype.updateSelectionFromCells = function( noHilight = false , cu
 	this.selectionRegion.xmax = xmax ;
 	this.selectionRegion.ymin = ymin ;
 	this.selectionRegion.ymax = ymax ;
-
-	if ( ! noHilight ) { this.hilightSelection() ; }
 } ;
 
 
@@ -7025,37 +7001,7 @@ TextBuffer.prototype.updateCursorFromCell = function( cursorCell ) {
 
 TextBuffer.prototype.resetSelectionRegion = function() {
 	if ( ! this.selectionRegion ) { return ; }
-
-	// Start by unhilighting existing selection
-	this.hilightSelection( false ) ;
 	this.selectionRegion = null ;
-} ;
-
-
-
-// Internal or maybe useful for userland?
-TextBuffer.prototype.hilightSelection = function( turnOn = true ) {
-	var x , y , xmin , xmax , ymax ,
-		region = this.selectionRegion ;
-
-	if ( ! region || region.xmin === undefined || region.ymin === undefined || region.xmax === undefined || region.ymax === undefined ) {
-		return ;
-	}
-
-	ymax = Math.min( region.ymax , this.buffer.length - 1 ) ;
-
-	for ( y = region.ymin ; y <= ymax ; y ++ ) {
-		if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
-
-		xmin = y === region.ymin ? region.xmin : 0 ;
-		xmax = y === region.ymax ? Math.min( region.xmax , this.buffer[ y ].length - 1 ) : this.buffer[ y ].length - 1 ;
-
-		for ( x = xmin ; x <= xmax ; x ++ ) {
-			this.buffer[ y ][ x ].attr = turnOn ?
-				this.ScreenBuffer.attrSelect( this.buffer[ y ][ x ].attr ) :
-				this.ScreenBuffer.attrUnselect( this.buffer[ y ][ x ].attr ) ;
-		}
-	}
 } ;
 
 
@@ -7162,7 +7108,7 @@ TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
 	if ( tabIndex !== -1 ) { this.reTabLine( tabIndex , y ) ; }
 
 	if ( this.selectionRegion ) {
-		this.updateSelectionFromCells( true , cursorCell ) ;
+		this.updateSelectionFromCells( cursorCell ) ;
 	}
 	else if ( cursorCell ) {
 		this.updateCursorFromCell( cursorCell ) ;
@@ -7542,7 +7488,7 @@ TextBuffer.prototype.insert = function( text , hasMarkup , attr ) {
 		count += this.inlineInsert( lines[ index ] , parser , attr , legacyColor ) ;
 	}
 
-	if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+	if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 
 	return count ;
 } ;
@@ -7693,7 +7639,7 @@ TextBuffer.prototype.delete = function( count , getDeleted = false ) {
 			this.cy >= this.buffer.length ||
 			( this.cy === this.buffer.length - 1 && this.cx >= currentLine.length )
 		) {
-			if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+			if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 			return deleted ;
 		}
 
@@ -7740,7 +7686,7 @@ TextBuffer.prototype.delete = function( count , getDeleted = false ) {
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine() ;	// Do it every time, before finding a better way to do it
 
-	if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+	if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 
 	return deleted ;
 } ;
@@ -7768,7 +7714,7 @@ TextBuffer.prototype.backDelete = function( count , getDeleted = false ) {
 
 		// If we are already at the begining of the buffer...
 		if ( this.cy === 0 && this.cx === 0 ) {
-			if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+			if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 			return deleted ;
 		}
 
@@ -7824,7 +7770,7 @@ TextBuffer.prototype.backDelete = function( count , getDeleted = false ) {
 	//if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 	this.reTabLine( tabIndex ) ;	// Do it every time, before finding a better way to do it
 
-	if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+	if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 
 	return deleted ;
 } ;
@@ -7905,7 +7851,7 @@ TextBuffer.prototype.newLine = function( internalCall ) {
 		tabIndex = this.indexOfCharInLine( currentLine , '\t' , this.cx ) ;
 		if ( tabIndex !== -1 ) { this.reTabLine( tabIndex ) ; }
 
-		if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+		if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 	}
 } ;
 
@@ -7950,7 +7896,7 @@ TextBuffer.prototype.joinLine = function( internalCall , y ) {
 		tabIndex = this.indexOfCharInLine( currentLine , '\t' , x ) ;
 		if ( tabIndex !== -1 ) { this.reTabLine( tabIndex , y ) ; }
 
-		if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+		if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 	}
 
 	return hasDeleted ;
@@ -7974,7 +7920,7 @@ TextBuffer.prototype.deleteLine = function( getDeleted = false ) {
 	}
 	this.buffer.splice( this.cy , 1 ) ;
 
-	if ( this.selectionRegion ) { this.updateSelectionFromCells( true ) ; }
+	if ( this.selectionRegion ) { this.updateSelectionFromCells() ; }
 
 	return deleted ;
 } ;
@@ -8099,6 +8045,7 @@ TextBuffer.prototype.blitter = function( p ) {
 			dstBuffer: p.dst.buffer ,
 			forceChar: this.hidden ,
 			voidAttr: this.voidAttr ,
+			inverseRegion: this.selectionRegion ,
 			writeAttr:
 				this.ScreenBuffer === termkit.ScreenBuffer ?
 					( dst , attr , offset ) => { dst.writeInt32BE( attr , offset ) ; } :
@@ -8128,7 +8075,10 @@ TextBuffer.prototype.blitter = function( p ) {
 
 TextBuffer.prototype.blitterLineIterator = function( p ) {
 	//console.error( "blitter line" , p.srcY ) ;
-	var srcRShift , srcX , srcXmax , srcExistingXmax , dstOffset , cells , cell , attr , char , charCode ;
+	var srcRShift , srcX , srcXmax , srcExistingXmax , dstOffset , cells , cell , attr , char , charCode ,
+		invRegion = p.context.inverseRegion ,
+		invXmin = Infinity ,
+		invXmax = -Infinity ;
 
 	//if ( ! global.deb ) { global.deb = [] ; }
 	//global.deb.push( p ) ;
@@ -8145,6 +8095,11 @@ TextBuffer.prototype.blitterLineIterator = function( p ) {
 		srcExistingXmax = srcXmax ;
 
 		if ( srcExistingXmax >= cells.length ) { srcExistingXmax = cells.length - 1 ; }
+
+		if ( invRegion && p.srcY >= invRegion.ymin && p.srcY <= invRegion.ymax ) {
+			invXmin = p.srcY === invRegion.ymin ? invRegion.xmin : -Infinity ;
+			invXmax = p.srcY === invRegion.ymax ? invRegion.xmax : Infinity ;
+		}
 
 		// Write existing cells
 		for ( ; srcX <= srcExistingXmax ; srcX ++ , dstOffset += this.ScreenBuffer.prototype.ITEM_SIZE ) {
@@ -8165,6 +8120,8 @@ TextBuffer.prototype.blitterLineIterator = function( p ) {
 					( ( charCode = cell.char.charCodeAt( 0 ) ) < 0x20 || charCode === 0x7f ) ? ' ' :
 					cell.char ;
 			}
+
+			if ( srcX >= invXmin && srcX <= invXmax ) { attr = this.ScreenBuffer.attrInverse( attr ) ; }
 
 			// Write the attributes
 			p.context.writeAttr( p.context.dstBuffer , attr , dstOffset ) ;
@@ -12449,13 +12406,9 @@ EditableTextBox.prototype.insert = function( str , selectIt = false , internal =
 		}
 
 		if ( selectIt ) {
-			// It calls .hilightSelection()
 			this.textBuffer.setSelectionRegion( {
 				xmin: x , ymin: y , xmax: this.textBuffer.cx , ymax: this.textBuffer.cy
 			} ) ;
-		}
-		else {
-			this.textBuffer.hilightSelection() ;
 		}
 
 		this.autoScrollAndDraw() ;
@@ -12491,7 +12444,6 @@ EditableTextBox.prototype.deleteSelection = function( internal = false ) {
 			if ( this.stateMachine ) {
 				this.textBuffer.runStateMachine() ;
 			}
-			// No .hilightSelection() here, cause we just deleted it
 			this.autoScrollAndDraw() ;
 		}
 
@@ -12519,7 +12471,6 @@ EditableTextBox.prototype.deleteRegion = function( region , internal = false ) {
 			if ( this.stateMachine ) {
 				this.textBuffer.runStateMachine() ;
 			}
-			// No .hilightSelection() here, cause we just deleted it
 			this.autoScrollAndDraw() ;
 		}
 
@@ -12610,7 +12561,6 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 				if ( this.stateMachine ) {
 					this.textBuffer.runStateMachine() ;
 				}
-				this.textBuffer.hilightSelection() ;
 				this.autoScrollAndDraw() ;
 			}
 			//else { this.drawCursor() ; }
@@ -12637,7 +12587,6 @@ userActions.character = function( key ) {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12667,7 +12616,6 @@ userActions.newLine = function() {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12686,7 +12634,6 @@ userActions.tab = function() {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 	this.emit( 'change' , {
 		type: 'insert' ,
@@ -12712,7 +12659,6 @@ userActions.delete = function() {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12744,7 +12690,6 @@ userActions.backDelete = function() {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -12765,7 +12710,6 @@ userActions.deleteLine = function() {
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
 	}
-	this.textBuffer.hilightSelection() ;
 	this.autoScrollAndDraw() ;
 
 	if ( deleted && deleted.count ) {
@@ -17541,7 +17485,6 @@ TextBox.prototype.addContent = function( content , mode , dontDraw ) {
 
 	if ( this.stateMachine ) {
 		this.textBuffer.runStateMachine() ;
-		this.textBuffer.hilightSelection() ;
 	}
 
 	// Move the cursor at the end of the input

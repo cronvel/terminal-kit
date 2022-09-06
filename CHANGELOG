@@ -1,4 +1,10 @@
 
+v2.10.1
+-------
+
+TextBuffer: selection highlighting is now done at blitter time (more flexible, less bugs)
+
+
 v2.10.0
 -------
 
