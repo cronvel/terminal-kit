@@ -12727,68 +12727,77 @@ userActions.deleteLine = function() {
 
 userActions.backward = function() {
 	this.textBuffer.moveBackward() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.forward = function() {
 	this.textBuffer.moveForward() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.startOfWord = function() {
 	this.textBuffer.moveToStartOfWord() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.endOfWord = function() {
 	this.textBuffer.moveToEndOfWord() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.startOfLine = function() {
 	this.textBuffer.moveToColumn( 0 ) ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.endOfLine = function() {
 	this.textBuffer.moveToEndOfLine() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.down = function() {
 	this.textBuffer.moveDown() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.up = function() {
 	this.textBuffer.moveUp() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.left = function() {
 	this.textBuffer.moveLeft() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.right = function() {
 	this.textBuffer.moveRight() ;
-	this.autoScrollAndDrawCursor() ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
 userActions.scrollUp = function() {
 	var dy = Math.ceil( this.outputHeight / 2 ) ;
 	this.textBuffer.move( 0 , -dy ) ;
-	this.scroll( 0 , dy ) ;
+	this.scroll( 0 , dy , true ) ; this.autoScrollAndDraw() ;
+	//this.scroll( 0 , dy ) ; this.autoScrollAndSmartDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.scrollDown = function() {
+	var dy = -Math.ceil( this.outputHeight / 2 ) ;
+	this.textBuffer.move( 0 , -dy ) ;
+	this.scroll( 0 , dy , true ) ; this.autoScrollAndDraw() ;
+	//this.scroll( 0 , dy ) ; this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
@@ -12800,14 +12809,7 @@ userActions.scrollTop = function() {
 
 userActions.scrollBottom = function() {
 	this.textBuffer.moveTo( 0 , this.textBuffer.buffer.length - 1 ) ;
-	this.autoScrollAndDrawCursor() ;
-	this.emit( 'cursorMove' ) ;
-} ;
-
-userActions.scrollDown = function() {
-	var dy = -Math.ceil( this.outputHeight / 2 ) ;
-	this.textBuffer.move( 0 , -dy ) ;
-	this.scroll( 0 , dy ) ;
+	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
 
@@ -16811,6 +16813,18 @@ Slider.prototype.setSlideRate = function( rate , internalAndNoDraw = false ) {
 
 
 
+Slider.prototype.getValue = function() {
+	return this.rateToValue( this.slideRate ) ;
+} ;
+
+
+
+Slider.prototype.setValue = function( value , internalAndNoDraw ) {
+	return this.setSlideRate( this.valueToRate( value ) , internalAndNoDraw ) ;
+} ;
+
+
+
 Slider.prototype.getHandleOffset = function() { return this.handleOffset ; } ;
 Slider.prototype.getSlideRate = function() { return this.slideRate ; } ;
 
@@ -16825,18 +16839,6 @@ Slider.prototype.onButtonSubmit = function( buttonValue , action , button ) {
 			this.emit( 'slideStep' , 1 ) ;
 			break ;
 	}
-} ;
-
-
-
-Slider.prototype.getValue = function() {
-	return this.rateToValue( this.slideRate ) ;
-} ;
-
-
-
-Slider.prototype.setValue = function( value , internalAndNoDraw ) {
-	return this.setSlideRate( this.valueToRate( value ) , internalAndNoDraw ) ;
 } ;
 
 
@@ -17072,6 +17074,9 @@ function TextBox( options ) {
 	// true: scroll down until the bottom of the content reaches the top of the textBox
 	this.extraScrolling = !! options.extraScrolling ;
 
+	this.autoScrollContextLines = options.autoScrollContextLines ?? 0 ;
+	this.autoScrollContextColumns = options.autoScrollContextColumns ?? 1 ;
+
 	// Right shift of the first-line, may be useful for prompt, or continuing another box in the flow
 	this.firstLineRightShift = options.firstLineRightShift || 0 ;
 
@@ -17288,25 +17293,6 @@ TextBox.prototype.preDrawSelf = function() {
 
 
 
-TextBox.prototype.scroll = function( dx , dy , dontDraw = false ) {
-	return this.scrollTo( dx ? this.scrollX + dx : null , dy ? this.scrollY + dy : null , dontDraw ) ;
-} ;
-
-
-
-TextBox.prototype.scrollToTop = function( dontDraw = false ) {
-	return this.scrollTo( null , 0 , dontDraw ) ;
-} ;
-
-
-
-TextBox.prototype.scrollToBottom = function( dontDraw = false ) {
-	// Ignore extra scrolling here
-	return this.scrollTo( null , this.textAreaHeight - this.textBuffer.buffer.length , dontDraw ) ;
-} ;
-
-
-
 TextBox.prototype.scrollTo = function( x , y , noDraw = false ) {
 	if ( ! this.scrollable ) { return ; }
 
@@ -17338,32 +17324,50 @@ TextBox.prototype.scrollTo = function( x , y , noDraw = false ) {
 	if ( ! noDraw ) { this.draw() ; }
 } ;
 
+TextBox.prototype.scroll = function( dx , dy , dontDraw = false ) {
+	return this.scrollTo(  dx ? this.scrollX + dx : null  ,  dy ? this.scrollY + dy : null  ,  dontDraw  ) ;
+} ;
+
+TextBox.prototype.scrollToTop = function( dontDraw = false ) {
+	return this.scrollTo( null , 0 , dontDraw ) ;
+} ;
+
+TextBox.prototype.scrollToBottom = function( dontDraw = false ) {
+	// Ignore extra scrolling here
+	return this.scrollTo( null , this.textAreaHeight - this.textBuffer.buffer.length , dontDraw ) ;
+} ;
 
 
-TextBox.prototype.autoScrollAndDraw = function( onlyDrawCursor = false ) {
-	var x , y ;
 
-	// We use cx-1 because at least we want to see the char just before the cursor (backspace, etc...)
-	// But do nothing if there is no scrolling yet (do not set x to 0 if it's unnecessary)
-	if ( this.textBuffer.cx - 1 < -this.scrollX && this.scrollX !== 0 ) {
-		x = -Math.max( 0 , this.textBuffer.cx - 1 ) ;
+TextBox.prototype.autoScrollAndDraw = function( onlyDrawCursorExceptIfScrolled = false , noDraw = false ) {
+	var x , y ,
+		contextColumns = Math.min( Math.floor( this.textAreaWidth / 2 ) , this.autoScrollContextColumns ) ,
+		contextLines = Math.min( Math.floor( this.textAreaHeight / 2 ) , this.autoScrollContextLines ) ;
+
+	// Do nothing if there is no scrolling yet (do not set x to 0 if it's unnecessary)
+	if ( this.textBuffer.cx < -this.scrollX + contextColumns && this.scrollX !== 0 ) {
+		// The cursor will be on left of the viewport
+		x = Math.min( 0 , -this.textBuffer.cx + contextColumns ) ;
 	}
-	else if ( this.textBuffer.cx > this.textAreaWidth - this.scrollX - 1 ) {
-		x = this.textAreaWidth - 1 - this.textBuffer.cx ;
+	else if ( this.textBuffer.cx > this.textAreaWidth - this.scrollX - 1 - contextColumns ) {
+		// The cursor will be on right of the viewport
+		x = this.textAreaWidth - 1 - this.textBuffer.cx - contextColumns ;
 	}
 
-	if ( this.textBuffer.cy < -this.scrollY ) {
-		y = -this.textBuffer.cy ;
+	if ( this.textBuffer.cy < -this.scrollY + contextLines ) {
+		// The cursor will be on top of the viewport
+		y = Math.min( 0 , -this.textBuffer.cy + contextLines ) ;
 	}
-	else if ( this.textBuffer.cy > this.textAreaHeight - this.scrollY - 1 ) {
-		y = this.textAreaHeight - 1 - this.textBuffer.cy ;
+	else if ( this.textBuffer.cy > this.textAreaHeight - this.scrollY - 1 - contextLines ) {
+		// The cursor will be at the bottom of the viewport
+		y = this.textAreaHeight - 1 - this.textBuffer.cy - contextLines ;
 	}
 
 	if ( x !== undefined || y !== undefined ) {
 		// .scrollTo() call .draw(), so no need to do that here...
-		this.scrollTo( x , y ) ;
+		this.scrollTo( x , y , noDraw ) ;
 	}
-	else if ( ! onlyDrawCursor ) {
+	else if ( ! onlyDrawCursorExceptIfScrolled ) {
 		this.draw() ;
 	}
 	else {
@@ -17371,7 +17375,7 @@ TextBox.prototype.autoScrollAndDraw = function( onlyDrawCursor = false ) {
 	}
 } ;
 
-TextBox.prototype.autoScrollAndDrawCursor = function() { return this.autoScrollAndDraw( true ) ; } ;
+TextBox.prototype.autoScrollAndSmartDraw = function() { return this.autoScrollAndDraw( true ) ; } ;
 
 
 
