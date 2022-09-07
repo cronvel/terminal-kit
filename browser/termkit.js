@@ -7302,7 +7302,7 @@ TextBuffer.prototype.moveForward = function( testFn , justSkipFiller ) {
 			! currentLine[ this.cx ]
 			|| (
 				! currentLine[ this.cx ].filler
-				&& ( ! testFn || testFn( currentLine[ this.cx ].char ) )
+				&& ( ! testFn || testFn( currentLine[ this.cx ].char , this.cx , this.cy ) )
 			)
 		) {
 			break ;
@@ -12751,6 +12751,26 @@ userActions.endOfWord = function() {
 
 userActions.startOfLine = function() {
 	this.textBuffer.moveToColumn( 0 ) ;
+	this.autoScrollAndSmartDraw() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+// Start of line, but if already at cx = 0, move to the first non-white char (skip indent),
+// Also known as “smart home”.
+userActions.smartStartOfLine = function() {
+	if ( this.textBuffer.cx !== 0 ) {
+		this.textBuffer.moveToColumn( 0 ) ;
+	}
+	else {
+		let cy = this.textBuffer.cy ;
+		this.textBuffer.moveForward( ( char , x , y ) => y !== cy || ( char !== ' ' && char !== '\t' ) ) ;
+
+		if ( this.textBuffer.cy !== cy ) {
+			// Line has changed, it was an empty line: fallback!
+			this.textBuffer.moveTo( 0 , cy ) ;
+		}
+	}
+
 	this.autoScrollAndSmartDraw() ;
 	this.emit( 'cursorMove' ) ;
 } ;
