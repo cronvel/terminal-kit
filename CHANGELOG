@@ -1,4 +1,10 @@
 
+v2.10.3
+-------
+
+Fix TextBuffer#offsetToCoordinate() bug when the offset is just after a filler char
+
+
 v2.10.2
 -------
 

@@ -6486,7 +6486,7 @@ TextBuffer.prototype.offsetToCoordinate = function( offset ) {
 		x = 0 ,
 		y = 0 ;
 
-	if ( offset <= 0 ) { return ; }
+	if ( offset < 0 ) { return ; }
 
 	while ( y < this.buffer.length ) {
 		x = 0 ;
@@ -6496,12 +6496,7 @@ TextBuffer.prototype.offsetToCoordinate = function( offset ) {
 
 		while ( x < line.length ) {
 			//console.error( "    iter cx" , offset , y , x ) ;
-			if ( line[ x ].filler ) {
-				x ++ ;
-			}
-			else {
-				offset -- ;
-				x ++ ;
+			if ( ! line[ x ].filler ) {
 				if ( offset <= 0 ) {
 					if ( x === line.length && line[ line.length - 1 ].char === '\n' ) {
 						//console.error( "    Exit with \\n" ) ;
@@ -6511,7 +6506,11 @@ TextBuffer.prototype.offsetToCoordinate = function( offset ) {
 					//console.error( "Exit" , y , x ) ;
 					return { x , y } ;
 				}
+
+				offset -- ;
 			}
+
+			x ++ ;
 		}
 
 		y ++ ;
