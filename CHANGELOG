@@ -1,4 +1,11 @@
 
+v2.10.2
+-------
+
+TextBuffer#updateCursorFromCell() now return true if successful
+Better META names
+
+
 v2.10.1
 -------
 

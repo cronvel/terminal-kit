@@ -5241,7 +5241,7 @@ notChainable.emitKey = function( name , matches , data ) {
 			name = name.replace( regexp , '$1' ) ;
 		}
 
-		name = this.metaKeyPrefix + '_' + name.toUpperCase() ;
+		name = this.metaKeyPrefix + '_' + termkit.characterName( name ) ;
 
 		this.metaKeyPrefix = null ;
 		this.metaKeyRemove = null ;
@@ -6982,6 +6982,7 @@ TextBuffer.prototype.updateSelectionFromCells = function( cursorCell = null ) {
 
 
 // TODOC
+// Return true if found, else return false
 TextBuffer.prototype.updateCursorFromCell = function( cursorCell ) {
 	for ( let y = 0 ; y < this.buffer.length ; y ++ ) {
 		let currentLine = this.buffer[ y ] ;
@@ -6991,10 +6992,12 @@ TextBuffer.prototype.updateCursorFromCell = function( cursorCell ) {
 			if ( cursorCell && currentLine[ x ] === cursorCell ) {
 				this.cx = x ;
 				this.cy = y ;
-				return ;
+				return true ;
 			}
 		}
 	}
+
+	return false ;
 } ;
 
 
@@ -12790,6 +12793,18 @@ userActions.scrollUp = function() {
 	this.emit( 'cursorMove' ) ;
 } ;
 
+userActions.scrollTop = function() {
+	this.textBuffer.moveTo( 0 , 0 ) ;
+	this.scrollTo( 0 , 0 ) ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
+userActions.scrollBottom = function() {
+	this.textBuffer.moveTo( 0 , this.textBuffer.buffer.length - 1 ) ;
+	this.autoScrollAndDrawCursor() ;
+	this.emit( 'cursorMove' ) ;
+} ;
+
 userActions.scrollDown = function() {
 	var dy = -Math.ceil( this.outputHeight / 2 ) ;
 	this.textBuffer.move( 0 , -dy ) ;
@@ -17357,8 +17372,6 @@ TextBox.prototype.autoScrollAndDraw = function( onlyDrawCursor = false ) {
 	}
 } ;
 
-
-
 TextBox.prototype.autoScrollAndDrawCursor = function() { return this.autoScrollAndDraw( true ) ; } ;
 
 
@@ -17597,42 +17610,42 @@ const userActions = TextBox.prototype.userActions ;
 
 userActions.tinyScrollUp = function() {
 	this.scroll( 0 , Math.ceil( this.textAreaHeight / 5 ) ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.tinyScrollDown = function() {
 	this.scroll( 0 , -Math.ceil( this.textAreaHeight / 5 ) ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollUp = function() {
 	this.scroll( 0 , Math.ceil( this.textAreaHeight / 2 ) ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollDown = function() {
 	this.scroll( 0 , -Math.ceil( this.textAreaHeight / 2 ) ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollLeft = function() {
 	this.scroll( Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollRight = function() {
 	this.scroll( -Math.ceil( this.textAreaWidth / 2 ) , 0 ) ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollTop = function() {
 	this.scrollToTop() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.scrollBottom = function() {
 	this.scrollToBottom() ;
-	this.emit( 'cursorChange' ) ;
+	this.emit( 'scroll' ) ;
 } ;
 
 userActions.copyToDocumentClipboard = function() {
@@ -20955,6 +20968,50 @@ exports.markupOptions = {
 		markupStack.push( attr ) ;
 		return attr || {} ;
 	}
+} ;
+
+
+
+const asciiSymbolName = {
+	' ': 'SPACE' ,
+	'!': 'EXCLAMATION' ,
+	'"': 'DOUBLE_QUOTE' ,
+	'#': 'HASH' ,
+	'$': 'DOLLAR' ,
+	'%': 'PERCENT' ,
+	'&': 'AMPERSAND' ,
+	"'": 'SINGLE_QUOTE' ,
+	'(': 'OPEN_PARENTHESIS' ,
+	')': 'CLOSE_PARENTHESIS' ,
+	'*': 'ASTERISK' ,
+	'+': 'PLUS' ,
+	',': 'COMMA' ,
+	'-': 'HYPHEN' ,
+	'.': 'DOT' ,
+	'/': 'SLASH' ,
+	':': 'COLON' ,
+	';': 'SEMICOLON' ,
+	'<': 'LESS_THAN' ,
+	'=': 'EQUAL' ,
+	'>': 'GREATER_THAN' ,
+	'?': 'QUESTION' ,
+	'@': 'AT' ,
+	'[': 'OPEN_BRACKET' ,
+	'\\': 'BACKSLASH' ,
+	']': 'CLOSE_BRACKET' ,
+	'^': 'CARET' ,
+	'_': 'UNDERSCORE' ,
+	'`': 'BACK_QUOTE' ,
+	'{': 'OPEN_BRACE' ,
+	'|': 'PIPE' ,
+	'}': 'CLOSE_BRACE' ,
+	'~': 'TILDE'
+} ;
+
+// Non-control character name
+exports.characterName = char => {
+	if ( asciiSymbolName[ char ] ) { return asciiSymbolName[ char ] ; }
+	return char.toUpperCase() ;
 } ;
 
 
