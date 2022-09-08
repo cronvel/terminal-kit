@@ -1,4 +1,10 @@
 
+v2.10.6
+-------
+
+Fix InlineInput and InlineFileInput completion's hint
+
+
 v2.10.5
 -------
 
