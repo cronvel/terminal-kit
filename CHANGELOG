@@ -1,4 +1,10 @@
 
+v2.11.0
+-------
+
+New (pseudo) widget: Border, add border (with or without shadow) to any other widgets, just by setting the 'parent' parameter
+
+
 v2.10.6
 -------
 

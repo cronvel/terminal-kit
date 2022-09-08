@@ -30,6 +30,7 @@ it manages widget keyboard focus, event dispatching, widget cycling, **with mous
 	* [Document](Document.md#top)
 	* [AnimatedText](AnimatedText.md#top)
 	* [Bar](Bar.md#top)
+	* [Border](Border.md#top)
 	* [Button](Button.md#top)
 	* [ColumnMenu](ColumnMenu.md#top)
 	* [ColumnMenuMulti](ColumnMenuMulti.md#top)

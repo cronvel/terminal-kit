@@ -41,7 +41,7 @@ var document = term.createDocument() ;
 
 var window = new termkit.Window( {
 	parent: document ,
-	//boxChars: 'dotted' ,
+	//frameChars: 'dotted' ,
 	x: 10 ,
 	y: 10 ,
 	width: 50 ,
