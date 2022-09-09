@@ -1,4 +1,12 @@
 
+v2.11.2
+-------
+
+Element#redraw() is DEPRECATED, replaced by Element#outerDraw() (more meaningful name)
+fix some drawing issue
+EditableTextBox has new property: this.autoCompleteHintMinInput 
+
+
 v2.11.1
 -------
 

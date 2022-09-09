@@ -48,8 +48,10 @@ var text = new termkit.Text( {
 	//contentHasMarkup: true ,
 	//contentHasMarkup: 'ansi' ,
 	contentHasMarkup: 'legacyAnsi' ,
+	attr: { bgColor: 'magenta' } ,
 	x: 10 ,
 	y: 10 ,
+	//width: 5
 } ) ;
 
 /*

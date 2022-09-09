@@ -27,7 +27,7 @@
 	* [.show()](#ref.Element.show)
 	* [.hide()](#ref.Element.hide)
 	* [.draw()](#ref.Element.draw)
-	* [.redraw()](#ref.Element.redraw)
+	* [.outerDraw()](#ref.Element.outerDraw)
 	* [.drawCursor()](#ref.Element.drawCursor)
 	* [.saveCursor()](#ref.Element.saveCursor)
 	* [.restoreCursor()](#ref.Element.restoreCursor)
@@ -118,7 +118,7 @@ It updates the z-index of the *element* so that it is below all sibling *element
 * hasMarkup `boolean` or `string` when set to *true* or the string *'markup'*, the content contains Terminal Kit's markup,
   used to set attributes of parts of the content, when set to the string *'ansi'*, the content contains ANSI escape sequence,
   default: false. **NOTE:** not all widget support markup or ansi!
-* dontDraw `boolean` when set, the content's update does not trigger the *redraw* of the *element*
+* dontDraw `boolean` when set, the content's update does not trigger the *draw*/*outerDraw* of the *element*
 
 Set the content of this *element*.
 
@@ -127,18 +127,18 @@ Set the content of this *element*.
 <a name="ref.Element.show"></a>
 ### .show( [dontDraw] )
 
-* dontDraw `boolean` when set (default: false) the element is not redrawn (it will be made visible the next time something trigger a *redraw*)
+* dontDraw `boolean` when set (default: false) the element is not drawn/outerDrawn (it will be made visible the next time something trigger a *outerDraw*)
 
-Turn the element visibility **on** and redraw it immediately (unless the `dontDraw` option is on).
+Turn the element visibility **on** and outerDraw it immediately (unless the `dontDraw` option is on).
 
 
 
 <a name="ref.Element.show"></a>
 ### .hide( [dontDraw] )
 
-* dontDraw `boolean` when set (default: false) the element is not redrawn (it will be hidden the next time something trigger a *redraw* on its parent)
+* dontDraw `boolean` when set (default: false) the element is not drawn/outerDrawn (it will be hidden the next time something trigger a *outerDraw* on its parent)
 
-Turn the element visibility **off** and redraw its parent immediately (unless the `dontDraw` option is on).
+Turn the element visibility **off** and outerDraw its parent immediately (unless the `dontDraw` option is on).
 
 
 
@@ -151,15 +151,15 @@ It is called internally/automatically, userland code should not be bothered with
 
 
 
-<a name="ref.Element.redraw"></a>
-### .redraw( [force] )
+<a name="ref.Element.outerDraw"></a>
+### .outerDraw( [force] )
 
-* force `boolean` **INTERNAL** when set (default: false) the element is *redrawn* even if it is hidden: i.e. the parent is redrawn,
+* force `boolean` **INTERNAL** when set (default: false) the element is *outerDrawn* even if it is hidden: i.e. the parent is outerDrawn,
   it would effectively clear an hidden element from its parent
 
 Redraw the *element*.
 While `.draw()` is used when drawing the current *element* is enough (the *element* has not moved, and has not been resized),
-`.redraw()` is used it is necessary to draw the closest ancestor which is a container.
+`.outerDraw()` is used when it is necessary to draw the closest ancestor which is a container.
 
 It is called internally/automatically, userland code should not be bothered with that, except in rare use-cases.
 

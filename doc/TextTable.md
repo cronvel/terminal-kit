@@ -111,7 +111,7 @@ This creates a *TextTable element*.
 
 * x,y `number` the cell coordinate to modify
 * content `string` the new content for this table cell
-* dontDraw `boolean` when set, the cell content's update does not trigger the *redraw* of the *textTable* (or of the cell's *textBox*
+* dontDraw `boolean` when set, the cell content's update does not trigger the *outerDraw* of the *textTable* (or of the cell's *textBox*
   if *dontUpdateLayout* is set)
 * dontUpdateLayout `boolean` when set, the table layout is not updated
 
@@ -127,7 +127,7 @@ The content may contain *markup*, but it should have been enabled on the *textTa
 * x,y `number` the cell coordinate to modify
 * textAttr `object` generic/default attributes for the cell's content (*textBox*)
 * voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the cell's *textBox*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the cell's *textBox*
 
 This update an existing cell text attribute.
 
@@ -137,7 +137,7 @@ This update an existing cell text attribute.
 ### .resetCellAttr( x , y , [dontDraw] )
 
 * x,y `number` the cell coordinate to reset
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the cell's *textBox*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the cell's *textBox*
 
 This reset an existing cell text attribute to what it should be, based upon the constructor's parameters.
 
@@ -149,7 +149,7 @@ This reset an existing cell text attribute to what it should be, based upon the 
 * y `number` the row's index to modify
 * textAttr `object` generic/default attributes for the row's cell's content (*textBox*)
 * voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This update all cells' text attribute of a row.
 
@@ -159,7 +159,7 @@ This update all cells' text attribute of a row.
 ### .resetRowAttr( y , [dontDraw] )
 
 * y `number` the row's index to reset
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This reset all cells' text attribute of a row to what it should be, based upon the constructor's parameters.
 
@@ -171,7 +171,7 @@ This reset all cells' text attribute of a row to what it should be, based upon t
 * x `number` the column's index to modify
 * textAttr `object` generic/default attributes for the column's cell's content (*textBox*)
 * voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This update all cells's text attribute of a column.
 
@@ -181,7 +181,7 @@ This update all cells's text attribute of a column.
 ### .resetColumnAttr( x , [dontDraw] )
 
 * x `number` the column's index to reset
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This reset all cells' text attribute of a column to what it should be, based upon the constructor's parameters.
 
@@ -192,7 +192,7 @@ This reset all cells' text attribute of a column to what it should be, based upo
 
 * textAttr `object` generic/default attributes for the table's cell's content (*textBox*)
 * voidAttr `object` attributes for the area of the cell (*textBox*) without any text content, default to the *textAttr* argument
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This update all cells's text attribute.
 
@@ -201,7 +201,7 @@ This update all cells's text attribute.
 <a name="ref.TextTable.resetTableAttr"></a>
 ### .resetTableAttr( [dontDraw] )
 
-* dontDraw `boolean` when set, the cell attr's update does not trigger the *redraw* of the *textTable*
+* dontDraw `boolean` when set, the cell attr's update does not trigger the *outerDraw* of the *textTable*
 
 This reset all cells's text attribute to what it should be, based upon the constructor's parameters.
 

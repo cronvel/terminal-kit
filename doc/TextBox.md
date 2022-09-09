@@ -163,7 +163,7 @@ It returns the current text-content size, an object with a *width* and *height* 
 ### .prependContent( content , [dontDraw] )
 
 * content `string` the text-content to prepend
-* dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
+* dontDraw `boolean` if set, don't outerDraw the widget (default: false, outerDraw)
 
 Prepend text-content at the begining of the current content. It supports markup or ansi if the textBox was instanciated with the `contentHasMarkup` options on.
 
@@ -173,7 +173,7 @@ Prepend text-content at the begining of the current content. It supports markup 
 ### .appendContent( content , [dontDraw] )
 
 * content `string` the text-content to append
-* dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
+* dontDraw `boolean` if set, don't outerDraw the widget (default: false, outerDraw)
 
 Append text-content at the end of the current content. It supports markup or ansi if the textBox was instanciated with the `contentHasMarkup` options on.
 
@@ -183,7 +183,7 @@ Append text-content at the end of the current content. It supports markup or ans
 ### .appendLog( content , [dontDraw] )
 
 * content `string` the text-content to append
-* dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
+* dontDraw `boolean` if set, don't outerDraw the widget (default: false, outerDraw)
 
 This method is almost like [.appendContent()](ref.TextBox.appendContent), but more suitable for logging.
 It appends **a new line** of text-content at the end of the current content.
@@ -207,7 +207,7 @@ It returns the alternate text-content.
 * hasMarkup `boolean` or `string` when set to *true* or the string *'markup'*, the content contains Terminal Kit's markup,
   used to set attributes of parts of the content, when set to the string *'ansi'*, the content contains ANSI escape sequence,
   default: false.
-* dontDraw `boolean` if set, don't redraw the widget (default: false, redraw)
+* dontDraw `boolean` if set, don't outerDraw the widget (default: false, outerDraw)
 
 It set the alternate text-content, work like its [.setContent()](#ref.Element.setContent) counterpart.
 
