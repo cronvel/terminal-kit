@@ -1,4 +1,10 @@
 
+v2.11.3
+-------
+
+New (missing) method: EditableTextBox#setStateMachine()
+
+
 v2.11.2
 -------
 
