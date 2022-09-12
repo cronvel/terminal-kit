@@ -6303,6 +6303,34 @@ TextBuffer.prototype.getLineText = function( y = this.cy ) {
 
 
 // TODOC
+// Get the indentation part of the line, return null if the line is empty (no char or no non-space char)
+TextBuffer.prototype.getLineIndent = function( y = this.cy ) {
+	if ( ! this.buffer[ y ] ) { return null ; }
+
+	var x , xmin , xmax , cell ,
+		indent = '' ;
+
+	for ( x = 0 , xmax = this.buffer[ y ].length - 1 ; x <= xmax ; x ++ ) {
+		cell = this.buffer[ y ][ x ] ;
+		if ( ! cell.filler ) {
+			if ( cell.char === '\t' || cell.char === ' ' ) {
+				indent += cell.char ;
+			}
+			else if ( cell.char === '\n' ) {
+				return null ;
+			}
+			else {
+				return indent ;
+			}
+		}
+	}
+
+	return null ;
+} ;
+
+
+
+// TODOC
 // Count characters in this line, excluding fillers
 TextBuffer.prototype.getLineCharCount = function( y = this.cy ) {
 	if ( y >= this.buffer.length ) { return null ; }
@@ -6321,6 +6349,47 @@ TextBuffer.prototype.getCellsCharCount = function( cells ) {
 	}
 
 	return count ;
+} ;
+
+
+
+// TODOC
+// Remove spaces and tabs at the end of the line
+TextBuffer.prototype.removeTrailingSpaces = function( y = this.cy , x = null , dry = false ) {
+	if ( y >= this.buffer.length ) { return '' ; }
+	if ( ! this.buffer[ y ] ) { this.buffer[ y ] = [] ; }
+
+	var line = this.buffer[ y ] ;
+
+	x = x ?? line.length - 1 ;
+
+	if ( x < 0 || x >= line.length ) { return '' ; }
+
+	var deletedStr = '' ,
+		hasNL = line[ x ].char === '\n' ;
+
+	if ( hasNL ) {
+		x -- ;
+	}
+
+	for ( ; x >= 0 ; x -- ) {
+		if ( line[ x ].filler ) { continue ; }
+
+		let char = line[ x ].char ;
+
+		if ( char === ' ' || char === '\t' ) {
+			deletedStr = char + deletedStr ;
+		}
+		else {
+			break ;
+		}
+	}
+
+	if ( deletedStr && ! dry ) {
+		line.splice( x + 1 , deletedStr.length ) ;
+	}
+
+	return deletedStr ;
 } ;
 
 
@@ -7127,34 +7196,6 @@ TextBuffer.prototype.deleteRegion = function( region , getDeleted = false ) {
 	}
 
 	return deleted ;
-} ;
-
-
-
-// TODOC
-// Get the indentation part of the line, return null if the line is empty (no char or no non-space char)
-TextBuffer.prototype.getLineIndent = function( y = this.cy ) {
-	if ( ! this.buffer[ y ] ) { return null ; }
-
-	var x , xmin , xmax , cell ,
-		indent = '' ;
-
-	for ( x = 0 , xmax = this.buffer[ y ].length - 1 ; x <= xmax ; x ++ ) {
-		cell = this.buffer[ y ][ x ] ;
-		if ( ! cell.filler ) {
-			if ( cell.char === '\t' || cell.char === ' ' ) {
-				indent += cell.char ;
-			}
-			else if ( cell.char === '\n' ) {
-				return null ;
-			}
-			else {
-				return indent ;
-			}
-		}
-	}
-
-	return null ;
 } ;
 
 

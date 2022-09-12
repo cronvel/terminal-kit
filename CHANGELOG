@@ -1,4 +1,10 @@
 
+v2.11.4
+-------
+
+TextBuffer fixes, and .removeTrailingSpaces()
+
+
 v2.11.3
 -------
 

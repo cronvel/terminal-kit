@@ -105,8 +105,8 @@ var dropDownMenu = new termkit.DropDownMenu( {
 	]
 } ) ;
 
-dropDownMenu.on( 'submit' , onSubmit ) ;
-//dropDownMenu.on( 'blinked' , onSubmit ) ;
+//dropDownMenu.on( 'submit' , onSubmit ) ;
+dropDownMenu.on( 'blinked' , onSubmit ) ;
 
 function onSubmit( buttonValue , action ) {
 	//console.error( 'Submitted: ' , value ) ;
