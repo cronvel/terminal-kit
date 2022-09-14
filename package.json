@@ -16,7 +16,7 @@
     "ndarray": "^1.0.19",
     "nextgen-events": "^1.5.3",
     "seventh": "^0.7.40",
-    "string-kit": "^0.17.3",
+    "string-kit": "^0.17.6",
     "tree-kit": "^0.7.4"
   },
   "scripts": {
