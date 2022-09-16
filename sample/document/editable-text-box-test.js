@@ -46,7 +46,7 @@ var document = term.createDocument( {
 //var placeHolder = 'var name = "Bob" ;\nconsole.log( `Hello ${name}! How are you?` ) ;\nconsole.log( `Hello $name}! How are you?` ) ;\n\n' ;
 //var placeHolder = 'fn( 1 ) ;\n\n' ;
 //var placeHolder = 're = /^some regexp (bob|bill) [a-zA-Z_-]+$/g ;\n' ;
-var placeHolder = 're = {\n  prop: "value" ,\n  key: 3\n} ;\n' ;
+var placeHolder = 're = {\n\tprop: "value" ,\n\tkey: 3\n} ;\n' ;
 //var placeHolder = '\n' ;
 
 try {
@@ -79,6 +79,7 @@ var textBox = new termkit.EditableTextBox( {
 	height: 20 ,
 	scrollable: true ,
 	vScrollBar: true ,
+	//tabWidth: 2 ,
 	//lineWrap: true ,
 	wordWrap: true ,
 	stateMachine: stateMachine
@@ -86,8 +87,10 @@ var textBox = new termkit.EditableTextBox( {
 
 document.giveFocusTo( textBox ) ;
 
+//setTimeout( () => textBox.setTabWidth( 8 ) , 1000 ) ;
+//setTimeout( () => textBox.setTabWidth( 2 ) , 2000 ) ;
+
 term.on( 'key' , function( key ) {
-	
 	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;

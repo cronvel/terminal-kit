@@ -1,4 +1,10 @@
 
+v2.11.6
+-------
+
+Add missing API method: TextBox#setTabWidth()
+
+
 v2.11.5
 -------
 

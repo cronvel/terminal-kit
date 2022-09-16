@@ -92,6 +92,7 @@ See [Element's key event](Element.md#ref.Element.event.key).
 	* scrollY `number` the initial vertical scroll value, default: 0
 	* extraScrolling `boolean` if unset (the default), it is possible to scroll down until both the content bottom and textBox bottom are on the same line,
 	  if set, it is possible to scroll down until the bottom of the content reaches the top of the textBox
+	* tabWidth `number` (default: 4) number of cells (=spaces) for the tab character
 	* lineWrap `boolean` when set, the text content is wrapped to the next line instead of being clipped by the textBox border
 	* wordWrap `boolean` like `lineWrap` but is word-aware, i.e. it doesn't split words
 	* firstLineRightShift `number` if set (default: 0) , the first-line of content is right-shifted from this amount of cells, may be useful for prompt,
