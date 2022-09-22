@@ -7298,6 +7298,7 @@ TextBuffer.prototype.moveToLeadingFullWidth = function() {
 TextBuffer.prototype.moveTo = function( x , y ) {
 	this.cx = x >= 0 ? x : 0 ;
 	this.cy = y >= 0 ? y : 0 ;
+	if ( this.forceInBound ) { this.moveInBound( true ) ; }
 	this.moveToLeadingFullWidth() ;
 } ;
 
@@ -7311,24 +7312,24 @@ TextBuffer.prototype.moveToLine = TextBuffer.prototype.moveToRow = function( y )
 
 TextBuffer.prototype.moveUp = function() {
 	this.cy = this.cy > 0 ? this.cy - 1 : 0 ;
-	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
+	this.moveToLeadingFullWidth() ;
 } ;
 
 
 
 TextBuffer.prototype.moveDown = function() {
 	this.cy ++ ;
-	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
+	this.moveToLeadingFullWidth() ;
 } ;
 
 
 
 TextBuffer.prototype.moveLeft = function() {
 	this.cx = this.cx > 0 ? this.cx - 1 : 0 ;
-	this.moveToLeadingFullWidth() ;
 	if ( this.forceInBound ) { this.moveInBound( true ) ; }
+	this.moveToLeadingFullWidth() ;
 } ;
 
 

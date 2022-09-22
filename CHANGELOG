@@ -1,4 +1,10 @@
 
+v2.11.7
+-------
+
+Fix TextBuffer#moveTo() not respecting 'forceInBound' property
+
+
 v2.11.6
 -------
 
