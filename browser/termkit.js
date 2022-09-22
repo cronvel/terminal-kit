@@ -12549,7 +12549,9 @@ userActions.clearColumnMenu = function() {
 
 const Element = require( './Element.js' ) ;
 const TextBox = require( './TextBox.js' ) ;
+
 const string = require( 'string-kit' ) ;
+const Promise = require( 'seventh' ) ;
 
 
 
@@ -12565,6 +12567,11 @@ function EditableTextBox( options ) {
 	this.onFocus = this.onFocus.bind( this ) ;
 	this.onDragEnd = this.onDragEnd.bind( this ) ;
 	this.onMiddleClick = this.onMiddleClick.bind( this ) ;
+
+	this.debounceTimeout = options.debounceTimeout ?? 100 ;
+	this.editionUpdateDebounced =
+		this.debounceTimeout ? Promise.debounceUpdate( { delay: this.debounceTimeout } , this.editionUpdate ) :
+		this.editionUpdate ;
 
 	if ( options.keyBindings ) { this.keyBindings = options.keyBindings ; }
 
@@ -12645,17 +12652,13 @@ EditableTextBox.prototype.insert = function( str , selectIt = false , internal =
 	let count = this.textBuffer.insert( str , this.textAttr ) ;
 
 	if ( ! internal ) {
-		if ( this.stateMachine ) {
-			this.textBuffer.runStateMachine() ;
-		}
-
 		if ( selectIt ) {
 			this.textBuffer.setSelectionRegion( {
 				xmin: x , ymin: y , xmax: this.textBuffer.cx , ymax: this.textBuffer.cy
 			} ) ;
 		}
 
-		this.autoScrollAndDraw() ;
+		this.editionUpdateDebounced() ;
 	}
 	else if ( selectIt ) {
 		this.textBuffer.setSelectionRegion( {
@@ -12686,10 +12689,7 @@ EditableTextBox.prototype.deleteSelection = function( internal = false ) {
 			this.textBuffer.cx = xmin ;
 			this.textBuffer.cy = ymin ;
 
-			if ( this.stateMachine ) {
-				this.textBuffer.runStateMachine() ;
-			}
-			this.autoScrollAndDraw() ;
+			this.editionUpdateDebounced() ;
 		}
 
 		this.emit( 'change' , {
@@ -12714,10 +12714,7 @@ EditableTextBox.prototype.deleteRegion = function( region , internal = false ) {
 			this.textBuffer.cx = xmin ;
 			this.textBuffer.cy = ymin ;
 
-			if ( this.stateMachine ) {
-				this.textBuffer.runStateMachine() ;
-			}
-			this.autoScrollAndDraw() ;
+			this.editionUpdateDebounced() ;
 		}
 
 		this.emit( 'change' , {
@@ -12745,6 +12742,21 @@ EditableTextBox.prototype.getValue = TextBox.prototype.getContent ;
 
 EditableTextBox.prototype.setValue = function( value , dontDraw ) {
 	return this.setContent( value , false , dontDraw ) ;
+} ;
+
+
+
+// Called when something was edited, usually requiring to run state machine, auto-scroll and draw.
+// Usually, editionUpdateDebounced is called instead.
+// Sync, but return a promise (needed for Promise.debounceUpdate())
+EditableTextBox.prototype.editionUpdate = function() {
+	if ( this.stateMachine ) {
+		this.textBuffer.runStateMachine() ;
+	}
+
+	this.autoScrollAndDraw() ;
+
+	return Promise.resolved ;
 } ;
 
 
@@ -12803,13 +12815,7 @@ EditableTextBox.prototype.onMiddleClick = function( data ) {
 
 	if ( this.document ) {
 		this.document.getSystemClipboard( 'primary' ).then( str => {
-			if ( str ) {
-				this.textBuffer.insert( str , this.textAttr ) ;
-				if ( this.stateMachine ) {
-					this.textBuffer.runStateMachine() ;
-				}
-				this.autoScrollAndDraw() ;
-			}
+			if ( str ) { this.insert( str ) ; }
 			//else { this.drawCursor() ; }
 		} )
 			.catch( () => undefined ) ;
@@ -12831,10 +12837,9 @@ userActions.character = function( key ) {
 		y = this.textBuffer.cy ;
 
 	var count = this.textBuffer.insert( key , this.textAttr ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+
+	this.editionUpdateDebounced() ;
+
 	this.emit( 'change' , {
 		type: 'insert' ,
 		insertedString: key ,
@@ -12853,10 +12858,8 @@ userActions.newLine = function() {
 
 	this.textBuffer.newLine() ;
 
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+	this.editionUpdateDebounced() ;
+
 	this.emit( 'change' , {
 		type: 'insert' ,
 		insertedString ,
@@ -12872,10 +12875,9 @@ userActions.tab = function() {
 		y = this.textBuffer.cy ;
 
 	this.textBuffer.insert( '\t' , this.textAttr ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+
+	this.editionUpdateDebounced() ;
+
 	this.emit( 'change' , {
 		type: 'insert' ,
 		insertedString: '\t' ,
@@ -12898,10 +12900,8 @@ userActions.delete = function() {
 	}
 
 	var deleted = this.textBuffer.delete( 1 , true ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+
+	this.editionUpdateDebounced() ;
 
 	if ( deleted && deleted.count ) {
 		this.emit( 'change' , {
@@ -12930,10 +12930,8 @@ userActions.backDelete = function() {
 	}
 
 	var deleted = this.textBuffer.backDelete( 1 , true ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+
+	this.editionUpdateDebounced() ;
 
 	if ( deleted && deleted.count ) {
 		this.emit( 'change' , {
@@ -12951,10 +12949,8 @@ userActions.deleteLine = function() {
 	var y = this.textBuffer.cy ;
 
 	var deleted = this.textBuffer.deleteLine( true ) ;
-	if ( this.stateMachine ) {
-		this.textBuffer.runStateMachine() ;
-	}
-	this.autoScrollAndDraw() ;
+
+	this.editionUpdateDebounced() ;
 
 	if ( deleted && deleted.count ) {
 		this.emit( 'change' , {
@@ -13308,7 +13304,8 @@ userActions.clearSystemClipboard = function() {
 	}
 } ;
 
-},{"./Element.js":25,"./TextBox.js":37,"string-kit":127}],25:[function(require,module,exports){
+
+},{"./Element.js":25,"./TextBox.js":37,"seventh":113,"string-kit":127}],25:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -39401,6 +39398,8 @@ Promise.promisifyAnyNodeApi = ( api , suffix , multiSuffix , filter ) => {
 
 "use strict" ;
 
+/* global AggregateError */
+
 
 
 const Promise = require( './seventh.js' ) ;
@@ -39423,32 +39422,27 @@ Promise.all = ( iterable ) => {
 	for ( value of iterable ) {
 		if ( settled ) { break ; }
 
-		index ++ ;
+		const promiseIndex = ++ index ;
 
-		// Create a scope to keep track of the promise's own index
-		( () => {
-			const promiseIndex = index ;
+		Promise.resolve( value )
+			.then(
+				value_ => {
+					if ( settled ) { return ; }
 
-			Promise.resolve( value )
-				.then(
-					value_ => {
-						if ( settled ) { return ; }
+					values[ promiseIndex ] = value_ ;
+					count ++ ;
 
-						values[ promiseIndex ] = value_ ;
-						count ++ ;
-
-						if ( count >= length ) {
-							settled = true ;
-							allPromise._resolveValue( values ) ;
-						}
-					} ,
-					error => {
-						if ( settled ) { return ; }
+					if ( count >= length ) {
 						settled = true ;
-						allPromise.reject( error ) ;
+						allPromise._resolveValue( values ) ;
 					}
-				) ;
-		} )() ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
+					settled = true ;
+					allPromise.reject( error ) ;
+				}
+			) ;
 	}
 
 	length = index + 1 ;
@@ -39510,6 +39504,56 @@ Promise._allArrayOne = ( value , index , runtime ) => {
 } ;
 
 
+
+Promise.allSettled = ( iterable ) => {
+	var index = -1 , settled = false ,
+		count = 0 , length = Infinity ,
+		value , values = [] ,
+		allPromise = new Promise() ;
+
+	for ( value of iterable ) {
+		if ( settled ) { break ; }
+
+		const promiseIndex = ++ index ;
+
+		Promise.resolve( value )
+			.then(
+				value_ => {
+					if ( settled ) { return ; }
+
+					values[ promiseIndex ] = { status: 'fulfilled' , value: value_ } ;
+					count ++ ;
+
+					if ( count >= length ) {
+						settled = true ;
+						allPromise._resolveValue( values ) ;
+					}
+				} ,
+				error => {
+					if ( settled ) { return ; }
+
+					values[ promiseIndex ] = { status: 'rejected' ,  reason: error } ;
+					count ++ ;
+
+					if ( count >= length ) {
+						settled = true ;
+						allPromise._resolveValue( values ) ;
+					}
+				}
+			) ;
+	}
+
+	length = index + 1 ;
+
+	if ( ! length ) {
+		allPromise._resolveValue( values ) ;
+	}
+
+	return allPromise ;
+} ;
+
+
+
 // Promise.all() with an iterator
 Promise.every =
 Promise.map = ( iterable , iterator ) => {
@@ -39521,36 +39565,31 @@ Promise.map = ( iterable , iterator ) => {
 	for ( value of iterable ) {
 		if ( settled ) { break ; }
 
-		index ++ ;
+		const promiseIndex = ++ index ;
 
-		// Create a scope to keep track of the promise's own index
-		( () => {
-			const promiseIndex = index ;
-
-			Promise.resolve( value )
-				.then( value_ => {
+		Promise.resolve( value )
+			.then( value_ => {
+				if ( settled ) { return ; }
+				return iterator( value_ , promiseIndex ) ;
+			} )
+			.then(
+				value_ => {
 					if ( settled ) { return ; }
-					return iterator( value_ , promiseIndex ) ;
-				} )
-				.then(
-					value_ => {
-						if ( settled ) { return ; }
 
-						values[ promiseIndex ] = value_ ;
-						count ++ ;
+					values[ promiseIndex ] = value_ ;
+					count ++ ;
 
-						if ( count >= length ) {
-							settled = true ;
-							allPromise._resolveValue( values ) ;
-						}
-					} ,
-					error => {
-						if ( settled ) { return ; }
+					if ( count >= length ) {
 						settled = true ;
-						allPromise.reject( error ) ;
+						allPromise._resolveValue( values ) ;
 					}
-				) ;
-		} )() ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
+					settled = true ;
+					allPromise.reject( error ) ;
+				}
+			) ;
 	}
 
 	length = index + 1 ;
@@ -39567,7 +39606,7 @@ Promise.map = ( iterable , iterator ) => {
 /*
 	It works symmetrically with Promise.all(), the resolve and reject logic are switched.
 	Therefore, it resolves to the first resolving promise OR reject if all promises are rejected
-	with, as a reason, the array of all promise rejection reasons.
+	with, as a reason an AggregateError of all promise rejection reasons.
 */
 Promise.any = ( iterable ) => {
 	var index = -1 , settled = false ,
@@ -39579,33 +39618,28 @@ Promise.any = ( iterable ) => {
 	for ( value of iterable ) {
 		if ( settled ) { break ; }
 
-		index ++ ;
+		const promiseIndex = ++ index ;
 
-		// Create a scope to keep track of the promise's own index
-		( () => {
-			const promiseIndex = index ;
+		Promise.resolve( value )
+			.then(
+				value_ => {
+					if ( settled ) { return ; }
 
-			Promise.resolve( value )
-				.then(
-					value_ => {
-						if ( settled ) { return ; }
+					settled = true ;
+					anyPromise._resolveValue( value_ ) ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
 
+					errors[ promiseIndex ] = error ;
+					count ++ ;
+
+					if ( count >= length ) {
 						settled = true ;
-						anyPromise._resolveValue( value_ ) ;
-					} ,
-					error => {
-						if ( settled ) { return ; }
-
-						errors[ promiseIndex ] = error ;
-						count ++ ;
-
-						if ( count >= length ) {
-							settled = true ;
-							anyPromise.reject( errors ) ;
-						}
+						anyPromise.reject( new AggregateError( errors ) , 'Promise.any(): All promises have rejected' ) ;
 					}
-				) ;
-		} )() ;
+				}
+			) ;
 	}
 
 	length = index + 1 ;
@@ -39630,43 +39664,38 @@ Promise.some = ( iterable , iterator ) => {
 	for ( value of iterable ) {
 		if ( settled ) { break ; }
 
-		index ++ ;
+		const promiseIndex = ++ index ;
 
-		// Create a scope to keep track of the promise's own index
-		( () => {
-			const promiseIndex = index ;
-
-			Promise.resolve( value )
-				.then( value_ => {
+		Promise.resolve( value )
+			.then( value_ => {
+				if ( settled ) { return ; }
+				return iterator( value_ , promiseIndex ) ;
+			} )
+			.then(
+				value_ => {
 					if ( settled ) { return ; }
-					return iterator( value_ , promiseIndex ) ;
-				} )
-				.then(
-					value_ => {
-						if ( settled ) { return ; }
 
+					settled = true ;
+					anyPromise._resolveValue( value_ ) ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
+
+					errors[ promiseIndex ] = error ;
+					count ++ ;
+
+					if ( count >= length ) {
 						settled = true ;
-						anyPromise._resolveValue( value_ ) ;
-					} ,
-					error => {
-						if ( settled ) { return ; }
-
-						errors[ promiseIndex ] = error ;
-						count ++ ;
-
-						if ( count >= length ) {
-							settled = true ;
-							anyPromise.reject( errors ) ;
-						}
+						anyPromise.reject( new AggregateError( errors , 'Promise.some(): All promises have rejected' ) ) ;
 					}
-				) ;
-		} )() ;
+				}
+			) ;
 	}
 
 	length = index + 1 ;
 
 	if ( ! length ) {
-		anyPromise.reject( new RangeError( 'Promise.any(): empty array' ) ) ;
+		anyPromise.reject( new RangeError( 'Promise.some(): empty array' ) ) ;
 	}
 
 	return anyPromise ;
@@ -39689,39 +39718,34 @@ Promise.filter = ( iterable , iterator ) => {
 	for ( value of iterable ) {
 		if ( settled ) { break ; }
 
-		index ++ ;
+		const promiseIndex = ++ index ;
 
-		// Create a scope to keep track of the promise's own index
-		( () => {
-			const promiseIndex = index ;
-
-			Promise.resolve( value )
-				.then( value_ => {
+		Promise.resolve( value )
+			.then( value_ => {
+				if ( settled ) { return ; }
+				values[ promiseIndex ] = value_ ;
+				return iterator( value_ , promiseIndex ) ;
+			} )
+			.then(
+				iteratorValue => {
 					if ( settled ) { return ; }
-					values[ promiseIndex ] = value_ ;
-					return iterator( value_ , promiseIndex ) ;
-				} )
-				.then(
-					iteratorValue => {
-						if ( settled ) { return ; }
 
-						count ++ ;
+					count ++ ;
 
-						if ( ! iteratorValue ) { values[ promiseIndex ] = HOLE ; }
+					if ( ! iteratorValue ) { values[ promiseIndex ] = HOLE ; }
 
-						if ( count >= length ) {
-							settled = true ;
-							values = values.filter( e => e !== HOLE ) ;
-							filterPromise._resolveValue( values ) ;
-						}
-					} ,
-					error => {
-						if ( settled ) { return ; }
+					if ( count >= length ) {
 						settled = true ;
-						filterPromise.reject( error ) ;
+						values = values.filter( e => e !== HOLE ) ;
+						filterPromise._resolveValue( values ) ;
 					}
-				) ;
-		} )() ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
+					settled = true ;
+					filterPromise.reject( error ) ;
+				}
+			) ;
 	}
 
 	length = index + 1 ;
@@ -39810,43 +39834,38 @@ Promise.reduce = ( iterable , iterator , accumulator ) => {
 Promise.mapObject = ( inputObject , iterator ) => {
 	var settled = false ,
 		count = 0 ,
-		i , key , keys = Object.keys( inputObject ) ,
+		keys = Object.keys( inputObject ) ,
 		length = keys.length ,
-		value , outputObject = {} ,
+		outputObject = {} ,
 		mapPromise = new Promise() ;
 
-	for ( i = 0 ; ! settled && i < length ; i ++ ) {
-		key = keys[ i ] ;
-		value = inputObject[ key ] ;
+	for ( let i = 0 ; ! settled && i < length ; i ++ ) {
+		const key = keys[ i ] ;
+		const value = inputObject[ key ] ;
 
-		// Create a scope to keep track of the promise's own key
-		( () => {
-			const promiseKey = key ;
-
-			Promise.resolve( value )
-				.then( value_ => {
+		Promise.resolve( value )
+			.then( value_ => {
+				if ( settled ) { return ; }
+				return iterator( value_ , key ) ;
+			} )
+			.then(
+				value_ => {
 					if ( settled ) { return ; }
-					return iterator( value_ , promiseKey ) ;
-				} )
-				.then(
-					value_ => {
-						if ( settled ) { return ; }
 
-						outputObject[ promiseKey ] = value_ ;
-						count ++ ;
+					outputObject[ key ] = value_ ;
+					count ++ ;
 
-						if ( count >= length ) {
-							settled = true ;
-							mapPromise._resolveValue( outputObject ) ;
-						}
-					} ,
-					error => {
-						if ( settled ) { return ; }
+					if ( count >= length ) {
 						settled = true ;
-						mapPromise.reject( error ) ;
+						mapPromise._resolveValue( outputObject ) ;
 					}
-				) ;
-		} )() ;
+				} ,
+				error => {
+					if ( settled ) { return ; }
+					settled = true ;
+					mapPromise.reject( error ) ;
+				}
+			) ;
 	}
 
 	if ( ! length ) {
@@ -39892,48 +39911,42 @@ Promise.concurrent = ( limit , iterable , iterator ) => {
 
 			if ( settled ) { break ; }
 
-			index ++ ;
+			const promiseIndex = ++ index ;
+			running ++ ;
+			//console.log( "Launch" , promiseIndex ) ;
 
-			// Create a scope to keep track of the promise's own index
-			( () => {
-				const promiseIndex = index ;
-
-				running ++ ;
-				//console.log( "Launch" , promiseIndex ) ;
-
-				Promise.resolve( value )
-					.then( value_ => {
+			Promise.resolve( value )
+				.then( value_ => {
+					if ( settled ) { return ; }
+					return iterator( value_ , promiseIndex ) ;
+				} )
+				.then(
+					value_ => {
+					//console.log( "Done" , promiseIndex , value_ ) ;
 						if ( settled ) { return ; }
-						return iterator( value_ , promiseIndex ) ;
-					} )
-					.then(
-						value_ => {
-						//console.log( "Done" , promiseIndex , value_ ) ;
-							if ( settled ) { return ; }
 
-							values[ promiseIndex ] = value_ ;
-							count ++ ;
-							running -- ;
+						values[ promiseIndex ] = value_ ;
+						count ++ ;
+						running -- ;
 
-							//console.log( "count/length" , count , length ) ;
-							if ( count >= length ) {
-								settled = true ;
-								concurrentPromise._resolveValue( values ) ;
-								return ;
-							}
-
-							if ( running < limit ) {
-								runBatch() ;
-								return ;
-							}
-						} ,
-						error => {
-							if ( settled ) { return ; }
+						//console.log( "count/length" , count , length ) ;
+						if ( count >= length ) {
 							settled = true ;
-							concurrentPromise.reject( error ) ;
+							concurrentPromise._resolveValue( values ) ;
+							return ;
 						}
-					) ;
-			} )() ;
+
+						if ( running < limit ) {
+							runBatch() ;
+							return ;
+						}
+					} ,
+					error => {
+						if ( settled ) { return ; }
+						settled = true ;
+						concurrentPromise.reject( error ) ;
+					}
+				) ;
 		}
 	} ;
 
@@ -40922,7 +40935,7 @@ Promise.debounce = ( asyncFn , thisBinding ) => {
 
 
 /*
-	Like .debouce(), but the last promise is returned for some extra time after it resolved
+	Like .debounce(), but subsequent call continue to return the last promise for some extra time after it resolved.
 */
 Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
 	var inProgress = null ;
@@ -40943,38 +40956,111 @@ Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
 
 
 /*
+	debounceUpdate( [options] , asyncFn , thisBinding ) => {
+
 	It does nothing if the decoratee is still in progress.
-	Instead, the decoratee is called when finished once and only once, if it was tried one or more time during its progress.
+	Instead, the decoratee is called again after finishing once and only once, if it was tried one or more time during its progress.
 	In case of multiple calls, the arguments of the last call will be used.
+
 	The use case is .update()/.refresh()/.redraw() functions.
+
+	If 'options' is given, it is an object, with:
+		* delay: `number` a delay before calling again the decoratee
+		* delayFn: async `function` called before calling again the decoratee
+		* waitFn: async `function` called before calling the decoratee (even the first try), use-case: Window.requestAnimationFrame()
 */
-Promise.debounceUpdate = ( asyncFn , thisBinding ) => {
-	var inProgress = null ;
-	var nextUpdateWith = null ;
-	var nextUpdatePromise = null ;
+Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
+	var inProgress = null ,
+		waitInProgress = null ,
+		currentUpdateWith = null ,
+		currentUpdatePromise = null ,
+		nextUpdateWith = null ,
+		nextUpdatePromise = null ,
+		delay = 0 ,
+		delayFn = null ,
+		waitFn = null ,
+		inWrapper = null ,
+		outWrapper = null ;
 
-	const outWrapper = () => {
-		var args , sharedPromise ;
 
-		inProgress = null ;
+	// Manage arguments
+	if ( typeof options === 'function' ) {
+		thisBinding = asyncFn ;
+		asyncFn = options ;
+	}
+	else {
+		if ( typeof options.delay === 'number' ) { delay = options.delay ; }
+		if ( typeof options.delayFn === 'function' ) { delayFn = options.delayFn ; }
+		if ( typeof options.waitFn === 'function' ) { waitFn = options.waitFn ; }
+	}
+
+
+	const nextUpdate = () => {
+		inProgress = currentUpdatePromise = null ;
 
 		if ( nextUpdateWith ) {
-			args = nextUpdateWith ;
+			let callArgs = nextUpdateWith ;
 			nextUpdateWith = null ;
-			sharedPromise = nextUpdatePromise ;
+			let sharedPromise = nextUpdatePromise ;
 			nextUpdatePromise = null ;
 
-			// Call the asyncFn again
-			inProgress = asyncFn.call( ... args ) ;
-
+			inProgress = inWrapper( callArgs ) ;
 			// Forward the result to the pending promise
 			Promise.propagate( inProgress , sharedPromise ) ;
+		}
+	} ;
 
-			// BTW, trigger again the outWrapper
-			Promise.finally( inProgress , outWrapper ) ;
+
+	// Build outWrapper
+	if ( delayFn ) {
+		outWrapper = () => delayFn().then( nextUpdate ) ;
+	}
+	else if ( delay ) {
+		outWrapper = () => setTimeout( nextUpdate , delay ) ;
+	}
+	else {
+		outWrapper = nextUpdate ;
+	}
+
+
+	if ( waitFn ) {
+		inWrapper = ( callArgs ) => {
+			inProgress = new Promise() ;
+			currentUpdateWith = callArgs ;
+			waitInProgress = waitFn() ;
+
+			Promise.finally( waitInProgress , () => {
+				waitInProgress = null ;
+				currentUpdatePromise = asyncFn.call( ... currentUpdateWith ) ;
+				Promise.finally( currentUpdatePromise , outWrapper ) ;
+				Promise.propagate( currentUpdatePromise , inProgress ) ;
+			} ) ;
 
 			return inProgress ;
-		}
+		} ;
+
+		return function( ... args ) {
+			var localThis = thisBinding || this ;
+
+			if ( waitInProgress ) {
+				currentUpdateWith = [ localThis , ... args ] ;
+				return inProgress ;
+			}
+
+			if ( currentUpdatePromise ) {
+				if ( ! nextUpdatePromise ) { nextUpdatePromise = new Promise() ; }
+				nextUpdateWith = [ localThis , ... args ] ;
+				return nextUpdatePromise ;
+			}
+
+			return inWrapper( [ localThis , ... args ] ) ;
+		} ;
+	}
+
+	inWrapper = ( callArgs ) => {
+		inProgress = asyncFn.call( ... callArgs ) ;
+		Promise.finally( inProgress , outWrapper ) ;
+		return inProgress ;
 	} ;
 
 	return function( ... args ) {
@@ -40986,10 +41072,9 @@ Promise.debounceUpdate = ( asyncFn , thisBinding ) => {
 			return nextUpdatePromise ;
 		}
 
-		inProgress = asyncFn.call( localThis , ... args ) ;
-		Promise.finally( inProgress , outWrapper ) ;
-		return inProgress ;
+		return inWrapper( [ localThis , ... args ] ) ;
 	} ;
+
 } ;
 
 
@@ -41147,6 +41232,7 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 
 
 
+// The call reject with a timeout error if it takes too much time
 Promise.timeout = ( timeout , asyncFn , thisBinding ) => {
 	return function( ... args ) {
 		var promise = asyncFn.call( thisBinding || this , ... args ) ;
@@ -41169,81 +41255,6 @@ Promise.variableTimeout = ( asyncFn , thisBinding ) => {
 	} ;
 
 } ;
-
-
-
-/*
-Promise.retry = ( retryCount , retryTimeout , timeoutMultiplier , asyncFn , thisBinding ) => {
-
-	return ( ... args ) => {
-
-		var lastError ,
-			count = retryCount ,
-			timeout = retryTimeout ,
-			globalPromise = new Promise() ;
-
-		const callAgain = () => {
-			if ( count -- < 0 ) {
-				globalPromise.reject( lastError ) ;
-				return ;
-			}
-
-			var promise = asyncFn.call( thisBinding , ... args ) ;
-
-			promise.then(
-				//( value ) => globalPromise.resolve( value ) ,
-				( value ) => {
-					globalPromise.resolve( value ) ;
-				} ,
-				( error ) => {
-					lastError = error ;
-					setTimeout( callAgain , timeout ) ;
-					timeout *= timeoutMultiplier ;
-				}
-			) ;
-		} ;
-
-		callAgain() ;
-
-		return globalPromise ;
-	} ;
-} ;
-
-
-
-Promise.variableRetry = ( asyncFn , thisBinding ) => {
-
-	return ( retryCount , retryTimeout , timeoutMultiplier , ... args ) => {
-
-		var lastError ,
-			count = retryCount ,
-			timeout = retryTimeout ,
-			globalPromise = new Promise() ;
-
-		const callAgain = () => {
-			if ( count -- < 0 ) {
-				globalPromise.reject( lastError ) ;
-				return ;
-			}
-
-			var promise = asyncFn.call( thisBinding , ... args ) ;
-
-			promise.then(
-				( value ) => globalPromise.resolve( value ) ,
-				( error ) => {
-					lastError = error ;
-					setTimeout( callAgain , timeout ) ;
-					timeout *= timeoutMultiplier ;
-				}
-			) ;
-		} ;
-
-		callAgain() ;
-
-		return globalPromise ;
-	} ;
-} ;
-*/
 
 
 },{"./seventh.js":113}],111:[function(require,module,exports){
