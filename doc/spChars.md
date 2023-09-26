@@ -60,5 +60,5 @@ Available animations:
 
 <a name="ref.spChars.animation.custom"></a>
 Everywhere an animation is required, a custom animation could be provided, it is an `array` of ( `array` of `string` **OR** `string` ).
-The `array` of `array` of `string` is used when the animation require multiple lines of text.
+The `array` of `array` of `string` is used when the animation requires multiple lines of text.
 
