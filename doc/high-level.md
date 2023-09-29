@@ -551,25 +551,27 @@ It produces:
 
 The same, with **Promise**:
 ```js
-var term = require( 'terminal-kit' ).terminal ;
+function func() {
+	var term = require( 'terminal-kit' ).terminal ;
 
-var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
+	var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
 
-var autoComplete = [
-	'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
-	'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
-	'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' ,
-	'Harry Truman' , 'Franklin Roosevelt'
-] ;
+	var autoComplete = [
+		'Barack Obama' , 'George W. Bush' , 'Bill Clinton' , 'George Bush' ,
+		'Ronald W. Reagan' , 'Jimmy Carter' , 'Gerald Ford' , 'Richard Nixon' ,
+		'Lyndon Johnson' , 'John F. Kennedy' , 'Dwight Eisenhower' ,
+		'Harry Truman' , 'Franklin Roosevelt'
+	] ;
 
-term( 'Please enter your name: ' ) ;
+	term( 'Please enter your name: ' ) ;
 
-var input = await term.inputField(
-	{ history: history , autoComplete: autoComplete , autoCompleteMenu: true }
-).promise ;
+	var input = await term.inputField(
+		{ history: history , autoComplete: autoComplete , autoCompleteMenu: true }
+	).promise ;
 
-term.green( "\nYour name is '%s'\n" , input ) ;
-process.exit() ;
+	term.green( "\nYour name is '%s'\n" , input ) ;
+	process.exit() ;
+}
 ```
 
 If we need our own auto-completer, we might take advantage of the built-in static method
