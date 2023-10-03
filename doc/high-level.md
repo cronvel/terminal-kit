@@ -551,7 +551,7 @@ It produces:
 
 The same, with **Promise**:
 ```js
-function func() {
+async function func() {
 	var term = require( 'terminal-kit' ).terminal ;
 
 	var history = [ 'John' , 'Jack' , 'Joey' , 'Billy' , 'Bob' ] ;
