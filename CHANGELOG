@@ -1,4 +1,10 @@
 
+v3.0.1
+------
+
+Piping to a file should provide a virtually infinite width and height (should partly fix #240)
+
+
 v3.0.0
 ------
 

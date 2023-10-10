@@ -1,0 +1,62 @@
+# +++ .gitignore
+# Specific #
+############
+
+*.local.*
+*.local
+*.log
+*.html.gz
+*.css.gz
+*.js.gz
+.spellcast
+build
+log
+_build
+_templates
+_static
+emoji-width.map.json
+emoji-width.ranges.json
+
+# gitignore / Node.gitignore #
+##############################
+lib-cov
+lcov.info
+npm-debug.log.*
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+build
+.grunt
+__issue.js
+__issues
+package-lock.json
+
+node_modules
+
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+
+
+# --- .gitignore
+test
+log
+sample
+wfm.json

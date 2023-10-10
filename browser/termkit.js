@@ -4956,6 +4956,10 @@ function onResize() {
 		this.width = this.stdout.columns ;
 		this.height = this.stdout.rows ;
 	}
+	else if ( ! this.isTTY ) {
+		// If it's not a TTY, we are probably piping to a file, in that case the size is virtually infinite
+		this.width = this.height = Infinity ;
+	}
 
 	this.emit( 'resize' , this.width , this.height ) ;
 }
@@ -39398,8 +39402,6 @@ Promise.promisifyAnyNodeApi = ( api , suffix , multiSuffix , filter ) => {
 
 "use strict" ;
 
-/* global AggregateError */
-
 
 
 const Promise = require( './seventh.js' ) ;
@@ -39414,7 +39416,7 @@ function noop() {}
 
 
 Promise.all = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39506,7 +39508,7 @@ Promise._allArrayOne = ( value , index , runtime ) => {
 
 
 Promise.allSettled = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39557,7 +39559,7 @@ Promise.allSettled = ( iterable ) => {
 // Promise.all() with an iterator
 Promise.every =
 Promise.map = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39609,7 +39611,7 @@ Promise.map = ( iterable , iterator ) => {
 	with, as a reason an AggregateError of all promise rejection reasons.
 */
 Promise.any = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value ,
 		errors = [] ,
@@ -39655,7 +39657,7 @@ Promise.any = ( iterable ) => {
 
 // Like Promise.any() but with an iterator
 Promise.some = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value ,
 		errors = [] ,
@@ -39710,7 +39712,7 @@ Promise.some = ( iterable , iterator ) => {
 	Any rejection reject the whole promise.
 */
 Promise.filter = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		filterPromise = new Promise() ;
@@ -39768,7 +39770,7 @@ Promise.filter = ( iterable , iterator ) => {
 // Force a function statement because we are using arguments.length, so we can support accumulator equals to undefined
 Promise.foreach =
 Promise.forEach = function( iterable , iterator , accumulator ) {
-	var index = -1 ,
+	var index = - 1 ,
 		isReduce = arguments.length >= 3 ,
 		it = iterable[Symbol.iterator]() ,
 		forEachPromise = new Promise() ,
@@ -39879,7 +39881,7 @@ Promise.mapObject = ( inputObject , iterator ) => {
 
 // Like map, but with a concurrency limit
 Promise.concurrent = ( limit , iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		running = 0 ,
 		count = 0 , length = Infinity ,
 		value , done = false ,
@@ -40073,6 +40075,7 @@ module.exports = Promise ;
 
 Promise.Native = NativePromise ;
 Promise.warnUnhandledRejection = true ;
+Promise.nextTick = nextTick ;
 
 
 
@@ -40229,6 +40232,18 @@ Promise.prototype.resolveTimeout = Promise.prototype.fulfillTimeout = function( 
 
 Promise.prototype.rejectTimeout = function( time , error ) {
 	setTimeout( () => this.reject( error ) , time ) ;
+} ;
+
+
+
+Promise.prototype.resolveNextTick = Promise.prototype.fulfillNextTick = function( result ) {
+	nextTick( () => this.resolve( result ) ) ;
+} ;
+
+
+
+Promise.prototype.rejectNextTick = function( error ) {
+	nextTick( () => this.reject( error ) ) ;
 } ;
 
 
@@ -40785,6 +40800,7 @@ if ( process.browser ) {
 
 
 const Promise = require( './seventh.js' ) ;
+const noop = () => undefined ;
 
 
 
@@ -40861,13 +40877,24 @@ Promise.promisify = ( nodeAsyncFn , thisBinding ) => {
 
 
 /*
-	Pass a function that will be called every time the decoratee return something.
+	Intercept each decoratee resolve/reject.
 */
-Promise.returnValueInterceptor = ( interceptor , asyncFn , thisBinding ) => {
+Promise.interceptor = ( asyncFn , interceptor , errorInterceptor , thisBinding ) => {
+	if ( typeof errorInterceptor !== 'function' ) {
+		thisBinding = errorInterceptor ;
+		errorInterceptor = noop ;
+	}
+
 	return function( ... args ) {
-		var returnVal = asyncFn.call( thisBinding || this , ... args ) ;
-		interceptor( returnVal ) ;
-		return returnVal ;
+		var localThis = thisBinding || this ,
+			maybePromise = asyncFn.call( localThis , ... args ) ;
+
+		Promise.resolve( maybePromise ).then(
+			value => interceptor.call( localThis , value ) ,
+			error => errorInterceptor.call( localThis , error )
+		) ;
+
+		return maybePromise ;
 	} ;
 } ;
 
@@ -40877,16 +40904,34 @@ Promise.returnValueInterceptor = ( interceptor , asyncFn , thisBinding ) => {
 	Run only once, return always the same promise.
 */
 Promise.once = ( asyncFn , thisBinding ) => {
-	var triggered = false ;
-	var result ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = {
+			triggered: false ,
+			result: undefined
+		} ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
 
 	return function( ... args ) {
-		if ( ! triggered ) {
-			triggered = true ;
-			result = asyncFn.call( thisBinding || this , ... args ) ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
+
+		if ( ! instance.triggered ) {
+			instance.triggered = true ;
+			instance.result = asyncFn.call( localThis , ... args ) ;
 		}
 
-		return result ;
+		return instance.result ;
 	} ;
 } ;
 
@@ -40896,16 +40941,31 @@ Promise.once = ( asyncFn , thisBinding ) => {
 	The decoratee execution does not overlap, multiple calls are serialized.
 */
 Promise.serialize = ( asyncFn , thisBinding ) => {
-	var lastPromise = new Promise.resolve() ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { lastPromise: Promise.resolve() } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
 
 	return function( ... args ) {
-		var promise = new Promise() ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ,
+			promise = new Promise() ;
 
-		lastPromise.finally( () => {
-			Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
+		instance.lastPromise.finally( () => {
+			Promise.propagate( asyncFn.call( localThis , ... args ) , promise ) ;
 		} ) ;
 
-		lastPromise = promise ;
+		instance.lastPromise = promise ;
 
 		return promise ;
 	} ;
@@ -40914,20 +40974,32 @@ Promise.serialize = ( asyncFn , thisBinding ) => {
 
 
 /*
-	It does nothing if the decoratee is still in progress, but return the promise of the action in progress.
+	It does nothing if the decoratee is still in progress, but it returns the promise of the action in progress.
 */
 Promise.debounce = ( asyncFn , thisBinding ) => {
-	var inProgress = null ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
-	const outWrapper = () => {
-		inProgress = null ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { inProgress: null } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
 	} ;
 
 	return function( ... args ) {
-		if ( inProgress ) { return inProgress ; }
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		inProgress = asyncFn.call( thisBinding || this , ... args ) ;
-		Promise.finally( inProgress , outWrapper ) ;
+		if ( instance.inProgress ) { return instance.inProgress ; }
+
+		let inProgress = instance.inProgress = asyncFn.call( localThis , ... args ) ;
+		Promise.finally( inProgress , () => instance.inProgress = null ) ;
 		return inProgress ;
 	} ;
 } ;
@@ -40938,18 +41010,131 @@ Promise.debounce = ( asyncFn , thisBinding ) => {
 	Like .debounce(), but subsequent call continue to return the last promise for some extra time after it resolved.
 */
 Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
-	var inProgress = null ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
-	const outWrapper = () => {
-		setTimeout( () => inProgress = null , delay ) ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { inProgress: null } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
 	} ;
 
 	return function( ... args ) {
-		if ( inProgress ) { return inProgress ; }
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		inProgress = asyncFn.call( thisBinding || this , ... args ) ;
-		Promise.finally( inProgress , outWrapper ) ;
+		if ( instance.inProgress ) { return instance.inProgress ; }
+
+		let inProgress = instance.inProgress = asyncFn.call( localThis , ... args ) ;
+		Promise.finally( inProgress , () => setTimeout( () => instance.inProgress = null , delay ) ) ;
 		return inProgress ;
+	} ;
+} ;
+
+
+
+/*
+	debounceNextTick( [asyncFn|syncFn] , thisBinding ) => {
+
+	It does nothing until the next tick.
+	The decoratee is called only once with the arguments of the last decorator call.
+	The function argument can be sync or async.
+
+	The use case is can be some niche case of .update()/.refresh()/.redraw() functions.
+*/
+Promise.debounceNextTick = ( asyncFn , thisBinding ) => {
+	var inWrapper = null ,
+		outWrapper = null ,
+		waitFn = null ,
+		functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = {
+			inProgress: null ,
+			waitingNextTick: false ,
+			currentUpdateWith: null ,
+			currentUpdatePromise: null ,
+			nextUpdateWith: null ,
+			nextUpdatePromise: null
+		} ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
+
+
+	const nextUpdate = function() {
+		var instance = getInstance( this ) ;
+		instance.inProgress = instance.currentUpdatePromise = null ;
+
+		if ( instance.nextUpdateWith ) {
+			let args = instance.nextUpdateWith ;
+			instance.nextUpdateWith = null ;
+			let sharedPromise = instance.nextUpdatePromise ;
+			instance.nextUpdatePromise = null ;
+
+			instance.inProgress = inWrapper.call( this , args ) ;
+			// Forward the result to the pending promise
+			Promise.propagate( instance.inProgress , sharedPromise ) ;
+		}
+	} ;
+
+
+	inWrapper = function( args ) {
+		var instance = getInstance( this ) ;
+
+		instance.inProgress = new Promise() ;
+		instance.currentUpdateWith = args ;
+		instance.waitingNextTick = true ;
+
+		Promise.nextTick( () => {
+			instance.waitingNextTick = false ;
+			let maybePromise = asyncFn.call( this , ... instance.currentUpdateWith ) ;
+
+			if ( Promise.isThenable( maybePromise ) ) {
+				instance.currentUpdatePromise = maybePromise ;
+				Promise.finally( maybePromise , nextUpdate.bind( this ) ) ;
+				Promise.propagate( maybePromise , instance.inProgress ) ;
+			}
+			else {
+				// the function was synchronous
+				instance.currentUpdatePromise = null ;
+				instance.inProgress.resolve( maybePromise ) ;
+				nextUpdate.call( this ) ;
+			}
+		} ) ;
+
+		return instance.inProgress ;
+	} ;
+
+	return function( ... args ) {
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
+
+		if ( instance.waitingNextTick ) {
+			instance.currentUpdateWith = args ;
+			return instance.inProgress ;
+		}
+
+		if ( instance.currentUpdatePromise ) {
+			if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+			instance.nextUpdateWith = args ;
+			return instance.nextUpdatePromise ;
+		}
+
+		return inWrapper.call( localThis , args ) ;
 	} ;
 } ;
 
@@ -40970,18 +41155,13 @@ Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
 		* waitFn: async `function` called before calling the decoratee (even the first try), use-case: Window.requestAnimationFrame()
 */
 Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
-	var inProgress = null ,
-		waitInProgress = null ,
-		currentUpdateWith = null ,
-		currentUpdatePromise = null ,
-		nextUpdateWith = null ,
-		nextUpdatePromise = null ,
+	var inWrapper = null ,
+		outWrapper = null ,
 		delay = 0 ,
 		delayFn = null ,
 		waitFn = null ,
-		inWrapper = null ,
-		outWrapper = null ;
-
+		functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
 	// Manage arguments
 	if ( typeof options === 'function' ) {
@@ -40991,32 +41171,59 @@ Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
 	else {
 		if ( typeof options.delay === 'number' ) { delay = options.delay ; }
 		if ( typeof options.delayFn === 'function' ) { delayFn = options.delayFn ; }
-		if ( typeof options.waitFn === 'function' ) { waitFn = options.waitFn ; }
+
+		if ( options.waitNextTick ) { waitFn = Promise.resolveNextTick ; }
+		else if ( typeof options.waitFn === 'function' ) { waitFn = options.waitFn ; }
 	}
 
 
-	const nextUpdate = () => {
-		inProgress = currentUpdatePromise = null ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
 
-		if ( nextUpdateWith ) {
-			let callArgs = nextUpdateWith ;
-			nextUpdateWith = null ;
-			let sharedPromise = nextUpdatePromise ;
-			nextUpdatePromise = null ;
+		instance = {
+			inProgress: null ,
+			waitInProgress: null ,
+			currentUpdateWith: null ,
+			currentUpdatePromise: null ,
+			nextUpdateWith: null ,
+			nextUpdatePromise: null
+		} ;
 
-			inProgress = inWrapper( callArgs ) ;
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
+
+
+	const nextUpdate = function() {
+		var instance = getInstance( this ) ;
+		instance.inProgress = instance.currentUpdatePromise = null ;
+
+		if ( instance.nextUpdateWith ) {
+			let args = instance.nextUpdateWith ;
+			instance.nextUpdateWith = null ;
+			let sharedPromise = instance.nextUpdatePromise ;
+			instance.nextUpdatePromise = null ;
+
+			instance.inProgress = inWrapper.call( this , args ) ;
 			// Forward the result to the pending promise
-			Promise.propagate( inProgress , sharedPromise ) ;
+			Promise.propagate( instance.inProgress , sharedPromise ) ;
 		}
 	} ;
 
 
 	// Build outWrapper
 	if ( delayFn ) {
-		outWrapper = () => delayFn().then( nextUpdate ) ;
+		outWrapper = function() {
+			delayFn().then( nextUpdate.bind( this ) ) ;
+		} ;
 	}
 	else if ( delay ) {
-		outWrapper = () => setTimeout( nextUpdate , delay ) ;
+		outWrapper = function() {
+			setTimeout( nextUpdate.bind( this ) , delay ) ;
+		} ;
 	}
 	else {
 		outWrapper = nextUpdate ;
@@ -41024,57 +41231,65 @@ Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
 
 
 	if ( waitFn ) {
-		inWrapper = ( callArgs ) => {
-			inProgress = new Promise() ;
-			currentUpdateWith = callArgs ;
-			waitInProgress = waitFn() ;
+		inWrapper = function( args ) {
+			var instance = getInstance( this ) ;
 
-			Promise.finally( waitInProgress , () => {
-				waitInProgress = null ;
-				currentUpdatePromise = asyncFn.call( ... currentUpdateWith ) ;
-				Promise.finally( currentUpdatePromise , outWrapper ) ;
-				Promise.propagate( currentUpdatePromise , inProgress ) ;
+			instance.inProgress = new Promise() ;
+			instance.currentUpdateWith = args ;
+			instance.waitInProgress = waitFn() ;
+
+			Promise.finally( instance.waitInProgress , () => {
+				instance.waitInProgress = null ;
+				instance.currentUpdatePromise = asyncFn.call( this , ... instance.currentUpdateWith ) ;
+				Promise.finally( instance.currentUpdatePromise , outWrapper.bind( this ) ) ;
+				Promise.propagate( instance.currentUpdatePromise , instance.inProgress ) ;
 			} ) ;
 
-			return inProgress ;
+			return instance.inProgress ;
 		} ;
 
 		return function( ... args ) {
-			var localThis = thisBinding || this ;
+			var localThis = thisBinding || this ,
+				instance = getInstance( localThis ) ;
 
-			if ( waitInProgress ) {
-				currentUpdateWith = [ localThis , ... args ] ;
-				return inProgress ;
+			if ( instance.waitInProgress ) {
+				instance.currentUpdateWith = args ;
+				return instance.inProgress ;
 			}
 
-			if ( currentUpdatePromise ) {
-				if ( ! nextUpdatePromise ) { nextUpdatePromise = new Promise() ; }
-				nextUpdateWith = [ localThis , ... args ] ;
-				return nextUpdatePromise ;
+			if ( instance.currentUpdatePromise ) {
+				if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+				instance.nextUpdateWith = args ;
+				return instance.nextUpdatePromise ;
 			}
 
-			return inWrapper( [ localThis , ... args ] ) ;
+			return inWrapper.call( localThis , args ) ;
 		} ;
 	}
 
-	inWrapper = ( callArgs ) => {
-		inProgress = asyncFn.call( ... callArgs ) ;
-		Promise.finally( inProgress , outWrapper ) ;
-		return inProgress ;
+
+	// Variant without a waitFn
+
+	inWrapper = function( args ) {
+		var instance = getInstance( this ) ;
+
+		instance.inProgress = asyncFn.call( this , ... args ) ;
+		Promise.finally( instance.inProgress , outWrapper.bind( this ) ) ;
+		return instance.inProgress ;
 	} ;
 
 	return function( ... args ) {
-		var localThis = thisBinding || this ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		if ( inProgress ) {
-			if ( ! nextUpdatePromise ) { nextUpdatePromise = new Promise() ; }
-			nextUpdateWith = [ localThis , ... args ] ;
-			return nextUpdatePromise ;
+		if ( instance.inProgress ) {
+			if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+			instance.nextUpdateWith = args ;
+			return instance.nextUpdatePromise ;
 		}
 
-		return inWrapper( [ localThis , ... args ] ) ;
+		return inWrapper.call( localThis , args ) ;
 	} ;
-
 } ;
 
 
@@ -41137,7 +41352,7 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 
 		if ( resourceData.nextFullSyncWith ) {
 			if ( fullSyncParams.delay && resourceData.lastFullSyncTime && ( delta = now - resourceData.lastFullSyncTime - fullSyncParams.delay ) < 0 ) {
-				resourceData.inProgress = Promise.resolveTimeout( -delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
+				resourceData.inProgress = Promise.resolveTimeout( - delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
 				resourceData.inProgress.finally( () => outWrapper( resourceData , 0 ) ) ;
 				return resourceData.nextFullSyncPromise ;
 			}
@@ -41211,7 +41426,7 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 		}
 
 		if ( ! resourceData.inProgress && ! noDelay && fullSyncParams.delay && resourceData.lastFullSyncTime && ( delta = new Date() - resourceData.lastFullSyncTime - fullSyncParams.delay ) < 0 ) {
-			resourceData.inProgress = Promise.resolveTimeout( -delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
+			resourceData.inProgress = Promise.resolveTimeout( - delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
 			Promise.finally( resourceData.inProgress , () => outWrapper( resourceData , 0 ) ) ;
 		}
 
@@ -41235,12 +41450,11 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 // The call reject with a timeout error if it takes too much time
 Promise.timeout = ( timeout , asyncFn , thisBinding ) => {
 	return function( ... args ) {
-		var promise = asyncFn.call( thisBinding || this , ... args ) ;
-		// Careful: not my promise, so cannot retrieve its status
+		var promise = new Promise() ;
+		Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
 		setTimeout( () => promise.reject( new Error( 'Timeout' ) ) , timeout ) ;
 		return promise ;
 	} ;
-
 } ;
 
 
@@ -41248,12 +41462,11 @@ Promise.timeout = ( timeout , asyncFn , thisBinding ) => {
 // Like .timeout(), but here the timeout value is not passed at creation, but as the first arg of each call
 Promise.variableTimeout = ( asyncFn , thisBinding ) => {
 	return function( timeout , ... args ) {
-		var promise = asyncFn.call( thisBinding || this , ... args ) ;
-		// Careful: not my promise, so cannot retrieve its status
+		var promise = new Promise() ;
+		Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
 		setTimeout( () => promise.reject( new Error( 'Timeout' ) ) , timeout ) ;
 		return promise ;
 	} ;
-
 } ;
 
 
@@ -42359,12 +42572,27 @@ camel.toCamelCase = function( str , preserveUpperCase = false , initialUpperCase
 
 
 
-camel.camelCaseToSeparated = function( str , separator = ' ' ) {
+camel.camelCaseToSeparated = function( str , separator = ' ' , acronym = true ) {
 	if ( ! str || typeof str !== 'string' ) { return '' ; }
 
-	return str.replace( /^([A-Z])|([A-Z])/g , ( match , firstLetter , letter ) => {
-		if ( firstLetter ) { return firstLetter.toLowerCase() ; }
-		return separator + letter.toLowerCase() ;
+	if ( ! acronym ) {
+		return str.replace( /^([A-Z])|([A-Z])/g , ( match , firstLetter , letter ) => {
+			if ( firstLetter ) { return firstLetter.toLowerCase() ; }
+			return separator + letter.toLowerCase() ;
+		} ) ;
+	}
+
+	// (^)? and (^)? does not work, so we have to use (?:(^)|)) and (?:($)|)) to capture end or not
+	return str.replace( /(?:(^)|)([A-Z]+)(?:($)|(?=[a-z]))/g , ( match , isStart , letters , isEnd ) => {
+		isStart = isStart === '' ;
+		isEnd = isEnd === '' ;
+
+		var prefix = isStart ? '' : separator ;
+
+		return letters.length === 1 ? prefix + letters.toLowerCase() :
+			isEnd ? prefix + letters :
+			letters.length === 2 ? prefix + letters[ 0 ].toLowerCase() + separator + letters[ 1 ].toLowerCase() :
+			prefix + letters.slice( 0 , -1 ) + separator + letters.slice( -1 ).toLowerCase() ;
 	} ) ;
 } ;
 
@@ -42372,7 +42600,7 @@ camel.camelCaseToSeparated = function( str , separator = ' ' ) {
 
 // Transform camel case to alphanum separated by minus
 camel.camelCaseToDash =
-camel.camelCaseToDashed = ( str ) => camel.camelCaseToSeparated( str , '-' ) ;
+camel.camelCaseToDashed = ( str ) => camel.camelCaseToSeparated( str , '-' , false ) ;
 
 
 },{}],118:[function(require,module,exports){
@@ -42553,9 +42781,9 @@ const StringNumber = require( './StringNumber.js' ) ;
 	%X		hexadecimal: convert a string into hex charcode, force pair of symbols (e.g. 'f' -> '0f')
 	%z		base64
 	%Z		base64url
-	%O		object (like inspect, but with ultra minimal options)
 	%I		call string-kit's inspect()
 	%Y		call string-kit's inspect(), but do not inspect non-enumerable
+	%O		object (like inspect, but with ultra minimal options)
 	%E		call string-kit's inspectError()
 	%J		JSON.stringify()
 	%D		drop
@@ -43462,7 +43690,7 @@ modes.Y.noSanitize = true ;
 
 
 // Even more minimalist inspect
-const O_OPTIONS = { minimal: true , noIndex: true } ;
+const O_OPTIONS = { minimal: true , bulletIndex: true , noMarkup: true } ;
 modes.O = ( arg , modeArg , options ) => genericInspectMode( arg , modeArg , options , O_OPTIONS ) ;
 modes.O.noSanitize = true ;
 
@@ -44099,12 +44327,14 @@ const TRIVIAL_CONSTRUCTOR = new Set( [ Object , Array ] ) ;
 		* noDescriptor: do not display descriptor information
 		* noArrayProperty: do not display array properties
 		* noIndex: do not display array indexes
+		* bulletIndex: do not display array indexes, instead display a bullet: *
 		* noType: do not display type and constructor
 		* noTypeButConstructor: do not display type, display non-trivial constructor (not Object or Array, but all others)
 		* enumOnly: only display enumerable properties
 		* funcDetails: display function's details
 		* proto: display object's prototype
 		* sort: sort the keys
+		* noMarkup: don't add Javascript/JSON markup: {}[],"
 		* minimal: imply noFunc: true, noDescriptor: true, noType: true, noArrayProperty: true, enumOnly: true, proto: false and funcDetails: false.
 		  Display a minimal JSON-like output
 		* minimalPlusConstructor: like minimal, but output non-trivial constructor
@@ -44168,14 +44398,17 @@ exports.inspect = inspect ;
 
 function inspect_( runtime , options , variable ) {
 	var i , funcName , length , proto , propertyList , isTrivialConstructor , constructor , keyIsProperty ,
-		type , pre , indent , isArray , isFunc , specialObject ,
-		str = '' , key = '' , descriptorStr = '' , descriptor , nextAncestors ;
+		type , pre , isArray , isFunc , specialObject ,
+		str = '' , key = '' , descriptorStr = '' , indent = '' ,
+		descriptor , nextAncestors ;
 
 	// Prepare things (indentation, key, descriptor, ... )
 
 	type = typeof variable ;
 
-	indent = ( options.tab ?? options.style.tab ).repeat( runtime.depth ) ;
+	if ( runtime.depth ) {
+		indent = ( options.tab ?? options.style.tab ).repeat( options.noMarkup ? runtime.depth - 1 : runtime.depth ) ;
+	}
 
 	if ( type === 'function' && options.noFunc ) { return '' ; }
 
@@ -44183,25 +44416,33 @@ function inspect_( runtime , options , variable ) {
 		if ( runtime.descriptor ) {
 			descriptorStr = [] ;
 
-			if ( ! runtime.descriptor.configurable ) { descriptorStr.push( '-conf' ) ; }
-			if ( ! runtime.descriptor.enumerable ) { descriptorStr.push( '-enum' ) ; }
+			if ( runtime.descriptor.error ) {
+				descriptorStr = '[' + runtime.descriptor.error + ']' ;
+			}
+			else {
+				if ( ! runtime.descriptor.configurable ) { descriptorStr.push( '-conf' ) ; }
+				if ( ! runtime.descriptor.enumerable ) { descriptorStr.push( '-enum' ) ; }
 
-			// Already displayed by runtime.forceType
-			//if ( runtime.descriptor.get || runtime.descriptor.set ) { descriptorStr.push( 'getter/setter' ) ; } else
-			if ( ! runtime.descriptor.writable ) { descriptorStr.push( '-w' ) ; }
+				// Already displayed by runtime.forceType
+				//if ( runtime.descriptor.get || runtime.descriptor.set ) { descriptorStr.push( 'getter/setter' ) ; } else
+				if ( ! runtime.descriptor.writable ) { descriptorStr.push( '-w' ) ; }
 
-			//if ( descriptorStr.length ) { descriptorStr = '(' + descriptorStr.join( ' ' ) + ')' ; }
-			if ( descriptorStr.length ) { descriptorStr = descriptorStr.join( ' ' ) ; }
-			else { descriptorStr = '' ; }
+				//if ( descriptorStr.length ) { descriptorStr = '(' + descriptorStr.join( ' ' ) + ')' ; }
+				if ( descriptorStr.length ) { descriptorStr = descriptorStr.join( ' ' ) ; }
+				else { descriptorStr = '' ; }
+			}
 		}
 
 		if ( runtime.keyIsProperty ) {
-			if ( keyNeedingQuotes( runtime.key ) ) {
+			if ( ! options.noMarkup && keyNeedingQuotes( runtime.key ) ) {
 				key = '"' + options.style.key( runtime.key ) + '": ' ;
 			}
 			else {
 				key = options.style.key( runtime.key ) + ': ' ;
 			}
+		}
+		else if ( options.bulletIndex ) {
+			key = ( typeof options.bulletIndex === 'string' ? options.bulletIndex : '*' ) + ' ' ;
 		}
 		else if ( ! options.noIndex ) {
 			key = options.style.index( runtime.key ) ;
@@ -44237,12 +44478,12 @@ function inspect_( runtime , options , variable ) {
 	}
 	else if ( type === 'string' ) {
 		if ( variable.length > options.maxLength ) {
-			str += pre + '"' + options.style.string( escape.control( variable.slice( 0 , options.maxLength - 1 ) ) ) + '…"' +
+			str += pre + ( options.noMarkup ? '' : '"' ) + options.style.string( escape.control( variable.slice( 0 , options.maxLength - 1 ) ) ) + '…' + ( options.noMarkup ? '' : '"' ) +
 				( options.noType || options.noTypeButConstructor ? '' : ' ' + options.style.type( 'string' ) + options.style.length( '(' + variable.length + ' - TRUNCATED)' ) ) +
 				descriptorStr + options.style.newline ;
 		}
 		else {
-			str += pre + '"' + options.style.string( escape.control( variable ) ) + '"' +
+			str += pre + ( options.noMarkup ? '' : '"' ) + options.style.string( escape.control( variable ) ) + ( options.noMarkup ? '' : '"' ) +
 				( options.noType || options.noTypeButConstructor ? '' : ' ' + options.style.type( 'string' ) + options.style.length( '(' + variable.length + ')' ) ) +
 				descriptorStr + options.style.newline ;
 		}
@@ -44329,7 +44570,7 @@ function inspect_( runtime , options , variable ) {
 			str += options.style.newline ;
 		}
 		else if ( ! propertyList.length && ! options.proto ) {
-			str += ( isArray ? '[]' : '{}' ) + options.style.newline ;
+			str += ( options.noMarkup ? '' : isArray ? '[]' : '{}' ) + options.style.newline ;
 		}
 		else if ( runtime.depth >= options.depth ) {
 			str += options.style.limit( '[depth limit]' ) + options.style.newline ;
@@ -44338,7 +44579,14 @@ function inspect_( runtime , options , variable ) {
 			str += options.style.limit( '[circular]' ) + options.style.newline ;
 		}
 		else {
-			str += ( isArray ? '[' : '{' ) + options.style.newline ;
+			/*
+			str +=
+				options.noMarkup ? ( isArray && options.noIndex && ! runtime.keyIsProperty ? '' : options.style.newline ) :
+				( isArray ? '[' : '{' ) + options.style.newline ;
+			//*/
+			//*
+			str += ( options.noMarkup ? '' : isArray ? '[' : '{'  ) + options.style.newline ;
+			//*/
 
 			// Do not use .concat() here, it doesn't works as expected with arrays...
 			nextAncestors = runtime.ancestors.slice() ;
@@ -44369,7 +44617,10 @@ function inspect_( runtime , options , variable ) {
 				else {
 					try {
 						descriptor = Object.getOwnPropertyDescriptor( variable , propertyList[ i ] ) ;
-						if ( ! descriptor.enumerable && options.enumOnly ) { continue ; }
+						// Note: descriptor can be undefined, this happens when the object is a Proxy with a bad implementation:
+						// it reports that key (Object.keys()) but doesn't give the descriptor for it.
+
+						if ( descriptor && ! descriptor.enumerable && options.enumOnly ) { continue ; }
 						keyIsProperty = ! isArray || ! descriptor.enumerable || isNaN( propertyList[ i ] ) ;
 
 						if ( ! options.noDescriptor && descriptor && ( descriptor.get || descriptor.set ) ) {
@@ -44393,7 +44644,7 @@ function inspect_( runtime , options , variable ) {
 									ancestors: nextAncestors ,
 									key: propertyList[ i ] ,
 									keyIsProperty: keyIsProperty ,
-									descriptor: options.noDescriptor ? undefined : descriptor
+									descriptor: options.noDescriptor ? undefined : descriptor || { error: "Bad Proxy Descriptor" }
 								} ,
 								options ,
 								variable[ propertyList[ i ] ]
@@ -44431,8 +44682,7 @@ function inspect_( runtime , options , variable ) {
 				) ;
 			}
 
-			str += indent + ( isArray ? ']' : '}' ) ;
-			str += options.style.newline ;
+			str += options.noMarkup ? '' : indent + ( isArray ? ']' : '}' ) + options.style.newline ;
 		}
 	}
 
@@ -46010,7 +46260,7 @@ function diff( left , right , options ) {
 		keyPath = options.path + options.pathSeparator + key ;
 		//console.log( 'L keyPath:' , keyPath ) ;
 
-		if ( ! Object.prototype.hasOwnProperty.call( right , key ) ) {
+		if ( ! Object.hasOwn( right , key ) ) {
 			diffObject[ keyPath ] = { path: keyPath , message: 'does not exist in right-hand side' } ;
 			continue ;
 		}
@@ -46074,7 +46324,7 @@ function diff( left , right , options ) {
 		keyPath = options.path + options.pathSeparator + key ;
 		//console.log( 'R keyPath:' , keyPath ) ;
 
-		if ( ! Object.prototype.hasOwnProperty.call( left , key ) ) {
+		if ( ! Object.hasOwn( left , key ) ) {
 			diffObject[ keyPath ] = { path: keyPath , message: 'does not exist in left-hand side' } ;
 			continue ;
 		}
@@ -46140,7 +46390,7 @@ function toPathArray( path ) {
 
 	if ( ! path ) { return EMPTY_PATH ; }
 	if ( typeof path === 'string' ) {
-		return path[ path.length - 1 ] === '.' ? path.slice( 0 , -1 ).split( '.' ) : path.split( '.' ) ;
+		return path[ path.length - 1 ] === '.' ? path.slice( 0 , - 1 ).split( '.' ) : path.split( '.' ) ;
 	}
 
 	throw new TypeError( '[tree.dotPath]: the path argument should be a string or an array' ) ;
@@ -46267,7 +46517,7 @@ dotPath.dec = ( object , path , value ) => {
 	var pointer = pave( object , pathArray ) ;
 
 	if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] -- ; }
-	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = -1 ; }
+	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = - 1 ; }
 
 	return value ;
 } ;
@@ -46328,7 +46578,7 @@ dotPath.delete = ( object , path ) => {
 
 	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
-	var pointer = walk( object , pathArray , -1 ) ;
+	var pointer = walk( object , pathArray , - 1 ) ;
 
 	if ( ! pointer || typeof pointer !== 'object' ) { return false ; }
 
@@ -46555,10 +46805,7 @@ module.exports = extend ;
 
 
 function extendOne( runtime , options , target , source , mask ) {
-	var j , jmax , path ,
-		sourceKeys , sourceKey , sourceValue , sourceValueIsObject , sourceValueProto , sourceDescriptor ,
-		targetKey , targetPointer , targetValue , targetValueIsObject ,
-		indexOfSource = -1 ;
+	var sourceKeys , sourceKey ;
 
 	// Max depth check
 	if ( options.maxDepth && runtime.depth > options.maxDepth ) {
@@ -46571,158 +46818,192 @@ function extendOne( runtime , options , target , source , mask ) {
 		runtime.references.targets.push( target ) ;
 	}
 
-	if ( options.own ) {
+	// 'unflat' mode computing
+	if ( options.unflat && runtime.depth === 0 ) {
+		for ( sourceKey in source ) {
+			runtime.unflatKeys = sourceKey.split( options.unflat ) ;
+			runtime.unflatIndex = 0 ;
+			runtime.unflatFullKey = sourceKey ;
+			extendOneKV( runtime , options , target , source , runtime.unflatKeys[ runtime.unflatIndex ] , mask ) ;
+		}
+
+		delete runtime.unflatKeys ;
+		delete runtime.unflatIndex ;
+		delete runtime.unflatFullKey ;
+	}
+	else if ( options.own ) {
 		if ( options.nonEnum ) { sourceKeys = Object.getOwnPropertyNames( source ) ; }
 		else { sourceKeys = Object.keys( source ) ; }
+
+		for ( sourceKey of sourceKeys ) {
+			extendOneKV( runtime , options , target , source , sourceKey , mask ) ;
+		}
 	}
-	else { sourceKeys = source ; }
+	else {
+		for ( sourceKey in source ) {
+			extendOneKV( runtime , options , target , source , sourceKey , mask ) ;
+		}
+	}
+}
 
-	for ( sourceKey in sourceKeys ) {
-		if ( options.own ) { sourceKey = sourceKeys[ sourceKey ] ; }
 
-		// OMG, this DEPRECATED __proto__ shit is still alive and can be used to hack anything ><
-		if ( sourceKey === '__proto__' ) { continue ; }
 
-		// If descriptor is on, get it now
-		if ( options.descriptor ) {
-			sourceDescriptor = Object.getOwnPropertyDescriptor( source , sourceKey ) ;
-			sourceValue = sourceDescriptor.value ;
+function extendOneKV( runtime , options , target , source , sourceKey , mask ) {
+	// OMG, this DEPRECATED __proto__ shit is still alive and can be used to hack anything ><
+	if ( sourceKey === '__proto__' ) { return ; }
+
+	let sourceValue , sourceDescriptor , sourceValueProto ;
+
+	if ( runtime.unflatKeys ) {
+		if ( runtime.unflatIndex < runtime.unflatKeys.length - 1 ) {
+			sourceValue = {} ;
 		}
 		else {
-			// We have to trigger an eventual getter only once
-			sourceValue = source[ sourceKey ] ;
+			sourceValue = source[ runtime.unflatFullKey ] ;
 		}
+	}
+	else if ( options.descriptor ) {
+		// If descriptor is on, get it now
+		sourceDescriptor = Object.getOwnPropertyDescriptor( source , sourceKey ) ;
+		sourceValue = sourceDescriptor.value ;
+	}
+	else {
+		// We have to trigger an eventual getter only once
+		sourceValue = source[ sourceKey ] ;
+	}
 
-		targetPointer = target ;
-		targetKey = runtime.prefix + sourceKey ;
+	let targetKey = runtime.prefix + sourceKey ;
 
-		// Do not copy if property is a function and we don't want them
-		if ( options.nofunc && typeof sourceValue === 'function' ) { continue ; }
+	// Do not copy if property is a function and we don't want them
+	if ( options.nofunc && typeof sourceValue === 'function' ) { return ; }
 
-		// 'unflat' mode computing
-		if ( options.unflat && runtime.depth === 0 ) {
-			path = sourceKey.split( options.unflat ) ;
-			jmax = path.length - 1 ;
+	// Again, trigger an eventual getter only once
+	let targetValue = target[ targetKey ] ;
+	let targetValueIsObject = targetValue && ( typeof targetValue === 'object' || typeof targetValue === 'function' ) ;
+	let sourceValueIsObject = sourceValue && ( typeof sourceValue === 'object' || typeof sourceValue === 'function' ) ;
 
-			if ( jmax ) {
-				for ( j = 0 ; j < jmax ; j ++ ) {
-					if ( ! targetPointer[ path[ j ] ] ||
-						( typeof targetPointer[ path[ j ] ] !== 'object' &&
-							typeof targetPointer[ path[ j ] ] !== 'function' ) ) {
-						targetPointer[ path[ j ] ] = {} ;
-					}
+	if (
+		( options.deep || runtime.unflatKeys )
+		&& sourceValue
+		&& ( typeof sourceValue === 'object' || ( options.deepFunc && typeof sourceValue === 'function' ) )
+		&& ( ! options.descriptor || ! sourceDescriptor.get )
+		// not a condition we just cache sourceValueProto now... ok it's trashy ><
+		&& ( ( sourceValueProto = Object.getPrototypeOf( sourceValue ) ) || true )
+		&& ( ! ( options.deep instanceof Set ) || options.deep.has( sourceValueProto ) )
+		&& ( ! options.immutables || ! options.immutables.has( sourceValueProto ) )
+		&& ( ! options.preserve || targetValueIsObject )
+		&& ( ! mask || targetValueIsObject )
+	) {
+		let indexOfSource = options.circular ? runtime.references.sources.indexOf( sourceValue ) : - 1 ;
 
-					targetPointer = targetPointer[ path[ j ] ] ;
+		if ( options.flat ) {
+			// No circular references reconnection when in 'flat' mode
+			if ( indexOfSource >= 0 ) { return ; }
+
+			extendOne(
+				{
+					depth: runtime.depth + 1 ,
+					prefix: runtime.prefix + sourceKey + options.flat ,
+					references: runtime.references
+				} ,
+				options , target , sourceValue , mask
+			) ;
+		}
+		else {
+			if ( indexOfSource >= 0 ) {
+				// Circular references reconnection...
+				targetValue = runtime.references.targets[ indexOfSource ] ;
+
+				if ( options.descriptor ) {
+					Object.defineProperty( target , targetKey , {
+						value: targetValue ,
+						enumerable: sourceDescriptor.enumerable ,
+						writable: sourceDescriptor.writable ,
+						configurable: sourceDescriptor.configurable
+					} ) ;
+				}
+				else {
+					target[ targetKey ] = targetValue ;
 				}
 
-				targetKey = runtime.prefix + path[ jmax ] ;
+				return ;
 			}
-		}
 
-		// Again, trigger an eventual getter only once
-		targetValue = targetPointer[ targetKey ] ;
-		targetValueIsObject = targetValue && ( typeof targetValue === 'object' || typeof targetValue === 'function' ) ;
-		sourceValueIsObject = sourceValue && ( typeof sourceValue === 'object' || typeof sourceValue === 'function' ) ;
+			if ( ! targetValueIsObject || ! Object.hasOwn( target , targetKey ) ) {
+				if ( Array.isArray( sourceValue ) ) { targetValue = [] ; }
+				else if ( options.proto ) { targetValue = Object.create( sourceValueProto ) ; }
+				else if ( options.inherit ) { targetValue = Object.create( sourceValue ) ; }
+				else { targetValue = {} ; }
 
+				if ( options.descriptor ) {
+					Object.defineProperty( target , targetKey , {
+						value: targetValue ,
+						enumerable: sourceDescriptor.enumerable ,
+						writable: sourceDescriptor.writable ,
+						configurable: sourceDescriptor.configurable
+					} ) ;
+				}
+				else {
+					target[ targetKey ] = targetValue ;
+				}
+			}
+			else if ( options.proto && Object.getPrototypeOf( targetValue ) !== sourceValueProto ) {
+				Object.setPrototypeOf( targetValue , sourceValueProto ) ;
+			}
+			else if ( options.inherit && Object.getPrototypeOf( targetValue ) !== sourceValue ) {
+				Object.setPrototypeOf( targetValue , sourceValue ) ;
+			}
 
-		if ( options.deep	// eslint-disable-line no-constant-condition
-			&& sourceValue
-			&& ( typeof sourceValue === 'object' || ( options.deepFunc && typeof sourceValue === 'function' ) )
-			&& ( ! options.descriptor || ! sourceDescriptor.get )
-			// not a condition we just cache sourceValueProto now... ok it's trashy ><
-			&& ( ( sourceValueProto = Object.getPrototypeOf( sourceValue ) ) || true )
-			&& ( ! ( options.deep instanceof Set ) || options.deep.has( sourceValueProto ) )
-			&& ( ! options.immutables || ! options.immutables.has( sourceValueProto ) )
-			&& ( ! options.preserve || targetValueIsObject )
-			&& ( ! mask || targetValueIsObject )
-		) {
 			if ( options.circular ) {
-				indexOfSource = runtime.references.sources.indexOf( sourceValue ) ;
+				runtime.references.sources.push( sourceValue ) ;
+				runtime.references.targets.push( targetValue ) ;
 			}
 
-			if ( options.flat ) {
-				// No circular references reconnection when in 'flat' mode
-				if ( indexOfSource >= 0 ) { continue ; }
+			if ( runtime.unflatKeys && runtime.unflatIndex < runtime.unflatKeys.length - 1 ) {
+				// Finish unflatting this property
+				let nextSourceKey = runtime.unflatKeys[ runtime.unflatIndex + 1 ] ;
 
-				extendOne(
-					{ depth: runtime.depth + 1 , prefix: runtime.prefix + sourceKey + options.flat , references: runtime.references } ,
-					options , targetPointer , sourceValue , mask
+				extendOneKV(
+					{
+						depth: runtime.depth ,	// keep the same depth
+						unflatKeys: runtime.unflatKeys ,
+						unflatIndex: runtime.unflatIndex + 1 ,
+						unflatFullKey: runtime.unflatFullKey ,
+						prefix: '' ,
+						references: runtime.references
+					} ,
+					options , targetValue , source , nextSourceKey , mask
 				) ;
 			}
 			else {
-				if ( indexOfSource >= 0 ) {
-					// Circular references reconnection...
-					targetValue = runtime.references.targets[ indexOfSource ] ;
-
-					if ( options.descriptor ) {
-						Object.defineProperty( targetPointer , targetKey , {
-							value: targetValue ,
-							enumerable: sourceDescriptor.enumerable ,
-							writable: sourceDescriptor.writable ,
-							configurable: sourceDescriptor.configurable
-						} ) ;
-					}
-					else {
-						targetPointer[ targetKey ] = targetValue ;
-					}
-
-					continue ;
-				}
-
-				if ( ! targetValueIsObject || ! Object.prototype.hasOwnProperty.call( targetPointer , targetKey ) ) {
-					if ( Array.isArray( sourceValue ) ) { targetValue = [] ; }
-					else if ( options.proto ) { targetValue = Object.create( sourceValueProto ) ; }	// jshint ignore:line
-					else if ( options.inherit ) { targetValue = Object.create( sourceValue ) ; }
-					else { targetValue = {} ; }
-
-					if ( options.descriptor ) {
-						Object.defineProperty( targetPointer , targetKey , {
-							value: targetValue ,
-							enumerable: sourceDescriptor.enumerable ,
-							writable: sourceDescriptor.writable ,
-							configurable: sourceDescriptor.configurable
-						} ) ;
-					}
-					else {
-						targetPointer[ targetKey ] = targetValue ;
-					}
-				}
-				else if ( options.proto && Object.getPrototypeOf( targetValue ) !== sourceValueProto ) {
-					Object.setPrototypeOf( targetValue , sourceValueProto ) ;
-				}
-				else if ( options.inherit && Object.getPrototypeOf( targetValue ) !== sourceValue ) {
-					Object.setPrototypeOf( targetValue , sourceValue ) ;
-				}
-
-				if ( options.circular ) {
-					runtime.references.sources.push( sourceValue ) ;
-					runtime.references.targets.push( targetValue ) ;
-				}
-
 				// Recursively extends sub-object
 				extendOne(
-					{ depth: runtime.depth + 1 , prefix: '' , references: runtime.references } ,
+					{
+						depth: runtime.depth + 1 ,
+						prefix: '' ,
+						references: runtime.references
+					} ,
 					options , targetValue , sourceValue , mask
 				) ;
 			}
 		}
-		else if ( mask && ( targetValue === undefined || targetValueIsObject || sourceValueIsObject ) ) {
-			// Do not create new value, and so do not delete source's properties that were not moved.
-			// We also do not overwrite object with non-object, and we don't overwrite non-object with object (preserve hierarchy)
-			continue ;
-		}
-		else if ( options.preserve && targetValue !== undefined ) {
-			// Do not overwrite, and so do not delete source's properties that were not moved
-			continue ;
-		}
-		else if ( ! options.inherit ) {
-			if ( options.descriptor ) { Object.defineProperty( targetPointer , targetKey , sourceDescriptor ) ; }
-			else { targetPointer[ targetKey ] = targetValue = sourceValue ; }
-		}
-
-		// Delete owned property of the source object
-		if ( options.move ) { delete source[ sourceKey ] ; }
 	}
+	else if ( mask && ( targetValue === undefined || targetValueIsObject || sourceValueIsObject ) ) {
+		// Do not create new value, and so do not delete source's properties that were not moved.
+		// We also do not overwrite object with non-object, and we don't overwrite non-object with object (preserve hierarchy)
+		return ;
+	}
+	else if ( options.preserve && targetValue !== undefined ) {
+		// Do not overwrite, and so do not delete source's properties that were not moved
+		return ;
+	}
+	else if ( ! options.inherit ) {
+		if ( options.descriptor ) { Object.defineProperty( target , targetKey , sourceDescriptor ) ; }
+		else { target[ targetKey ] = targetValue = sourceValue ; }
+	}
+
+	// Delete owned property of the source object
+	if ( options.move ) { delete source[ sourceKey ] ; }
 }
 
 
@@ -46971,7 +47252,7 @@ masklib.Mask.prototype.applyTo = function applyTo( input , context , contextOver
 		if ( maskValue !== null && typeof maskValue === 'object' ) {
 			//console.log( 'sub' ) ;
 
-			if ( Object.prototype.hasOwnProperty.call( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
+			if ( Object.hasOwn( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
 				//console.log( 'recursive call' ) ;
 
 				if ( input.key instanceof masklib.Mask ) {
@@ -46988,7 +47269,7 @@ masklib.Mask.prototype.applyTo = function applyTo( input , context , contextOver
 			}
 		}
 		// If mask exists, add the key
-		else if ( Object.prototype.hasOwnProperty.call( input , key ) ) {
+		else if ( Object.hasOwn( input , key ) ) {
 			//console.log( 'property found' ) ;
 
 			if ( maskValue !== undefined && typeof context.options.leaf === 'function' ) {
@@ -47133,7 +47414,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 		if ( maskValue !== null && typeof maskValue === 'object' ) {
 			//console.log( 'sub' ) ;
 
-			if ( Object.prototype.hasOwnProperty.call( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
+			if ( Object.hasOwn( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
 				//console.log( 'recursive call' ) ;
 
 				if ( input.key instanceof masklib.Mask ) {
@@ -47145,7 +47426,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 			}
 		}
 		// If mask exists, remove the key
-		else if ( Object.prototype.hasOwnProperty.call( input , key ) ) {
+		else if ( Object.hasOwn( input , key ) ) {
 			delete output[ key ] ;
 		}
 	}
@@ -47372,7 +47653,7 @@ treePath.op = function( type , object , path , value ) {
 			return pointer[ key ] ;
 		case 'dec' :
 			if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] -- ; }
-			else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = -1 ; }
+			else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = - 1 ; }
 			return pointer[ key ] ;
 		case 'append' :
 			if ( ! pointer[ key ] ) { pointer[ key ] = [ value ] ; }
