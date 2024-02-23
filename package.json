@@ -16,8 +16,8 @@
     "ndarray": "^1.0.19",
     "nextgen-events": "^1.5.3",
     "seventh": "^0.9.2",
-    "string-kit": "^0.17.10",
-    "tree-kit": "^0.8.1"
+    "string-kit": "^0.18.1",
+    "tree-kit": "^0.8.7"
   },
   "scripts": {
     "test": "tea-time -R dot"
