@@ -20,6 +20,8 @@
 	* [new Element()](#ref.Element.new)
 
 * Methods:
+	* [.destroy()](#ref.Element.destroy)
+	* [.destroyNoRedraw()](#ref.Element.destroyNoRedraw)
 	* [.updateZ() / .updateZIndex()](#ref.Element.updateZ)
 	* [.topZ()](#ref.Element.topZ)
 	* [.bottomZ()](#ref.Element.bottomZ)
@@ -85,6 +87,23 @@ TODOC / unstable.
 
 While *Element* is a super-class that is never directly instantiated, the derived class's constructor always call the *Element* constructor with the `options` object.
 This contains all `options` that are common across all/many widgets.
+
+
+
+<a name="ref.Element.destroy"></a>
+### .destroy()
+
+It destroys the *element* immediately, and triggers all draw/redraw necessary to remove it from the screen now.
+
+
+
+<a name="ref.Element.destroyNoRedraw"></a>
+### .destroyNoRedraw()
+
+It destroys the *element* immediately, but nothing is redrawn, so the *element* is still visible until the next redraw.
+
+It is usually done when there is a lot of *elements* to remove at once, to avoid redrawing the screen for each one, which would dramatically slow down the app.
+Instead of `.destroy()`, it's best to use `.destroyNoRedraw()` each *element*, and then to call `document.draw()` once done.
 
 
 

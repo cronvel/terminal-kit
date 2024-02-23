@@ -92,7 +92,8 @@ function exploreSubObject( document , stack ) {
 	if ( stack.length > 1 ) {
 		menuItems.push( {
 			content: '..' ,
-			internalRole: 'parent'
+			internalRole: 'parent' ,
+			hotkey: [ 'BACKSPACE' ]
 		} ) ;
 	}
 
@@ -142,7 +143,7 @@ function exploreSubObject( document , stack ) {
 
 
 	function onPageInit( page ) {
-		for ( let text of textFields ) { text.destroy() ; }
+		for ( let text of textFields ) { text.destroyNoRedraw() ; }
 		textFields.length = 0 ;
 
 		for ( let button of columnMenu.buttons ) {
@@ -205,11 +206,14 @@ function exploreSubObject( document , stack ) {
 				x: button.outputX + button.outputWidth + 2 ,
 				y: button.outputY ,
 				attr: textAttr ,
-				content: textContent
+				content: textContent ,
+				noDraw: true
 			} ) ;
 
 			textFields.push( text ) ;
 		}
+
+		document.draw() ;
 	}
 
 
@@ -232,10 +236,11 @@ function exploreSubObject( document , stack ) {
 
 
 	function close() {
-		for ( let text of textFields ) { text.destroy() ; }
+		for ( let text of textFields ) { text.destroyNoRedraw() ; }
 		textFields.length = 0 ;
-		columnMenu.destroy() ;
-		breadCrumbText.destroy() ;
+		columnMenu.destroyNoRedraw() ;
+		breadCrumbText.destroyNoRedraw() ;
+		document.draw() ;
 		promise.resolve() ;
 	}
 

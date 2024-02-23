@@ -1,4 +1,12 @@
 
+v3.0.2
+------
+
+New Document's Element API: .destroyNoRedraw()
+ColumnMenu (and BaseMenu): improved key navigation
+Dependencies upgraded
+
+
 v3.0.1
 ------
 
