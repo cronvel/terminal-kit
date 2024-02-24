@@ -64,7 +64,7 @@ async function run() {
 
 	var stack = [ { object , key: '' } ] ;
 	
-	var document = term.createDocument( { palette: new termkit.Palette() } ) ;
+	document = term.createDocument( { palette: new termkit.Palette() } ) ;
 
 	for ( ;; ) {
 		await exploreSubObject( document , stack ) ;

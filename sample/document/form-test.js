@@ -29,13 +29,8 @@
 
 
 
-/* jshint unused:false */
-
-
-
-//console.error( "\n\n\n\n\n\n\n\n" ) ;
-var termkit = require( '../../lib/termkit.js' ) ;
-var term = termkit.terminal ;
+const termkit = require( '../..' ) ;
+const term = termkit.terminal ;
 
 
 
@@ -129,8 +124,7 @@ var form = new termkit.Form( {
 
 form.on( 'submit' , onSubmit ) ;
 
-function onSubmit( value )
-{
+function onSubmit( value ) {
 	//console.error( 'Submitted: ' , value ) ;
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , 24 , 'Submitted: %J\n' , value ) ;
@@ -142,8 +136,7 @@ function onSubmit( value )
 document.giveFocusTo( form ) ;
 
 term.on( 'key' , function( key ) {
-	switch( key )
-	{
+	switch( key ) {
 		case 'CTRL_C' :
 			term.grabInput( false ) ;
 			term.hideCursor( false ) ;
@@ -153,6 +146,4 @@ term.on( 'key' , function( key ) {
 			break ;
 	}
 } ) ;
-
-
 
