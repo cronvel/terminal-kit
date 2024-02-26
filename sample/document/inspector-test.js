@@ -37,6 +37,7 @@
 
 
 const fs = require( 'fs' ) ;
+const path = require( 'path' ) ;
 
 const string = require( 'string-kit' ) ;
 const Promise = require( 'seventh' ) ;
@@ -67,7 +68,8 @@ async function run() {
 		inspectedObject: object ,
 		x: 0 ,
 		y: 0 ,
-		width: document.outputWidth - 1 ,
+		width: 30 ,
+		//width: document.outputWidth - 1 ,
 		height: document.outputHeight - 1 ,
 	} ) ;
 

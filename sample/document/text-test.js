@@ -40,7 +40,7 @@ var document = term.createDocument( {
 	palette: new termkit.Palette()
 } ) ;
 
-var text = new termkit.Text( {
+var text1 = new termkit.Text( {
 	parent: document ,
 	//content: '^[fg:*royal-blue]A simple text' ,
 	//content: ['^[fg:*royal-blue]A simple text','2nd line'] ,
@@ -50,8 +50,44 @@ var text = new termkit.Text( {
 	contentHasMarkup: 'legacyAnsi' ,
 	attr: { bgColor: 'magenta' } ,
 	x: 10 ,
-	y: 10 ,
+	y: 5 ,
 	//width: 5
+} ) ;
+
+var text2 = new termkit.Text( {
+	parent: document ,
+	content: [ 'some text ' , 'some text' ] ,
+	//contentHasMarkup: true ,
+	//contentHasMarkup: 'ansi' ,
+	contentHasMarkup: 'legacyAnsi' ,
+	attr: { bgColor: 'magenta' } ,
+	x: 10 ,
+	y: 10 ,
+	width: 5
+} ) ;
+
+var button1 = new termkit.Button( {
+	parent: document ,
+	content: [ 'some text' , 'some text' ] ,
+	//contentHasMarkup: true ,
+	//contentHasMarkup: 'ansi' ,
+	contentHasMarkup: 'legacyAnsi' ,
+	attr: { bgColor: 'magenta' } ,
+	x: 10 ,
+	y: 15 ,
+	width: 5
+} ) ;
+
+var button2 = new termkit.Button( {
+	parent: document ,
+	content: [ 'some text2' , 'some text2' ] ,
+	//contentHasMarkup: true ,
+	//contentHasMarkup: 'ansi' ,
+	contentHasMarkup: 'legacyAnsi' ,
+	attr: { bgColor: 'magenta' } ,
+	x: 10 ,
+	y: 20 ,
+	width: 5
 } ) ;
 
 /*
