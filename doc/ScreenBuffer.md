@@ -264,6 +264,7 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 		* y
 		* width
 		* height
+	* clipChar: `string` (optional) a single char used when the text will be clipped, e.g.: '…' 
 	* direction `string` (optional) the direction where the cursor move after each char, one of:
 		* 'right' (default)
 		* 'left'
