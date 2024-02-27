@@ -54,6 +54,13 @@ var text1 = new termkit.Text( {
 	//width: 5
 } ) ;
 
+var text1b = new termkit.Text( {
+	parent: document ,
+	content: 'lol' ,
+	x: 1 ,
+	y: 5 ,
+} ) ;
+
 var text2 = new termkit.Text( {
 	parent: document ,
 	content: [ 'some text ' , 'some text' ] ,
@@ -94,6 +101,12 @@ var button2 = new termkit.Button( {
 setTimeout( () => {
 	//text.setContent( ['^RS'] , true ) ;
 	text.setContent( ['^RChanged!^ some very very very long text','bob'] , true ) ;
+} , 800 ) ;
+//*/
+
+//*
+setTimeout( () => {
+	text1b.draw() ;
 } , 800 ) ;
 //*/
 

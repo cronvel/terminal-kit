@@ -245,30 +245,37 @@ It clears the *screenBuffer*, this is like calling [.fill()](#ref.ScreenBuffer.f
 
 
 <a name="ref.ScreenBuffer.put"></a>
-### .put( options , format , [arg1] , [arg2] , ... )
+### .put( options , text ) or .put( options , format , [arg1] , [arg2] , ... )
 
 * options `Object`, where:
 	* x `integer` (optional) x-coordinate where to put the text, bypassing the cursor x-coordinate
 	* y `integer` (optional) y-coordinate where to put the text, bypassing the cursor y-coordinate
-	* markup `boolean` or 'ansi', true if the text contains markup that should be interpreted,
+	* markup `boolean` or 'ansi' (optional) true if the text contains markup that should be interpreted,
 	  'ansi' if it contains *ANSI* code
-	* attr `Object` or `integer` attributes of the chars (attribute object or bit flags,
+	* attr `Object` or `integer` (optional) attributes of the chars (attribute object or bit flags,
 	  see: [the attribute object](#ref.ScreenBuffer.attributes))
-	* wrap `boolean` if true, text wrapping is enabled: when the cursor move beyond the last column, it is moved to the begining
-	  of the next line
-    * newLine: if true, then \r and \n produce new lines, false by default: .put() does not manage lines
-	* direction `string` the direction where the cursor move after each char, one of:
+	* wrap `boolean` (optional) if true, text wrapping is enabled: when the cursor move beyond the last column,
+	  it is moved to the begining of the next line
+	* newLine: `boolean` (optional) if true, then \r and \n produce new lines, false by default: .put() does not manage lines
+	* clip: `object` (optional) if set, it defines the clipping area, nothing is written outside of it,
+	  and if the 'wrap' option is set, wrapping is done on its boundary.
+	  Properties:
+		* x
+		* y
+		* width
+		* height
+	* direction `string` (optional) the direction where the cursor move after each char, one of:
 		* 'right' (default)
 		* 'left'
 		* 'up'
 		* 'down'
 		* 'none'/null: do not move after puting a char
-	* dx `integer` x-coordinate increment of the cursor after each character (default: 1),
+	* dx `integer` (optional) x-coordinate increment of the cursor after each character (default: 1),
 	  allow more precise controle than the *direction* option
-	* dy `integer` y-coordinate increment after each character (default: 0),
+	* dy `integer` (optional) y-coordinate increment after each character (default: 0),
 	  allow more precise controle than the *direction* option
-* format `string` the string or the formated string to put into the *screenBuffer*
-  (works just like any other `term( format , args... )`)
+* text `string` the string to put into the *screenBuffer*
+* format `string` the formated string to put into the *screenBuffer* (works just like any other `term( format , args... )`)
 * arg1 (optional) the first argument of the format
 * arg2...
 * ...
