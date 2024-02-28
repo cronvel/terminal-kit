@@ -82,7 +82,7 @@ var text3 = new termkit.Text( {
 
 var button1 = new termkit.Button( {
 	parent: document ,
-	content: [ 'some text' , 'some text' ] ,
+	content: [ 'some text' , '2nd line' ] ,
 	//contentHasMarkup: true ,
 	//attr: { bgColor: 'magenta' } ,
 	x: 10 ,
@@ -92,12 +92,12 @@ var button1 = new termkit.Button( {
 
 var button2 = new termkit.Button( {
 	parent: document ,
-	content: [ 'some text2' , 'some text2' ] ,
+	content: 'cancel' ,
 	//contentHasMarkup: true ,
 	//attr: { bgColor: 'magenta' } ,
 	x: 10 ,
 	y: 20 ,
-	width: 5
+	//width: 5
 } ) ;
 
 /*
