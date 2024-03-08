@@ -144,8 +144,8 @@ columnMenu.on( 'itemFocus' , onItemFocus ) ;
 
 
 
-//document.giveFocusTo( columnMenu ) ;
-columnMenu.focusValue( 'edit' ) ;
+document.giveFocusTo( columnMenu ) ;
+//columnMenu.focusValue( 'edit' ) ;
 
 term.on( 'key' , function( key ) {
 	switch( key ) {

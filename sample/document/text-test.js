@@ -92,12 +92,14 @@ var button1 = new termkit.Button( {
 
 var button2 = new termkit.Button( {
 	parent: document ,
-	content: 'cancel' ,
+	//content: 'cancel' ,
+	blurContent: 'cancel' ,
+	focusContent: 'CANCEL' ,
 	//contentHasMarkup: true ,
 	//attr: { bgColor: 'magenta' } ,
 	x: 10 ,
 	y: 20 ,
-	//width: 5
+	//width: 10
 } ) ;
 
 /*
