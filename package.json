@@ -20,7 +20,8 @@
     "tree-kit": "^0.8.7"
   },
   "scripts": {
-    "test": "tea-time -R dot"
+    "test": "tea-time -R dot",
+    "lint": "eslint --quiet ."
   },
   "repository": {
     "type": "git",
@@ -65,5 +66,9 @@
       2022
     ],
     "owner": "Cédric Ronvel"
+  },
+  "devDependencies": {
+    "eslint": "^8.8.0",
+    "tea-time": "^1.14.5"
   }
 }

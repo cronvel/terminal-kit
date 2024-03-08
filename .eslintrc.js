@@ -1,4 +1,25 @@
+'use strict' ;
+
 module.exports = {
+	overrides: [
+		{
+			files: [ "test/*" ] ,
+			env: {
+				mocha: true
+			} ,
+			globals: {
+				expect: 'readonly'
+			} ,
+			rules: {
+				'prefer-arrow-callback': 'warn' ,
+				'object-curly-newline': 'warn' ,
+				'comma-spacing': [ 'warn' , {
+					'before': true ,
+					'after': true
+				} ]
+			}
+		}
+	] ,
 	'root': true ,
 	'env': {
 		'browser': true ,
@@ -62,7 +83,7 @@ module.exports = {
 			'MemberExpression': 1 ,
 			'flatTernaryExpressions': true
 		} ] ,
-		'newline-per-chained-call': 'off',
+		'newline-per-chained-call': 'off' ,
 		'no-multi-spaces': 'off' ,
 		'block-spacing': 'error' ,
 		'comma-spacing': [ 'error' , {
@@ -72,8 +93,8 @@ module.exports = {
 		'no-whitespace-before-property': 'error' ,
 		'space-before-blocks': 'error' ,
 		'space-before-function-paren': [ 'error' , {
-			'anonymous': 'never',
-			'named': 'never',
+			'anonymous': 'never' ,
+			'named': 'never' ,
 			'asyncArrow': 'always'
 		} ] ,
 		'space-infix-ops': 'error' ,
@@ -81,13 +102,13 @@ module.exports = {
 			'words': true ,
 			'nonwords': true ,
 			'overrides': {
-				'-': false ,
+				'-': false
 			}
 		} ] ,
 		'space-in-parens': [ 'error' , 'always' , {
 			'exceptions': [ 'empty' ]
 		} ] ,
-		'no-trailing-spaces': 'error' ,
+		'no-trailing-spaces': [ 'error' , { "skipBlankLines": true } ] ,
 		'switch-colon-spacing': [ 'error' , {
 			'after': true ,
 			'before': true
@@ -123,11 +144,11 @@ module.exports = {
 			'mode': 'strict'
 		} ] ,
 		'object-curly-newline': [ 'error' , {
-			'ObjectExpression' : {
+			'ObjectExpression': {
 				'consistent': true ,
 				'minProperties': 4
 			} ,
-			'ObjectPattern' : {
+			'ObjectPattern': {
 				// object destructuring assigment
 				'consistent': true ,
 				'minProperties': 8
@@ -140,7 +161,7 @@ module.exports = {
 		// Arrays
 		'array-bracket-newline': [ 'error' , 'consistent' ] ,
 		//'array-element-newline': [ 'error' , { 'multiline': true , 'minItems': 5 } ] ,
-		'array-bracket-spacing': [ 'error' , 'always' ],
+		'array-bracket-spacing': [ 'error' , 'always' ] ,
 		
 		'brace-style': [ 'error' , 'stroustrup' , {
 			'allowSingleLine': true
