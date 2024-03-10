@@ -47,6 +47,7 @@ var columnMenu = new termkit.ColumnMenu( {
 	width: 20 ,
 	pageMaxHeight: 5 ,
 	//height: 5 ,
+	//disableBlink: true,
 	blurLeftPadding: '^;  ' ,
 	focusLeftPadding: '^;^R> ' ,
 	disabledLeftPadding: '^;  ' ,
