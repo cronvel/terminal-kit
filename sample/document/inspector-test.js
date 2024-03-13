@@ -68,9 +68,12 @@ async function run() {
 		inspectedObject: object ,
 		x: 0 ,
 		y: 0 ,
-		width: 30 ,
+		width: 80 ,
 		//width: document.outputWidth - 1 ,
 		height: document.outputHeight - 1 ,
+		editable: true ,
+		sealed: true ,
+		mode: 'sealedEdit' ,
 	} ) ;
 
 	inspector.on( 'submit' , onSubmit ) ;
