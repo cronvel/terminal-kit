@@ -488,6 +488,7 @@ It moves the cursor to the end of the line and joins the current line with the f
 
 * options `Object` where:
 	* finalCall `boolean` call the callback one more time at the end of the buffer with an empty string
+	* fillerCopyAttr `boolean` if set, during the iteration it always copies attribute of a non-filler cell to all filler cells after it
 * callback `Function( cellData )`, where:
 	* cellData `Object` where:
 		* offset `integer` the offset/position of the current cell in the raw/serialized text
@@ -497,6 +498,7 @@ It moves the cursor to the end of the line and joins the current line with the f
 		* attr `integer` the attributes of the current cell in the bit flags mode, use 
 		  [ScreenBuffer.attr2object()](ScreenBuffer.md#ref.ScreenBuffer.attr2object) to convert it if necessary
 		* misc `Object` userland meta-data for the current cell
+		* cell `Object` the Cell instance, avoid modifying it unless knowing what you are doing
 
 It iterates over the whole *textBuffer*, using the *callback* for each cell.
 
