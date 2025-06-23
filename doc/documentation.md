@@ -32,6 +32,8 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 <a name="ref.quick"></a>
 ## Quick examples
 
+Some examples (note that if you execute all at once, some examples overwrite seach other) :
+
 ```js
 // Require the lib, get a working terminal
 var term = require( 'terminal-kit' ).terminal ;
@@ -75,12 +77,16 @@ term.moveTo.cyan( 1 , 1 , "My name is %s, I'm %d.\n" , 'Jack' , 32  ) ;
 
 // Get some user input
 term.magenta( "Enter your name: " ) ;
-term.inputField(
-    function( error , input ) {
-        term.green( "\nYour name is '%s'\n" , input ) ;
-    }
-) ;
+var input = await term.inputField().promise ;
+term.green( "\nYour name is '%s'\n" , input ) ;
+
+// Cleanly exit : avoid having junk escape characters and restore default style.
+// Any interactive functions (like .inputFiled(), .yesOrNo(), etc) will open "stdin" and listen for events,
+// so the process will NOT exit except explicitly (or explicitly calling .grabInput( false )).
+term.processExit() ;
 ```
+
+More complete examples could be found in the [sample directory](https://github.com/cronvel/terminal-kit/tree/master/sample).
 
 
 
