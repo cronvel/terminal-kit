@@ -104,7 +104,7 @@ Click any image to see the documentation related to the feature!
 
 ## Quick examples
 
-Some examples (note that if you execute all at once, some examples overwrite seach other) :
+Some examples (note that if you execute all at once, some examples overwrite each other) :
 
 ```js
 // Require the lib, get a working terminal
