@@ -32,7 +32,7 @@ Some tutorials are available at [blog.soulserv.net/tag/terminal](http://blog.sou
 <a name="ref.quick"></a>
 ## Quick examples
 
-Some examples (note that if you execute all at once, some examples overwrite seach other) :
+Some examples (note that if you execute all at once, some examples overwrite each other) :
 
 ```js
 // Require the lib, get a working terminal
