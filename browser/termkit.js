@@ -370,7 +370,7 @@ Palette.prototype.clStep = function( chromaColor , cAdjust , lAdjust , fixRgb = 
 
 		if ( rgb.every( channel => channel > -5 && channel < 260 ) ) { return chromaColor ; }
 
-		sortedChannels = [ ... rgb ].sort() ;
+		sortedChannels = [ ... rgb ].sort( ( a , b ) => a - b ) ;
 
 		//console.log( "Clipped!" , rgb , chromaColor.rgb() ) ;
 
@@ -422,7 +422,7 @@ Palette.prototype.clStep = function( chromaColor , cAdjust , lAdjust , fixRgb = 
 } ;
 
 
-},{"./termkit.js":55}],2:[function(require,module,exports){
+},{"./termkit.js":56}],2:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -972,7 +972,7 @@ Rect.wrapIterator = function( p , iterator ) {
 } ;
 
 
-},{"./termkit.js":55}],3:[function(require,module,exports){
+},{"./termkit.js":56}],3:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -1251,16 +1251,29 @@ ScreenBuffer.prototype.parseMarkup = string.markupMethod.bind( misc.markupOption
 		* markup: boolean or 'ansi' or 'legacyAnsi', true if the text contains markup that should be interpreted,
 		 'ansi' if it contains ansi code, 'legacyAnsi' is bold is bright fg and blink is bright bg
 		* attr: standard attributes
-		* resumeAttr: attr to resume to
+		* resumeAttr: (internal) attr code to resume to
 		* wrap: text wrapping, when the cursor move beyond the last column, it is moved to the begining of the next line
 		* newLine: if true, then \r and \n produce new lines, false by default: .put() does not manage lines
+		* clip: if set, it is object describing the clipping area, nothing is written outside of it,
+		  and if the 'wrap' option is set, wrapping is done on its boundary.
+		  Properties:
+			* x
+			* y
+			* width
+			* height
+		* clipChar: a char that is display just before clipping something
 		* direction: 'right' (default), 'left', 'up', 'down' or 'none'/null (do not move after puting a char)
 		* dx: x increment after each character (default: 1)
 		* dy: y increment after each character (default: 0)
 */
 // Shared
 ScreenBuffer.prototype.put = function( options , str , ... args ) {
-	var startX , startY , x , y , dx , dy , baseAttr , attr , attrObject , wrap ;
+	var startX , startY , x , y , dx , dy , baseAttr , attr , attrObject , wrap ,
+		lastValidOffset = -1 ,
+		xmin = 0 ,
+		ymin = 0 ,
+		xmax = this.width - 1 ,
+		ymax = this.height - 1 ;
 
 	// Manage options
 	if ( ! options ) { options = {} ; }
@@ -1270,10 +1283,14 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 	startX = x = Math.floor( options.x !== undefined ? options.x : this.cx ) ;
 	startY = y = Math.floor( options.y !== undefined ? options.y : this.cy ) ;
 
+	if ( options.clip ) {
+		xmin = options.clip.x ;
+		ymin = options.clip.y ;
+		xmax = xmin + options.clip.width - 1 ;
+		ymax = ymin + options.clip.height - 1 ;
+	}
 
 	// Process directions/increments
-	dx = 1 ;
-	dy = 0 ;
 
 	switch ( options.direction ) {
 		//case 'right' : // not needed, use the default dx & dy
@@ -1293,8 +1310,14 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 			dx = 0 ;
 			dy = 0 ;
 			break ;
+		case 'right' :
+		default :
+			dx = 1 ;
+			dy = 0 ;
+			break ;
 	}
 
+	// Overide
 	if ( typeof options.dx === 'number' ) { dx = options.dx ; }
 	if ( typeof options.dy === 'number' ) { dy = options.dy ; }
 
@@ -1324,15 +1347,13 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 	var processRaw = part => {
 		//part = termkit.stripControlChars( part ) ;
 
-		var isFullWidth ,
-			offset , char , charCode ,
-			characters = string.unicode.toArray( part ) ,
-			i , iMax = characters.length ;
+		var characters = string.unicode.toArray( part ) ,
+			iMax = characters.length ;
 
-		for ( i = 0 ; i < iMax ; i ++ ) {
-			offset = ( y * this.width + x ) * this.ITEM_SIZE ;
-			char = characters[ i ] ;
-			charCode = char.charCodeAt( 0 ) ;
+		for ( let i = 0 ; i < iMax ; i ++ ) {
+			let offset = ( y * this.width + x ) * this.ITEM_SIZE ;
+			let char = characters[ i ] ;
+			let charCode = char.charCodeAt( 0 ) ;
 
 			if ( charCode < 0x20 || charCode === 0x7f ) {
 				if ( options.newLine && ( charCode === 0x0a || charCode === 0x0d ) ) {
@@ -1353,57 +1374,85 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 				}
 			}
 
-			isFullWidth = string.unicode.isFullWidth( char ) ;
+			let isFullWidth = string.unicode.isFullWidth( char ) ;
+			let inBounds = false ;
 
-			if ( isFullWidth ) {
-				if ( x + isFullWidth * dx >= 0 && x + isFullWidth * ( dx || 1 ) < this.width && y >= 0 && y < this.height ) {
-					// This is a full-width char! Needs extra care!
+			if ( y >= ymin && y <= ymax ) {
+				if ( isFullWidth ) {
+					if ( x + isFullWidth * dx >= xmin && x + isFullWidth * ( dx || 1 ) <= xmax ) {
+						// This is a full-width char! Needs extra care!
 
-					if ( dx < 0 ) { offset -= this.ITEM_SIZE ; }
+						if ( dx < 0 ) { offset -= this.ITEM_SIZE ; }
+						lastValidOffset = offset ;
 
-					// Check if we are writing on a fullwidth char
-					if ( this.hasTrailingFullWidth( this.buffer , offset ) && x ) { this.removeFullWidth( this.buffer , offset - this.ITEM_SIZE ) ; }
+						// Check if we are writing on a fullwidth char
+						if ( this.hasTrailingFullWidth( this.buffer , offset ) && x ) { this.removeFullWidth( this.buffer , offset - this.ITEM_SIZE ) ; }
 
-					// Write the attributes
-					this.writeAttr( this.buffer , attr , offset , this.LEADING_FULLWIDTH ) ;
+						// Write the attributes
+						this.writeAttr( this.buffer , attr , offset , this.LEADING_FULLWIDTH ) ;
 
-					// Write the character
-					this.writeChar( this.buffer , char , offset ) ;
+						// Write the character
+						this.writeChar( this.buffer , char , offset ) ;
 
-					offset += this.ITEM_SIZE ;
+						offset += this.ITEM_SIZE ;
 
-					// Check if we are writing on a fullwidth char
-					if ( this.hasLeadingFullWidth( this.buffer , offset ) && x < this.width - 1 ) { this.removeFullWidth( this.buffer , offset + this.ITEM_SIZE ) ; }
+						// Check if we are writing on a fullwidth char
+						if ( this.hasLeadingFullWidth( this.buffer , offset ) && x < xmax ) { this.removeFullWidth( this.buffer , offset + this.ITEM_SIZE ) ; }
 
-					// Write the attributes
-					this.writeAttr( this.buffer , attr , offset , this.TRAILING_FULLWIDTH ) ;
+						// Write the attributes
+						this.writeAttr( this.buffer , attr , offset , this.TRAILING_FULLWIDTH ) ;
 
-					// Write a blank character
-					this.writeChar( this.buffer , ' ' , offset ) ;
+						// Write a blank character
+						this.writeChar( this.buffer , ' ' , offset ) ;
+
+						inBounds = true ;
+					}
+				}
+				else {
+					if ( x >= xmin && x <= xmax ) {
+						// Check if we are writing on a fullwidth char
+						if ( this.hasLeadingFullWidth( this.buffer , offset ) && x < xmax ) { this.removeFullWidth( this.buffer , offset + this.ITEM_SIZE ) ; }
+						else if ( this.hasTrailingFullWidth( this.buffer , offset ) && x ) { this.removeFullWidth( this.buffer , offset - this.ITEM_SIZE ) ; }
+
+						// Write the attributes
+						this.writeAttr( this.buffer , attr , offset ) ;
+
+						// Write the character
+						this.writeChar( this.buffer , char , offset ) ;
+
+						lastValidOffset = offset ;
+						inBounds = true ;
+					}
 				}
 			}
-			else if ( x >= 0 && x < this.width && y >= 0 && y < this.height ) {
-				// Check if we are writing on a fullwidth char
-				if ( this.hasLeadingFullWidth( this.buffer , offset ) && x < this.width - 1 ) { this.removeFullWidth( this.buffer , offset + this.ITEM_SIZE ) ; }
-				else if ( this.hasTrailingFullWidth( this.buffer , offset ) && x ) { this.removeFullWidth( this.buffer , offset - this.ITEM_SIZE ) ; }
+			else {
+				// Optimization : early out when there is no chance anymore char would be put...
+				if ( ( y > ymax && dy >= 0 ) || ( y < ymin && dy < 0 ) ) {
+					return true ;
+				}
+			}
 
-				// Write the attributes
-				this.writeAttr( this.buffer , attr , offset ) ;
+			if ( ! inBounds && lastValidOffset >= 0 && options.clipChar ) {
+				// Check if we are writing on a fullwidth char
+				if ( this.hasLeadingFullWidth( this.buffer , lastValidOffset ) && x < xmax ) { this.removeFullWidth( this.buffer , lastValidOffset + this.ITEM_SIZE ) ; }
+				else if ( this.hasTrailingFullWidth( this.buffer , lastValidOffset ) && x ) { this.removeFullWidth( this.buffer , lastValidOffset - this.ITEM_SIZE ) ; }
 
 				// Write the character
-				this.writeChar( this.buffer , char , offset ) ;
+				this.writeChar( this.buffer , options.clipChar , lastValidOffset ) ;
+
+				lastValidOffset = -1 ;
 			}
 
 			x += dx * ( 1 + isFullWidth ) ;
 			y += dy ;
 
 			if ( wrap ) {
-				if ( x < 0 ) {
-					x = this.width - 1 ;
+				if ( x < xmin ) {
+					x = xmax ;
 					y -- ;
 				}
-				else if ( x >= this.width ) {
-					x = 0 ;
+				else if ( x > xmax ) {
+					x = xmin ;
 					y ++ ;
 				}
 			}
@@ -1434,7 +1483,7 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 				break ;
 		}
 
-		parts.forEach( part => {
+		for ( let part of parts ) {
 			attrObject = Object.assign( {} , part.specialReset ? defaultAttrObject : baseAttrObject , part ) ;
 			delete attrObject.text ;
 
@@ -1445,9 +1494,9 @@ ScreenBuffer.prototype.put = function( options , str , ... args ) {
 			attr = this.object2attr( attrObject , undefined , legacyColor ) ;
 
 			if ( part.text ) {
-				processRaw( part.text ) ;
+				if ( processRaw( part.text ) ) { break ; }
 			}
-		} ) ;
+		}
 	}
 
 	this.cx = x ;
@@ -2776,7 +2825,7 @@ ScreenBuffer.prototype.saveSync = ScreenBuffer.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./misc.js":47,"./termkit.js":55,"buffer":151,"fs":141,"nextgen-events":77,"string-kit":127}],4:[function(require,module,exports){
+},{"./misc.js":48,"./termkit.js":56,"buffer":159,"fs":148,"nextgen-events":78,"string-kit":133}],4:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -3941,7 +3990,7 @@ ScreenBufferHD.prototype.saveSync = ScreenBufferHD.prototype.saveSyncV2 ;
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./misc.js":47,"./termkit.js":55,"buffer":151,"fs":141,"string-kit":127}],5:[function(require,module,exports){
+},{"./ScreenBuffer.js":3,"./colorScheme/gnome.json":11,"./misc.js":48,"./termkit.js":56,"buffer":159,"fs":148,"string-kit":133}],5:[function(require,module,exports){
 (function (process,Buffer){(function (){
 /*
 	Terminal Kit
@@ -4956,6 +5005,10 @@ function onResize() {
 		this.width = this.stdout.columns ;
 		this.height = this.stdout.rows ;
 	}
+	else if ( ! this.isTTY ) {
+		// If it's not a TTY, we are probably piping to a file, in that case the size is virtually infinite
+		this.width = this.height = Infinity ;
+	}
 
 	this.emit( 'resize' , this.width , this.height ) ;
 }
@@ -5364,6 +5417,7 @@ notChainable.asyncCleanup = async function() {
 	this.shutdown = true ;
 
 	this.styleReset() ;
+	this.hideCursor( false ) ;
 
 	var wasGrabbing = this.grabbing ;
 
@@ -6163,7 +6217,7 @@ notChainable.drawImage = function( filepath , options , callback ) {
 
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":41,"./fileInput.js":43,"./gridMenu.js":44,"./inputField.js":46,"./progressBar.js":49,"./singleColumnMenu.js":50,"./singleLineMenu.js":51,"./slowTyping.js":52,"./termkit.js":55,"./yesOrNo.js":62,"_process":185,"buffer":151,"nextgen-events":77,"seventh":113,"string-kit":127,"tree-kit":139}],6:[function(require,module,exports){
+},{"./bar.js":8,"./colorScheme/default.json":10,"./extClipboard.js":42,"./fileInput.js":44,"./gridMenu.js":45,"./inputField.js":47,"./progressBar.js":50,"./singleColumnMenu.js":51,"./singleLineMenu.js":52,"./slowTyping.js":53,"./termkit.js":56,"./yesOrNo.js":63,"_process":191,"buffer":159,"nextgen-events":78,"seventh":114,"string-kit":133,"tree-kit":145}],6:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -8415,7 +8469,7 @@ TextMachineApi.hint = function( context , buffer , hints ) {
 } ;
 
 
-},{"./misc.js":47,"./termkit.js":55,"fs":141,"string-kit":127}],7:[function(require,module,exports){
+},{"./misc.js":48,"./termkit.js":56,"fs":148,"string-kit":133}],7:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -8570,7 +8624,7 @@ module.exports = function( value , options ) {
 } ;
 
 
-},{"./spChars.js":53}],9:[function(require,module,exports){
+},{"./spChars.js":54}],9:[function(require,module,exports){
 (function (global){(function (){
 /*
 	Terminal Kit
@@ -8607,7 +8661,7 @@ global.IS_BROWSER = true ;
 
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./termkit-no-lazy-require.js":54}],10:[function(require,module,exports){
+},{"./termkit-no-lazy-require.js":55}],10:[function(require,module,exports){
 module.exports=[
 	{ "r": 0, "g": 0, "b": 0, "names": [ "black" ] } ,
 	{ "r": 180, "g": 0, "b": 0, "names": [ "red" ] } ,
@@ -9056,7 +9110,7 @@ exports.getDetectedTerminal = async function( callback ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./termkit.js":55,"_process":185,"child_process":141,"os":172,"path":184,"seventh":113}],13:[function(require,module,exports){
+},{"./termkit.js":56,"_process":191,"child_process":148,"os":178,"path":190,"seventh":114}],13:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -9165,7 +9219,7 @@ AnimatedText.prototype.autoUpdate = function() {
 } ;
 
 
-},{"../spChars.js":53,"./Element.js":25,"./Text.js":36}],14:[function(require,module,exports){
+},{"../spChars.js":54,"./Element.js":25,"./Text.js":37}],14:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -9355,7 +9409,7 @@ Bar.prototype.setValue = function( value , internalAndNoDraw ) {
 } ;
 
 
-},{"../spChars.js":53,"./Element.js":25}],15:[function(require,module,exports){
+},{"../spChars.js":54,"./Element.js":25}],15:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -9402,7 +9456,7 @@ function BaseMenu( options = {} ) {
 	Element.call( this , options ) ;
 
 	this.backgroundAttr = options.backgroundAttr || { bgColor: 'white' , color: 'black' } ;
-	this.contentEllipsis = options.contentEllipsis || '…' ;
+	this.contentEllipsis = options.contentEllipsis === true ? '…' : options.contentEllipsis || '…' ;
 	this.previousPageContent = options.previousPageContent || '«' ;
 	this.previousPageContentHasMarkup = !! options.previousPageContentHasMarkup ;
 	this.nextPageContent = options.nextPageContent || '»' ;
@@ -9513,44 +9567,56 @@ BaseMenu.prototype.destroy = function( isSubDestroy , noDraw = false ) {
 
 
 
-BaseMenu.prototype.previousPage = function( focusType ) {
-	var focusAware ;
+BaseMenu.prototype.focusFirstPageItem = function( focusType ) {
+	this.focusChild = this.children[ this.page ? 1 : 0 ] ;
+	var focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
+	if ( ! focusAware ) { this.document.focusNext() ; }
+} ;
 
+
+
+BaseMenu.prototype.focusLastPageItem = function( focusType ) {
+	this.focusChild = this.children[  this.page === this.maxPage  ?  this.children.length - 1  :  this.children.length - 2  ] ;
+	var focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
+	if ( ! focusAware ) { this.document.focusNext() ; }
+} ;
+
+
+
+BaseMenu.prototype.previousPage = function( focusType ) {
 	if ( this.maxPage && this.page > 0 ) {
 		this.page -- ;
 		this.initPage() ;
 		this.focusChild = this.children[ this.children.length - 2 ] ;
-		focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
+		let focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
 		if ( ! focusAware ) { this.document.focusPrevious() ; }
 		this.updateDraw() ;
+		this.emit( 'previousPage' , this.page , this ) ;
 	}
 } ;
 
 
 
 BaseMenu.prototype.nextPage = function( focusType ) {
-	var focusAware ;
-
 	if ( this.maxPage && this.page < this.maxPage ) {
 		this.page ++ ;
 		this.initPage() ;
 		this.focusChild = this.children[ 1 ] ;
-		focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
+		let focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
 		if ( ! focusAware ) { this.document.focusNext() ; }
 		this.updateDraw() ;
+		this.emit( 'nextPage' , this.page , this ) ;
 	}
 } ;
 
 
 
 BaseMenu.prototype.toPage = function( page , focusType ) {
-	var focusAware ;
-
 	if ( this.maxPage && page !== this.page ) {
 		this.page = page ;
 		this.initPage() ;
-		this.focusChild = this.children[ 1 ] ;
-		focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
+		this.focusChild = this.children[ this.page ? 1 : 0 ] ;
+		let focusAware = this.document.giveFocusTo_( this.focusChild , focusType ) ;
 		if ( ! focusAware ) { this.document.focusNext() ; }
 		this.updateDraw() ;
 	}
@@ -9834,11 +9900,17 @@ userActions.previousPage = function() {
 	if ( this.maxPage && this.page > 0 ) {
 		this.previousPage( 'backCycle' ) ;
 	}
+	else {
+		this.focusFirstPageItem( 'backCycle' ) ;
+	}
 } ;
 
 userActions.nextPage = function() {
 	if ( this.maxPage && this.page < this.maxPage ) {
 		this.nextPage( 'cycle' ) ;
+	}
+	else {
+		this.focusLastPageItem( 'cycle' ) ;
 	}
 } ;
 
@@ -9846,12 +9918,26 @@ userActions.firstPage = function() {
 	if ( this.maxPage && this.page !== 0 ) {
 		this.toPage( 0 , 'backCycle' ) ;
 	}
+	else {
+		this.focusFirstPageItem( 'backCycle' ) ;
+	}
 } ;
 
 userActions.lastPage = function() {
 	if ( this.maxPage && this.page !== this.maxPage ) {
 		this.toPage( this.maxPage , 'cycle' ) ;
 	}
+	else {
+		this.focusLastPageItem( 'cycle' ) ;
+	}
+} ;
+
+userActions.firstPageItem = function() {
+	this.focusFirstPageItem( 'backCycle' ) ;
+} ;
+
+userActions.lastPageItem = function() {
+	this.focusLastPageItem( 'cycle' ) ;
 } ;
 
 userActions.parentMenu = function() {
@@ -9878,7 +9964,7 @@ userActions.submenu = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":17,"./Element.js":25,"_process":185,"tree-kit":139}],16:[function(require,module,exports){
+},{"./Button.js":17,"./Element.js":25,"_process":191,"tree-kit":145}],16:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -10012,7 +10098,7 @@ Border.prototype.onParentResize = function() {
 } ;
 
 
-},{"../spChars.js":53,"./Element.js":25}],17:[function(require,module,exports){
+},{"../spChars.js":54,"./Element.js":25}],17:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -10089,12 +10175,23 @@ function Button( options ) {
 		this.setContent( options , this.contentHasMarkup , true , true ) ;
 	}
 
+	// Forced or adaptative windth/height?
+	if ( ! options.width ) {
+		options.width = this.innerWidth ;
+		options.contentAdaptativeWidth = true ;
+	}
+
+	if ( ! options.height ) {
+		options.height = this.contentHeight ;
+		options.contentAdaptativeHeight = true ;
+	}
+
 	// Used by menus, to assign nextPage/previousPage action
 	this.internalRole = options.internalRole || null ;
 
 	// Force delete on width/height, should be computed from content
-	delete options.width ;
-	delete options.height ;
+	//delete options.width ;
+	//delete options.height ;
 
 	Text.call( this , options ) ;
 
@@ -10170,13 +10267,16 @@ Button.prototype.setContent = function( content , hasMarkup , dontDraw = false ,
 
 	if ( ! content || typeof content !== 'object' || Array.isArray( content ) ) {
 		this.content = this._toContentArray( content ) ;
-		this.contentWidth = Element.computeContentWidth( this.content , this.contentHasMarkup ) ;
 
 		this.blurContent = this.focusContent =
 			this.disabledContent = this.submittedContent =
 			this.turnedOnBlurContent = this.turnedOffBlurContent =
 			this.turnedOnFocusContent = this.turnedOffFocusContent =
 			this.content ;
+
+		//this.contentWidth = Element.computeContentWidth( this.content , this.contentHasMarkup ) ;
+		this.computeRequiredWidth() ;
+		this.computeRequiredHeight() ;
 	}
 	else {
 		if ( content.internal ) {
@@ -10204,7 +10304,9 @@ Button.prototype.setContent = function( content , hasMarkup , dontDraw = false ,
 			this.turnedOffFocusContent = this._toContentArray( content.turnedOffFocus ?? content.turnedOff ?? this.content ) ;
 		}
 
-		this.computeContentWidth( content , this.contentHasMarkup ) ;
+		//this.computeContentWidth() ;
+		this.computeRequiredWidth() ;
+		this.computeRequiredHeight() ;
 	}
 
 	if ( ! dontResize && this.resizeOnContent ) { this.resizeOnContent() ; }
@@ -10213,7 +10315,29 @@ Button.prototype.setContent = function( content , hasMarkup , dontDraw = false ,
 
 
 
-Button.prototype.computeContentWidth = function() {
+Button.prototype.computeRequiredWidth = function() {
+	this.leftPaddingWidth = Math.max(
+		Element.computeContentWidth( this.blurLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.focusLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.disabledLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.submittedLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnFocusLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffFocusLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnBlurLeftPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffBlurLeftPadding , this.paddingHasMarkup )
+	) ;
+
+	this.rightPaddingWidth = Math.max(
+		Element.computeContentWidth( this.blurRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.focusRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.disabledRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.submittedRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnFocusRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffFocusRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOnBlurRightPadding , this.paddingHasMarkup ) ,
+		Element.computeContentWidth( this.turnedOffBlurRightPadding , this.paddingHasMarkup )
+	) ;
+
 	this.contentWidth = Math.max(
 		Element.computeContentWidth( this.blurContent , this.contentHasMarkup ) ,
 		Element.computeContentWidth( this.focusContent , this.contentHasMarkup ) ,
@@ -10225,42 +10349,9 @@ Button.prototype.computeContentWidth = function() {
 		Element.computeContentWidth( this.turnedOffBlurContent , this.contentHasMarkup )
 	) ;
 
-	return this.contentWidth ;
-} ;
+	this.innerWidth = this.leftPaddingWidth + this.rightPaddingWidth + this.contentWidth || 1 ;
 
-
-
-Button.prototype.computeRequiredWidth = function() {
-	return (
-		Math.max(
-			Element.computeContentWidth( this.blurLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.focusLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.disabledLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.submittedLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnFocusLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffFocusLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnBlurLeftPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffBlurLeftPadding , this.paddingHasMarkup )
-		) + Math.max(
-			Element.computeContentWidth( this.blurRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.focusRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.disabledRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.submittedRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnFocusRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffFocusRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnBlurRightPadding , this.paddingHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffBlurRightPadding , this.paddingHasMarkup )
-		) + Math.max(
-			Element.computeContentWidth( this.blurContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.focusContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.disabledContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.submittedContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnFocusContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffFocusContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOnBlurContent , this.contentHasMarkup ) ,
-			Element.computeContentWidth( this.turnedOffBlurContent , this.contentHasMarkup )
-		) || 1
-	) ;
+	return this.innerWidth ;
 } ;
 
 
@@ -10391,7 +10482,7 @@ userActions.submit = function( key ) {
 } ;
 
 
-},{"./Element.js":25,"./Text.js":36}],18:[function(require,module,exports){
+},{"./Element.js":25,"./Text.js":37}],18:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -10711,12 +10802,14 @@ ColumnMenu.prototype.initPage = function( page = this.page ) {
 
 	this.buttons.forEach( button => button.destroy( false , true ) ) ;
 	this.buttons.length = 0 ;
+	this.hotkeyToButtonIndex.clear() ;
 
 	this.pageItemsDef[ page ].forEach( ( def , index ) => {
 		var ButtonConstructor , isToggle , key , value , blurAttr ;
 
 		if ( ! Array.isArray( def.buttonContent ) ) {
-			def.buttonContent = [ def.buttonContent + ' '.repeat( this.buttonsMaxWidth - def.width ) ] ;
+			//def.buttonContent = [ def.buttonContent + ' '.repeat( this.buttonsMaxWidth - def.width ) ] ;
+			def.buttonContent = [ def.buttonContent ] ;
 		}
 
 		ButtonConstructor = def.internalRole ? Button :
@@ -10744,6 +10837,7 @@ ColumnMenu.prototype.initPage = function( page = this.page ) {
 			parent: this ,
 			childId: index ,
 			internalRole: def.internalRole ,
+			width: this.buttonsMaxWidth ,	// force a common fixed width
 			contentHasMarkup: def.contentHasMarkup ,
 			content: def.buttonContent ,
 			blurContent: def.buttonBlurContent ,
@@ -10801,6 +10895,15 @@ ColumnMenu.prototype.initPage = function( page = this.page ) {
 		this.buttons[ index ].on( 'blinked' , this.onButtonBlinked ) ;
 		this.buttons[ index ].on( 'focus' , this.onButtonFocus ) ;
 
+		if ( def.hotkey ) {
+			if ( Array.isArray( def.hotkey ) ) {
+				def.hotkey.forEach( hotkey => this.hotkeyToButtonIndex.set( hotkey , index ) ) ;
+			}
+			else {
+				this.hotkeyToButtonIndex.set( def.hotkey , index ) ;
+			}
+		}
+
 		if ( isToggle ) {
 			this.buttons[ index ].on( 'toggle' , this.onButtonToggle ) ;
 		}
@@ -10833,7 +10936,7 @@ ColumnMenu.prototype.onParentResize = function() {
 } ;
 
 
-},{"./BaseMenu.js":15,"./Button.js":17,"./Element.js":25,"./ToggleButton.js":39}],19:[function(require,module,exports){
+},{"./BaseMenu.js":15,"./Button.js":17,"./Element.js":25,"./ToggleButton.js":40}],19:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -10965,7 +11068,7 @@ ColumnMenuMixed.prototype.onButtonToggle = function( buttonValue , action , butt
 } ;
 
 
-},{"./Button.js":17,"./ColumnMenu.js":18,"./Element.js":25,"./ToggleButton.js":39}],20:[function(require,module,exports){
+},{"./Button.js":17,"./ColumnMenu.js":18,"./Element.js":25,"./ToggleButton.js":40}],20:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -11125,7 +11228,7 @@ userActions.submit = function() {
 } ;
 
 
-},{"./ColumnMenu.js":18,"./Element.js":25,"./ToggleButton.js":39}],21:[function(require,module,exports){
+},{"./ColumnMenu.js":18,"./Element.js":25,"./ToggleButton.js":40}],21:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -11499,7 +11602,7 @@ userActions.scrollBottom = function() {
 } ;
 
 
-},{"../ScreenBuffer.js":3,"../termkit.js":55,"./Element.js":25}],22:[function(require,module,exports){
+},{"../ScreenBuffer.js":3,"../termkit.js":56,"./Element.js":25}],22:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -12225,7 +12328,7 @@ Document.prototype.onEventSourceResize = function( width , height ) {
 } ;
 
 
-},{"./Container.js":21,"./Element.js":25,"seventh":113}],23:[function(require,module,exports){
+},{"./Container.js":21,"./Element.js":25,"seventh":114}],23:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -12516,7 +12619,7 @@ userActions.clearColumnMenu = function() {
 } ;
 
 
-},{"./ColumnMenuMixed.js":19,"./Element.js":25,"./RowMenu.js":32,"./ToggleButton.js":39}],24:[function(require,module,exports){
+},{"./ColumnMenuMixed.js":19,"./Element.js":25,"./RowMenu.js":33,"./ToggleButton.js":40}],24:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -13305,7 +13408,7 @@ userActions.clearSystemClipboard = function() {
 } ;
 
 
-},{"./Element.js":25,"./TextBox.js":37,"seventh":113,"string-kit":127}],25:[function(require,module,exports){
+},{"./Element.js":25,"./TextBox.js":38,"seventh":114,"string-kit":133}],25:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -13386,6 +13489,7 @@ function Element( options = {} ) {
 	this.content = this.content ?? '' ;
 	this.contentHasMarkup = this.contentHasMarkup ?? false ;
 	this.contentWidth = this.contentWidth ?? 0 ;
+	this.contentHeight = this.contentHeight ?? 0 ;
 
 	if ( this.setContent === Element.prototype.setContent ) {
 		this.setContent( options.content || '' , options.contentHasMarkup , true , true ) ;
@@ -13411,6 +13515,8 @@ function Element( options = {} ) {
 		options.height ? options.height :
 		this.strictInline ? this.inlineTerm.height :
 		1 ;
+	this.contentAdaptativeWidth = this.contentAdaptativeWidth ?? !! options.contentAdaptativeWidth ;
+	this.contentAdaptativeHeight = this.contentAdaptativeHeight ?? !! options.contentAdaptativeHeight ;
 
 	// Used by .updateDraw()
 	this.needOuterDraw = false ;
@@ -13477,6 +13583,9 @@ Element.prototype.destroy = function( isSubDestroy = false , noDraw = false ) {
 
 	this.destroyed = true ;
 } ;
+
+// User API
+Element.prototype.destroyNoRedraw = function() { return this.destroy( undefined , true ) ; } ;
 
 
 
@@ -13636,7 +13745,7 @@ Element.prototype.zSort = function() {
 
 
 // Insert a child into the zChildren array, shift all greater zIndex to the left
-// Used this instead of .push() and .zSort()
+// Use this instead of .push() and .zSort()
 Element.prototype.zInsert = function( child ) {
 	var current ,
 		i = this.zChildren.length ;
@@ -13744,17 +13853,19 @@ Element.wordWrapContent = ( content , width , hasMarkup ) =>
 Element.prototype.setContent = function( content , hasMarkup , dontDraw = false , dontResize = false ) {
 	if ( this.forceContentArray && ! Array.isArray( content ) ) { content = [ content || '' ] ; }
 
+	var oldOutputWidth = this.outputWidth ,
+		oldOutputHeight = this.outputHeight ;
+
 	this.content = content ;
 	this.contentHasMarkup = hasMarkup ;
 
-	var oldContentWidth = this.contentWidth ;
 	this.contentWidth = Element.computeContentWidth( content , this.contentHasMarkup ) ;
+	this.contentHeight = Array.isArray( content ) ? content.length : 1 ;
 
 	if ( ! dontResize && this.resizeOnContent ) { this.resizeOnContent() ; }
+
 	if ( ! dontDraw ) {
-		// This condition is bad, and is only relevant for Text ATM,
-		// Should find a clean way to split outputWidth/outputHeight from a sort of wantedWidth/wantedHeight
-		if ( this.contentWidth !== oldContentWidth && ( this.contentWidth > this.outputWidth || this.resizeOnContent ) ) {
+		if ( this.outputWidth < oldOutputWidth || this.outputHeight < oldOutputHeight ) {
 			this.outerDraw() ;
 		}
 		else {
@@ -14256,7 +14367,7 @@ Element.prototype.keyBindings = {} ;	// object, store key bindings, the key is a
 Element.prototype.userActions = {} ;	// object, the key is an user-action name, the value is a function... THIS IS INHERITED
 
 
-},{"../misc.js":47,"../termkit.js":55,"nextgen-events":77,"string-kit":127}],26:[function(require,module,exports){
+},{"../misc.js":48,"../termkit.js":56,"nextgen-events":78,"string-kit":133}],26:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -14565,7 +14676,7 @@ userActions.next = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Button.js":17,"./Element.js":25,"./LabeledInput.js":30,"_process":185}],27:[function(require,module,exports){
+},{"./Button.js":17,"./Element.js":25,"./LabeledInput.js":31,"_process":191}],27:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -14702,7 +14813,7 @@ InlineFileInput.prototype.submit = async function() {
 } ;
 
 
-},{"../fileHelpers.js":42,"./Element.js":25,"./InlineInput.js":28,"fs":141,"path":184}],28:[function(require,module,exports){
+},{"../fileHelpers.js":43,"./Element.js":25,"./InlineInput.js":28,"fs":148,"path":190}],28:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -15232,7 +15343,7 @@ userActions.delete = function() {
 } ;
 
 
-},{"../autoComplete.js":7,"./EditableTextBox.js":24,"./Element.js":25,"./RowMenu.js":32,"./TextBox.js":37,"seventh":113,"string-kit":127}],29:[function(require,module,exports){
+},{"../autoComplete.js":7,"./EditableTextBox.js":24,"./Element.js":25,"./RowMenu.js":33,"./TextBox.js":38,"seventh":114,"string-kit":133}],29:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -15339,7 +15450,468 @@ InlineMenu.prototype.initChildren = function( noInitPage = false ) {
 } ;
 
 
-},{"./Element.js":25,"./RowMenu.js":32,"./TextBox.js":37,"seventh":113,"string-kit":127}],30:[function(require,module,exports){
+},{"./Element.js":25,"./RowMenu.js":33,"./TextBox.js":38,"seventh":114,"string-kit":133}],30:[function(require,module,exports){
+(function (process){(function (){
+/*
+	Terminal Kit
+
+	Copyright (c) 2009 - 2022 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+const Element = require( './Element.js' ) ;
+const Text = require( './Text.js' ) ;
+const Button = require( './Button.js' ) ;
+const RowMenu = require( './RowMenu.js' ) ;
+const ColumnMenu = require( './ColumnMenu.js' ) ;
+
+const string = require( 'string-kit' ) ;
+
+
+
+function Inspector( options ) {
+	// Clone options if necessary
+	options = ! options ? {} : options.internal ? options : Object.create( options ) ;
+	options.internal = true ;
+
+	this.onPropertiesColumnMenuPageInit = this.onPropertiesColumnMenuPageInit.bind( this ) ;
+	this.onPropertiesColumnMenuSubmit = this.onPropertiesColumnMenuSubmit.bind( this ) ;
+	this.onBreadCrumbRowMenuSubmit = this.onBreadCrumbRowMenuSubmit.bind( this ) ;
+
+	if ( ! options.outputWidth && ! options.width ) { options.outputWidth = 78 ; }
+
+	Element.call( this , options ) ;
+
+	//this.submitValue = null ;
+
+	this.inspectedObject = options.inspectedObject ;
+
+	// TMP?
+	this.breadCrumbText = null ;
+	this.breadCrumbRowMenu = null ;
+	this.propertiesColumnMenu = null ;
+	this.valueFieldTextList = [] ;
+	this.inspectStack = [] ;
+
+	this.buttonsDef = options.buttons || [] ;
+	this.buttons = [] ;
+	this.focusChild = null ;
+	this.onButtonSubmit = this.onButtonSubmit.bind( this ) ;
+	this.onFocus = this.onFocus.bind( this ) ;
+
+	// Global default attributes
+	this.textAttr = options.textAttr || null ;
+	this.voidAttr = options.voidAttr || options.emptyAttr || null ;
+	this.buttonFocusAttr = options.buttonFocusAttr || null ;
+	this.buttonBlurAttr = options.buttonBlurAttr || null ;
+	this.turnedOnBlurAttr = options.turnedOnBlurAttr || null ;
+	this.turnedOnFocusAttr = options.turnedOnFocusAttr || null ;
+	this.turnedOffBlurAttr = options.turnedOffBlurAttr || null ;
+	this.turnedOffFocusAttr = options.turnedOffFocusAttr || null ;
+
+	if ( options.keyBindings ) { this.keyBindings = options.keyBindings ; }
+	if ( options.textInputKeyBindings ) { this.textInputKeyBindings = options.textInputKeyBindings ; }
+
+	this.on( 'key' , this.onKey ) ;
+	this.on( 'focus' , this.onFocus ) ;
+
+	this.initChildren() ;
+
+	// Only draw if we are not a superclass of the object
+	if ( this.elementType === 'Inspector' && ! options.noDraw ) { this.draw() ; }
+}
+
+module.exports = Inspector ;
+Element.inherit( Inspector ) ;
+
+
+
+Inspector.prototype.needInput = true ;
+
+
+
+Inspector.prototype.keyBindings = {
+	LEFT: 'levelUp' ,
+	BACKSPACE: 'levelUp'
+} ;
+
+
+
+Inspector.prototype.textInputKeyBindings = {} ;
+Inspector.prototype.selectInputKeyBindings = {} ;
+Inspector.prototype.selectMultiInputKeyBindings = {} ;
+
+
+
+// Create Button automatically
+Inspector.prototype.initChildren = function( noInitLevel = false ) {
+	var offsetX = 0 , offsetY = 0 ,
+		buttonsTextWidth = 0 , buttonSpacing = 0 ;
+
+	// Submit Button part
+	if ( ! this.buttonsDef.length ) {
+		this.buttonsDef.push( {
+			content: 'Submit' ,
+			value: 'submit'
+		} ) ;
+	}
+
+	this.buttonsDef.forEach( def => {
+		def.contentWidth = Element.computeContentWidth( def.content , def.contentHasMarkup ) ;
+		buttonsTextWidth += def.contentWidth ;
+	} ) ;
+
+	buttonSpacing = Math.floor( ( this.outputWidth - buttonsTextWidth ) / ( this.buttonsDef.length + 1 ) ) ;
+
+	offsetX = buttonSpacing ;
+	offsetY ++ ;
+
+	/*
+	this.buttonsDef.forEach( ( def , index ) => {
+		this.buttons[ index ] = new Button( {
+			internal: true ,
+			parent: this ,
+			content: def.content ,
+			value: def.value ,
+			outputX: this.outputX + offsetX ,
+			outputY: this.outputY + offsetY ,
+			focusAttr: def.focusAttr || this.buttonFocusAttr ,
+			blurAttr: def.blurAttr || this.buttonBlurAttr ,
+			noDraw: true
+		} ) ;
+
+		this.buttons[ index ].on( 'submit' , this.onButtonSubmit ) ;
+
+		offsetX += def.contentWidth + buttonSpacing ;
+	} ) ;
+	*/
+
+	this.inspectStack = [ { object: this.inspectedObject , key: '' } ] ;
+
+	// Only initLevel if we are not a superclass of the object
+	if ( this.elementType === 'Inspector' && ! noInitLevel ) { this.initLevel() ; }
+} ;
+
+
+
+// Init the UI for the current depth level, depending on the stack
+Inspector.prototype.initLevel = function() {
+	this.resetChildren() ;
+
+	var current = this.inspectStack[ this.inspectStack.length - 1 ] ,
+		subObject = current.object ,
+		breadCrumbMenuItems = [] ,
+		propertiesMenuItems = [] ,
+		path = this.inspectStack.map( e => e.key ).join( '.' ) ;
+
+	this.breadCrumbText = new Text( {
+		internal: true ,
+		parent: this ,
+		x: this.outputX ,
+		y: this.outputY ,
+		attr: { bgColor: 'cyan' , color: 'white' , bold: true } ,
+		content: 'Path> '
+	} ) ;
+
+	breadCrumbMenuItems =  this.inspectStack.map( ( stackItem , index ) => {
+		var key = stackItem.key ;
+
+		return {
+			content: index ? key : '<root>' ,
+			value: index
+		} ;
+	} ) ;
+
+	this.breadCrumbRowMenu = new RowMenu( {
+		internal: this ,
+		parent: this ,
+		x: this.breadCrumbText.outputX + this.breadCrumbText.outputWidth ,
+		y: this.outputY ,
+		width: this.outputWidth - this.breadCrumbText.outputWidth ,
+		separator: '.' ,
+		items: breadCrumbMenuItems
+	} ) ;
+
+	propertiesMenuItems = Object.keys( subObject ).map( key => {
+		var value = subObject[ key ] ;
+
+		var item = {
+			content: key ,
+			value: key
+		} ;
+
+		if ( ! value || typeof value !== 'object' ) {
+			item.disabled = true ;
+		}
+
+		return item ;
+	} ) ;
+
+	this.propertiesColumnMenu = new ColumnMenu( {
+		internal: this ,
+		parent: this ,
+		x: this.outputX ,
+		y: this.outputY + 2 ,
+		width: Math.round( this.outputWidth / 2.5 ) ,
+		pageMaxHeight: this.outputHeight - 4 ,
+		blurLeftPadding: '^;  ' ,
+		focusLeftPadding: '^;^R> ' ,
+		disabledLeftPadding: '^;  ' ,
+		paddingHasMarkup: true ,
+		buttonBlurAttr: { bgColor: '@dark-gray' , color: 'white' , bold: true } ,
+		/*
+		buttonKeyBindings: {
+			ENTER: 'submit' ,
+			BACKSPACE: 'submit' ,
+			LEFT: 'submit'
+		} ,
+		buttonActionKeyBindings: {
+			BACKSPACE: 'levelUp' ,
+			LEFT: 'levelUp'
+		} ,
+		*/
+		items: propertiesMenuItems
+	} ) ;
+
+	this.propertiesColumnMenu.on( 'submit' , this.onPropertiesColumnMenuSubmit ) ;
+	this.propertiesColumnMenu.on( 'previousPage' , this.onPropertiesColumnMenuPageInit ) ;
+	this.propertiesColumnMenu.on( 'nextPage' , this.onPropertiesColumnMenuPageInit ) ;
+	this.onPropertiesColumnMenuPageInit( this.propertiesColumnMenu.page ) ;
+
+	this.breadCrumbRowMenu.on( 'submit' , this.onBreadCrumbRowMenuSubmit ) ;
+
+	if ( current.fromKey !== undefined ) {
+		this.propertiesColumnMenu.focusValue( current.fromKey ) ;
+	}
+	else {
+		this.document.giveFocusTo( this.propertiesColumnMenu ) ;
+	}
+} ;
+
+
+
+Inspector.prototype.createValueFieldTexts = function() {
+	var current = this.inspectStack[ this.inspectStack.length - 1 ] ,
+		subObject = current.object ;
+
+	for ( let valueFieldText of this.valueFieldTextList ) { valueFieldText.destroyNoRedraw() ; }
+	this.valueFieldTextList.length = 0 ;
+
+	for ( let button of this.propertiesColumnMenu.buttons ) {
+		if ( button.def.internalRole ) { continue ; }
+
+		let valueFieldTextContent , valueFieldTextAttr ;
+		let value = subObject[ button.def.value ] ;
+
+		if ( value && typeof value === 'object' ) {
+			let proto = Object.getPrototypeOf( value ) ;
+
+			if ( Array.isArray( value ) ) {
+				valueFieldTextContent = proto?.constructor?.name ?? '<Array>' ;
+				valueFieldTextContent =
+					proto?.constructor?.name ? '<' + proto.constructor.name + '>' :
+					valueFieldTextContent = '<unknown array> ' ;
+
+				if ( value.length <= 10 ) {
+					valueFieldTextContent += ' ' + string.format( "%[1]n" , value ) ;
+				}
+				else {
+					valueFieldTextContent += ' [...]' ;
+				}
+			}
+			else {
+				valueFieldTextContent =
+					! proto ? '<null>' :
+					proto.constructor?.name ? '<' + proto.constructor.name + '>' :
+					valueFieldTextContent = '<unknown object> ' ;
+
+				if ( Object.keys( value ).length <= 10 ) {
+					valueFieldTextContent += ' ' + string.format( "%[1]n" , value ) ;
+				}
+				else {
+					valueFieldTextContent += ' {...}' ;
+				}
+			}
+
+			valueFieldTextAttr = { bgColor: '@orange--' , color: '@lighter-gray' } ;
+		}
+		else if ( typeof value === 'boolean' || value === null || value === undefined ) {
+			valueFieldTextContent = '' + value ;
+			valueFieldTextAttr = { bgColor: 'blue' , color: 'brightMagenta' , bold: true } ;
+		}
+		else if ( typeof value === 'number' ) {
+			valueFieldTextContent = '' + value ;
+			valueFieldTextAttr = { bgColor: 'blue' , color: 'brightCyan' } ;
+		}
+		else if ( typeof value === 'string' ) {
+			valueFieldTextContent = '' + value ;
+			valueFieldTextAttr = { bgColor: 'blue' , color: 'white' } ;
+		}
+		else {
+			valueFieldTextContent = '' + value ;
+			valueFieldTextAttr = { bgColor: 'blue' , color: 'gray' } ;
+		}
+
+		let valueFieldText = new Text( {
+			internal: true ,
+			parent: this ,
+			x: button.outputX + button.outputWidth + 2 ,
+			y: button.outputY ,
+			width: this.outputWidth - button.outputWidth - 2 ,
+			attr: valueFieldTextAttr ,
+			content: valueFieldTextContent ,
+			contentEllipsis: '…' ,
+			noDraw: true
+		} ) ;
+
+		this.valueFieldTextList.push( valueFieldText ) ;
+	}
+
+	this.redraw() ;
+} ;
+
+
+
+// Delete all children element
+Inspector.prototype.resetChildren = function() {
+	if ( ! this.valueFieldTextList.length && ! this.propertiesColumnMenu && ! this.breadCrumbText ) { return ; }
+
+	for ( let valueFieldText of this.valueFieldTextList ) { valueFieldText.destroyNoRedraw() ; }
+	this.valueFieldTextList.length = 0 ;
+
+	if ( this.propertiesColumnMenu ) {
+		this.propertiesColumnMenu.destroyNoRedraw() ;
+		this.propertiesColumnMenu = null ;
+	}
+
+	if ( this.breadCrumbRowMenu ) {
+		this.breadCrumbRowMenu.destroyNoRedraw() ;
+		this.breadCrumbRowMenu = null ;
+	}
+
+	if ( this.breadCrumbText ) {
+		this.breadCrumbText.destroyNoRedraw() ;
+		this.breadCrumbText = null ;
+	}
+
+	this.redraw() ;
+} ;
+
+
+
+// Not very useful, but could be later
+Inspector.prototype.getValue = function() { return this.inspectedObject ; } ;
+
+
+
+Inspector.prototype.levelUp = function() {
+	if ( this.inspectStack.length <= 1 ) { return ; }
+	this.inspectStack.pop() ;
+	this.initLevel() ;
+} ;
+
+
+
+Inspector.prototype.onPropertiesColumnMenuPageInit = function() {
+	this.createValueFieldTexts() ;
+} ;
+
+
+
+Inspector.prototype.onPropertiesColumnMenuSubmit = function( buttonValue , action , menu , button ) {
+	if ( action ) {
+		if ( action === 'levelUp' ) {
+			if ( this.inspectStack.length <= 1 ) { return ; }
+			this.inspectStack.pop() ;
+		}
+	}
+	else if ( button.internalRole === 'parent' ) {
+		if ( this.inspectStack.length <= 1 ) { return ; }
+		this.inspectStack.pop() ;
+	}
+	else {
+		let current = this.inspectStack[ this.inspectStack.length - 1 ] ,
+			subObject = current.object ;
+
+		if ( subObject[ buttonValue ] && typeof subObject[ buttonValue ] === 'object' ) {
+			current.fromKey = buttonValue ;
+			this.inspectStack.push( { object: subObject[ buttonValue ] , key: buttonValue } ) ;
+		}
+	}
+
+	this.initLevel() ;
+} ;
+
+
+
+Inspector.prototype.onBreadCrumbRowMenuSubmit = function( buttonValue , action , menu , button ) {
+	if ( buttonValue === this.inspectStack.length - 1 ) { return ; }
+	this.inspectStack.length = buttonValue + 1 ;
+	this.initLevel() ;
+} ;
+
+
+
+Inspector.prototype.onFocus = function( focus , type ) {
+	if ( type === 'cycle' || type === 'backCycle' ) { return ; }
+
+	if ( focus ) {
+		// Defer to the next tick to avoid recursive events producing wrong listener order
+		process.nextTick( () => {
+			if ( this.propertiesColumnMenu ) {
+				this.document.giveFocusTo( this.propertiesColumnMenu , 'delegate' ) ;
+			}
+			else {
+				this.focusChild = this.focusNextChild() ;
+			}
+		} ) ;
+	}
+} ;
+
+
+
+Inspector.prototype.onButtonSubmit = function( buttonValue , action , button ) {
+	// There is no submit button for instance, it will be used once we can edit values
+	/*
+		this.submitValue = buttonValue ;
+		this.emit( 'submit' , this.getValue() , action , this , button ) ;
+	*/
+} ;
+
+
+
+const userActions = Inspector.prototype.userActions ;
+
+userActions.levelUp = function() {
+	this.levelUp() ;
+} ;
+
+
+}).call(this)}).call(this,require('_process'))
+},{"./Button.js":17,"./ColumnMenu.js":18,"./Element.js":25,"./RowMenu.js":33,"./Text.js":37,"_process":191,"string-kit":133}],31:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -15577,7 +16149,9 @@ LabeledInput.prototype.initTextInput = function( options ) {
 		textAttr: this.textAttr ,
 		voidAttr: this.voidAttr ,
 		keyBindings: this.inputKeyBindings ,
-		noDraw: true
+		noDraw: true ,
+		autoWidth: options.autoWidth ,
+		autoHeight: options.autoHeight
 	} ) ;
 } ;
 
@@ -15738,7 +16312,7 @@ userActions.submit = function() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./EditableTextBox.js":24,"./Element.js":25,"./SelectList.js":33,"./SelectListMulti.js":34,"./Text.js":36,"_process":185,"string-kit":127}],31:[function(require,module,exports){
+},{"./EditableTextBox.js":24,"./Element.js":25,"./SelectList.js":34,"./SelectListMulti.js":35,"./Text.js":37,"_process":191,"string-kit":133}],32:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16103,7 +16677,7 @@ Layout.prototype.onParentResize = function() {
 } ;
 
 
-},{"../spChars.js":53,"./Container.js":21,"./Element.js":25}],32:[function(require,module,exports){
+},{"../spChars.js":54,"./Container.js":21,"./Element.js":25}],33:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16469,7 +17043,7 @@ RowMenu.prototype.preDrawSelf = function() {
 } ;
 
 
-},{"../misc.js":47,"./BaseMenu.js":15,"./Button.js":17,"./Element.js":25,"./ToggleButton.js":39,"string-kit":127}],33:[function(require,module,exports){
+},{"../misc.js":48,"./BaseMenu.js":15,"./Button.js":17,"./Element.js":25,"./ToggleButton.js":40,"string-kit":133}],34:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16697,7 +17271,7 @@ SelectList.prototype.onClickOut = function() { this.toggle( false ) ; } ;
 SelectList.prototype.getValue = function() { return this.value ; } ;
 
 
-},{"./BaseMenu.js":15,"./Button.js":17,"./ColumnMenu.js":18,"./Element.js":25}],34:[function(require,module,exports){
+},{"./BaseMenu.js":15,"./Button.js":17,"./ColumnMenu.js":18,"./Element.js":25}],35:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -16867,7 +17441,7 @@ SelectListMulti.prototype.onClickOut = function() {
 SelectListMulti.prototype.getValue = function() { return this.value ; } ;
 
 
-},{"./BaseMenu.js":15,"./Button.js":17,"./ColumnMenuMulti.js":20,"./Element.js":25}],35:[function(require,module,exports){
+},{"./BaseMenu.js":15,"./Button.js":17,"./ColumnMenuMulti.js":20,"./Element.js":25}],36:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -17196,7 +17770,7 @@ Slider.prototype.onWheel = function( data ) {
 } ;
 
 
-},{"./Button.js":17,"./Element.js":25}],36:[function(require,module,exports){
+},{"./Button.js":17,"./Element.js":25}],37:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -17240,20 +17814,38 @@ function Text( options ) {
 
 	this.leftPadding = options.leftPadding || '' ;
 	this.rightPadding = options.rightPadding || '' ;
+	this.paddingHasMarkup = !! options.paddingHasMarkup ;
+	this.leftPaddingWidth = 0 ;
+	this.rightPaddingWidth = 0 ;
 
 	if ( ! Array.isArray( options.content ) ) { options.content = [ options.content || '' ] ; }
 
 	// Usually done by the Element's constructor, but it's required now
 	// Also check that sub-class hasn't defined it yet...
-	this.content = this.content ?? options.content ;
-	this.contentHasMarkup = this.contentHasMarkup ?? options.contentHasMarkup ;
+	this.content = '' ;	// set by .setContent()
+	this.contentHasMarkup = options.contentHasMarkup || false ;	// can be true/false or 'ansi' or 'legacyAnsi'
+	this.contentEllipsis = options.contentEllipsis === true ? '…' : options.contentEllipsis || '' ;
 
-	// For width and height, we centralize here the work for sub-class having animations
-	if ( ! options.width ) {
-		options.width = this.computeRequiredWidth() ;
+	this.contentAdaptativeWidth = options.contentAdaptativeWidth ?? ! options.width ;
+	this.contentAdaptativeHeight = options.contentAdaptativeHeight ?? ! options.height ;
+
+	this.innerWidth = 0 ;	// content width + padding width
+
+	// We need to compute that now
+	if ( this.setContent === Text.prototype.setContent ) {
+		this.setContent( options.content , this.contentHasMarkup , true , true ) ;
 	}
 
-	options.height = this.computeRequiredHeight() ;
+	// Forced or adaptative windth/height?
+	if ( ! options.width ) {
+		options.width = this.innerWidth ;
+		options.contentAdaptativeWidth = true ;
+	}
+
+	if ( ! options.height ) {
+		options.height = this.contentHeight ;
+		options.contentAdaptativeHeight = true ;
+	}
 
 	Element.call( this , options ) ;
 
@@ -17269,33 +17861,63 @@ Text.prototype.forceContentArray = true ;
 
 
 
+Text.prototype.setContent = function( content , hasMarkup , dontDraw = false , dontResize = false ) {
+	if ( this.forceContentArray && ! Array.isArray( content ) ) { content = [ content || '' ] ; }
+
+	var oldOutputWidth = this.outputWidth ,
+		oldOutputHeight = this.outputHeight ;
+
+	this.content = content ;
+	this.contentHasMarkup = hasMarkup ;
+
+	this.computeRequiredWidth() ;
+	this.computeRequiredHeight() ;
+
+	if ( ! dontResize && this.resizeOnContent ) { this.resizeOnContent() ; }
+
+	if ( ! dontDraw ) {
+		if ( this.outputWidth < oldOutputWidth || this.outputHeight < oldOutputHeight ) {
+			this.outerDraw() ;
+		}
+		else {
+			this.draw() ;
+		}
+	}
+} ;
+
+
+
 Text.prototype.computeRequiredWidth = function() {
-	return (
-		Element.computeContentWidth( this.leftPadding , this.paddingHasMarkup )
-		+ Element.computeContentWidth( this.rightPadding , this.paddingHasMarkup )
-		+ ( this.animation ?
-			Math.max( ... this.animation.map( e => Element.computeContentWidth( e , this.contentHasMarkup ) ) ) :
-			Element.computeContentWidth( this.content , this.contentHasMarkup ) || 1
-		)
-	) ;
+	this.leftPaddingWidth = Element.computeContentWidth( this.leftPadding , this.paddingHasMarkup ) ;
+	this.rightPaddingWidth = Element.computeContentWidth( this.rightPadding , this.paddingHasMarkup ) ;
+	this.contentWidth =
+		this.animation ? Math.max( ... this.animation.map( e => Element.computeContentWidth( e , this.contentHasMarkup ) ) ) :
+		Element.computeContentWidth( this.content , this.contentHasMarkup ) || 1 ;
+	this.innerWidth = this.leftPaddingWidth + this.rightPaddingWidth + this.contentWidth ;
+
+	return this.innerWidth ;
 } ;
 
 
 
 Text.prototype.computeRequiredHeight = function() {
-	return (
-		this.animation ?
-			Math.max( ... this.animation.map( e => e.length ) ) :
-			this.content.length
-	) ;
+	this.contentHeight =
+		this.animation ? Math.max( ... this.animation.map( e => e.length ) ) :
+		this.content.length ;
+
+	return this.contentHeight ;
 } ;
 
 
 
 Text.prototype.resizeOnContent = function() {
-	// /!\ .width and .height are unused ATM
-	this.width = this.computeRequiredWidth( this.content , this.contentHasMarkup ) ;
-	this.height = this.computeRequiredHeight( this.content , this.contentHasMarkup ) ;
+	if ( this.contentAdaptativeWidth ) {
+		this.outputWidth = this.innerWidth ;
+	}
+
+	if ( this.contentAdaptativeHeight ) {
+		this.outputHeight = this.contentHeight ;
+	}
 } ;
 
 
@@ -17303,44 +17925,91 @@ Text.prototype.resizeOnContent = function() {
 Text.prototype.postDrawSelf = function() {
 	if ( ! this.outputDst ) { return this ; }
 
-	var gap , resumeAttr , lineNumber , contentLine ;
+	var resumeAttr ;
 
-	for ( lineNumber = 0 ; lineNumber < this.outputHeight ; lineNumber ++ ) {
-		contentLine = this.content[ lineNumber ] || '' ;
+	// This is the gap caused by an output width larger than its actual content + padding
+	var outputWidthGap = this.outputWidth - ( this.leftPaddingWidth + this.rightPaddingWidth + this.contentWidth ) ;
 
-		// Prepare the cursor position, since we will not "put at"
-		// We use cx/cy directly because we can violate bounds limit, and let .put() clip things away
-		this.outputDst.cx = this.outputX ;
-		this.outputDst.cy = this.outputY + lineNumber ;
-		//this.outputDst.moveTo( this.outputX , this.outputY + lineNumber ) ;
+	var contentClip = {
+		x: this.outputX + this.leftPaddingWidth ,
+		y: this.outputY ,
+		// NOT contentWidth, it could exceed the actual outputWidth
+		width: this.outputWidth - this.leftPaddingWidth - this.rightPaddingWidth ,
+		height: this.outputHeight
+	} ;
+
+	var elementClip = {
+		x: this.outputX ,
+		y: this.outputY ,
+		width: this.outputWidth ,
+		height: this.outputHeight
+	} ;
+
+	for ( let lineNumber = 0 ; lineNumber < this.outputHeight ; lineNumber ++ ) {
+		let contentLine = this.content[ lineNumber ] || '' ;
 
 		// Write the left padding
 		if ( this.leftPadding ) {
-			this.outputDst.put( { attr: this.attr , markup: this.paddingHasMarkup } , this.leftPadding ) ;
+			this.outputDst.put(
+				{
+					x: this.outputX ,
+					y: this.outputY + lineNumber ,
+					attr: this.attr ,
+					markup: this.paddingHasMarkup ,
+					clip: elementClip
+				} ,
+				this.leftPadding
+			) ;
+
+			let leftPaddingGap = this.outputX + this.leftPaddingWidth - this.outputDst.cx ;
+			if ( leftPaddingGap > 0 ) {
+				this.outputDst.put( { attr: this.attr } , ' '.repeat( leftPaddingGap ) ) ;
+			}
 		}
 
 		// Write the content
-		resumeAttr = this.outputDst.put( { attr: this.attr , resumeAttr: resumeAttr , markup: this.contentHasMarkup } , contentLine ) ;
+		resumeAttr = this.outputDst.put(
+			{
+				x: this.outputX + this.leftPaddingWidth ,
+				y: this.outputY + lineNumber ,
+				attr: this.attr ,
+				resumeAttr: resumeAttr ,
+				markup: this.contentHasMarkup ,
+				clip: contentClip ,
+				clipChar: this.contentEllipsis
+			} ,
+			contentLine
+		) ;
+
+		// We add the output width gap to the content gap
+		let contentGap = this.outputX + this.leftPaddingWidth + this.contentWidth + outputWidthGap - this.outputDst.cx ;
+		if ( contentGap > 0 ) {
+			this.outputDst.put( { attr: this.attr } , ' '.repeat( contentGap ) ) ;
+		}
 
 		// Write the right padding
 		if ( this.rightPadding ) {
-			this.outputDst.put( { attr: this.attr , markup: this.paddingHasMarkup } , this.rightPadding ) ;
-		}
+			this.outputDst.put(
+				{
+					x: this.outputX + this.outputWidth - this.rightPaddingWidth ,
+					y: this.outputY + lineNumber ,
+					attr: this.attr ,
+					markup: this.paddingHasMarkup ,
+					clip: elementClip
+				} ,
+				this.rightPadding
+			) ;
 
-		// NOTE: this.outputDst.cx is not incremented when it is already at the last column,
-		// so the "gap" formula only works if lesser than width - 1
-		if ( this.outputDst.cx < this.outputDst.width - 1 ) {
-			gap = this.outputX + this.outputWidth - this.outputDst.cx ;
-
-			if ( gap > 0 ) {
-				this.outputDst.put( { attr: this.attr } , ' '.repeat( gap ) ) ;
+			let rightPaddingGap = this.outputX + this.leftPaddingWidth + this.contentWidth + outputWidthGap + this.rightPaddingWidth - this.outputDst.cx ;
+			if ( rightPaddingGap > 0 ) {
+				this.outputDst.put( { attr: this.attr } , ' '.repeat( rightPaddingGap ) ) ;
 			}
 		}
 	}
 } ;
 
 
-},{"./Element.js":25}],37:[function(require,module,exports){
+},{"./Element.js":25}],38:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18030,7 +18699,7 @@ userActions.copyToSystemClipboard = function() {
 } ;
 
 
-},{"../Rect.js":2,"../ScreenBuffer.js":3,"../TextBuffer.js":6,"./Element.js":25,"./Slider.js":35,"string-kit":127}],38:[function(require,module,exports){
+},{"../Rect.js":2,"../ScreenBuffer.js":3,"../TextBuffer.js":6,"./Element.js":25,"./Slider.js":36,"string-kit":133}],39:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18614,7 +19283,7 @@ TextTable.prototype.preDrawSelf = function() {
 } ;
 
 
-},{"../spChars.js":53,"./Element.js":25,"./TextBox.js":37}],39:[function(require,module,exports){
+},{"../spChars.js":54,"./Element.js":25,"./TextBox.js":38}],40:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18780,7 +19449,7 @@ userActions.submit = function( key ) {
 } ;
 
 
-},{"./Button.js":17,"./Element.js":25,"./Text.js":36}],40:[function(require,module,exports){
+},{"./Button.js":17,"./Element.js":25,"./Text.js":37}],41:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -18900,7 +19569,7 @@ Window.prototype.preDrawSelf = function() {
 //Window.prototype.onDrag = function( data ) { Container.prototype.onDrag.call( this , data ) ; } ;
 
 
-},{"../spChars.js":53,"./Container.js":21,"./Element.js":25}],41:[function(require,module,exports){
+},{"../spChars.js":54,"./Container.js":21,"./Element.js":25}],42:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -18985,7 +19654,7 @@ else {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./patches.js":48,"_process":185,"child_process":141,"seventh":113,"string-kit":127}],42:[function(require,module,exports){
+},{"./patches.js":49,"_process":191,"child_process":148,"seventh":114,"string-kit":133}],43:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -19142,7 +19811,7 @@ exports.autoCompleteFile = async ( inputString , params ) => {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./autoComplete.js":7,"_process":185,"fs":141,"path":184,"seventh":113}],43:[function(require,module,exports){
+},{"./autoComplete.js":7,"_process":191,"fs":148,"path":190,"seventh":114}],44:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -19219,7 +19888,7 @@ module.exports = async function fileInput( options , callback ) {
 } ;
 
 
-},{"./fileHelpers.js":42,"path":184}],44:[function(require,module,exports){
+},{"./fileHelpers.js":43,"path":190}],45:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -19615,7 +20284,7 @@ module.exports = function gridMenu( menuItems_ , options , callback ) {
 } ;
 
 
-},{"seventh":113}],45:[function(require,module,exports){
+},{"seventh":114}],46:[function(require,module,exports){
 (function (global){(function (){
 /*
 	Terminal Kit
@@ -19758,7 +20427,7 @@ image.shrinkNdarrayImage = function shrinkNdarrayImage( pixels , options ) {
 
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@cronvel/get-pixels":63,"get-pixels":141,"ndarray":76,"seventh":113}],46:[function(require,module,exports){
+},{"@cronvel/get-pixels":64,"get-pixels":148,"ndarray":77,"seventh":114}],47:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -20829,7 +21498,7 @@ module.exports = function inputField( options , callback ) {
 } ;
 
 
-},{"./autoComplete.js":7,"nextgen-events":77,"seventh":113,"string-kit":127}],47:[function(require,module,exports){
+},{"./autoComplete.js":7,"nextgen-events":78,"seventh":114,"string-kit":133}],48:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -21422,7 +22091,7 @@ exports.userInterfaceNameToKey = key => {
 } ;
 
 
-},{"string-kit":127}],48:[function(require,module,exports){
+},{"string-kit":133}],49:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -21459,7 +22128,7 @@ const Promise = require( 'seventh' ) ;
 Promise.promisifyNodeApi( require( 'child_process' ) ) ;
 
 
-},{"child_process":141,"seventh":113}],49:[function(require,module,exports){
+},{"child_process":148,"seventh":114}],50:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -21934,7 +22603,7 @@ module.exports = function progressBar_( options ) {
 } ;
 
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -22638,7 +23307,7 @@ module.exports = function singleColumnMenu( menuItemsArg , options , callback ) 
 } ;
 
 
-},{"./termkit":55,"nextgen-events":77,"seventh":113,"string-kit":127}],51:[function(require,module,exports){
+},{"./termkit":56,"nextgen-events":78,"seventh":114,"string-kit":133}],52:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -23117,7 +23786,7 @@ module.exports = function singleLineMenu( menuItems_ , options , callback ) {
 } ;
 
 
-},{"./termkit":55,"nextgen-events":77,"seventh":113}],52:[function(require,module,exports){
+},{"./termkit":56,"nextgen-events":78,"seventh":114}],53:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -23216,7 +23885,7 @@ module.exports = function slowTyping( str , options , callback ) {
 } ;
 
 
-},{"seventh":113}],53:[function(require,module,exports){
+},{"seventh":114}],54:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -23505,7 +24174,7 @@ module.exports = {
 } ;
 
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -23595,6 +24264,7 @@ termkit.LabeledInput = require( './document/LabeledInput.js' ) ;
 termkit.InlineInput = require( './document/InlineInput.js' ) ;
 termkit.InlineFileInput = require( './document/InlineFileInput.js' ) ;
 termkit.InlineMenu = require( './document/InlineMenu.js' ) ;
+termkit.Inspector = require( './document/Inspector.js' ) ;
 termkit.Form = require( './document/Form.js' ) ;
 termkit.RowMenu = require( './document/RowMenu.js' ) ;
 termkit.ColumnMenu = require( './document/ColumnMenu.js' ) ;
@@ -23651,7 +24321,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Border.js":16,"./document/Button.js":17,"./document/ColumnMenu.js":18,"./document/ColumnMenuMixed.js":19,"./document/ColumnMenuMulti.js":20,"./document/Container.js":21,"./document/Document.js":22,"./document/DropDownMenu.js":23,"./document/EditableTextBox.js":24,"./document/Element.js":25,"./document/Form.js":26,"./document/InlineFileInput.js":27,"./document/InlineInput.js":28,"./document/InlineMenu.js":29,"./document/LabeledInput.js":30,"./document/Layout.js":31,"./document/RowMenu.js":32,"./document/SelectList.js":33,"./document/SelectListMulti.js":34,"./document/Slider.js":35,"./document/Text.js":36,"./document/TextBox.js":37,"./document/TextTable.js":38,"./document/ToggleButton.js":39,"./document/Window.js":40,"./image.js":45,"./misc.js":47,"./spChars.js":53,"./tty.js":56,"./vte/Vte.js":58,"./windows.js":61,"_process":185,"chroma-js":64,"lazyness":73}],55:[function(require,module,exports){
+},{"./Palette.js":1,"./Rect.js":2,"./ScreenBuffer.js":3,"./ScreenBufferHD.js":4,"./Terminal.js":5,"./TextBuffer.js":6,"./autoComplete.js":7,"./detectTerminal.js":12,"./document/AnimatedText.js":13,"./document/Bar.js":14,"./document/Border.js":16,"./document/Button.js":17,"./document/ColumnMenu.js":18,"./document/ColumnMenuMixed.js":19,"./document/ColumnMenuMulti.js":20,"./document/Container.js":21,"./document/Document.js":22,"./document/DropDownMenu.js":23,"./document/EditableTextBox.js":24,"./document/Element.js":25,"./document/Form.js":26,"./document/InlineFileInput.js":27,"./document/InlineInput.js":28,"./document/InlineMenu.js":29,"./document/Inspector.js":30,"./document/LabeledInput.js":31,"./document/Layout.js":32,"./document/RowMenu.js":33,"./document/SelectList.js":34,"./document/SelectListMulti.js":35,"./document/Slider.js":36,"./document/Text.js":37,"./document/TextBox.js":38,"./document/TextTable.js":39,"./document/ToggleButton.js":40,"./document/Window.js":41,"./image.js":46,"./misc.js":48,"./spChars.js":54,"./tty.js":57,"./vte/Vte.js":59,"./windows.js":62,"_process":191,"chroma-js":65,"lazyness":74}],56:[function(require,module,exports){
 (function (process,__dirname){(function (){
 /*
 	Terminal Kit
@@ -23753,6 +24423,7 @@ lazy.requireProperties( termkit , {
 	InlineInput: './document/InlineInput.js' ,
 	InlineFileInput: './document/InlineFileInput.js' ,
 	InlineMenu: './document/InlineMenu.js' ,
+	Inspector: './document/Inspector.js' ,
 	Form: './document/Form.js' ,
 	RowMenu: './document/RowMenu.js' ,
 	ColumnMenu: './document/ColumnMenu.js' ,
@@ -23810,7 +24481,7 @@ lazy.properties( termkit , {
 
 
 }).call(this)}).call(this,require('_process'),"/lib")
-},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":47,"./termkit-no-lazy-require.js":54,"./windows.js":61,"_process":185,"lazyness":73,"path":184}],56:[function(require,module,exports){
+},{"./Terminal.js":5,"./detectTerminal.js":12,"./misc.js":48,"./termkit-no-lazy-require.js":55,"./windows.js":62,"_process":191,"lazyness":74,"path":190}],57:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Terminal Kit
@@ -23970,7 +24641,7 @@ tty_.getOutput = function getOutput() {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":185,"child_process":141,"fs":141,"tty":204}],57:[function(require,module,exports){
+},{"_process":191,"child_process":148,"fs":148,"tty":210}],58:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	Terminal Kit
@@ -24325,7 +24996,7 @@ SequencesReader.prototype.streamToEvent = async function( stream ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./fromOutputSequence.js":59,"buffer":151,"nextgen-events":77,"seventh":113,"string-kit":127}],58:[function(require,module,exports){
+},{"./fromOutputSequence.js":60,"buffer":159,"nextgen-events":78,"seventh":114,"string-kit":133}],59:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25333,7 +26004,7 @@ Vte.prototype.onChildOutputOSC = function( type , args ) {
 } ;
 
 
-},{"../Rect.js":2,"../ScreenBuffer.js":3,"./SequencesReader.js":57,"./toInputSequence.js":60,"child_process":141,"child_pty":141,"nextgen-events":77,"seventh":113,"string-kit":127}],59:[function(require,module,exports){
+},{"../Rect.js":2,"../ScreenBuffer.js":3,"./SequencesReader.js":58,"./toInputSequence.js":61,"child_process":148,"child_pty":148,"nextgen-events":78,"seventh":114,"string-kit":133}],60:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25587,7 +26258,7 @@ exports.OSC = {
 } ;
 
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25787,7 +26458,7 @@ exports.reports = {
 } ;
 
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25828,7 +26499,7 @@ module.exports = function( termkit ) {
 
 
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /*
 	Terminal Kit
 
@@ -25925,7 +26596,7 @@ module.exports = function yesOrNo( options , callback ) {
 } ;
 
 
-},{"seventh":113}],63:[function(require,module,exports){
+},{"seventh":114}],64:[function(require,module,exports){
 (function (Buffer){(function (){
 'use strict'
 
@@ -26076,8 +26747,8 @@ module.exports = function getPixels(url, type, cb) {
   }
 }
 
-}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":167,"fs":141,"jpeg-js":70,"ndarray":76,"ndarray-pack":74,"node-bitmap":80,"omggif":82,"path":184,"pngjs":102}],64:[function(require,module,exports){
+}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":174,"fs":148,"jpeg-js":71,"ndarray":77,"ndarray-pack":75,"node-bitmap":81,"omggif":83,"path":190,"pngjs":103}],65:[function(require,module,exports){
 /**
  * chroma.js - JavaScript library for color conversions
  *
@@ -29662,7 +30333,7 @@ module.exports = function getPixels(url, type, cb) {
 
 }));
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 "use strict"
 
 var createThunk = require("./lib/thunk.js")
@@ -29773,7 +30444,7 @@ function compileCwise(user_args) {
 
 module.exports = compileCwise
 
-},{"./lib/thunk.js":67}],66:[function(require,module,exports){
+},{"./lib/thunk.js":68}],67:[function(require,module,exports){
 "use strict"
 
 var uniq = require("uniq")
@@ -30133,7 +30804,7 @@ function generateCWiseOp(proc, typesig) {
 }
 module.exports = generateCWiseOp
 
-},{"uniq":140}],67:[function(require,module,exports){
+},{"uniq":147}],68:[function(require,module,exports){
 "use strict"
 
 // The function below is called when constructing a cwise function object, and does the following:
@@ -30221,7 +30892,7 @@ function createThunk(proc) {
 
 module.exports = createThunk
 
-},{"./compile.js":66}],68:[function(require,module,exports){
+},{"./compile.js":67}],69:[function(require,module,exports){
 "use strict"
 
 function iota(n) {
@@ -30233,7 +30904,7 @@ function iota(n) {
 }
 
 module.exports = iota
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -30256,7 +30927,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 var encode = require('./lib/encoder'),
     decode = require('./lib/decoder');
 
@@ -30265,7 +30936,7 @@ module.exports = {
   decode: decode
 };
 
-},{"./lib/decoder":71,"./lib/encoder":72}],71:[function(require,module,exports){
+},{"./lib/decoder":72,"./lib/encoder":73}],72:[function(require,module,exports){
 (function (Buffer){(function (){
 /* -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
@@ -31420,7 +32091,7 @@ function decode(jpegData, userOpts = {}) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":151}],72:[function(require,module,exports){
+},{"buffer":159}],73:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
   Copyright (c) 2008, Adobe Systems Incorporated
@@ -32238,7 +32909,7 @@ function getImageDataFromImage(idOrElement){
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":151}],73:[function(require,module,exports){
+},{"buffer":159}],74:[function(require,module,exports){
 /*
 	Lazyness
 
@@ -32461,7 +33132,7 @@ Lazyness.prototype.requireProperties = function( object , properties , enumerabl
 } ;
 
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 "use strict"
 
 var ndarray = require("ndarray")
@@ -32484,10 +33155,10 @@ module.exports = function convert(arr, result) {
   return result
 }
 
-},{"./doConvert.js":75,"ndarray":76}],75:[function(require,module,exports){
+},{"./doConvert.js":76,"ndarray":77}],76:[function(require,module,exports){
 module.exports=require('cwise-compiler')({"args":["array","scalar","index"],"pre":{"body":"{}","args":[],"thisVars":[],"localVars":[]},"body":{"body":"{\nvar _inline_1_v=_inline_1_arg1_,_inline_1_i\nfor(_inline_1_i=0;_inline_1_i<_inline_1_arg2_.length-1;++_inline_1_i) {\n_inline_1_v=_inline_1_v[_inline_1_arg2_[_inline_1_i]]\n}\n_inline_1_arg0_=_inline_1_v[_inline_1_arg2_[_inline_1_arg2_.length-1]]\n}","args":[{"name":"_inline_1_arg0_","lvalue":true,"rvalue":false,"count":1},{"name":"_inline_1_arg1_","lvalue":false,"rvalue":true,"count":1},{"name":"_inline_1_arg2_","lvalue":false,"rvalue":true,"count":4}],"thisVars":[],"localVars":["_inline_1_i","_inline_1_v"]},"post":{"body":"{}","args":[],"thisVars":[],"localVars":[]},"funcName":"convert","blockSize":64})
 
-},{"cwise-compiler":65}],76:[function(require,module,exports){
+},{"cwise-compiler":66}],77:[function(require,module,exports){
 var iota = require("iota-array")
 var isBuffer = require("is-buffer")
 
@@ -32838,7 +33509,7 @@ function wrappedNDArrayCtor(data, shape, stride, offset) {
 
 module.exports = wrappedNDArrayCtor
 
-},{"iota-array":68,"is-buffer":69}],77:[function(require,module,exports){
+},{"iota-array":69,"is-buffer":70}],78:[function(require,module,exports){
 (function (process,global,setImmediate){(function (){
 /*
 	Next-Gen Events
@@ -34260,7 +34931,7 @@ NextGenEvents.Proxy = require( './Proxy.js' ) ;
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"../package.json":79,"./Proxy.js":78,"_process":185,"timers":203}],78:[function(require,module,exports){
+},{"../package.json":80,"./Proxy.js":79,"_process":191,"timers":209}],79:[function(require,module,exports){
 /*
 	Next-Gen Events
 
@@ -34807,7 +35478,7 @@ RemoteService.prototype.receiveAckEmit = function( message ) {
 } ;
 
 
-},{"./NextGenEvents.js":77}],79:[function(require,module,exports){
+},{"./NextGenEvents.js":78}],80:[function(require,module,exports){
 module.exports={
   "name": "nextgen-events",
   "version": "1.5.3",
@@ -34867,10 +35538,10 @@ module.exports={
   }
 }
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 module.exports = require('./lib/bitmap');
 
-},{"./lib/bitmap":81}],81:[function(require,module,exports){
+},{"./lib/bitmap":82}],82:[function(require,module,exports){
 (function (Buffer){(function (){
 var Bitmap = module.exports = exports = function(buffer){
   this.buffer = buffer;
@@ -35475,7 +36146,7 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":151}],82:[function(require,module,exports){
+},{"buffer":159}],83:[function(require,module,exports){
 // (c) Dean McNamee <dean@gmail.com>, 2013.
 //
 // https://github.com/deanm/omggif
@@ -36284,7 +36955,7 @@ function GifReaderLZWOutputIndexStream(code_stream, p, output, output_length) {
 // CommonJS.
 try { exports.GifWriter = GifWriter; exports.GifReader = GifReader } catch(e) {}
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36555,7 +37226,7 @@ exports.dataToBitMap = function (data, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":93,"buffer":151}],84:[function(require,module,exports){
+},{"./interlace":94,"buffer":159}],85:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -36717,7 +37388,7 @@ module.exports = function (dataIn, width, height, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":86,"buffer":151}],85:[function(require,module,exports){
+},{"./constants":87,"buffer":159}],86:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -36910,7 +37581,7 @@ ChunkStream.prototype._process = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":185,"buffer":151,"stream":187,"util":208}],86:[function(require,module,exports){
+},{"_process":191,"buffer":159,"stream":193,"util":214}],87:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -36944,7 +37615,7 @@ module.exports = {
   GAMMA_DIVISION: 100000,
 };
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict";
 
 let crcTable = [];
@@ -36986,7 +37657,7 @@ CrcCalculator.crc32 = function (buf) {
   return crc ^ -1;
 };
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37161,7 +37832,7 @@ module.exports = function (pxData, width, height, options, bpp) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./paeth-predictor":97,"buffer":151}],89:[function(require,module,exports){
+},{"./paeth-predictor":98,"buffer":159}],90:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37189,7 +37860,7 @@ let FilterAsync = (module.exports = function (bitmapInfo) {
 util.inherits(FilterAsync, ChunkStream);
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./chunkstream":85,"./filter-parse":91,"buffer":151,"util":208}],90:[function(require,module,exports){
+},{"./chunkstream":86,"./filter-parse":92,"buffer":159,"util":214}],91:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37214,7 +37885,7 @@ exports.process = function (inBuffer, bitmapInfo) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./filter-parse":91,"./sync-reader":104,"buffer":151}],91:[function(require,module,exports){
+},{"./filter-parse":92,"./sync-reader":105,"buffer":159}],92:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37395,7 +38066,7 @@ Filter.prototype._reverseFilterLine = function (rawData) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./interlace":93,"./paeth-predictor":97,"buffer":151}],92:[function(require,module,exports){
+},{"./interlace":94,"./paeth-predictor":98,"buffer":159}],93:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37492,7 +38163,7 @@ module.exports = function (indata, imageData, skipRescale = false) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":151}],93:[function(require,module,exports){
+},{"buffer":159}],94:[function(require,module,exports){
 "use strict";
 
 // Adam 7
@@ -37589,7 +38260,7 @@ exports.getInterlaceIterator = function (width) {
   };
 };
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37643,7 +38314,7 @@ PackerAsync.prototype.pack = function (data, width, height, gamma) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":86,"./packer":96,"buffer":151,"stream":187,"util":208}],95:[function(require,module,exports){
+},{"./constants":87,"./packer":97,"buffer":159,"stream":193,"util":214}],96:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37703,7 +38374,7 @@ module.exports = function (metaData, opt) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":86,"./packer":96,"buffer":151,"zlib":150}],96:[function(require,module,exports){
+},{"./constants":87,"./packer":97,"buffer":159,"zlib":158}],97:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -37836,7 +38507,7 @@ Packer.prototype.packIEND = function () {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitpacker":84,"./constants":86,"./crc":87,"./filter-pack":88,"buffer":151,"zlib":150}],97:[function(require,module,exports){
+},{"./bitpacker":85,"./constants":87,"./crc":88,"./filter-pack":89,"buffer":159,"zlib":158}],98:[function(require,module,exports){
 "use strict";
 
 module.exports = function paethPredictor(left, above, upLeft) {
@@ -37854,7 +38525,7 @@ module.exports = function paethPredictor(left, above, upLeft) {
   return upLeft;
 };
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 "use strict";
 
 let util = require("util");
@@ -38025,7 +38696,7 @@ ParserAsync.prototype._complete = function (filteredData) {
   this.emit("parsed", normalisedBitmapData);
 };
 
-},{"./bitmapper":83,"./chunkstream":85,"./filter-parse-async":89,"./format-normaliser":92,"./parser":100,"util":208,"zlib":150}],99:[function(require,module,exports){
+},{"./bitmapper":84,"./chunkstream":86,"./filter-parse-async":90,"./format-normaliser":93,"./parser":101,"util":214,"zlib":158}],100:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -38141,7 +38812,7 @@ module.exports = function (buffer, options) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./bitmapper":83,"./filter-parse-sync":90,"./format-normaliser":92,"./parser":100,"./sync-inflate":103,"./sync-reader":104,"buffer":151,"zlib":150}],100:[function(require,module,exports){
+},{"./bitmapper":84,"./filter-parse-sync":91,"./format-normaliser":93,"./parser":101,"./sync-inflate":104,"./sync-reader":105,"buffer":159,"zlib":158}],101:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 
@@ -38435,7 +39106,7 @@ Parser.prototype._parseIEND = function (data) {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":86,"./crc":87,"buffer":151}],101:[function(require,module,exports){
+},{"./constants":87,"./crc":88,"buffer":159}],102:[function(require,module,exports){
 "use strict";
 
 let parse = require("./parser-sync");
@@ -38449,7 +39120,7 @@ exports.write = function (png, options) {
   return pack(png, options);
 };
 
-},{"./packer-sync":95,"./parser-sync":99}],102:[function(require,module,exports){
+},{"./packer-sync":96,"./parser-sync":100}],103:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -38647,7 +39318,7 @@ PNG.prototype.adjustGamma = function () {
 };
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"./packer-async":94,"./parser-async":98,"./png-sync":101,"_process":185,"buffer":151,"stream":187,"util":208}],103:[function(require,module,exports){
+},{"./packer-async":95,"./parser-async":99,"./png-sync":102,"_process":191,"buffer":159,"stream":193,"util":214}],104:[function(require,module,exports){
 (function (process,Buffer){(function (){
 "use strict";
 
@@ -38819,7 +39490,7 @@ exports.createInflate = createInflate;
 exports.inflateSync = inflateSync;
 
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":185,"assert":142,"buffer":151,"util":208,"zlib":150}],104:[function(require,module,exports){
+},{"_process":191,"assert":150,"buffer":159,"util":214,"zlib":158}],105:[function(require,module,exports){
 "use strict";
 
 let SyncReader = (module.exports = function (buffer) {
@@ -38866,7 +39537,7 @@ SyncReader.prototype.process = function () {
   }
 };
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (process,global){(function (){
 (function (global, undefined) {
     "use strict";
@@ -39056,7 +39727,7 @@ SyncReader.prototype.process = function () {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":185}],106:[function(require,module,exports){
+},{"_process":191}],107:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39285,7 +39956,7 @@ Queue.prototype.getStats = function() {
 } ;
 
 
-},{"./seventh.js":113}],107:[function(require,module,exports){
+},{"./seventh.js":114}],108:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39369,7 +40040,7 @@ Promise.promisifyAnyNodeApi = ( api , suffix , multiSuffix , filter ) => {
 
 
 
-},{"./seventh.js":113}],108:[function(require,module,exports){
+},{"./seventh.js":114}],109:[function(require,module,exports){
 /*
 	Seventh
 
@@ -39398,8 +40069,6 @@ Promise.promisifyAnyNodeApi = ( api , suffix , multiSuffix , filter ) => {
 
 "use strict" ;
 
-/* global AggregateError */
-
 
 
 const Promise = require( './seventh.js' ) ;
@@ -39414,7 +40083,7 @@ function noop() {}
 
 
 Promise.all = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39506,7 +40175,7 @@ Promise._allArrayOne = ( value , index , runtime ) => {
 
 
 Promise.allSettled = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39557,7 +40226,7 @@ Promise.allSettled = ( iterable ) => {
 // Promise.all() with an iterator
 Promise.every =
 Promise.map = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		allPromise = new Promise() ;
@@ -39609,7 +40278,7 @@ Promise.map = ( iterable , iterator ) => {
 	with, as a reason an AggregateError of all promise rejection reasons.
 */
 Promise.any = ( iterable ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value ,
 		errors = [] ,
@@ -39655,7 +40324,7 @@ Promise.any = ( iterable ) => {
 
 // Like Promise.any() but with an iterator
 Promise.some = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value ,
 		errors = [] ,
@@ -39710,7 +40379,7 @@ Promise.some = ( iterable , iterator ) => {
 	Any rejection reject the whole promise.
 */
 Promise.filter = ( iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		count = 0 , length = Infinity ,
 		value , values = [] ,
 		filterPromise = new Promise() ;
@@ -39768,7 +40437,7 @@ Promise.filter = ( iterable , iterator ) => {
 // Force a function statement because we are using arguments.length, so we can support accumulator equals to undefined
 Promise.foreach =
 Promise.forEach = function( iterable , iterator , accumulator ) {
-	var index = -1 ,
+	var index = - 1 ,
 		isReduce = arguments.length >= 3 ,
 		it = iterable[Symbol.iterator]() ,
 		forEachPromise = new Promise() ,
@@ -39879,7 +40548,7 @@ Promise.mapObject = ( inputObject , iterator ) => {
 
 // Like map, but with a concurrency limit
 Promise.concurrent = ( limit , iterable , iterator ) => {
-	var index = -1 , settled = false ,
+	var index = - 1 , settled = false ,
 		running = 0 ,
 		count = 0 , length = Infinity ,
 		value , done = false ,
@@ -39994,7 +40663,7 @@ Promise.race = ( iterable ) => {
 } ;
 
 
-},{"./seventh.js":113}],109:[function(require,module,exports){
+},{"./seventh.js":114}],110:[function(require,module,exports){
 (function (process,global,setImmediate){(function (){
 /*
 	Seventh
@@ -40073,6 +40742,7 @@ module.exports = Promise ;
 
 Promise.Native = NativePromise ;
 Promise.warnUnhandledRejection = true ;
+Promise.nextTick = nextTick ;
 
 
 
@@ -40229,6 +40899,18 @@ Promise.prototype.resolveTimeout = Promise.prototype.fulfillTimeout = function( 
 
 Promise.prototype.rejectTimeout = function( time , error ) {
 	setTimeout( () => this.reject( error ) , time ) ;
+} ;
+
+
+
+Promise.prototype.resolveNextTick = Promise.prototype.fulfillNextTick = function( result ) {
+	nextTick( () => this.resolve( result ) ) ;
+} ;
+
+
+
+Promise.prototype.rejectNextTick = function( error ) {
+	nextTick( () => this.reject( error ) ) ;
 } ;
 
 
@@ -40753,7 +41435,7 @@ if ( process.browser ) {
 
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":185,"setimmediate":105,"timers":203}],110:[function(require,module,exports){
+},{"_process":191,"setimmediate":106,"timers":209}],111:[function(require,module,exports){
 /*
 	Seventh
 
@@ -40785,6 +41467,7 @@ if ( process.browser ) {
 
 
 const Promise = require( './seventh.js' ) ;
+const noop = () => undefined ;
 
 
 
@@ -40861,13 +41544,24 @@ Promise.promisify = ( nodeAsyncFn , thisBinding ) => {
 
 
 /*
-	Pass a function that will be called every time the decoratee return something.
+	Intercept each decoratee resolve/reject.
 */
-Promise.returnValueInterceptor = ( interceptor , asyncFn , thisBinding ) => {
+Promise.interceptor = ( asyncFn , interceptor , errorInterceptor , thisBinding ) => {
+	if ( typeof errorInterceptor !== 'function' ) {
+		thisBinding = errorInterceptor ;
+		errorInterceptor = noop ;
+	}
+
 	return function( ... args ) {
-		var returnVal = asyncFn.call( thisBinding || this , ... args ) ;
-		interceptor( returnVal ) ;
-		return returnVal ;
+		var localThis = thisBinding || this ,
+			maybePromise = asyncFn.call( localThis , ... args ) ;
+
+		Promise.resolve( maybePromise ).then(
+			value => interceptor.call( localThis , value ) ,
+			error => errorInterceptor.call( localThis , error )
+		) ;
+
+		return maybePromise ;
 	} ;
 } ;
 
@@ -40877,16 +41571,34 @@ Promise.returnValueInterceptor = ( interceptor , asyncFn , thisBinding ) => {
 	Run only once, return always the same promise.
 */
 Promise.once = ( asyncFn , thisBinding ) => {
-	var triggered = false ;
-	var result ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = {
+			triggered: false ,
+			result: undefined
+		} ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
 
 	return function( ... args ) {
-		if ( ! triggered ) {
-			triggered = true ;
-			result = asyncFn.call( thisBinding || this , ... args ) ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
+
+		if ( ! instance.triggered ) {
+			instance.triggered = true ;
+			instance.result = asyncFn.call( localThis , ... args ) ;
 		}
 
-		return result ;
+		return instance.result ;
 	} ;
 } ;
 
@@ -40896,16 +41608,31 @@ Promise.once = ( asyncFn , thisBinding ) => {
 	The decoratee execution does not overlap, multiple calls are serialized.
 */
 Promise.serialize = ( asyncFn , thisBinding ) => {
-	var lastPromise = new Promise.resolve() ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { lastPromise: Promise.resolve() } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
 
 	return function( ... args ) {
-		var promise = new Promise() ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ,
+			promise = new Promise() ;
 
-		lastPromise.finally( () => {
-			Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
+		instance.lastPromise.finally( () => {
+			Promise.propagate( asyncFn.call( localThis , ... args ) , promise ) ;
 		} ) ;
 
-		lastPromise = promise ;
+		instance.lastPromise = promise ;
 
 		return promise ;
 	} ;
@@ -40914,20 +41641,32 @@ Promise.serialize = ( asyncFn , thisBinding ) => {
 
 
 /*
-	It does nothing if the decoratee is still in progress, but return the promise of the action in progress.
+	It does nothing if the decoratee is still in progress, but it returns the promise of the action in progress.
 */
 Promise.debounce = ( asyncFn , thisBinding ) => {
-	var inProgress = null ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
-	const outWrapper = () => {
-		inProgress = null ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { inProgress: null } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
 	} ;
 
 	return function( ... args ) {
-		if ( inProgress ) { return inProgress ; }
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		inProgress = asyncFn.call( thisBinding || this , ... args ) ;
-		Promise.finally( inProgress , outWrapper ) ;
+		if ( instance.inProgress ) { return instance.inProgress ; }
+
+		let inProgress = instance.inProgress = asyncFn.call( localThis , ... args ) ;
+		Promise.finally( inProgress , () => instance.inProgress = null ) ;
 		return inProgress ;
 	} ;
 } ;
@@ -40938,18 +41677,131 @@ Promise.debounce = ( asyncFn , thisBinding ) => {
 	Like .debounce(), but subsequent call continue to return the last promise for some extra time after it resolved.
 */
 Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
-	var inProgress = null ;
+	var functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
-	const outWrapper = () => {
-		setTimeout( () => inProgress = null , delay ) ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = { inProgress: null } ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
 	} ;
 
 	return function( ... args ) {
-		if ( inProgress ) { return inProgress ; }
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		inProgress = asyncFn.call( thisBinding || this , ... args ) ;
-		Promise.finally( inProgress , outWrapper ) ;
+		if ( instance.inProgress ) { return instance.inProgress ; }
+
+		let inProgress = instance.inProgress = asyncFn.call( localThis , ... args ) ;
+		Promise.finally( inProgress , () => setTimeout( () => instance.inProgress = null , delay ) ) ;
 		return inProgress ;
+	} ;
+} ;
+
+
+
+/*
+	debounceNextTick( [asyncFn|syncFn] , thisBinding ) => {
+
+	It does nothing until the next tick.
+	The decoratee is called only once with the arguments of the last decorator call.
+	The function argument can be sync or async.
+
+	The use case is can be some niche case of .update()/.refresh()/.redraw() functions.
+*/
+Promise.debounceNextTick = ( asyncFn , thisBinding ) => {
+	var inWrapper = null ,
+		outWrapper = null ,
+		waitFn = null ,
+		functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
+
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
+
+		instance = {
+			inProgress: null ,
+			waitingNextTick: false ,
+			currentUpdateWith: null ,
+			currentUpdatePromise: null ,
+			nextUpdateWith: null ,
+			nextUpdatePromise: null
+		} ;
+
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
+
+
+	const nextUpdate = function() {
+		var instance = getInstance( this ) ;
+		instance.inProgress = instance.currentUpdatePromise = null ;
+
+		if ( instance.nextUpdateWith ) {
+			let args = instance.nextUpdateWith ;
+			instance.nextUpdateWith = null ;
+			let sharedPromise = instance.nextUpdatePromise ;
+			instance.nextUpdatePromise = null ;
+
+			instance.inProgress = inWrapper.call( this , args ) ;
+			// Forward the result to the pending promise
+			Promise.propagate( instance.inProgress , sharedPromise ) ;
+		}
+	} ;
+
+
+	inWrapper = function( args ) {
+		var instance = getInstance( this ) ;
+
+		instance.inProgress = new Promise() ;
+		instance.currentUpdateWith = args ;
+		instance.waitingNextTick = true ;
+
+		Promise.nextTick( () => {
+			instance.waitingNextTick = false ;
+			let maybePromise = asyncFn.call( this , ... instance.currentUpdateWith ) ;
+
+			if ( Promise.isThenable( maybePromise ) ) {
+				instance.currentUpdatePromise = maybePromise ;
+				Promise.finally( maybePromise , nextUpdate.bind( this ) ) ;
+				Promise.propagate( maybePromise , instance.inProgress ) ;
+			}
+			else {
+				// the function was synchronous
+				instance.currentUpdatePromise = null ;
+				instance.inProgress.resolve( maybePromise ) ;
+				nextUpdate.call( this ) ;
+			}
+		} ) ;
+
+		return instance.inProgress ;
+	} ;
+
+	return function( ... args ) {
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
+
+		if ( instance.waitingNextTick ) {
+			instance.currentUpdateWith = args ;
+			return instance.inProgress ;
+		}
+
+		if ( instance.currentUpdatePromise ) {
+			if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+			instance.nextUpdateWith = args ;
+			return instance.nextUpdatePromise ;
+		}
+
+		return inWrapper.call( localThis , args ) ;
 	} ;
 } ;
 
@@ -40970,18 +41822,13 @@ Promise.debounceDelay = ( delay , asyncFn , thisBinding ) => {
 		* waitFn: async `function` called before calling the decoratee (even the first try), use-case: Window.requestAnimationFrame()
 */
 Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
-	var inProgress = null ,
-		waitInProgress = null ,
-		currentUpdateWith = null ,
-		currentUpdatePromise = null ,
-		nextUpdateWith = null ,
-		nextUpdatePromise = null ,
+	var inWrapper = null ,
+		outWrapper = null ,
 		delay = 0 ,
 		delayFn = null ,
 		waitFn = null ,
-		inWrapper = null ,
-		outWrapper = null ;
-
+		functionInstance = null ,	// instance when not called as an object's method but a regular function ('this' is undefined)
+		instanceMap = new WeakMap() ;
 
 	// Manage arguments
 	if ( typeof options === 'function' ) {
@@ -40991,32 +41838,59 @@ Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
 	else {
 		if ( typeof options.delay === 'number' ) { delay = options.delay ; }
 		if ( typeof options.delayFn === 'function' ) { delayFn = options.delayFn ; }
-		if ( typeof options.waitFn === 'function' ) { waitFn = options.waitFn ; }
+
+		if ( options.waitNextTick ) { waitFn = Promise.resolveNextTick ; }
+		else if ( typeof options.waitFn === 'function' ) { waitFn = options.waitFn ; }
 	}
 
 
-	const nextUpdate = () => {
-		inProgress = currentUpdatePromise = null ;
+	const getInstance = ( localThis ) => {
+		var instance = localThis ? instanceMap.get( localThis ) : functionInstance ;
+		if ( instance ) { return instance ; }
 
-		if ( nextUpdateWith ) {
-			let callArgs = nextUpdateWith ;
-			nextUpdateWith = null ;
-			let sharedPromise = nextUpdatePromise ;
-			nextUpdatePromise = null ;
+		instance = {
+			inProgress: null ,
+			waitInProgress: null ,
+			currentUpdateWith: null ,
+			currentUpdatePromise: null ,
+			nextUpdateWith: null ,
+			nextUpdatePromise: null
+		} ;
 
-			inProgress = inWrapper( callArgs ) ;
+		if ( localThis ) { instanceMap.set( localThis , instance ) ; }
+		else { functionInstance = instance ; }
+
+		return instance ;
+	} ;
+
+
+	const nextUpdate = function() {
+		var instance = getInstance( this ) ;
+		instance.inProgress = instance.currentUpdatePromise = null ;
+
+		if ( instance.nextUpdateWith ) {
+			let args = instance.nextUpdateWith ;
+			instance.nextUpdateWith = null ;
+			let sharedPromise = instance.nextUpdatePromise ;
+			instance.nextUpdatePromise = null ;
+
+			instance.inProgress = inWrapper.call( this , args ) ;
 			// Forward the result to the pending promise
-			Promise.propagate( inProgress , sharedPromise ) ;
+			Promise.propagate( instance.inProgress , sharedPromise ) ;
 		}
 	} ;
 
 
 	// Build outWrapper
 	if ( delayFn ) {
-		outWrapper = () => delayFn().then( nextUpdate ) ;
+		outWrapper = function() {
+			delayFn().then( nextUpdate.bind( this ) ) ;
+		} ;
 	}
 	else if ( delay ) {
-		outWrapper = () => setTimeout( nextUpdate , delay ) ;
+		outWrapper = function() {
+			setTimeout( nextUpdate.bind( this ) , delay ) ;
+		} ;
 	}
 	else {
 		outWrapper = nextUpdate ;
@@ -41024,57 +41898,65 @@ Promise.debounceUpdate = ( options , asyncFn , thisBinding ) => {
 
 
 	if ( waitFn ) {
-		inWrapper = ( callArgs ) => {
-			inProgress = new Promise() ;
-			currentUpdateWith = callArgs ;
-			waitInProgress = waitFn() ;
+		inWrapper = function( args ) {
+			var instance = getInstance( this ) ;
 
-			Promise.finally( waitInProgress , () => {
-				waitInProgress = null ;
-				currentUpdatePromise = asyncFn.call( ... currentUpdateWith ) ;
-				Promise.finally( currentUpdatePromise , outWrapper ) ;
-				Promise.propagate( currentUpdatePromise , inProgress ) ;
+			instance.inProgress = new Promise() ;
+			instance.currentUpdateWith = args ;
+			instance.waitInProgress = waitFn() ;
+
+			Promise.finally( instance.waitInProgress , () => {
+				instance.waitInProgress = null ;
+				instance.currentUpdatePromise = asyncFn.call( this , ... instance.currentUpdateWith ) ;
+				Promise.finally( instance.currentUpdatePromise , outWrapper.bind( this ) ) ;
+				Promise.propagate( instance.currentUpdatePromise , instance.inProgress ) ;
 			} ) ;
 
-			return inProgress ;
+			return instance.inProgress ;
 		} ;
 
 		return function( ... args ) {
-			var localThis = thisBinding || this ;
+			var localThis = thisBinding || this ,
+				instance = getInstance( localThis ) ;
 
-			if ( waitInProgress ) {
-				currentUpdateWith = [ localThis , ... args ] ;
-				return inProgress ;
+			if ( instance.waitInProgress ) {
+				instance.currentUpdateWith = args ;
+				return instance.inProgress ;
 			}
 
-			if ( currentUpdatePromise ) {
-				if ( ! nextUpdatePromise ) { nextUpdatePromise = new Promise() ; }
-				nextUpdateWith = [ localThis , ... args ] ;
-				return nextUpdatePromise ;
+			if ( instance.currentUpdatePromise ) {
+				if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+				instance.nextUpdateWith = args ;
+				return instance.nextUpdatePromise ;
 			}
 
-			return inWrapper( [ localThis , ... args ] ) ;
+			return inWrapper.call( localThis , args ) ;
 		} ;
 	}
 
-	inWrapper = ( callArgs ) => {
-		inProgress = asyncFn.call( ... callArgs ) ;
-		Promise.finally( inProgress , outWrapper ) ;
-		return inProgress ;
+
+	// Variant without a waitFn
+
+	inWrapper = function( args ) {
+		var instance = getInstance( this ) ;
+
+		instance.inProgress = asyncFn.call( this , ... args ) ;
+		Promise.finally( instance.inProgress , outWrapper.bind( this ) ) ;
+		return instance.inProgress ;
 	} ;
 
 	return function( ... args ) {
-		var localThis = thisBinding || this ;
+		var localThis = thisBinding || this ,
+			instance = getInstance( localThis ) ;
 
-		if ( inProgress ) {
-			if ( ! nextUpdatePromise ) { nextUpdatePromise = new Promise() ; }
-			nextUpdateWith = [ localThis , ... args ] ;
-			return nextUpdatePromise ;
+		if ( instance.inProgress ) {
+			if ( ! instance.nextUpdatePromise ) { instance.nextUpdatePromise = new Promise() ; }
+			instance.nextUpdateWith = args ;
+			return instance.nextUpdatePromise ;
 		}
 
-		return inWrapper( [ localThis , ... args ] ) ;
+		return inWrapper.call( localThis , args ) ;
 	} ;
-
 } ;
 
 
@@ -41137,7 +42019,7 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 
 		if ( resourceData.nextFullSyncWith ) {
 			if ( fullSyncParams.delay && resourceData.lastFullSyncTime && ( delta = now - resourceData.lastFullSyncTime - fullSyncParams.delay ) < 0 ) {
-				resourceData.inProgress = Promise.resolveTimeout( -delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
+				resourceData.inProgress = Promise.resolveTimeout( - delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
 				resourceData.inProgress.finally( () => outWrapper( resourceData , 0 ) ) ;
 				return resourceData.nextFullSyncPromise ;
 			}
@@ -41211,7 +42093,7 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 		}
 
 		if ( ! resourceData.inProgress && ! noDelay && fullSyncParams.delay && resourceData.lastFullSyncTime && ( delta = new Date() - resourceData.lastFullSyncTime - fullSyncParams.delay ) < 0 ) {
-			resourceData.inProgress = Promise.resolveTimeout( -delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
+			resourceData.inProgress = Promise.resolveTimeout( - delta + 1 ) ;	// Strangely, sometime it is trigerred 1ms too soon
 			Promise.finally( resourceData.inProgress , () => outWrapper( resourceData , 0 ) ) ;
 		}
 
@@ -41235,12 +42117,11 @@ Promise.debounceSync = ( getParams , fullSyncParams ) => {
 // The call reject with a timeout error if it takes too much time
 Promise.timeout = ( timeout , asyncFn , thisBinding ) => {
 	return function( ... args ) {
-		var promise = asyncFn.call( thisBinding || this , ... args ) ;
-		// Careful: not my promise, so cannot retrieve its status
+		var promise = new Promise() ;
+		Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
 		setTimeout( () => promise.reject( new Error( 'Timeout' ) ) , timeout ) ;
 		return promise ;
 	} ;
-
 } ;
 
 
@@ -41248,16 +42129,15 @@ Promise.timeout = ( timeout , asyncFn , thisBinding ) => {
 // Like .timeout(), but here the timeout value is not passed at creation, but as the first arg of each call
 Promise.variableTimeout = ( asyncFn , thisBinding ) => {
 	return function( timeout , ... args ) {
-		var promise = asyncFn.call( thisBinding || this , ... args ) ;
-		// Careful: not my promise, so cannot retrieve its status
+		var promise = new Promise() ;
+		Promise.propagate( asyncFn.call( thisBinding || this , ... args ) , promise ) ;
 		setTimeout( () => promise.reject( new Error( 'Timeout' ) ) , timeout ) ;
 		return promise ;
 	} ;
-
 } ;
 
 
-},{"./seventh.js":113}],111:[function(require,module,exports){
+},{"./seventh.js":114}],112:[function(require,module,exports){
 (function (process){(function (){
 /*
 	Seventh
@@ -41357,7 +42237,7 @@ Promise.resolveSafeTimeout = function( timeout , value ) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"./seventh.js":113,"_process":185}],112:[function(require,module,exports){
+},{"./seventh.js":114,"_process":191}],113:[function(require,module,exports){
 /*
 	Seventh
 
@@ -41409,7 +42289,7 @@ Promise.parasite = () => {
 } ;
 
 
-},{"./seventh.js":113}],113:[function(require,module,exports){
+},{"./seventh.js":114}],114:[function(require,module,exports){
 /*
 	Seventh
 
@@ -41453,7 +42333,7 @@ require( './parasite.js' ) ;
 require( './misc.js' ) ;
 
 
-},{"./Queue.js":106,"./api.js":107,"./batch.js":108,"./core.js":109,"./decorators.js":110,"./misc.js":111,"./parasite.js":112,"./wrapper.js":114}],114:[function(require,module,exports){
+},{"./Queue.js":107,"./api.js":108,"./batch.js":109,"./core.js":110,"./decorators.js":111,"./misc.js":112,"./parasite.js":113,"./wrapper.js":115}],115:[function(require,module,exports){
 /*
 	Seventh
 
@@ -41618,7 +42498,7 @@ Promise.onceEventAllOrError = ( emitter , eventName , excludeEvents ) => {
 } ;
 
 
-},{"./seventh.js":113}],115:[function(require,module,exports){
+},{"./seventh.js":114}],116:[function(require,module,exports){
 /*
 	String Kit
 
@@ -41658,15 +42538,31 @@ Promise.onceEventAllOrError = ( emitter , eventName , excludeEvents ) => {
 
 
 
-function StringNumber( number , decimalSeparator = '.' , groupSeparator = '' , forceDecimalSeparator = false ) {
+const NUMERALS = [
+	'0' , '1' , '2' , '3' , '4' , '5' , '6' , '7' , '8' , '9' ,
+	'a' , 'b' , 'c' , 'd' , 'e' , 'f' ,
+	'g' , 'h' , 'i' , 'j' , 'k' , 'l' , 'm' , 'n' , 'o' , 'p' , 'q' , 'r' , 's' , 't' , 'u' , 'v' , 'w' , 'x' , 'y' , 'z'
+] ;
+
+//const NUMERAL_MAP = buildNumeralMap( NUMERALS ) ;
+
+
+
+function StringNumber( number , options = {} ) {
 	this.sign = 1 ;
 	this.digits = [] ;
 	this.exposant = 0 ;
-	this.special = null ;	// 'special' store special values like NaN, Infinity, etc
+	this.special = null ;	// It stores special values like NaN, Infinity, etc
 
-	this.decimalSeparator = decimalSeparator ;
-	this.forceDecimalSeparator = !! forceDecimalSeparator ;
-	this.groupSeparator = groupSeparator ;
+	this.decimalSeparator = options.decimalSeparator ?? '.' ;
+	this.forceDecimalSeparator = !! options.forceDecimalSeparator ;
+	this.groupSeparator = options.groupSeparator ?? '' ;
+
+	this.numerals = options.numerals ?? NUMERALS ;
+	this.numeralZero = options.numeralZero ?? null ;	// Special numeral when the result is EXACTLY 0 (used for Roman Numerals)
+	this.placeNumerals = options.placeNumerals ?? null ;
+	//this.numeralMap = NUMERAL_MAP ;
+	//if ( options.numerals ) { this.numeralMap = buildNumeralMap( options.numerals ) ; }
 
 	this.set( number ) ;
 }
@@ -41675,8 +42571,23 @@ module.exports = StringNumber ;
 
 
 
+/*
+function buildNumeralMap( numbers ) {
+	var map = new Map() ;
+
+	for ( let i = 0 ; i < numbers.length ; i ++ ) {
+		let number = numbers[ i ] ;
+		map.set( NUMERALS[ i ] , numbers[ i ] ) ;
+	}
+
+	return map ;
+}
+*/
+
+
+
 StringNumber.prototype.set = function( number ) {
-	var matches , digits , exposant , v , i , iMax , index , hasNonZeroHead , tailIndex ;
+	var matches , v , i , iMax , index , hasNonZeroHead , tailIndex ;
 
 	number = + number ;
 
@@ -41822,45 +42733,49 @@ StringNumber.prototype.toNoExpString = function( leadingZero = 1 , trailingZero 
 		str = this.sign < 0 ? '-' : forcePlusSign ? '+' : '' ;
 
 	if ( ! this.digits.length ) {
-		arrayFill( integerDigits , 0 , leadingZero ) ;
+		if ( leadingZero > 1 ) {
+			this.fillZeroes( integerDigits , leadingZero - 1 , leadingZero ) ;
+		}
+
+		integerDigits.push( this.numeralZero ?? this.placeNumerals?.[ 0 ]?.[ 0 ] ?? this.numerals[ 0 ] ) ;
 
 		if ( trailingZero && ! onlyIfDecimal ) {
-			arrayFill( decimalDigits , 0 , trailingZero ) ;
+			this.fillZeroes( decimalDigits , trailingZero ) ;
 		}
 	}
 	else if ( exposant <= 0 ) {
 		// This number is of type 0.[0...]xyz
-		arrayFill( integerDigits , 0 , leadingZero ) ;
+		this.fillZeroes( integerDigits , leadingZero ) ;
 
-		arrayFill( decimalDigits , 0 , -exposant ) ;
-		arrayConcatSlice( decimalDigits , this.digits ) ;
+		this.fillZeroes( decimalDigits , -exposant , trailingZero - this.digits.length ) ;
+		this.appendNumerals( decimalDigits , this.digits , undefined , undefined , -exposant - 1 ) ;
 
 		if ( trailingZero && this.digits.length - exposant < trailingZero ) {
-			arrayFill( decimalDigits , 0 , trailingZero - this.digits.length + exposant ) ;
+			this.fillZeroes( decimalDigits , trailingZero - this.digits.length + exposant ) ;
 		}
 	}
 	else if ( exposant >= this.digits.length ) {
 		// This number is of type xyz[0...]
-		if ( exposant < leadingZero ) { arrayFill( integerDigits , 0 , leadingZero - exposant ) ; }
-		arrayConcatSlice( integerDigits , this.digits ) ;
-		arrayFill( integerDigits , 0 , exposant - this.digits.length ) ;
+		if ( exposant < leadingZero ) { this.fillZeroes( integerDigits , leadingZero - exposant , exposant - 1 ) ; }
+		this.appendNumerals( integerDigits , this.digits , undefined , undefined , exposant - 1 ) ;
+		this.fillZeroes( integerDigits , exposant - this.digits.length ) ;
 
 		if ( trailingZero && ! onlyIfDecimal ) {
-			arrayFill( decimalDigits , 0 , trailingZero ) ;
+			this.fillZeroes( decimalDigits , trailingZero ) ;
 		}
 	}
 	else {
 		// Here the digits are splitted with a dot in the middle
-		if ( exposant < leadingZero ) { arrayFill( integerDigits , 0 , leadingZero - exposant ) ; }
-		arrayConcatSlice( integerDigits , this.digits , 0 , exposant ) ;
+		if ( exposant < leadingZero ) { this.fillZeroes( integerDigits , leadingZero - exposant ) ; }
+		this.appendNumerals( integerDigits , this.digits , 0 , exposant , exposant - 1 ) ;
 
-		arrayConcatSlice( decimalDigits , this.digits , exposant ) ;
+		this.appendNumerals( decimalDigits , this.digits , exposant , undefined , this.digits.length - exposant ) ;
 
 		if (
 			trailingZero && this.digits.length - exposant < trailingZero
 			&& ( ! onlyIfDecimal || this.digits.length - exposant > 0 )
 		) {
-			arrayFill( decimalDigits , 0 , trailingZero - this.digits.length + exposant ) ;
+			this.fillZeroes( decimalDigits , trailingZero - this.digits.length + exposant ) ;
 		}
 	}
 
@@ -42019,20 +42934,74 @@ StringNumber.prototype.groupDigits = function( digits , separator , inverseOrder
 
 
 
-function arrayFill( intoArray , value , repeat ) {
-	while ( repeat -- ) { intoArray[ intoArray.length ] = value ; }
+StringNumber.prototype.appendNumerals = function( intoArray , sourceArray , start = 0 , end = sourceArray.length , leftPlace = end ) {
+	//console.log( "appendNumerals:" , { intoArray , sourceArray , start , end , leftPlace } ) ;
+	for ( let i = start , place = leftPlace ; i < end ; i ++ , place -- ) {
+		let numerals = this.placeNumerals?.[ place ] ?? this.numerals ;
+		intoArray.push( numerals[ sourceArray[ i ] ] ?? sourceArray[ i ] ) ;
+	}
+
 	return intoArray ;
-}
+} ;
 
 
 
-function arrayConcatSlice( intoArray , sourceArray , start = 0 , end = sourceArray.length ) {
-	for ( let i = start ; i < end ; i ++ ) { intoArray[ intoArray.length ] = sourceArray[ i ] ; }
+StringNumber.prototype.fillZeroes = function( intoArray , count , leftPlace = count - 1 ) {
+	//console.log( "fillZeroes:" , { intoArray , count , leftPlace } ) ;
+	for ( let i = 0 , place = leftPlace ; i < count ; i ++ , place -- ) {
+		let numerals = this.placeNumerals?.[ place ] ?? this.numerals ;
+		intoArray.push( numerals[ 0 ] ?? 0 ) ;
+	}
+
 	return intoArray ;
-}
+} ;
 
 
-},{}],116:[function(require,module,exports){
+
+const ROMAN_OPTIONS = {
+	numeralZero: 'N' ,
+	placeNumerals: [
+		[ '' , 'I' , 'II' , 'III' , 'IV' , 'V' , 'VI' , 'VII' , 'VIII' , 'IX' ] ,
+		[ '' , 'X' , 'XX' , 'XXX' , 'XL' , 'L' , 'LX' , 'LXX' , 'LXXX' , 'XC' ] ,
+		[ '' , 'C' , 'CC' , 'CCC' , 'CD' , 'D' , 'DC' , 'DCC' , 'DCCC' , 'CM' ] ,
+		[ '' , 'M' , 'MM' , 'MMM' , 'MMMM' , 'ↁ' , 'ↁↀ' , 'ↁↀↀ' , 'ↁↀↀↀ' , 'ↁↀↀↀↀ' ]
+	]
+} ;
+
+const ADDITIVE_ROMAN_OPTIONS = {
+	numeralZero: 'N' ,
+	placeNumerals: [
+		[ '' , 'I' , 'II' , 'III' , 'IIII' , 'V' , 'VI' , 'VII' , 'VIII' , 'VIIII' ] ,
+		[ '' , 'X' , 'XX' , 'XXX' , 'XXXX' , 'L' , 'LX' , 'LXX' , 'LXXX' , 'LXXXX' ] ,
+		[ '' , 'C' , 'CC' , 'CCC' , 'CCCC' , 'D' , 'DC' , 'DCC' , 'DCCC' , 'DCCCC' ] ,
+		[ '' , 'M' , 'MM' , 'MMM' , 'MMMM' , 'ↁ' , 'ↁↀ' , 'ↁↀↀ' , 'ↁↀↀↀ' , 'ↁↀↀↀↀ' ]
+	]
+} ;
+
+const APOSTROPHUS_ROMAN_OPTIONS = {
+	numeralZero: 'N' ,
+	placeNumerals: [
+		[ '' , 'I' , 'II' , 'III' , 'IV' , 'V' , 'VI' , 'VII' , 'VIII' , 'IX' ] ,
+		[ '' , 'X' , 'XX' , 'XXX' , 'XL' , 'L' , 'LX' , 'LXX' , 'LXXX' , 'XC' ] ,
+		[ '' , 'C' , 'CC' , 'CCC' , 'CD' , 'D' , 'DC' , 'DCC' , 'DCCC' , 'CM' ] ,
+		[ '' , 'M' , 'MM' , 'MMM' , 'MMMM' , 'IↃↃ' , 'IↃↃCIↃ' , 'IↃↃCIↃCIↃ' , 'IↃↃCIↃCIↃCIↃ' , 'IↃↃCIↃCIↃCIↃCIↃ' ] ,
+		[ '' , 'CCIↃↃ' , 'CCIↃↃCCIↃↃ' , 'CCIↃↃCCIↃↃCCIↃↃ' , 'CCIↃↃCCIↃↃCCIↃↃCCIↃↃ' , 'IↃↃↃ' , 'IↃↃↃCCIↃↃ' , 'IↃↃↃCCIↃↃCCIↃↃ' , 'IↃↃↃCCIↃↃCCIↃↃCCIↃↃ' , 'IↃↃↃCCIↃↃCCIↃↃCCIↃↃCCIↃↃ' ] ,
+		[ '' , 'CCCIↃↃↃ' , 'CCCIↃↃↃCCCIↃↃↃ' , 'CCCIↃↃↃCCCIↃↃↃCCCIↃↃↃ' , 'CCCIↃↃↃCCCIↃↃↃCCCIↃↃↃCCCIↃↃↃ' , 'IↃↃↃↃ' , 'IↃↃↃↃCCCIↃↃↃ' , 'IↃↃↃↃCCCIↃↃↃCCCIↃↃↃ' , 'IↃↃↃↃCCCIↃↃↃCCCIↃↃↃCCCIↃↃↃ' , 'IↃↃↃↃCCCIↃↃↃCCCIↃↃↃCCCIↃↃↃCCCIↃↃↃ' ]
+	]
+} ;
+
+StringNumber.roman = ( number , options ) => {
+	options = options ? Object.assign( {} , options , ROMAN_OPTIONS ) : ROMAN_OPTIONS ;
+	return new StringNumber( number , options ) ;
+} ;
+
+StringNumber.additiveRoman = ( number , options ) => {
+	options = options ? Object.assign( {} , options , ADDITIVE_ROMAN_OPTIONS ) : ADDITIVE_ROMAN_OPTIONS ;
+	return new StringNumber( number , options ) ;
+} ;
+
+
+},{}],117:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42301,7 +43270,7 @@ ansi.parse = str => {
 } ;
 
 
-},{}],117:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42359,12 +43328,27 @@ camel.toCamelCase = function( str , preserveUpperCase = false , initialUpperCase
 
 
 
-camel.camelCaseToSeparated = function( str , separator = ' ' ) {
+camel.camelCaseToSeparated = function( str , separator = ' ' , acronym = true ) {
 	if ( ! str || typeof str !== 'string' ) { return '' ; }
 
-	return str.replace( /^([A-Z])|([A-Z])/g , ( match , firstLetter , letter ) => {
-		if ( firstLetter ) { return firstLetter.toLowerCase() ; }
-		return separator + letter.toLowerCase() ;
+	if ( ! acronym ) {
+		return str.replace( /^([A-Z])|([A-Z])/g , ( match , firstLetter , letter ) => {
+			if ( firstLetter ) { return firstLetter.toLowerCase() ; }
+			return separator + letter.toLowerCase() ;
+		} ) ;
+	}
+
+	// (^)? and (^)? does not work, so we have to use (?:(^)|)) and (?:($)|)) to capture end or not
+	return str.replace( /(?:(^)|)([A-Z]+)(?:($)|(?=[a-z]))/g , ( match , isStart , letters , isEnd ) => {
+		isStart = isStart === '' ;
+		isEnd = isEnd === '' ;
+
+		var prefix = isStart ? '' : separator ;
+
+		return letters.length === 1 ? prefix + letters.toLowerCase() :
+			isEnd ? prefix + letters :
+			letters.length === 2 ? prefix + letters[ 0 ].toLowerCase() + separator + letters[ 1 ].toLowerCase() :
+			prefix + letters.slice( 0 , -1 ) + separator + letters.slice( -1 ).toLowerCase() ;
 	} ) ;
 } ;
 
@@ -42372,10 +43356,239 @@ camel.camelCaseToSeparated = function( str , separator = ' ' ) {
 
 // Transform camel case to alphanum separated by minus
 camel.camelCaseToDash =
-camel.camelCaseToDashed = ( str ) => camel.camelCaseToSeparated( str , '-' ) ;
+camel.camelCaseToDashed = ( str ) => camel.camelCaseToSeparated( str , '-' , false ) ;
 
 
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
+/*
+	Book Source
+
+	Copyright (c) 2023 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+const latinize = require( './latinize.js' ) ;
+const english = require( './english.js' ) ;
+
+const KEYWORD_TO_CHARLIST = require( './json-data/emoji-keyword-to-charlist.json' ) ;
+const CHAR_TO_CANONICAL_NAME = require( './json-data/emoji-char-to-canonical-name.json' ) ;
+
+
+
+const emoji = {} ;
+module.exports = emoji ;
+
+
+
+emoji.getCanonicalName = emojiChar => CHAR_TO_CANONICAL_NAME[ emojiChar ] ;
+
+
+
+const emojiToKeywordsCache = {} ;
+
+// Return a cached and frozen array
+emoji.getKeywords = emojiChar => {
+	if ( ! CHAR_TO_CANONICAL_NAME[ emojiChar ] ) { return ; }
+
+	if ( ! emojiToKeywordsCache[ emojiChar ] ) {
+		emojiToKeywordsCache[ emojiChar ] = emoji.splitIntoKeywords( CHAR_TO_CANONICAL_NAME[ emojiChar ] ) ;
+		Object.freeze( emojiToKeywordsCache[ emojiChar ] ) ;
+	}
+
+	return emojiToKeywordsCache[ emojiChar ] ;
+} ;
+
+
+
+emoji.search = ( name , bestOnly = false ) => {
+	var keywords = emoji.splitIntoKeywords( name ) ,
+		matches = {} ,
+		score ,
+		bestScore = 0 ;
+
+	for ( let keyword of keywords ) {
+		if ( ! KEYWORD_TO_CHARLIST[ keyword ] ) { continue ; }
+
+		for ( let emojiChar of KEYWORD_TO_CHARLIST[ keyword ] ) {
+			if ( ! matches[ emojiChar ] ) {
+				score = 1 ;
+				matches[ emojiChar ] = {
+					emoji: emojiChar ,
+					score ,
+					canonical: CHAR_TO_CANONICAL_NAME[ emojiChar ] ,
+					keywords: emoji.getKeywords( emojiChar )
+				} ;
+			}
+			else {
+				score = matches[ emojiChar ].score + 1 ;
+				matches[ emojiChar ].score = score ;
+			}
+
+			if ( score > bestScore ) { bestScore = score ; }
+		}
+	}
+
+	var results = [ ... Object.values( matches ) ] ;
+	if ( bestOnly ) { results = results.filter( e => e.score === bestScore ) ; }
+	results.sort( ( a , b ) => ( b.score - a.score ) || ( a.keywords.length - b.keywords.length ) ) ;
+	return results ;
+} ;
+
+emoji.searchBest = name => emoji.search( name , true ) ;
+emoji.get = name => emoji.search( name , true )[ 0 ]?.emoji ;
+
+
+
+
+
+// Internal API, exposed because it is used by the builder
+
+
+
+emoji.simplifyName = name => {
+	name = name.toLowerCase().replace( /[“”().!]/g , '' ).replace( /[ ’',]/g , '-' ).replace( /-+/g , '-' ) ;
+	name = latinize( name ) ;
+	return name ;
+} ;
+
+
+
+emoji.simplifyKeyword = inputKeyword => {
+	var kw = inputKeyword ;
+	kw = english.undoPresentParticiple( kw ) ;
+
+	//if ( kw !== inputKeyword ) { console.log( "Changing KW:" , inputKeyword , "-->" , kw ) ; }
+	return kw ;
+} ;
+
+
+
+const KEYWORD_EXCLUSION = new Set( [ 'with' , 'of' ] ) ;
+
+emoji.splitIntoKeywords = ( name , noSimplify = false ) => {
+	if ( ! noSimplify ) { name = emoji.simplifyName( name ) ; }
+	var keywords = name.split( /-/g ).filter( keyword => keyword.length >= 2 && ! KEYWORD_EXCLUSION.has( keyword ) ) ;
+	keywords = keywords.map( emoji.simplifyKeyword ) ;
+	keywords = [ ... new Set( keywords ) ] ;	// Make them unique
+	return keywords ;
+} ;
+
+
+},{"./english.js":120,"./json-data/emoji-char-to-canonical-name.json":125,"./json-data/emoji-keyword-to-charlist.json":126,"./latinize.js":129}],120:[function(require,module,exports){
+/*
+	Book Source
+
+	Copyright (c) 2023 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+const english = {} ;
+module.exports = english ;
+
+
+
+const VOWELS = new Set( [ 'a' , 'e' , 'i' , 'o' , 'u' , 'y' ] ) ;
+const VOWELS_ADDING_E = new Set( [ 'a' , 'i' , 'o' , 'u' ] ) ;
+const CONSONANTS_AFTER_VOWEL_ADDING_E = new Set( [ 's' ] ) ;
+const CONSONANTS_ADDING_E = new Set( [ 'v' ] ) ;
+const CONSONANTS_NOT_ADDING_E = new Set( [ 'w' , 'x' ] ) ;
+const DOUBLE_CONSONANTS_ADDING_E = new Set( [ 'cl' , 'dl' , 'gl' , 'kl' , 'nc' , 'pl' , 'tl' ] ) ;
+const REDUCING_DOUBLE_CONSONANTS = new Set( [ 'd' , 'g' , 'm' , 'n' , 'p' ] ) ;
+const CONSONANTS_AFTER_VOWELS_COMBO_NOT_ADDING_E = new Set( [ 'or' ] ) ;	// Last chance fix
+
+// Remove -ing and transform to a proper verb or noun
+english.undoPresentParticiple = word => {
+	if ( word.endsWith( 'ing' ) && word.length >= 6 && ! word.endsWith( 'ghtning' ) ) {
+		let ingSuffix = 'ing' ;
+		//if ( word.endsWith( 'ling' ) ) { ingSuffix = 'ling' ; }
+
+		let ingLen = ingSuffix.length ;
+
+		let before = word[ word.length - ingLen - 1 ] ,
+			before2 = word[ word.length - ingLen - 2 ] ,
+			before3 = word[ word.length - ingLen - 3 ] ;
+
+		if ( VOWELS.has( before ) ) {
+			word = word.slice( 0 , -ingLen ) ;
+		}
+		else if ( VOWELS.has( before2 ) ) {
+			if ( VOWELS.has( before3 ) ) {
+				if ( CONSONANTS_AFTER_VOWEL_ADDING_E.has( before ) && ! CONSONANTS_AFTER_VOWELS_COMBO_NOT_ADDING_E.has( before2 + before ) ) {
+					word = word.slice( 0 , -ingLen ) + 'e' ;
+				}
+				else {
+					word = word.slice( 0 , -ingLen ) ;
+				}
+			}
+			else if ( VOWELS_ADDING_E.has( before2 ) && ! CONSONANTS_NOT_ADDING_E.has( before ) ) {
+				word = word.slice( 0 , -ingLen ) + 'e' ;
+			}
+			else {
+				word = word.slice( 0 , -ingLen ) ;
+			}
+		}
+		else if ( before === before2 && REDUCING_DOUBLE_CONSONANTS.has( before ) ) {
+			word = word.slice( 0 , -ingLen - 1 ) ;
+		}
+		else if ( CONSONANTS_ADDING_E.has( before ) || DOUBLE_CONSONANTS_ADDING_E.has( before2 + before ) ) {
+			word = word.slice( 0 , -ingLen ) + 'e' ;
+		}
+		else {
+			word = word.slice( 0 , -ingLen ) ;
+		}
+	}
+
+	return word ;
+} ;
+
+
+},{}],121:[function(require,module,exports){
 /*
 	String Kit
 
@@ -42480,7 +43693,7 @@ exports.unicodePercentEncode = str => str.replace( /[\x00-\x1f\u0100-\uffff\x7f%
 exports.httpHeaderValue = str => exports.unicodePercentEncode( str ) ;
 
 
-},{}],119:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
 	String Kit
@@ -42544,6 +43757,7 @@ const StringNumber = require( './StringNumber.js' ) ;
 	%U		unsigned positive integer (>0)
 	%P		number to (absolute) percent (e.g.: 0.75 -> 75%)
 	%p		number to relative percent (e.g.: 1.25 -> +25% ; 0.75 -> -25%)
+	%T		date/time display, using ISO date, or Intl module
 	%t		time duration, convert ms into h min s, e.g.: 2h14min52s or 2:14:52
 	%m		convert degree into degree, minutes and seconds
 	%h		hexadecimal (input is a number)
@@ -42553,11 +43767,13 @@ const StringNumber = require( './StringNumber.js' ) ;
 	%X		hexadecimal: convert a string into hex charcode, force pair of symbols (e.g. 'f' -> '0f')
 	%z		base64
 	%Z		base64url
-	%O		object (like inspect, but with ultra minimal options)
 	%I		call string-kit's inspect()
 	%Y		call string-kit's inspect(), but do not inspect non-enumerable
+	%O		object (like inspect, but with ultra minimal options)
 	%E		call string-kit's inspectError()
 	%J		JSON.stringify()
+	%v		roman numerals, additive variant (e.g. 4 is IIII instead of IV)
+	%V		roman numerals
 	%D		drop
 	%F		filter function existing in the 'this' context, e.g. %[filter:%a%a]F
 	%a		argument for a function
@@ -43060,57 +44276,8 @@ modes.S.noCommonModeArg = true ;
 
 
 // natural (WIP)
-modes.N = ( arg , isSubCall ) => {
-	if ( typeof arg === 'string' ) { return arg ; }
-
-	if ( arg === null || arg === undefined || arg === true || arg === false ) {
-		return '' + arg ;
-	}
-
-	if ( typeof arg === 'number' ) {
-		return modes.f( arg , '.3g ' ) ;
-	}
-
-	if ( Array.isArray( arg ) ) {
-		arg = arg.map( e => modes.N( e , true ) ) ;
-
-		if ( isSubCall ) {
-			return '[' + arg.join( ',' ) + ']' ;
-		}
-
-		return arg.join( ', ' ) ;
-	}
-
-	if ( Buffer.isBuffer( arg ) ) {
-		arg = [ ... arg ].map( e => {
-			e = e.toString( 16 ) ;
-			if ( e.length === 1 ) { e = '0' + e ; }
-			return e ;
-		} ) ;
-		return '<' + arg.join( ' ' ) + '>' ;
-	}
-
-	var proto = Object.getPrototypeOf( arg ) ;
-
-	if ( proto === null || proto === Object.prototype ) {
-		// Plain objects
-		arg = Object.entries( arg ).sort( naturalSort )
-			.map( e => e[ 0 ] + ': ' + modes.N( e[ 1 ] , true ) ) ;
-
-		if ( isSubCall ) {
-			return '{' + arg.join( ', ' ) + '}' ;
-		}
-
-		return arg.join( ', ' ) ;
-	}
-
-	if ( typeof arg.inspect === 'function' ) { return arg.inspect() ; }
-	if ( typeof arg.toString === 'function' ) { return arg.toString() ; }
-
-	return '(' + arg + ')' ;
-} ;
-
-modes.n = arg => modes.N( arg , true ) ;
+modes.N = ( arg , modeArg ) => genericNaturalMode( arg , modeArg , false ) ;
+modes.n = ( arg , modeArg ) => genericNaturalMode( arg , modeArg , true ) ;
 
 
 
@@ -43120,7 +44287,7 @@ modes.f = ( arg , modeArg ) => {
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
 	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
@@ -43132,6 +44299,42 @@ modes.f.noSanitize = true ;
 
 
 
+// roman numeral, additive variant
+modes.v = ( arg , modeArg ) => {
+	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
+	if ( typeof arg !== 'number' ) { arg = 0 ; }
+
+	var subModes = floatModeArg( modeArg ) ,
+		sn = StringNumber.additiveRoman( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
+
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
+
+	return sn.toString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal ) ;
+} ;
+
+modes.v.noSanitize = true ;
+
+
+
+// roman numeral
+modes.V = ( arg , modeArg ) => {
+	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
+	if ( typeof arg !== 'number' ) { arg = 0 ; }
+
+	var subModes = floatModeArg( modeArg ) ,
+		sn = StringNumber.roman( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
+
+	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
+	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
+
+	return sn.toString( subModes.leftPadding , subModes.rightPadding , subModes.rightPaddingOnlyIfDecimal ) ;
+} ;
+
+modes.V.noSanitize = true ;
+
+
+
 // absolute percent
 modes.P = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
@@ -43140,7 +44343,7 @@ modes.P = ( arg , modeArg ) => {
 	arg *= 100 ;
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	// Force rounding to zero by default
 	if ( subModes.rounding !== null || ! subModes.precision ) { sn.round( subModes.rounding || 0 ) ; }
@@ -43161,7 +44364,7 @@ modes.p = ( arg , modeArg ) => {
 	arg = ( arg - 1 ) * 100 ;
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	// Force rounding to zero by default
 	if ( subModes.rounding !== null || ! subModes.precision ) { sn.round( subModes.rounding || 0 ) ; }
@@ -43181,7 +44384,7 @@ modes.k = ( arg , modeArg ) => {
 	if ( typeof arg !== 'number' ) { return '0' ; }
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
 	// Default to 3 numbers precision
@@ -43200,7 +44403,7 @@ modes.e = ( arg , modeArg ) => {
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
 	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
@@ -43218,7 +44421,7 @@ modes.K = ( arg , modeArg ) => {
 	if ( typeof arg !== 'number' ) { arg = 0 ; }
 
 	var subModes = floatModeArg( modeArg ) ,
-		sn = new StringNumber( arg , '.' , subModes.groupSeparator ) ;
+		sn = new StringNumber( arg , { decimalSeparator: '.' , groupSeparator: subModes.groupSeparator } ) ;
 
 	if ( subModes.rounding !== null ) { sn.round( subModes.rounding ) ; }
 	if ( subModes.precision ) { sn.precision( subModes.precision ) ; }
@@ -43293,16 +44496,89 @@ modes.m.noSanitize = true ;
 
 
 
-// time duration, transform ms into H:min:s
-// Later it should format Date as well: number=duration, date object=date
-// Note that it would not replace moment.js, but it could uses it.
+// Date/time
+// Minimal Date formating, only support sort of ISO ATM.
+// It will be improved later.
+modes.T = ( arg , modeArg ) => {
+	// Always get a copy of the arg
+	try {
+		arg = new Date( arg ) ;
+	}
+	catch ( error ) {
+		return '(invalid)' ;
+	}
+
+	if ( Number.isNaN( arg.getTime() ) ) {
+		return '(invalid)' ;
+	}
+
+	var datePart = '' ,
+		timePart = '' ,
+		str = '' ,
+		subModes = dateTimeModeArg( modeArg ) ,
+		roundingType = subModes.roundingType ,
+		forceDecimalSeparator = subModes.useAbbreviation ;
+
+	// For instance, we only support the ISO-like type
+
+	if ( subModes.years ) {
+		if ( datePart ) { datePart += '-' ; }
+		datePart += arg.getFullYear() ;
+	}
+
+	if ( subModes.months ) {
+		if ( datePart ) { datePart += '-' ; }
+		datePart += ( '' + ( arg.getMonth() + 1 ) ).padStart( 2 , '0' ) ;
+	}
+
+	if ( subModes.days ) {
+		if ( datePart ) { datePart += '-' ; }
+		datePart += ( '' + arg.getDate() ).padStart( 2 , '0' ) ;
+	}
+
+	if ( subModes.hours ) {
+		if ( timePart && ! subModes.useAbbreviation ) { timePart += ':' ; }
+		timePart += ( '' + arg.getHours() ).padStart( 2 , '0' ) ;
+		if ( subModes.useAbbreviation ) { timePart += 'h' ; }
+	}
+
+	if ( subModes.minutes ) {
+		if ( timePart && ! subModes.useAbbreviation ) { timePart += ':' ; }
+		timePart += ( '' + arg.getMinutes() ).padStart( 2 , '0' ) ;
+		if ( subModes.useAbbreviation ) { timePart += 'min' ; }
+	}
+
+	if ( subModes.seconds ) {
+		if ( timePart && ! subModes.useAbbreviation ) { timePart += ':' ; }
+		timePart += ( '' + arg.getSeconds() ).padStart( 2 , '0' ) ;
+		if ( subModes.useAbbreviation ) { timePart += 's' ; }
+	}
+
+	if ( datePart ) {
+		if ( str ) { str += ' ' ; }
+		str += datePart ;
+	}
+
+	if ( timePart ) {
+		if ( str ) { str += ' ' ; }
+		str += timePart ;
+	}
+
+	return str ;
+} ;
+
+modes.T.noSanitize = true ;
+
+
+
+// Time duration, transform ms into H:min:s
 modes.t = ( arg , modeArg ) => {
 	if ( typeof arg === 'string' ) { arg = parseFloat( arg ) ; }
 	if ( typeof arg !== 'number' ) { return '(NaN)' ; }
 
 	var h , min , s , sn , sStr ,
 		sign = '' ,
-		subModes = timeModeArg( modeArg ) ,
+		subModes = timeDurationModeArg( modeArg ) ,
 		roundingType = subModes.roundingType ,
 		hSeparator = subModes.useAbbreviation ? 'h' : ':' ,
 		minSeparator = subModes.useAbbreviation ? 'min' : ':' ,
@@ -43318,7 +44594,7 @@ modes.t = ( arg , modeArg ) => {
 	}
 
 	if ( s < 60 && ! subModes.forceMinutes ) {
-		sn = new StringNumber( s , sSeparator , undefined , forceDecimalSeparator ) ;
+		sn = new StringNumber( s , { decimalSeparator: sSeparator , forceDecimalSeparator } ) ;
 		sn.round( subModes.rounding , roundingType ) ;
 
 		// Check if rounding has made it reach 60
@@ -43334,7 +44610,7 @@ modes.t = ( arg , modeArg ) => {
 	min = Math.floor( s / 60 ) ;
 	s = s % 60 ;
 
-	sn = new StringNumber( s , sSeparator , undefined , forceDecimalSeparator ) ;
+	sn = new StringNumber( s , { decimalSeparator: sSeparator , forceDecimalSeparator } ) ;
 	sn.round( subModes.rounding , roundingType ) ;
 
 	// Check if rounding has made it reach 60
@@ -43462,7 +44738,7 @@ modes.Y.noSanitize = true ;
 
 
 // Even more minimalist inspect
-const O_OPTIONS = { minimal: true , noIndex: true } ;
+const O_OPTIONS = { minimal: true , bulletIndex: true , noMarkup: true } ;
 modes.O = ( arg , modeArg , options ) => genericInspectMode( arg , modeArg , options , O_OPTIONS ) ;
 modes.O.noSanitize = true ;
 
@@ -43591,7 +44867,110 @@ function floatModeArg( modeArg ) {
 
 
 
-const TIME_MODES = {
+const DATE_TIME_MODES = {
+	useAbbreviation: false ,
+	rightPadding: 0 ,
+	rightPaddingOnlyIfDecimal: false ,
+	years: true ,
+	months: true ,
+	days: true ,
+	hours: true ,
+	minutes: true ,
+	seconds: true
+} ;
+
+// Generic number modes
+function dateTimeModeArg( modeArg ) {
+	DATE_TIME_MODES.rightPadding = 0 ;
+	DATE_TIME_MODES.rightPaddingOnlyIfDecimal = false ;
+	DATE_TIME_MODES.rounding = 0 ;
+	DATE_TIME_MODES.roundingType = -1 ;
+	DATE_TIME_MODES.years = DATE_TIME_MODES.months = DATE_TIME_MODES.days = false ;
+	DATE_TIME_MODES.hours = DATE_TIME_MODES.minutes = DATE_TIME_MODES.seconds = false ;
+	DATE_TIME_MODES.useAbbreviation = false ;
+
+	var hasSelector = false ;
+
+	if ( modeArg ) {
+		for ( let [ , k , v ] of modeArg.matchAll( MODE_ARG_FORMAT_REGEX ) ) {
+			if ( k === 'T' ) {
+				DATE_TIME_MODES.years = DATE_TIME_MODES.months = DATE_TIME_MODES.days = false ;
+				DATE_TIME_MODES.hours = DATE_TIME_MODES.minutes = DATE_TIME_MODES.seconds = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'D' ) {
+				DATE_TIME_MODES.years = DATE_TIME_MODES.months = DATE_TIME_MODES.days = true ;
+				DATE_TIME_MODES.hours = DATE_TIME_MODES.minutes = DATE_TIME_MODES.seconds = false ;
+				hasSelector = true ;
+			}
+			else if ( k === 'Y' ) {
+				DATE_TIME_MODES.years = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'M' ) {
+				DATE_TIME_MODES.months = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'd' ) {
+				DATE_TIME_MODES.days = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'h' ) {
+				DATE_TIME_MODES.hours = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'm' ) {
+				DATE_TIME_MODES.minutes = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 's' ) {
+				DATE_TIME_MODES.seconds = true ;
+				hasSelector = true ;
+			}
+			else if ( k === 'r' ) {
+				DATE_TIME_MODES.roundingType = 0 ;
+			}
+			else if ( k === 'f' ) {
+				DATE_TIME_MODES.roundingType = -1 ;
+			}
+			else if ( k === 'c' ) {
+				DATE_TIME_MODES.roundingType = 1 ;
+			}
+			else if ( k === 'a' ) {
+				DATE_TIME_MODES.useAbbreviation = true ;
+			}
+			else if ( ! k ) {
+				if ( v[ 0 ] === '.' ) {
+					// Rounding after the decimal
+					let lv = v[ v.length - 1 ] ;
+
+					// Zero-right padding?
+					if ( lv === '!' ) {
+						DATE_TIME_MODES.rounding = DATE_TIME_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
+					}
+					else if ( lv === '?' ) {
+						DATE_TIME_MODES.rounding = DATE_TIME_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
+						DATE_TIME_MODES.rightPaddingOnlyIfDecimal = true ;
+					}
+					else {
+						DATE_TIME_MODES.rounding = parseInt( v.slice( 1 ) , 10 ) || 0 ;
+					}
+				}
+			}
+		}
+	}
+
+	if ( ! hasSelector ) {
+		DATE_TIME_MODES.years = DATE_TIME_MODES.months = DATE_TIME_MODES.days = true ;
+		DATE_TIME_MODES.hours = DATE_TIME_MODES.minutes = DATE_TIME_MODES.seconds = true ;
+	}
+
+	return DATE_TIME_MODES ;
+}
+
+
+
+const TIME_DURATION_MODES = {
 	useAbbreviation: false ,
 	rightPadding: 0 ,
 	rightPaddingOnlyIfDecimal: false ,
@@ -43602,32 +44981,32 @@ const TIME_MODES = {
 } ;
 
 // Generic number modes
-function timeModeArg( modeArg ) {
-	TIME_MODES.rightPadding = 0 ;
-	TIME_MODES.rightPaddingOnlyIfDecimal = false ;
-	TIME_MODES.rounding = 0 ;
-	TIME_MODES.roundingType = -1 ;
-	TIME_MODES.useAbbreviation = TIME_MODES.forceHours = TIME_MODES.forceMinutes = false ;
+function timeDurationModeArg( modeArg ) {
+	TIME_DURATION_MODES.rightPadding = 0 ;
+	TIME_DURATION_MODES.rightPaddingOnlyIfDecimal = false ;
+	TIME_DURATION_MODES.rounding = 0 ;
+	TIME_DURATION_MODES.roundingType = -1 ;
+	TIME_DURATION_MODES.useAbbreviation = TIME_DURATION_MODES.forceHours = TIME_DURATION_MODES.forceMinutes = false ;
 
 	if ( modeArg ) {
 		for ( let [ , k , v ] of modeArg.matchAll( MODE_ARG_FORMAT_REGEX ) ) {
 			if ( k === 'h' ) {
-				TIME_MODES.forceHours = TIME_MODES.forceMinutes = true ;
+				TIME_DURATION_MODES.forceHours = TIME_DURATION_MODES.forceMinutes = true ;
 			}
 			else if ( k === 'm' ) {
-				TIME_MODES.forceMinutes = true ;
+				TIME_DURATION_MODES.forceMinutes = true ;
 			}
 			else if ( k === 'r' ) {
-				TIME_MODES.roundingType = 0 ;
+				TIME_DURATION_MODES.roundingType = 0 ;
 			}
 			else if ( k === 'f' ) {
-				TIME_MODES.roundingType = -1 ;
+				TIME_DURATION_MODES.roundingType = -1 ;
 			}
 			else if ( k === 'c' ) {
-				TIME_MODES.roundingType = 1 ;
+				TIME_DURATION_MODES.roundingType = 1 ;
 			}
 			else if ( k === 'a' ) {
-				TIME_MODES.useAbbreviation = true ;
+				TIME_DURATION_MODES.useAbbreviation = true ;
 			}
 			else if ( ! k ) {
 				if ( v[ 0 ] === '.' ) {
@@ -43636,21 +45015,86 @@ function timeModeArg( modeArg ) {
 
 					// Zero-right padding?
 					if ( lv === '!' ) {
-						TIME_MODES.rounding = TIME_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
+						TIME_DURATION_MODES.rounding = TIME_DURATION_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
 					}
 					else if ( lv === '?' ) {
-						TIME_MODES.rounding = TIME_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
-						TIME_MODES.rightPaddingOnlyIfDecimal = true ;
+						TIME_DURATION_MODES.rounding = TIME_DURATION_MODES.rightPadding = parseInt( v.slice( 1 , -1 ) , 10 ) || 0 ;
+						TIME_DURATION_MODES.rightPaddingOnlyIfDecimal = true ;
 					}
 					else {
-						TIME_MODES.rounding = parseInt( v.slice( 1 ) , 10 ) || 0 ;
+						TIME_DURATION_MODES.rounding = parseInt( v.slice( 1 ) , 10 ) || 0 ;
 					}
 				}
 			}
 		}
 	}
 
-	return TIME_MODES ;
+	return TIME_DURATION_MODES ;
+}
+
+
+
+// Generic Natural Mode
+function genericNaturalMode( arg , modeArg , delimiters ) {
+	var depthLimit = 2 ;
+
+	if ( modeArg ) {
+		for ( let [ , k , v ] of modeArg.matchAll( MODE_ARG_FORMAT_REGEX ) ) {
+			if ( ! k ) {
+				depthLimit = parseInt( v , 10 ) || 1 ;
+			}
+		}
+	}
+
+	return genericNaturalModeRecursive( arg , delimiters , depthLimit , 0 ) ;
+}
+
+function genericNaturalModeRecursive( arg , delimiters , depthLimit , depth ) {
+	if ( typeof arg === 'string' ) { return arg ; }
+
+	if ( arg === null || arg === undefined || arg === true || arg === false ) {
+		return '' + arg ;
+	}
+
+	if ( typeof arg === 'number' ) {
+		return modes.f( arg , '.3g ' ) ;
+	}
+
+	if ( Array.isArray( arg ) ) {
+		if ( depth >= depthLimit ) { return '[...]' ; }
+
+		arg = arg.map( e => genericNaturalModeRecursive( e , true , depthLimit , depth + 1 ) ) ;
+
+		if ( delimiters ) { return '[' + arg.join( ',' ) + ']' ; }
+		return arg.join( ', ' ) ;
+	}
+
+	if ( Buffer.isBuffer( arg ) ) {
+		arg = [ ... arg ].map( e => {
+			e = e.toString( 16 ) ;
+			if ( e.length === 1 ) { e = '0' + e ; }
+			return e ;
+		} ) ;
+		return '<' + arg.join( ' ' ) + '>' ;
+	}
+
+	var proto = Object.getPrototypeOf( arg ) ;
+
+	if ( proto === null || proto === Object.prototype ) {
+		// Plain objects
+		if ( depth >= depthLimit ) { return '{...}' ; }
+
+		arg = Object.entries( arg ).sort( naturalSort )
+			.map( e => e[ 0 ] + ': ' + genericNaturalModeRecursive( e[ 1 ] , true , depthLimit , depth + 1 ) ) ;
+
+		if ( delimiters ) { return '{' + arg.join( ', ' ) + '}' ; }
+		return arg.join( ', ' ) ;
+	}
+
+	if ( typeof arg.inspect === 'function' ) { return arg.inspect() ; }
+	if ( typeof arg.toString === 'function' ) { return arg.toString() ; }
+
+	return '(' + arg + ')' ;
 }
 
 
@@ -43721,7 +45165,7 @@ function round( v , step ) {
 
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./StringNumber.js":115,"./ansi.js":116,"./escape.js":118,"./inspect.js":121,"./naturalSort.js":125,"./unicode.js":130,"buffer":151}],120:[function(require,module,exports){
+},{"./StringNumber.js":116,"./ansi.js":117,"./escape.js":121,"./inspect.js":124,"./naturalSort.js":131,"./unicode.js":135,"buffer":159}],123:[function(require,module,exports){
 /*
 	String Kit
 
@@ -44037,7 +45481,7 @@ fuzzy.levenshtein = ( left , right ) => {
 } ;
 
 
-},{}],121:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 (function (Buffer,process){(function (){
 /*
 	String Kit
@@ -44099,12 +45543,14 @@ const TRIVIAL_CONSTRUCTOR = new Set( [ Object , Array ] ) ;
 		* noDescriptor: do not display descriptor information
 		* noArrayProperty: do not display array properties
 		* noIndex: do not display array indexes
+		* bulletIndex: do not display array indexes, instead display a bullet: *
 		* noType: do not display type and constructor
 		* noTypeButConstructor: do not display type, display non-trivial constructor (not Object or Array, but all others)
 		* enumOnly: only display enumerable properties
 		* funcDetails: display function's details
 		* proto: display object's prototype
 		* sort: sort the keys
+		* noMarkup: don't add Javascript/JSON markup: {}[],"
 		* minimal: imply noFunc: true, noDescriptor: true, noType: true, noArrayProperty: true, enumOnly: true, proto: false and funcDetails: false.
 		  Display a minimal JSON-like output
 		* minimalPlusConstructor: like minimal, but output non-trivial constructor
@@ -44168,14 +45614,17 @@ exports.inspect = inspect ;
 
 function inspect_( runtime , options , variable ) {
 	var i , funcName , length , proto , propertyList , isTrivialConstructor , constructor , keyIsProperty ,
-		type , pre , indent , isArray , isFunc , specialObject ,
-		str = '' , key = '' , descriptorStr = '' , descriptor , nextAncestors ;
+		type , pre , isArray , isFunc , specialObject ,
+		str = '' , key = '' , descriptorStr = '' , indent = '' ,
+		descriptor , nextAncestors ;
 
 	// Prepare things (indentation, key, descriptor, ... )
 
 	type = typeof variable ;
 
-	indent = ( options.tab ?? options.style.tab ).repeat( runtime.depth ) ;
+	if ( runtime.depth ) {
+		indent = ( options.tab ?? options.style.tab ).repeat( options.noMarkup ? runtime.depth - 1 : runtime.depth ) ;
+	}
 
 	if ( type === 'function' && options.noFunc ) { return '' ; }
 
@@ -44183,25 +45632,33 @@ function inspect_( runtime , options , variable ) {
 		if ( runtime.descriptor ) {
 			descriptorStr = [] ;
 
-			if ( ! runtime.descriptor.configurable ) { descriptorStr.push( '-conf' ) ; }
-			if ( ! runtime.descriptor.enumerable ) { descriptorStr.push( '-enum' ) ; }
+			if ( runtime.descriptor.error ) {
+				descriptorStr = '[' + runtime.descriptor.error + ']' ;
+			}
+			else {
+				if ( ! runtime.descriptor.configurable ) { descriptorStr.push( '-conf' ) ; }
+				if ( ! runtime.descriptor.enumerable ) { descriptorStr.push( '-enum' ) ; }
 
-			// Already displayed by runtime.forceType
-			//if ( runtime.descriptor.get || runtime.descriptor.set ) { descriptorStr.push( 'getter/setter' ) ; } else
-			if ( ! runtime.descriptor.writable ) { descriptorStr.push( '-w' ) ; }
+				// Already displayed by runtime.forceType
+				//if ( runtime.descriptor.get || runtime.descriptor.set ) { descriptorStr.push( 'getter/setter' ) ; } else
+				if ( ! runtime.descriptor.writable ) { descriptorStr.push( '-w' ) ; }
 
-			//if ( descriptorStr.length ) { descriptorStr = '(' + descriptorStr.join( ' ' ) + ')' ; }
-			if ( descriptorStr.length ) { descriptorStr = descriptorStr.join( ' ' ) ; }
-			else { descriptorStr = '' ; }
+				//if ( descriptorStr.length ) { descriptorStr = '(' + descriptorStr.join( ' ' ) + ')' ; }
+				if ( descriptorStr.length ) { descriptorStr = descriptorStr.join( ' ' ) ; }
+				else { descriptorStr = '' ; }
+			}
 		}
 
 		if ( runtime.keyIsProperty ) {
-			if ( keyNeedingQuotes( runtime.key ) ) {
+			if ( ! options.noMarkup && keyNeedingQuotes( runtime.key ) ) {
 				key = '"' + options.style.key( runtime.key ) + '": ' ;
 			}
 			else {
 				key = options.style.key( runtime.key ) + ': ' ;
 			}
+		}
+		else if ( options.bulletIndex ) {
+			key = ( typeof options.bulletIndex === 'string' ? options.bulletIndex : '*' ) + ' ' ;
 		}
 		else if ( ! options.noIndex ) {
 			key = options.style.index( runtime.key ) ;
@@ -44237,12 +45694,12 @@ function inspect_( runtime , options , variable ) {
 	}
 	else if ( type === 'string' ) {
 		if ( variable.length > options.maxLength ) {
-			str += pre + '"' + options.style.string( escape.control( variable.slice( 0 , options.maxLength - 1 ) ) ) + '…"' +
+			str += pre + ( options.noMarkup ? '' : '"' ) + options.style.string( escape.control( variable.slice( 0 , options.maxLength - 1 ) ) ) + '…' + ( options.noMarkup ? '' : '"' ) +
 				( options.noType || options.noTypeButConstructor ? '' : ' ' + options.style.type( 'string' ) + options.style.length( '(' + variable.length + ' - TRUNCATED)' ) ) +
 				descriptorStr + options.style.newline ;
 		}
 		else {
-			str += pre + '"' + options.style.string( escape.control( variable ) ) + '"' +
+			str += pre + ( options.noMarkup ? '' : '"' ) + options.style.string( escape.control( variable ) ) + ( options.noMarkup ? '' : '"' ) +
 				( options.noType || options.noTypeButConstructor ? '' : ' ' + options.style.type( 'string' ) + options.style.length( '(' + variable.length + ')' ) ) +
 				descriptorStr + options.style.newline ;
 		}
@@ -44329,7 +45786,7 @@ function inspect_( runtime , options , variable ) {
 			str += options.style.newline ;
 		}
 		else if ( ! propertyList.length && ! options.proto ) {
-			str += ( isArray ? '[]' : '{}' ) + options.style.newline ;
+			str += ( options.noMarkup ? '' : isArray ? '[]' : '{}' ) + options.style.newline ;
 		}
 		else if ( runtime.depth >= options.depth ) {
 			str += options.style.limit( '[depth limit]' ) + options.style.newline ;
@@ -44338,7 +45795,14 @@ function inspect_( runtime , options , variable ) {
 			str += options.style.limit( '[circular]' ) + options.style.newline ;
 		}
 		else {
-			str += ( isArray ? '[' : '{' ) + options.style.newline ;
+			/*
+			str +=
+				options.noMarkup ? ( isArray && options.noIndex && ! runtime.keyIsProperty ? '' : options.style.newline ) :
+				( isArray ? '[' : '{' ) + options.style.newline ;
+			//*/
+			//*
+			str += ( options.noMarkup ? '' : isArray ? '[' : '{'  ) + options.style.newline ;
+			//*/
 
 			// Do not use .concat() here, it doesn't works as expected with arrays...
 			nextAncestors = runtime.ancestors.slice() ;
@@ -44369,7 +45833,10 @@ function inspect_( runtime , options , variable ) {
 				else {
 					try {
 						descriptor = Object.getOwnPropertyDescriptor( variable , propertyList[ i ] ) ;
-						if ( ! descriptor.enumerable && options.enumOnly ) { continue ; }
+						// Note: descriptor can be undefined, this happens when the object is a Proxy with a bad implementation:
+						// it reports that key (Object.keys()) but doesn't give the descriptor for it.
+
+						if ( descriptor && ! descriptor.enumerable && options.enumOnly ) { continue ; }
 						keyIsProperty = ! isArray || ! descriptor.enumerable || isNaN( propertyList[ i ] ) ;
 
 						if ( ! options.noDescriptor && descriptor && ( descriptor.get || descriptor.set ) ) {
@@ -44393,7 +45860,7 @@ function inspect_( runtime , options , variable ) {
 									ancestors: nextAncestors ,
 									key: propertyList[ i ] ,
 									keyIsProperty: keyIsProperty ,
-									descriptor: options.noDescriptor ? undefined : descriptor
+									descriptor: options.noDescriptor ? undefined : descriptor || { error: "Bad Proxy Descriptor" }
 								} ,
 								options ,
 								variable[ propertyList[ i ] ]
@@ -44431,8 +45898,7 @@ function inspect_( runtime , options , variable ) {
 				) ;
 			}
 
-			str += indent + ( isArray ? ']' : '}' ) ;
-			str += options.style.newline ;
+			str += options.noMarkup ? '' : indent + ( isArray ? ']' : '}' ) + options.style.newline ;
 		}
 	}
 
@@ -44778,10 +46244,17 @@ inspectStyle.html = Object.assign( {} , inspectStyle.none , {
 } ) ;
 
 
-}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")},require('_process'))
-},{"../../../../../../../../opt/node-v16.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":167,"./ansi.js":116,"./escape.js":118,"_process":185}],122:[function(require,module,exports){
+}).call(this)}).call(this,{"isBuffer":require("../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js")},require('_process'))
+},{"../../../../../../../../opt/node-v14.15.4/lib/node_modules/browserify/node_modules/is-buffer/index.js":174,"./ansi.js":117,"./escape.js":121,"_process":191}],125:[function(require,module,exports){
+module.exports={"😀":"grinning-face","😃":"grinning-face-with-big-eyes","😄":"grinning-face-with-smiling-eyes","😁":"beaming-face-with-smiling-eyes","😆":"grinning-squinting-face","😅":"grinning-face-with-sweat","🤣":"rolling-on-the-floor-laughing","😂":"face-with-tears-of-joy","🙂":"slightly-smiling-face","🙃":"upside-down-face","🫠":"melting-face","😉":"winking-face","😊":"smiling-face-with-smiling-eyes","😇":"smiling-face-with-halo","🥰":"smiling-face-with-hearts","😍":"smiling-face-with-heart-eyes","🤩":"star-struck","😘":"face-blowing-a-kiss","😗":"kissing-face","☺️":"smiling-face","😚":"kissing-face-with-closed-eyes","😙":"kissing-face-with-smiling-eyes","🥲":"smiling-face-with-tear","😋":"face-savoring-food","😛":"face-with-tongue","😜":"winking-face-with-tongue","🤪":"zany-face","😝":"squinting-face-with-tongue","🤑":"money-mouth-face","🤗":"smiling-face-with-open-hands","🤭":"face-with-hand-over-mouth","🫢":"face-with-open-eyes-and-hand-over-mouth","🫣":"face-with-peeking-eye","🤫":"shushing-face","🤔":"thinking-face","🫡":"saluting-face","🤐":"zipper-mouth-face","🤨":"face-with-raised-eyebrow","😐":"neutral-face","😑":"expressionless-face","😶":"face-without-mouth","🫥":"dotted-line-face","😶‍🌫️":"face-in-clouds","😏":"smirking-face","😒":"unamused-face","🙄":"face-with-rolling-eyes","😬":"grimacing-face","😮‍💨":"face-exhaling","🤥":"lying-face","🫨":"shaking-face","😌":"relieved-face","😔":"pensive-face","😪":"sleepy-face","🤤":"drooling-face","😴":"sleeping-face","😷":"face-with-medical-mask","🤒":"face-with-thermometer","🤕":"face-with-head-bandage","🤢":"nauseated-face","🤮":"face-vomiting","🤧":"sneezing-face","🥵":"hot-face","🥶":"cold-face","🥴":"woozy-face","😵":"face-with-crossed-out-eyes","😵‍💫":"face-with-spiral-eyes","🤯":"exploding-head","🤠":"cowboy-hat-face","🥳":"partying-face","🥸":"disguised-face","😎":"smiling-face-with-sunglasses","🤓":"nerd-face","🧐":"face-with-monocle","😕":"confused-face","🫤":"face-with-diagonal-mouth","😟":"worried-face","🙁":"slightly-frowning-face","☹️":"frowning-face","😮":"face-with-open-mouth","😯":"hushed-face","😲":"astonished-face","😳":"flushed-face","🥺":"pleading-face","🥹":"face-holding-back-tears","😦":"frowning-face-with-open-mouth","😧":"anguished-face","😨":"fearful-face","😰":"anxious-face-with-sweat","😥":"sad-but-relieved-face","😢":"crying-face","😭":"loudly-crying-face","😱":"face-screaming-in-fear","😖":"confounded-face","😣":"persevering-face","😞":"disappointed-face","😓":"downcast-face-with-sweat","😩":"weary-face","😫":"tired-face","🥱":"yawning-face","😤":"face-with-steam-from-nose","😡":"enraged-face","😠":"angry-face","🤬":"face-with-symbols-on-mouth","😈":"smiling-face-with-horns","👿":"angry-face-with-horns","💀":"skull","☠️":"skull-and-crossbones","💩":"pile-of-poo","🤡":"clown-face","👹":"ogre","👺":"goblin","👻":"ghost","👽":"alien","👾":"alien-monster","🤖":"robot","😺":"grinning-cat","😸":"grinning-cat-with-smiling-eyes","😹":"cat-with-tears-of-joy","😻":"smiling-cat-with-heart-eyes","😼":"cat-with-wry-smile","😽":"kissing-cat","🙀":"weary-cat","😿":"crying-cat","😾":"pouting-cat","🙈":"see-no-evil-monkey","🙉":"hear-no-evil-monkey","🙊":"speak-no-evil-monkey","💌":"love-letter","💘":"heart-with-arrow","💝":"heart-with-ribbon","💖":"sparkling-heart","💗":"growing-heart","💓":"beating-heart","💞":"revolving-hearts","💕":"two-hearts","💟":"heart-decoration","❣️":"heart-exclamation","💔":"broken-heart","❤️‍🔥":"heart-on-fire","❤️‍🩹":"mending-heart","❤️":"red-heart","🩷":"pink-heart","🧡":"orange-heart","💛":"yellow-heart","💚":"green-heart","💙":"blue-heart","🩵":"light-blue-heart","💜":"purple-heart","🤎":"brown-heart","🖤":"black-heart","🩶":"grey-heart","🤍":"white-heart","💋":"kiss-mark","💯":"hundred-points","💢":"anger-symbol","💥":"collision","💫":"dizzy","💦":"sweat-droplets","💨":"dashing-away","🕳️":"hole","💬":"speech-balloon","👁️‍🗨️":"eye-in-speech-bubble","🗨️":"left-speech-bubble","🗯️":"right-anger-bubble","💭":"thought-balloon","💤":"zzz","👋":"waving-hand","🤚":"raised-back-of-hand","🖐️":"hand-with-fingers-splayed","✋":"raised-hand","🖖":"vulcan-salute","🫱":"rightwards-hand","🫲":"leftwards-hand","🫳":"palm-down-hand","🫴":"palm-up-hand","🫷":"leftwards-pushing-hand","🫸":"rightwards-pushing-hand","👌":"ok-hand","🤌":"pinched-fingers","🤏":"pinching-hand","✌️":"victory-hand","🤞":"crossed-fingers","🫰":"hand-with-index-finger-and-thumb-crossed","🤟":"love-you-gesture","🤘":"sign-of-the-horns","🤙":"call-me-hand","👈":"backhand-index-pointing-left","👉":"backhand-index-pointing-right","👆":"backhand-index-pointing-up","🖕":"middle-finger","👇":"backhand-index-pointing-down","☝️":"index-pointing-up","🫵":"index-pointing-at-the-viewer","👍":"thumbs-up","👎":"thumbs-down","✊":"raised-fist","👊":"oncoming-fist","🤛":"left-facing-fist","🤜":"right-facing-fist","👏":"clapping-hands","🙌":"raising-hands","🫶":"heart-hands","👐":"open-hands","🤲":"palms-up-together","🤝":"handshake","🙏":"folded-hands","✍️":"writing-hand","💅":"nail-polish","🤳":"selfie","💪":"flexed-biceps","🦾":"mechanical-arm","🦿":"mechanical-leg","🦵":"leg","🦶":"foot","👂":"ear","🦻":"ear-with-hearing-aid","👃":"nose","🧠":"brain","🫀":"anatomical-heart","🫁":"lungs","🦷":"tooth","🦴":"bone","👀":"eyes","👁️":"eye","👅":"tongue","👄":"mouth","🫦":"biting-lip","👶":"baby","🧒":"child","👦":"boy","👧":"girl","🧑":"person","👱":"person-blond-hair","👨":"man","🧔":"person-beard","🧔‍♂️":"man-beard","🧔‍♀️":"woman-beard","👨‍🦰":"man-red-hair","👨‍🦱":"man-curly-hair","👨‍🦳":"man-white-hair","👨‍🦲":"man-bald","👩":"woman","👩‍🦰":"woman-red-hair","🧑‍🦰":"person-red-hair","👩‍🦱":"woman-curly-hair","🧑‍🦱":"person-curly-hair","👩‍🦳":"woman-white-hair","🧑‍🦳":"person-white-hair","👩‍🦲":"woman-bald","🧑‍🦲":"person-bald","👱‍♀️":"woman-blond-hair","👱‍♂️":"man-blond-hair","🧓":"older-person","👴":"old-man","👵":"old-woman","🙍":"person-frowning","🙍‍♂️":"man-frowning","🙍‍♀️":"woman-frowning","🙎":"person-pouting","🙎‍♂️":"man-pouting","🙎‍♀️":"woman-pouting","🙅":"person-gesturing-no","🙅‍♂️":"man-gesturing-no","🙅‍♀️":"woman-gesturing-no","🙆":"person-gesturing-ok","🙆‍♂️":"man-gesturing-ok","🙆‍♀️":"woman-gesturing-ok","💁":"person-tipping-hand","💁‍♂️":"man-tipping-hand","💁‍♀️":"woman-tipping-hand","🙋":"person-raising-hand","🙋‍♂️":"man-raising-hand","🙋‍♀️":"woman-raising-hand","🧏":"deaf-person","🧏‍♂️":"deaf-man","🧏‍♀️":"deaf-woman","🙇":"person-bowing","🙇‍♂️":"man-bowing","🙇‍♀️":"woman-bowing","🤦":"person-facepalming","🤦‍♂️":"man-facepalming","🤦‍♀️":"woman-facepalming","🤷":"person-shrugging","🤷‍♂️":"man-shrugging","🤷‍♀️":"woman-shrugging","🧑‍⚕️":"health-worker","👨‍⚕️":"man-health-worker","👩‍⚕️":"woman-health-worker","🧑‍🎓":"student","👨‍🎓":"man-student","👩‍🎓":"woman-student","🧑‍🏫":"teacher","👨‍🏫":"man-teacher","👩‍🏫":"woman-teacher","🧑‍⚖️":"judge","👨‍⚖️":"man-judge","👩‍⚖️":"woman-judge","🧑‍🌾":"farmer","👨‍🌾":"man-farmer","👩‍🌾":"woman-farmer","🧑‍🍳":"cook","👨‍🍳":"man-cook","👩‍🍳":"woman-cook","🧑‍🔧":"mechanic","👨‍🔧":"man-mechanic","👩‍🔧":"woman-mechanic","🧑‍🏭":"factory-worker","👨‍🏭":"man-factory-worker","👩‍🏭":"woman-factory-worker","🧑‍💼":"office-worker","👨‍💼":"man-office-worker","👩‍💼":"woman-office-worker","🧑‍🔬":"scientist","👨‍🔬":"man-scientist","👩‍🔬":"woman-scientist","🧑‍💻":"technologist","👨‍💻":"man-technologist","👩‍💻":"woman-technologist","🧑‍🎤":"singer","👨‍🎤":"man-singer","👩‍🎤":"woman-singer","🧑‍🎨":"artist","👨‍🎨":"man-artist","👩‍🎨":"woman-artist","🧑‍✈️":"pilot","👨‍✈️":"man-pilot","👩‍✈️":"woman-pilot","🧑‍🚀":"astronaut","👨‍🚀":"man-astronaut","👩‍🚀":"woman-astronaut","🧑‍🚒":"firefighter","👨‍🚒":"man-firefighter","👩‍🚒":"woman-firefighter","👮":"police-officer","👮‍♂️":"man-police-officer","👮‍♀️":"woman-police-officer","🕵️":"detective","🕵️‍♂️":"man-detective","🕵️‍♀️":"woman-detective","💂":"guard","💂‍♂️":"man-guard","💂‍♀️":"woman-guard","🥷":"ninja","👷":"construction-worker","👷‍♂️":"man-construction-worker","👷‍♀️":"woman-construction-worker","🫅":"person-with-crown","🤴":"prince","👸":"princess","👳":"person-wearing-turban","👳‍♂️":"man-wearing-turban","👳‍♀️":"woman-wearing-turban","👲":"person-with-skullcap","🧕":"woman-with-headscarf","🤵":"person-in-tuxedo","🤵‍♂️":"man-in-tuxedo","🤵‍♀️":"woman-in-tuxedo","👰":"person-with-veil","👰‍♂️":"man-with-veil","👰‍♀️":"woman-with-veil","🤰":"pregnant-woman","🫃":"pregnant-man","🫄":"pregnant-person","🤱":"breast-feeding","👩‍🍼":"woman-feeding-baby","👨‍🍼":"man-feeding-baby","🧑‍🍼":"person-feeding-baby","👼":"baby-angel","🎅":"santa-claus","🤶":"mrs-claus","🧑‍🎄":"mx-claus","🦸":"superhero","🦸‍♂️":"man-superhero","🦸‍♀️":"woman-superhero","🦹":"supervillain","🦹‍♂️":"man-supervillain","🦹‍♀️":"woman-supervillain","🧙":"mage","🧙‍♂️":"man-mage","🧙‍♀️":"woman-mage","🧚":"fairy","🧚‍♂️":"man-fairy","🧚‍♀️":"woman-fairy","🧛":"vampire","🧛‍♂️":"man-vampire","🧛‍♀️":"woman-vampire","🧜":"merperson","🧜‍♂️":"merman","🧜‍♀️":"mermaid","🧝":"elf","🧝‍♂️":"man-elf","🧝‍♀️":"woman-elf","🧞":"genie","🧞‍♂️":"man-genie","🧞‍♀️":"woman-genie","🧟":"zombie","🧟‍♂️":"man-zombie","🧟‍♀️":"woman-zombie","🧌":"troll","💆":"person-getting-massage","💆‍♂️":"man-getting-massage","💆‍♀️":"woman-getting-massage","💇":"person-getting-haircut","💇‍♂️":"man-getting-haircut","💇‍♀️":"woman-getting-haircut","🚶":"person-walking","🚶‍♂️":"man-walking","🚶‍♀️":"woman-walking","🧍":"person-standing","🧍‍♂️":"man-standing","🧍‍♀️":"woman-standing","🧎":"person-kneeling","🧎‍♂️":"man-kneeling","🧎‍♀️":"woman-kneeling","🧑‍🦯":"person-with-white-cane","👨‍🦯":"man-with-white-cane","👩‍🦯":"woman-with-white-cane","🧑‍🦼":"person-in-motorized-wheelchair","👨‍🦼":"man-in-motorized-wheelchair","👩‍🦼":"woman-in-motorized-wheelchair","🧑‍🦽":"person-in-manual-wheelchair","👨‍🦽":"man-in-manual-wheelchair","👩‍🦽":"woman-in-manual-wheelchair","🏃":"person-running","🏃‍♂️":"man-running","🏃‍♀️":"woman-running","💃":"woman-dancing","🕺":"man-dancing","🕴️":"person-in-suit-levitating","👯":"people-with-bunny-ears","👯‍♂️":"men-with-bunny-ears","👯‍♀️":"women-with-bunny-ears","🧖":"person-in-steamy-room","🧖‍♂️":"man-in-steamy-room","🧖‍♀️":"woman-in-steamy-room","🧗":"person-climbing","🧗‍♂️":"man-climbing","🧗‍♀️":"woman-climbing","🤺":"person-fencing","🏇":"horse-racing","⛷️":"skier","🏂":"snowboarder","🏌️":"person-golfing","🏌️‍♂️":"man-golfing","🏌️‍♀️":"woman-golfing","🏄":"person-surfing","🏄‍♂️":"man-surfing","🏄‍♀️":"woman-surfing","🚣":"person-rowing-boat","🚣‍♂️":"man-rowing-boat","🚣‍♀️":"woman-rowing-boat","🏊":"person-swimming","🏊‍♂️":"man-swimming","🏊‍♀️":"woman-swimming","⛹️":"person-bouncing-ball","⛹️‍♂️":"man-bouncing-ball","⛹️‍♀️":"woman-bouncing-ball","🏋️":"person-lifting-weights","🏋️‍♂️":"man-lifting-weights","🏋️‍♀️":"woman-lifting-weights","🚴":"person-biking","🚴‍♂️":"man-biking","🚴‍♀️":"woman-biking","🚵":"person-mountain-biking","🚵‍♂️":"man-mountain-biking","🚵‍♀️":"woman-mountain-biking","🤸":"person-cartwheeling","🤸‍♂️":"man-cartwheeling","🤸‍♀️":"woman-cartwheeling","🤼":"people-wrestling","🤼‍♂️":"men-wrestling","🤼‍♀️":"women-wrestling","🤽":"person-playing-water-polo","🤽‍♂️":"man-playing-water-polo","🤽‍♀️":"woman-playing-water-polo","🤾":"person-playing-handball","🤾‍♂️":"man-playing-handball","🤾‍♀️":"woman-playing-handball","🤹":"person-juggling","🤹‍♂️":"man-juggling","🤹‍♀️":"woman-juggling","🧘":"person-in-lotus-position","🧘‍♂️":"man-in-lotus-position","🧘‍♀️":"woman-in-lotus-position","🛀":"person-taking-bath","🛌":"person-in-bed","🧑‍🤝‍🧑":"people-holding-hands","👭":"women-holding-hands","👫":"woman-and-man-holding-hands","👬":"men-holding-hands","💏":"kiss","👩‍❤️‍💋‍👨":"kiss-woman-man","👨‍❤️‍💋‍👨":"kiss-man-man","👩‍❤️‍💋‍👩":"kiss-woman-woman","💑":"couple-with-heart","👩‍❤️‍👨":"couple-with-heart-woman-man","👨‍❤️‍👨":"couple-with-heart-man-man","👩‍❤️‍👩":"couple-with-heart-woman-woman","👪":"family","👨‍👩‍👦":"family-man-woman-boy","👨‍👩‍👧":"family-man-woman-girl","👨‍👩‍👧‍👦":"family-man-woman-girl-boy","👨‍👩‍👦‍👦":"family-man-woman-boy-boy","👨‍👩‍👧‍👧":"family-man-woman-girl-girl","👨‍👨‍👦":"family-man-man-boy","👨‍👨‍👧":"family-man-man-girl","👨‍👨‍👧‍👦":"family-man-man-girl-boy","👨‍👨‍👦‍👦":"family-man-man-boy-boy","👨‍👨‍👧‍👧":"family-man-man-girl-girl","👩‍👩‍👦":"family-woman-woman-boy","👩‍👩‍👧":"family-woman-woman-girl","👩‍👩‍👧‍👦":"family-woman-woman-girl-boy","👩‍👩‍👦‍👦":"family-woman-woman-boy-boy","👩‍👩‍👧‍👧":"family-woman-woman-girl-girl","👨‍👦":"family-man-boy","👨‍👦‍👦":"family-man-boy-boy","👨‍👧":"family-man-girl","👨‍👧‍👦":"family-man-girl-boy","👨‍👧‍👧":"family-man-girl-girl","👩‍👦":"family-woman-boy","👩‍👦‍👦":"family-woman-boy-boy","👩‍👧":"family-woman-girl","👩‍👧‍👦":"family-woman-girl-boy","👩‍👧‍👧":"family-woman-girl-girl","🗣️":"speaking-head","👤":"bust-in-silhouette","👥":"busts-in-silhouette","🫂":"people-hugging","👣":"footprints","🐵":"monkey-face","🐒":"monkey","🦍":"gorilla","🦧":"orangutan","🐶":"dog-face","🐕":"dog","🦮":"guide-dog","🐕‍🦺":"service-dog","🐩":"poodle","🐺":"wolf","🦊":"fox","🦝":"raccoon","🐱":"cat-face","🐈":"cat","🐈‍⬛":"black-cat","🦁":"lion","🐯":"tiger-face","🐅":"tiger","🐆":"leopard","🐴":"horse-face","🫎":"moose","🫏":"donkey","🐎":"horse","🦄":"unicorn","🦓":"zebra","🦌":"deer","🦬":"bison","🐮":"cow-face","🐂":"ox","🐃":"water-buffalo","🐄":"cow","🐷":"pig-face","🐖":"pig","🐗":"boar","🐽":"pig-nose","🐏":"ram","🐑":"ewe","🐐":"goat","🐪":"camel","🐫":"two-hump-camel","🦙":"llama","🦒":"giraffe","🐘":"elephant","🦣":"mammoth","🦏":"rhinoceros","🦛":"hippopotamus","🐭":"mouse-face","🐁":"mouse","🐀":"rat","🐹":"hamster","🐰":"rabbit-face","🐇":"rabbit","🐿️":"chipmunk","🦫":"beaver","🦔":"hedgehog","🦇":"bat","🐻":"bear","🐻‍❄️":"polar-bear","🐨":"koala","🐼":"panda","🦥":"sloth","🦦":"otter","🦨":"skunk","🦘":"kangaroo","🦡":"badger","🐾":"paw-prints","🦃":"turkey","🐔":"chicken","🐓":"rooster","🐣":"hatching-chick","🐤":"baby-chick","🐥":"front-facing-baby-chick","🐦":"bird","🐧":"penguin","🕊️":"dove","🦅":"eagle","🦆":"duck","🦢":"swan","🦉":"owl","🦤":"dodo","🪶":"feather","🦩":"flamingo","🦚":"peacock","🦜":"parrot","🪽":"wing","🐦‍⬛":"black-bird","🪿":"goose","🐸":"frog","🐊":"crocodile","🐢":"turtle","🦎":"lizard","🐍":"snake","🐲":"dragon-face","🐉":"dragon","🦕":"sauropod","🦖":"t-rex","🐳":"spouting-whale","🐋":"whale","🐬":"dolphin","🦭":"seal","🐟":"fish","🐠":"tropical-fish","🐡":"blowfish","🦈":"shark","🐙":"octopus","🐚":"spiral-shell","🪸":"coral","🪼":"jellyfish","🐌":"snail","🦋":"butterfly","🐛":"bug","🐜":"ant","🐝":"honeybee","🪲":"beetle","🐞":"lady-beetle","🦗":"cricket","🪳":"cockroach","🕷️":"spider","🕸️":"spider-web","🦂":"scorpion","🦟":"mosquito","🪰":"fly","🪱":"worm","🦠":"microbe","💐":"bouquet","🌸":"cherry-blossom","💮":"white-flower","🪷":"lotus","🏵️":"rosette","🌹":"rose","🥀":"wilted-flower","🌺":"hibiscus","🌻":"sunflower","🌼":"blossom","🌷":"tulip","🪻":"hyacinth","🌱":"seedling","🪴":"potted-plant","🌲":"evergreen-tree","🌳":"deciduous-tree","🌴":"palm-tree","🌵":"cactus","🌾":"sheaf-of-rice","🌿":"herb","☘️":"shamrock","🍀":"four-leaf-clover","🍁":"maple-leaf","🍂":"fallen-leaf","🍃":"leaf-fluttering-in-wind","🪹":"empty-nest","🪺":"nest-with-eggs","🍄":"mushroom","🍇":"grapes","🍈":"melon","🍉":"watermelon","🍊":"tangerine","🍋":"lemon","🍌":"banana","🍍":"pineapple","🥭":"mango","🍎":"red-apple","🍏":"green-apple","🍐":"pear","🍑":"peach","🍒":"cherries","🍓":"strawberry","🫐":"blueberries","🥝":"kiwi-fruit","🍅":"tomato","🫒":"olive","🥥":"coconut","🥑":"avocado","🍆":"eggplant","🥔":"potato","🥕":"carrot","🌽":"ear-of-corn","🌶️":"hot-pepper","🫑":"bell-pepper","🥒":"cucumber","🥬":"leafy-green","🥦":"broccoli","🧄":"garlic","🧅":"onion","🥜":"peanuts","🫘":"beans","🌰":"chestnut","🫚":"ginger-root","🫛":"pea-pod","🍞":"bread","🥐":"croissant","🥖":"baguette-bread","🫓":"flatbread","🥨":"pretzel","🥯":"bagel","🥞":"pancakes","🧇":"waffle","🧀":"cheese-wedge","🍖":"meat-on-bone","🍗":"poultry-leg","🥩":"cut-of-meat","🥓":"bacon","🍔":"hamburger","🍟":"french-fries","🍕":"pizza","🌭":"hot-dog","🥪":"sandwich","🌮":"taco","🌯":"burrito","🫔":"tamale","🥙":"stuffed-flatbread","🧆":"falafel","🥚":"egg","🍳":"cooking","🥘":"shallow-pan-of-food","🍲":"pot-of-food","🫕":"fondue","🥣":"bowl-with-spoon","🥗":"green-salad","🍿":"popcorn","🧈":"butter","🧂":"salt","🥫":"canned-food","🍱":"bento-box","🍘":"rice-cracker","🍙":"rice-ball","🍚":"cooked-rice","🍛":"curry-rice","🍜":"steaming-bowl","🍝":"spaghetti","🍠":"roasted-sweet-potato","🍢":"oden","🍣":"sushi","🍤":"fried-shrimp","🍥":"fish-cake-with-swirl","🥮":"moon-cake","🍡":"dango","🥟":"dumpling","🥠":"fortune-cookie","🥡":"takeout-box","🦀":"crab","🦞":"lobster","🦐":"shrimp","🦑":"squid","🦪":"oyster","🍦":"soft-ice-cream","🍧":"shaved-ice","🍨":"ice-cream","🍩":"doughnut","🍪":"cookie","🎂":"birthday-cake","🍰":"shortcake","🧁":"cupcake","🥧":"pie","🍫":"chocolate-bar","🍬":"candy","🍭":"lollipop","🍮":"custard","🍯":"honey-pot","🍼":"baby-bottle","🥛":"glass-of-milk","☕":"hot-beverage","🫖":"teapot","🍵":"teacup-without-handle","🍶":"sake","🍾":"bottle-with-popping-cork","🍷":"wine-glass","🍸":"cocktail-glass","🍹":"tropical-drink","🍺":"beer-mug","🍻":"clinking-beer-mugs","🥂":"clinking-glasses","🥃":"tumbler-glass","🫗":"pouring-liquid","🥤":"cup-with-straw","🧋":"bubble-tea","🧃":"beverage-box","🧉":"mate","🧊":"ice","🥢":"chopsticks","🍽️":"fork-and-knife-with-plate","🍴":"fork-and-knife","🥄":"spoon","🔪":"kitchen-knife","🫙":"jar","🏺":"amphora","🌍":"globe-showing-europe-africa","🌎":"globe-showing-americas","🌏":"globe-showing-asia-australia","🌐":"globe-with-meridians","🗺️":"world-map","🗾":"map-of-japan","🧭":"compass","🏔️":"snow-capped-mountain","⛰️":"mountain","🌋":"volcano","🗻":"mount-fuji","🏕️":"camping","🏖️":"beach-with-umbrella","🏜️":"desert","🏝️":"desert-island","🏞️":"national-park","🏟️":"stadium","🏛️":"classical-building","🏗️":"building-construction","🧱":"brick","🪨":"rock","🪵":"wood","🛖":"hut","🏘️":"houses","🏚️":"derelict-house","🏠":"house","🏡":"house-with-garden","🏢":"office-building","🏣":"japanese-post-office","🏤":"post-office","🏥":"hospital","🏦":"bank","🏨":"hotel","🏩":"love-hotel","🏪":"convenience-store","🏫":"school","🏬":"department-store","🏭":"factory","🏯":"japanese-castle","🏰":"castle","💒":"wedding","🗼":"tokyo-tower","🗽":"statue-of-liberty","⛪":"church","🕌":"mosque","🛕":"hindu-temple","🕍":"synagogue","⛩️":"shinto-shrine","🕋":"kaaba","⛲":"fountain","⛺":"tent","🌁":"foggy","🌃":"night-with-stars","🏙️":"cityscape","🌄":"sunrise-over-mountains","🌅":"sunrise","🌆":"cityscape-at-dusk","🌇":"sunset","🌉":"bridge-at-night","♨️":"hot-springs","🎠":"carousel-horse","🛝":"playground-slide","🎡":"ferris-wheel","🎢":"roller-coaster","💈":"barber-pole","🎪":"circus-tent","🚂":"locomotive","🚃":"railway-car","🚄":"high-speed-train","🚅":"bullet-train","🚆":"train","🚇":"metro","🚈":"light-rail","🚉":"station","🚊":"tram","🚝":"monorail","🚞":"mountain-railway","🚋":"tram-car","🚌":"bus","🚍":"oncoming-bus","🚎":"trolleybus","🚐":"minibus","🚑":"ambulance","🚒":"fire-engine","🚓":"police-car","🚔":"oncoming-police-car","🚕":"taxi","🚖":"oncoming-taxi","🚗":"automobile","🚘":"oncoming-automobile","🚙":"sport-utility-vehicle","🛻":"pickup-truck","🚚":"delivery-truck","🚛":"articulated-lorry","🚜":"tractor","🏎️":"racing-car","🏍️":"motorcycle","🛵":"motor-scooter","🦽":"manual-wheelchair","🦼":"motorized-wheelchair","🛺":"auto-rickshaw","🚲":"bicycle","🛴":"kick-scooter","🛹":"skateboard","🛼":"roller-skate","🚏":"bus-stop","🛣️":"motorway","🛤️":"railway-track","🛢️":"oil-drum","⛽":"fuel-pump","🛞":"wheel","🚨":"police-car-light","🚥":"horizontal-traffic-light","🚦":"vertical-traffic-light","🛑":"stop-sign","🚧":"construction","⚓":"anchor","🛟":"ring-buoy","⛵":"sailboat","🛶":"canoe","🚤":"speedboat","🛳️":"passenger-ship","⛴️":"ferry","🛥️":"motor-boat","🚢":"ship","✈️":"airplane","🛩️":"small-airplane","🛫":"airplane-departure","🛬":"airplane-arrival","🪂":"parachute","💺":"seat","🚁":"helicopter","🚟":"suspension-railway","🚠":"mountain-cableway","🚡":"aerial-tramway","🛰️":"satellite","🚀":"rocket","🛸":"flying-saucer","🛎️":"bellhop-bell","🧳":"luggage","⌛":"hourglass-done","⏳":"hourglass-not-done","⌚":"watch","⏰":"alarm-clock","⏱️":"stopwatch","⏲️":"timer-clock","🕰️":"mantelpiece-clock","🕛":"twelve-o-clock","🕧":"twelve-thirty","🕐":"one-o-clock","🕜":"one-thirty","🕑":"two-o-clock","🕝":"two-thirty","🕒":"three-o-clock","🕞":"three-thirty","🕓":"four-o-clock","🕟":"four-thirty","🕔":"five-o-clock","🕠":"five-thirty","🕕":"six-o-clock","🕡":"six-thirty","🕖":"seven-o-clock","🕢":"seven-thirty","🕗":"eight-o-clock","🕣":"eight-thirty","🕘":"nine-o-clock","🕤":"nine-thirty","🕙":"ten-o-clock","🕥":"ten-thirty","🕚":"eleven-o-clock","🕦":"eleven-thirty","🌑":"new-moon","🌒":"waxing-crescent-moon","🌓":"first-quarter-moon","🌔":"waxing-gibbous-moon","🌕":"full-moon","🌖":"waning-gibbous-moon","🌗":"last-quarter-moon","🌘":"waning-crescent-moon","🌙":"crescent-moon","🌚":"new-moon-face","🌛":"first-quarter-moon-face","🌜":"last-quarter-moon-face","🌡️":"thermometer","☀️":"sun","🌝":"full-moon-face","🌞":"sun-with-face","🪐":"ringed-planet","⭐":"star","🌟":"glowing-star","🌠":"shooting-star","🌌":"milky-way","☁️":"cloud","⛅":"sun-behind-cloud","⛈️":"cloud-with-lightning-and-rain","🌤️":"sun-behind-small-cloud","🌥️":"sun-behind-large-cloud","🌦️":"sun-behind-rain-cloud","🌧️":"cloud-with-rain","🌨️":"cloud-with-snow","🌩️":"cloud-with-lightning","🌪️":"tornado","🌫️":"fog","🌬️":"wind-face","🌀":"cyclone","🌈":"rainbow","🌂":"closed-umbrella","☂️":"umbrella","☔":"umbrella-with-rain-drops","⛱️":"umbrella-on-ground","⚡":"high-voltage","❄️":"snowflake","☃️":"snowman","⛄":"snowman-without-snow","☄️":"comet","🔥":"fire","💧":"droplet","🌊":"water-wave","🎃":"jack-o-lantern","🎄":"christmas-tree","🎆":"fireworks","🎇":"sparkler","🧨":"firecracker","✨":"sparkles","🎈":"balloon","🎉":"party-popper","🎊":"confetti-ball","🎋":"tanabata-tree","🎍":"pine-decoration","🎎":"japanese-dolls","🎏":"carp-streamer","🎐":"wind-chime","🎑":"moon-viewing-ceremony","🧧":"red-envelope","🎀":"ribbon","🎁":"wrapped-gift","🎗️":"reminder-ribbon","🎟️":"admission-tickets","🎫":"ticket","🎖️":"military-medal","🏆":"trophy","🏅":"sports-medal","🥇":"1st-place-medal","🥈":"2nd-place-medal","🥉":"3rd-place-medal","⚽":"soccer-ball","⚾":"baseball","🥎":"softball","🏀":"basketball","🏐":"volleyball","🏈":"american-football","🏉":"rugby-football","🎾":"tennis","🥏":"flying-disc","🎳":"bowling","🏏":"cricket-game","🏑":"field-hockey","🏒":"ice-hockey","🥍":"lacrosse","🏓":"ping-pong","🏸":"badminton","🥊":"boxing-glove","🥋":"martial-arts-uniform","🥅":"goal-net","⛳":"flag-in-hole","⛸️":"ice-skate","🎣":"fishing-pole","🤿":"diving-mask","🎽":"running-shirt","🎿":"skis","🛷":"sled","🥌":"curling-stone","🎯":"bullseye","🪀":"yo-yo","🪁":"kite","🔫":"water-pistol","🎱":"pool-8-ball","🔮":"crystal-ball","🪄":"magic-wand","🎮":"video-game","🕹️":"joystick","🎰":"slot-machine","🎲":"game-die","🧩":"puzzle-piece","🧸":"teddy-bear","🪅":"pinata","🪩":"mirror-ball","🪆":"nesting-dolls","♠️":"spade-suit","♥️":"heart-suit","♦️":"diamond-suit","♣️":"club-suit","♟️":"chess-pawn","🃏":"joker","🀄":"mahjong-red-dragon","🎴":"flower-playing-cards","🎭":"performing-arts","🖼️":"framed-picture","🎨":"artist-palette","🧵":"thread","🪡":"sewing-needle","🧶":"yarn","🪢":"knot","👓":"glasses","🕶️":"sunglasses","🥽":"goggles","🥼":"lab-coat","🦺":"safety-vest","👔":"necktie","👕":"t-shirt","👖":"jeans","🧣":"scarf","🧤":"gloves","🧥":"coat","🧦":"socks","👗":"dress","👘":"kimono","🥻":"sari","🩱":"one-piece-swimsuit","🩲":"briefs","🩳":"shorts","👙":"bikini","👚":"woman-s-clothes","🪭":"folding-hand-fan","👛":"purse","👜":"handbag","👝":"clutch-bag","🛍️":"shopping-bags","🎒":"backpack","🩴":"thong-sandal","👞":"man-s-shoe","👟":"running-shoe","🥾":"hiking-boot","🥿":"flat-shoe","👠":"high-heeled-shoe","👡":"woman-s-sandal","🩰":"ballet-shoes","👢":"woman-s-boot","🪮":"hair-pick","👑":"crown","👒":"woman-s-hat","🎩":"top-hat","🎓":"graduation-cap","🧢":"billed-cap","🪖":"military-helmet","⛑️":"rescue-worker-s-helmet","📿":"prayer-beads","💄":"lipstick","💍":"ring","💎":"gem-stone","🔇":"muted-speaker","🔈":"speaker-low-volume","🔉":"speaker-medium-volume","🔊":"speaker-high-volume","📢":"loudspeaker","📣":"megaphone","📯":"postal-horn","🔔":"bell","🔕":"bell-with-slash","🎼":"musical-score","🎵":"musical-note","🎶":"musical-notes","🎙️":"studio-microphone","🎚️":"level-slider","🎛️":"control-knobs","🎤":"microphone","🎧":"headphone","📻":"radio","🎷":"saxophone","🪗":"accordion","🎸":"guitar","🎹":"musical-keyboard","🎺":"trumpet","🎻":"violin","🪕":"banjo","🥁":"drum","🪘":"long-drum","🪇":"maracas","🪈":"flute","📱":"mobile-phone","📲":"mobile-phone-with-arrow","☎️":"telephone","📞":"telephone-receiver","📟":"pager","📠":"fax-machine","🔋":"battery","🪫":"low-battery","🔌":"electric-plug","💻":"laptop","🖥️":"desktop-computer","🖨️":"printer","⌨️":"keyboard","🖱️":"computer-mouse","🖲️":"trackball","💽":"computer-disk","💾":"floppy-disk","💿":"optical-disk","📀":"dvd","🧮":"abacus","🎥":"movie-camera","🎞️":"film-frames","📽️":"film-projector","🎬":"clapper-board","📺":"television","📷":"camera","📸":"camera-with-flash","📹":"video-camera","📼":"videocassette","🔍":"magnifying-glass-tilted-left","🔎":"magnifying-glass-tilted-right","🕯️":"candle","💡":"light-bulb","🔦":"flashlight","🏮":"red-paper-lantern","🪔":"diya-lamp","📔":"notebook-with-decorative-cover","📕":"closed-book","📖":"open-book","📗":"green-book","📘":"blue-book","📙":"orange-book","📚":"books","📓":"notebook","📒":"ledger","📃":"page-with-curl","📜":"scroll","📄":"page-facing-up","📰":"newspaper","🗞️":"rolled-up-newspaper","📑":"bookmark-tabs","🔖":"bookmark","🏷️":"label","💰":"money-bag","🪙":"coin","💴":"yen-banknote","💵":"dollar-banknote","💶":"euro-banknote","💷":"pound-banknote","💸":"money-with-wings","💳":"credit-card","🧾":"receipt","💹":"chart-increasing-with-yen","✉️":"envelope","📧":"e-mail","📨":"incoming-envelope","📩":"envelope-with-arrow","📤":"outbox-tray","📥":"inbox-tray","📦":"package","📫":"closed-mailbox-with-raised-flag","📪":"closed-mailbox-with-lowered-flag","📬":"open-mailbox-with-raised-flag","📭":"open-mailbox-with-lowered-flag","📮":"postbox","🗳️":"ballot-box-with-ballot","✏️":"pencil","✒️":"black-nib","🖋️":"fountain-pen","🖊️":"pen","🖌️":"paintbrush","🖍️":"crayon","📝":"memo","💼":"briefcase","📁":"file-folder","📂":"open-file-folder","🗂️":"card-index-dividers","📅":"calendar","📆":"tear-off-calendar","🗒️":"spiral-notepad","🗓️":"spiral-calendar","📇":"card-index","📈":"chart-increasing","📉":"chart-decreasing","📊":"bar-chart","📋":"clipboard","📌":"pushpin","📍":"round-pushpin","📎":"paperclip","🖇️":"linked-paperclips","📏":"straight-ruler","📐":"triangular-ruler","✂️":"scissors","🗃️":"card-file-box","🗄️":"file-cabinet","🗑️":"wastebasket","🔒":"locked","🔓":"unlocked","🔏":"locked-with-pen","🔐":"locked-with-key","🔑":"key","🗝️":"old-key","🔨":"hammer","🪓":"axe","⛏️":"pick","⚒️":"hammer-and-pick","🛠️":"hammer-and-wrench","🗡️":"dagger","⚔️":"crossed-swords","💣":"bomb","🪃":"boomerang","🏹":"bow-and-arrow","🛡️":"shield","🪚":"carpentry-saw","🔧":"wrench","🪛":"screwdriver","🔩":"nut-and-bolt","⚙️":"gear","🗜️":"clamp","⚖️":"balance-scale","🦯":"white-cane","🔗":"link","⛓️":"chains","🪝":"hook","🧰":"toolbox","🧲":"magnet","🪜":"ladder","⚗️":"alembic","🧪":"test-tube","🧫":"petri-dish","🧬":"dna","🔬":"microscope","🔭":"telescope","📡":"satellite-antenna","💉":"syringe","🩸":"drop-of-blood","💊":"pill","🩹":"adhesive-bandage","🩼":"crutch","🩺":"stethoscope","🩻":"x-ray","🚪":"door","🛗":"elevator","🪞":"mirror","🪟":"window","🛏️":"bed","🛋️":"couch-and-lamp","🪑":"chair","🚽":"toilet","🪠":"plunger","🚿":"shower","🛁":"bathtub","🪤":"mouse-trap","🪒":"razor","🧴":"lotion-bottle","🧷":"safety-pin","🧹":"broom","🧺":"basket","🧻":"roll-of-paper","🪣":"bucket","🧼":"soap","🫧":"bubbles","🪥":"toothbrush","🧽":"sponge","🧯":"fire-extinguisher","🛒":"shopping-cart","🚬":"cigarette","⚰️":"coffin","🪦":"headstone","⚱️":"funeral-urn","🧿":"nazar-amulet","🪬":"hamsa","🗿":"moai","🪧":"placard","🪪":"identification-card","🏧":"atm-sign","🚮":"litter-in-bin-sign","🚰":"potable-water","♿":"wheelchair-symbol","🚹":"men-s-room","🚺":"women-s-room","🚻":"restroom","🚼":"baby-symbol","🚾":"water-closet","🛂":"passport-control","🛃":"customs","🛄":"baggage-claim","🛅":"left-luggage","⚠️":"warning","🚸":"children-crossing","⛔":"no-entry","🚫":"prohibited","🚳":"no-bicycles","🚭":"no-smoking","🚯":"no-littering","🚱":"non-potable-water","🚷":"no-pedestrians","📵":"no-mobile-phones","🔞":"no-one-under-eighteen","☢️":"radioactive","☣️":"biohazard","⬆️":"up-arrow","↗️":"up-right-arrow","➡️":"right-arrow","↘️":"down-right-arrow","⬇️":"down-arrow","↙️":"down-left-arrow","⬅️":"left-arrow","↖️":"up-left-arrow","↕️":"up-down-arrow","↔️":"left-right-arrow","↩️":"right-arrow-curving-left","↪️":"left-arrow-curving-right","⤴️":"right-arrow-curving-up","⤵️":"right-arrow-curving-down","🔃":"clockwise-vertical-arrows","🔄":"counterclockwise-arrows-button","🔙":"back-arrow","🔚":"end-arrow","🔛":"on-arrow","🔜":"soon-arrow","🔝":"top-arrow","🛐":"place-of-worship","⚛️":"atom-symbol","🕉️":"om","✡️":"star-of-david","☸️":"wheel-of-dharma","☯️":"yin-yang","✝️":"latin-cross","☦️":"orthodox-cross","☪️":"star-and-crescent","☮️":"peace-symbol","🕎":"menorah","🔯":"dotted-six-pointed-star","🪯":"khanda","♈":"aries","♉":"taurus","♊":"gemini","♋":"cancer","♌":"leo","♍":"virgo","♎":"libra","♏":"scorpio","♐":"sagittarius","♑":"capricorn","♒":"aquarius","♓":"pisces","⛎":"ophiuchus","🔀":"shuffle-tracks-button","🔁":"repeat-button","🔂":"repeat-single-button","▶️":"play-button","⏩":"fast-forward-button","⏭️":"next-track-button","⏯️":"play-or-pause-button","◀️":"reverse-button","⏪":"fast-reverse-button","⏮️":"last-track-button","🔼":"upwards-button","⏫":"fast-up-button","🔽":"downwards-button","⏬":"fast-down-button","⏸️":"pause-button","⏹️":"stop-button","⏺️":"record-button","⏏️":"eject-button","🎦":"cinema","🔅":"dim-button","🔆":"bright-button","📶":"antenna-bars","🛜":"wireless","📳":"vibration-mode","📴":"mobile-phone-off","♀️":"female-sign","♂️":"male-sign","⚧️":"transgender-symbol","✖️":"multiply","➕":"plus","➖":"minus","➗":"divide","🟰":"heavy-equals-sign","♾️":"infinity","‼️":"double-exclamation-mark","⁉️":"exclamation-question-mark","❓":"red-question-mark","❔":"white-question-mark","❕":"white-exclamation-mark","❗":"red-exclamation-mark","〰️":"wavy-dash","💱":"currency-exchange","💲":"heavy-dollar-sign","⚕️":"medical-symbol","♻️":"recycling-symbol","⚜️":"fleur-de-lis","🔱":"trident-emblem","📛":"name-badge","🔰":"japanese-symbol-for-beginner","⭕":"hollow-red-circle","✅":"check-mark-button","☑️":"check-box-with-check","✔️":"check-mark","❌":"cross-mark","❎":"cross-mark-button","➰":"curly-loop","➿":"double-curly-loop","〽️":"part-alternation-mark","✳️":"eight-spoked-asterisk","✴️":"eight-pointed-star","❇️":"sparkle","©️":"copyright","®️":"registered","™️":"trade-mark","#️⃣":"keycap-#","*️⃣":"keycap-*","0️⃣":"keycap-0","1️⃣":"keycap-1","2️⃣":"keycap-2","3️⃣":"keycap-3","4️⃣":"keycap-4","5️⃣":"keycap-5","6️⃣":"keycap-6","7️⃣":"keycap-7","8️⃣":"keycap-8","9️⃣":"keycap-9","🔟":"keycap-10","🔠":"input-latin-uppercase","🔡":"input-latin-lowercase","🔢":"input-numbers","🔣":"input-symbols","🔤":"input-latin-letters","🅰️":"a-button-blood-type","🆎":"ab-button-blood-type","🅱️":"b-button-blood-type","🆑":"cl-button","🆒":"cool-button","🆓":"free-button","ℹ️":"information","🆔":"id-button","Ⓜ️":"circled-m","🆕":"new-button","🆖":"ng-button","🅾️":"o-button-blood-type","🆗":"ok-button","🅿️":"p-button","🆘":"sos-button","🆙":"up-button","🆚":"vs-button","🈁":"japanese-here-button","🈂️":"japanese-service-charge-button","🈷️":"japanese-monthly-amount-button","🈶":"japanese-not-free-of-charge-button","🈯":"japanese-reserved-button","🉐":"japanese-bargain-button","🈹":"japanese-discount-button","🈚":"japanese-free-of-charge-button","🈲":"japanese-prohibited-button","🉑":"japanese-acceptable-button","🈸":"japanese-application-button","🈴":"japanese-passing-grade-button","🈳":"japanese-vacancy-button","㊗️":"japanese-congratulations-button","㊙️":"japanese-secret-button","🈺":"japanese-open-for-business-button","🈵":"japanese-no-vacancy-button","🔴":"red-circle","🟠":"orange-circle","🟡":"yellow-circle","🟢":"green-circle","🔵":"blue-circle","🟣":"purple-circle","🟤":"brown-circle","⚫":"black-circle","⚪":"white-circle","🟥":"red-square","🟧":"orange-square","🟨":"yellow-square","🟩":"green-square","🟦":"blue-square","🟪":"purple-square","🟫":"brown-square","⬛":"black-large-square","⬜":"white-large-square","◼️":"black-medium-square","◻️":"white-medium-square","◾":"black-medium-small-square","◽":"white-medium-small-square","▪️":"black-small-square","▫️":"white-small-square","🔶":"large-orange-diamond","🔷":"large-blue-diamond","🔸":"small-orange-diamond","🔹":"small-blue-diamond","🔺":"red-triangle-pointed-up","🔻":"red-triangle-pointed-down","💠":"diamond-with-a-dot","🔘":"radio-button","🔳":"white-square-button","🔲":"black-square-button","🏁":"chequered-flag","🚩":"triangular-flag","🎌":"crossed-flags","🏴":"black-flag","🏳️":"white-flag","🏳️‍🌈":"rainbow-flag","🏳️‍⚧️":"transgender-flag","🏴‍☠️":"pirate-flag","🇦🇨":"flag-ascension-island","🇦🇩":"flag-andorra","🇦🇪":"flag-united-arab-emirates","🇦🇫":"flag-afghanistan","🇦🇬":"flag-antigua-&-barbuda","🇦🇮":"flag-anguilla","🇦🇱":"flag-albania","🇦🇲":"flag-armenia","🇦🇴":"flag-angola","🇦🇶":"flag-antarctica","🇦🇷":"flag-argentina","🇦🇸":"flag-american-samoa","🇦🇹":"flag-austria","🇦🇺":"flag-australia","🇦🇼":"flag-aruba","🇦🇽":"flag-aland-islands","🇦🇿":"flag-azerbaijan","🇧🇦":"flag-bosnia-&-herzegovina","🇧🇧":"flag-barbados","🇧🇩":"flag-bangladesh","🇧🇪":"flag-belgium","🇧🇫":"flag-burkina-faso","🇧🇬":"flag-bulgaria","🇧🇭":"flag-bahrain","🇧🇮":"flag-burundi","🇧🇯":"flag-benin","🇧🇱":"flag-st-barthelemy","🇧🇲":"flag-bermuda","🇧🇳":"flag-brunei","🇧🇴":"flag-bolivia","🇧🇶":"flag-caribbean-netherlands","🇧🇷":"flag-brazil","🇧🇸":"flag-bahamas","🇧🇹":"flag-bhutan","🇧🇻":"flag-bouvet-island","🇧🇼":"flag-botswana","🇧🇾":"flag-belarus","🇧🇿":"flag-belize","🇨🇦":"flag-canada","🇨🇨":"flag-cocos-keeling-islands","🇨🇩":"flag-congo-kinshasa","🇨🇫":"flag-central-african-republic","🇨🇬":"flag-congo-brazzaville","🇨🇭":"flag-switzerland","🇨🇮":"flag-cote-d-ivoire","🇨🇰":"flag-cook-islands","🇨🇱":"flag-chile","🇨🇲":"flag-cameroon","🇨🇳":"flag-china","🇨🇴":"flag-colombia","🇨🇵":"flag-clipperton-island","🇨🇷":"flag-costa-rica","🇨🇺":"flag-cuba","🇨🇻":"flag-cape-verde","🇨🇼":"flag-curacao","🇨🇽":"flag-christmas-island","🇨🇾":"flag-cyprus","🇨🇿":"flag-czechia","🇩🇪":"flag-germany","🇩🇬":"flag-diego-garcia","🇩🇯":"flag-djibouti","🇩🇰":"flag-denmark","🇩🇲":"flag-dominica","🇩🇴":"flag-dominican-republic","🇩🇿":"flag-algeria","🇪🇦":"flag-ceuta-&-melilla","🇪🇨":"flag-ecuador","🇪🇪":"flag-estonia","🇪🇬":"flag-egypt","🇪🇭":"flag-western-sahara","🇪🇷":"flag-eritrea","🇪🇸":"flag-spain","🇪🇹":"flag-ethiopia","🇪🇺":"flag-european-union","🇫🇮":"flag-finland","🇫🇯":"flag-fiji","🇫🇰":"flag-falkland-islands","🇫🇲":"flag-micronesia","🇫🇴":"flag-faroe-islands","🇫🇷":"flag-france","🇬🇦":"flag-gabon","🇬🇧":"flag-united-kingdom","🇬🇩":"flag-grenada","🇬🇪":"flag-georgia","🇬🇫":"flag-french-guiana","🇬🇬":"flag-guernsey","🇬🇭":"flag-ghana","🇬🇮":"flag-gibraltar","🇬🇱":"flag-greenland","🇬🇲":"flag-gambia","🇬🇳":"flag-guinea","🇬🇵":"flag-guadeloupe","🇬🇶":"flag-equatorial-guinea","🇬🇷":"flag-greece","🇬🇸":"flag-south-georgia-&-south-sandwich-islands","🇬🇹":"flag-guatemala","🇬🇺":"flag-guam","🇬🇼":"flag-guinea-bissau","🇬🇾":"flag-guyana","🇭🇰":"flag-hong-kong-sar-china","🇭🇲":"flag-heard-&-mcdonald-islands","🇭🇳":"flag-honduras","🇭🇷":"flag-croatia","🇭🇹":"flag-haiti","🇭🇺":"flag-hungary","🇮🇨":"flag-canary-islands","🇮🇩":"flag-indonesia","🇮🇪":"flag-ireland","🇮🇱":"flag-israel","🇮🇲":"flag-isle-of-man","🇮🇳":"flag-india","🇮🇴":"flag-british-indian-ocean-territory","🇮🇶":"flag-iraq","🇮🇷":"flag-iran","🇮🇸":"flag-iceland","🇮🇹":"flag-italy","🇯🇪":"flag-jersey","🇯🇲":"flag-jamaica","🇯🇴":"flag-jordan","🇯🇵":"flag-japan","🇰🇪":"flag-kenya","🇰🇬":"flag-kyrgyzstan","🇰🇭":"flag-cambodia","🇰🇮":"flag-kiribati","🇰🇲":"flag-comoros","🇰🇳":"flag-st-kitts-&-nevis","🇰🇵":"flag-north-korea","🇰🇷":"flag-south-korea","🇰🇼":"flag-kuwait","🇰🇾":"flag-cayman-islands","🇰🇿":"flag-kazakhstan","🇱🇦":"flag-laos","🇱🇧":"flag-lebanon","🇱🇨":"flag-st-lucia","🇱🇮":"flag-liechtenstein","🇱🇰":"flag-sri-lanka","🇱🇷":"flag-liberia","🇱🇸":"flag-lesotho","🇱🇹":"flag-lithuania","🇱🇺":"flag-luxembourg","🇱🇻":"flag-latvia","🇱🇾":"flag-libya","🇲🇦":"flag-morocco","🇲🇨":"flag-monaco","🇲🇩":"flag-moldova","🇲🇪":"flag-montenegro","🇲🇫":"flag-st-martin","🇲🇬":"flag-madagascar","🇲🇭":"flag-marshall-islands","🇲🇰":"flag-north-macedonia","🇲🇱":"flag-mali","🇲🇲":"flag-myanmar-burma","🇲🇳":"flag-mongolia","🇲🇴":"flag-macao-sar-china","🇲🇵":"flag-northern-mariana-islands","🇲🇶":"flag-martinique","🇲🇷":"flag-mauritania","🇲🇸":"flag-montserrat","🇲🇹":"flag-malta","🇲🇺":"flag-mauritius","🇲🇻":"flag-maldives","🇲🇼":"flag-malawi","🇲🇽":"flag-mexico","🇲🇾":"flag-malaysia","🇲🇿":"flag-mozambique","🇳🇦":"flag-namibia","🇳🇨":"flag-new-caledonia","🇳🇪":"flag-niger","🇳🇫":"flag-norfolk-island","🇳🇬":"flag-nigeria","🇳🇮":"flag-nicaragua","🇳🇱":"flag-netherlands","🇳🇴":"flag-norway","🇳🇵":"flag-nepal","🇳🇷":"flag-nauru","🇳🇺":"flag-niue","🇳🇿":"flag-new-zealand","🇴🇲":"flag-oman","🇵🇦":"flag-panama","🇵🇪":"flag-peru","🇵🇫":"flag-french-polynesia","🇵🇬":"flag-papua-new-guinea","🇵🇭":"flag-philippines","🇵🇰":"flag-pakistan","🇵🇱":"flag-poland","🇵🇲":"flag-st-pierre-&-miquelon","🇵🇳":"flag-pitcairn-islands","🇵🇷":"flag-puerto-rico","🇵🇸":"flag-palestinian-territories","🇵🇹":"flag-portugal","🇵🇼":"flag-palau","🇵🇾":"flag-paraguay","🇶🇦":"flag-qatar","🇷🇪":"flag-reunion","🇷🇴":"flag-romania","🇷🇸":"flag-serbia","🇷🇺":"flag-russia","🇷🇼":"flag-rwanda","🇸🇦":"flag-saudi-arabia","🇸🇧":"flag-solomon-islands","🇸🇨":"flag-seychelles","🇸🇩":"flag-sudan","🇸🇪":"flag-sweden","🇸🇬":"flag-singapore","🇸🇭":"flag-st-helena","🇸🇮":"flag-slovenia","🇸🇯":"flag-svalbard-&-jan-mayen","🇸🇰":"flag-slovakia","🇸🇱":"flag-sierra-leone","🇸🇲":"flag-san-marino","🇸🇳":"flag-senegal","🇸🇴":"flag-somalia","🇸🇷":"flag-suriname","🇸🇸":"flag-south-sudan","🇸🇹":"flag-sao-tome-&-principe","🇸🇻":"flag-el-salvador","🇸🇽":"flag-sint-maarten","🇸🇾":"flag-syria","🇸🇿":"flag-eswatini","🇹🇦":"flag-tristan-da-cunha","🇹🇨":"flag-turks-&-caicos-islands","🇹🇩":"flag-chad","🇹🇫":"flag-french-southern-territories","🇹🇬":"flag-togo","🇹🇭":"flag-thailand","🇹🇯":"flag-tajikistan","🇹🇰":"flag-tokelau","🇹🇱":"flag-timor-leste","🇹🇲":"flag-turkmenistan","🇹🇳":"flag-tunisia","🇹🇴":"flag-tonga","🇹🇷":"flag-turkey","🇹🇹":"flag-trinidad-&-tobago","🇹🇻":"flag-tuvalu","🇹🇼":"flag-taiwan","🇹🇿":"flag-tanzania","🇺🇦":"flag-ukraine","🇺🇬":"flag-uganda","🇺🇲":"flag-us-outlying-islands","🇺🇳":"flag-united-nations","🇺🇸":"flag-united-states","🇺🇾":"flag-uruguay","🇺🇿":"flag-uzbekistan","🇻🇦":"flag-vatican-city","🇻🇨":"flag-st-vincent-&-grenadines","🇻🇪":"flag-venezuela","🇻🇬":"flag-british-virgin-islands","🇻🇮":"flag-us-virgin-islands","🇻🇳":"flag-vietnam","🇻🇺":"flag-vanuatu","🇼🇫":"flag-wallis-&-futuna","🇼🇸":"flag-samoa","🇽🇰":"flag-kosovo","🇾🇪":"flag-yemen","🇾🇹":"flag-mayotte","🇿🇦":"flag-south-africa","🇿🇲":"flag-zambia","🇿🇼":"flag-zimbabwe","🏴󠁧󠁢󠁥󠁮󠁧󠁿":"flag-england","🏴󠁧󠁢󠁳󠁣󠁴󠁿":"flag-scotland","🏴󠁧󠁢󠁷󠁬󠁳󠁿":"flag-wales"}
+},{}],126:[function(require,module,exports){
+module.exports={"10":["🔟"],"grin":["😀","😃","😄","😆","😅","😺","😸"],"face":["😀","😃","😄","😁","😆","😅","😂","🙂","🙃","🫠","😉","😊","😇","🥰","😍","😘","😗","☺️","😚","😙","🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🫢","🫣","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😶‍🌫️","😏","😒","🙄","😬","😮‍💨","🤥","🫨","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","😵‍💫","🤠","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","☹️","😮","😯","😲","😳","🥺","🥹","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","🤡","🤛","🤜","🐵","🐶","🐱","🐯","🐴","🐮","🐷","🐭","🐰","🐥","🐲","🌚","🌛","🌜","🌝","🌞","🌬️","📄"],"big":["😃"],"eyes":["😃","😄","😁","😊","😍","😚","😙","🫢","🙄","😵","😵‍💫","😸","😻","👀"],"smile":["😄","😁","🙂","😊","😇","🥰","😍","☺️","😙","🥲","🤗","😎","😈","😸","😻","😼"],"beam":["😁"],"squint":["😆","😝"],"sweat":["😅","😰","😓","💦"],"roll":["🤣","🙄","🧻"],"on":["🤣","🤬","❤️‍🔥","🍖","⛱️","🔛"],"the":["🤣","🤘","🫵"],"floor":["🤣"],"laugh":["🤣"],"tears":["😂","🥹","😹"],"joy":["😂","😹"],"slightly":["🙂","🙁"],"upside":["🙃"],"down":["🙃","🫳","👇","👎","↘️","⬇️","↙️","↕️","⤵️","⏬","🔻"],"melt":["🫠"],"wink":["😉","😜"],"halo":["😇"],"hearts":["🥰","💞","💕"],"heart":["😍","😻","💘","💝","💖","💗","💓","💟","❣️","💔","❤️‍🔥","❤️‍🩹","❤️","🩷","🧡","💛","💚","💙","🩵","💜","🤎","🖤","🩶","🤍","🫶","🫀","💑","👩‍❤️‍👨","👨‍❤️‍👨","👩‍❤️‍👩","♥️"],"star":["🤩","⭐","🌟","🌠","✡️","☪️","🔯","✴️"],"struck":["🤩"],"blow":["😘"],"kiss":["😘","😗","😚","😙","😽","💋","💏","👩‍❤️‍💋‍👨","👨‍❤️‍💋‍👨","👩‍❤️‍💋‍👩"],"closed":["😚","🌂","📕","📫","📪"],"tear":["🥲","📆"],"savore":["😋"],"food":["😋","🥘","🍲","🥫"],"tongue":["😛","😜","😝","👅"],"zany":["🤪"],"money":["🤑","💰","💸"],"mouth":["🤑","🤭","🫢","🤐","😶","🫤","😮","😦","🤬","👄"],"open":["🤗","🫢","😮","😦","👐","📖","📬","📭","📂","🈺"],"hands":["🤗","👏","🙌","🫶","👐","🙏","🧑‍🤝‍🧑","👭","👫","👬"],"hand":["🤭","🫢","👋","🤚","🖐️","✋","🫱","🫲","🫳","🫴","🫷","🫸","👌","🤏","✌️","🫰","🤙","✍️","💁","💁‍♂️","💁‍♀️","🙋","🙋‍♂️","🙋‍♀️","🪭"],"over":["🤭","🫢","🌄"],"and":["🫢","☠️","🫰","👫","🍽️","🍴","⛈️","⚒️","🛠️","🏹","🔩","🛋️","☪️"],"peek":["🫣"],"eye":["🫣","👁️‍🗨️","👁️"],"shush":["🤫"],"think":["🤔"],"salute":["🫡","🖖"],"zipper":["🤐"],"raised":["🤨","🤚","✋","✊","📫","📬"],"eyebrow":["🤨"],"neutral":["😐"],"expressionless":["😑"],"without":["😶","🍵","⛄"],"dotted":["🫥","🔯"],"line":["🫥"],"in":["😶‍🌫️","😱","👁️‍🗨️","🤵","🤵‍♂️","🤵‍♀️","🧑‍🦼","👨‍🦼","👩‍🦼","🧑‍🦽","👨‍🦽","👩‍🦽","🕴️","🧖","🧖‍♂️","🧖‍♀️","🧘","🧘‍♂️","🧘‍♀️","🛌","👤","👥","🍃","⛳","🚮"],"clouds":["😶‍🌫️"],"smirk":["😏"],"unamused":["😒"],"grimace":["😬"],"exhale":["😮‍💨"],"lying":["🤥"],"shake":["🫨"],"relieved":["😌","😥"],"pensive":["😔"],"sleepy":["😪"],"drool":["🤤"],"sleep":["😴"],"medical":["😷","⚕️"],"mask":["😷","🤿"],"thermometer":["🤒","🌡️"],"head":["🤕","🤯","🗣️"],"bandage":["🤕","🩹"],"nauseated":["🤢"],"vomite":["🤮"],"sneez":["🤧"],"hot":["🥵","🌶️","🌭","☕","♨️"],"cold":["🥶"],"woozy":["🥴"],"crossed":["😵","🤞","🫰","⚔️","🎌"],"out":["😵"],"spiral":["😵‍💫","🐚","🗒️","🗓️"],"explode":["🤯"],"cowboy":["🤠"],"hat":["🤠","👒","🎩"],"party":["🥳","🎉"],"disguised":["🥸"],"sunglasses":["😎","🕶️"],"nerd":["🤓"],"monocle":["🧐"],"confused":["😕"],"diagonal":["🫤"],"worried":["😟"],"frown":["🙁","☹️","😦","🙍","🙍‍♂️","🙍‍♀️"],"hushed":["😯"],"astonished":["😲"],"flushed":["😳"],"plead":["🥺"],"hold":["🥹","🧑‍🤝‍🧑","👭","👫","👬"],"back":["🥹","🤚","🔙"],"anguished":["😧"],"fearful":["😨"],"anxious":["😰"],"sad":["😥"],"but":["😥"],"cry":["😢","😭","😿"],"loudly":["😭"],"scream":["😱"],"fear":["😱"],"confounded":["😖"],"persever":["😣"],"disappointed":["😞"],"downcast":["😓"],"weary":["😩","🙀"],"tired":["😫"],"yawn":["🥱"],"steam":["😤","🍜"],"from":["😤"],"nose":["😤","👃","🐽"],"enraged":["😡"],"angry":["😠","👿"],"symbols":["🤬","🔣"],"horns":["😈","👿","🤘"],"skull":["💀","☠️"],"crossbones":["☠️"],"pile":["💩"],"poo":["💩"],"clown":["🤡"],"ogre":["👹"],"goblin":["👺"],"ghost":["👻"],"alien":["👽","👾"],"monster":["👾"],"robot":["🤖"],"cat":["😺","😸","😹","😻","😼","😽","🙀","😿","😾","🐱","🐈","🐈‍⬛"],"wry":["😼"],"pout":["😾","🙎","🙎‍♂️","🙎‍♀️"],"see":["🙈"],"no":["🙈","🙉","🙊","🙅","🙅‍♂️","🙅‍♀️","⛔","🚳","🚭","🚯","🚷","📵","🔞","🈵"],"evil":["🙈","🙉","🙊"],"monkey":["🙈","🙉","🙊","🐵","🐒"],"hear":["🙉","🦻"],"speak":["🙊","🗣️"],"love":["💌","🤟","🏩"],"letter":["💌"],"arrow":["💘","📲","📩","🏹","⬆️","↗️","➡️","↘️","⬇️","↙️","⬅️","↖️","↕️","↔️","↩️","↪️","⤴️","⤵️","🔙","🔚","🔛","🔜","🔝"],"ribbon":["💝","🎀","🎗️"],"sparkle":["💖","❇️"],"grow":["💗"],"beat":["💓"],"revolve":["💞"],"two":["💕","🐫","🕑","🕝"],"decoration":["💟","🎍"],"exclamation":["❣️","‼️","⁉️","❕","❗"],"broken":["💔"],"fire":["❤️‍🔥","🚒","🔥","🧯"],"mend":["❤️‍🩹"],"red":["❤️","👨‍🦰","👩‍🦰","🧑‍🦰","🍎","🧧","🀄","🏮","❓","❗","⭕","🔴","🟥","🔺","🔻"],"pink":["🩷"],"orange":["🧡","📙","🟠","🟧","🔶","🔸"],"yellow":["💛","🟡","🟨"],"green":["💚","🍏","🥬","🥗","📗","🟢","🟩"],"blue":["💙","🩵","📘","🔵","🟦","🔷","🔹"],"light":["🩵","🚈","🚨","🚥","🚦","💡"],"purple":["💜","🟣","🟪"],"brown":["🤎","🟤","🟫"],"black":["🖤","🐈‍⬛","🐦‍⬛","✒️","⚫","⬛","◼️","◾","▪️","🔲","🏴"],"grey":["🩶"],"white":["🤍","👨‍🦳","👩‍🦳","🧑‍🦳","🧑‍🦯","👨‍🦯","👩‍🦯","💮","🦯","❔","❕","⚪","⬜","◻️","◽","▫️","🔳","🏳️"],"mark":["💋","‼️","⁉️","❓","❔","❕","❗","✅","✔️","❌","❎","〽️","™️"],"hundred":["💯"],"points":["💯"],"anger":["💢","🗯️"],"symbol":["💢","♿","🚼","⚛️","☮️","⚧️","⚕️","♻️","🔰"],"collision":["💥"],"dizzy":["💫"],"droplets":["💦"],"dash":["💨","〰️"],"away":["💨"],"hole":["🕳️","⛳"],"speech":["💬","👁️‍🗨️","🗨️"],"balloon":["💬","💭","🎈"],"bubble":["👁️‍🗨️","🗨️","🗯️","🧋"],"left":["🗨️","👈","🤛","🔍","🛅","↙️","⬅️","↖️","↔️","↩️","↪️"],"right":["🗯️","👉","🤜","🔎","↗️","➡️","↘️","↔️","↩️","↪️","⤴️","⤵️"],"thought":["💭"],"zzz":["💤"],"wave":["👋","🌊"],"fingers":["🖐️","🤌","🤞"],"splayed":["🖐️"],"vulcan":["🖖"],"rightwards":["🫱","🫸"],"leftwards":["🫲","🫷"],"palm":["🫳","🫴","🌴"],"up":["🫴","👆","☝️","👍","🤲","📄","🗞️","⬆️","↗️","↖️","↕️","⤴️","⏫","🆙","🔺"],"push":["🫷","🫸"],"ok":["👌","🙆","🙆‍♂️","🙆‍♀️","🆗"],"pinched":["🤌"],"pinch":["🤏"],"victory":["✌️"],"index":["🫰","👈","👉","👆","👇","☝️","🫵","🗂️","📇"],"finger":["🫰","🖕"],"thumb":["🫰"],"you":["🤟"],"gesture":["🤟","🙅","🙅‍♂️","🙅‍♀️","🙆","🙆‍♂️","🙆‍♀️"],"sign":["🤘","🛑","🏧","🚮","♀️","♂️","🟰","💲"],"call":["🤙"],"me":["🤙"],"backhand":["👈","👉","👆","👇"],"point":["👈","👉","👆","👇","☝️","🫵"],"middle":["🖕"],"at":["🫵","🌆","🌉"],"viewer":["🫵"],"thumbs":["👍","👎"],"fist":["✊","👊","🤛","🤜"],"oncome":["👊","🚍","🚔","🚖","🚘"],"clap":["👏"],"raise":["🙌","🙋","🙋‍♂️","🙋‍♀️"],"palms":["🤲"],"together":["🤲"],"handshake":["🤝"],"folded":["🙏"],"write":["✍️"],"nail":["💅"],"polish":["💅"],"selfie":["🤳"],"flexed":["💪"],"biceps":["💪"],"mechanical":["🦾","🦿"],"arm":["🦾"],"leg":["🦿","🦵","🍗"],"foot":["🦶"],"ear":["👂","🦻","🌽"],"aid":["🦻"],"brain":["🧠"],"anatomical":["🫀"],"lungs":["🫁"],"tooth":["🦷"],"bone":["🦴","🍖"],"bite":["🫦"],"lip":["🫦"],"baby":["👶","👩‍🍼","👨‍🍼","🧑‍🍼","👼","🐤","🐥","🍼","🚼"],"child":["🧒"],"boy":["👦","👨‍👩‍👦","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👨‍👦","👨‍👨‍👧‍👦","👨‍👨‍👦‍👦","👩‍👩‍👦","👩‍👩‍👧‍👦","👩‍👩‍👦‍👦","👨‍👦","👨‍👦‍👦","👨‍👧‍👦","👩‍👦","👩‍👦‍👦","👩‍👧‍👦"],"girl":["👧","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👧‍👧","👨‍👨‍👧","👨‍👨‍👧‍👦","👨‍👨‍👧‍👧","👩‍👩‍👧","👩‍👩‍👧‍👦","👩‍👩‍👧‍👧","👨‍👧","👨‍👧‍👦","👨‍👧‍👧","👩‍👧","👩‍👧‍👦","👩‍👧‍👧"],"person":["🧑","👱","🧔","🧑‍🦰","🧑‍🦱","🧑‍🦳","🧑‍🦲","🧓","🙍","🙎","🙅","🙆","💁","🙋","🧏","🙇","🤦","🤷","🫅","👳","👲","🤵","👰","🫄","🧑‍🍼","💆","💇","🚶","🧍","🧎","🧑‍🦯","🧑‍🦼","🧑‍🦽","🏃","🕴️","🧖","🧗","🤺","🏌️","🏄","🚣","🏊","⛹️","🏋️","🚴","🚵","🤸","🤽","🤾","🤹","🧘","🛀","🛌"],"blond":["👱","👱‍♀️","👱‍♂️"],"hair":["👱","👨‍🦰","👨‍🦱","👨‍🦳","👩‍🦰","🧑‍🦰","👩‍🦱","🧑‍🦱","👩‍🦳","🧑‍🦳","👱‍♀️","👱‍♂️","🪮"],"man":["👨","🧔‍♂️","👨‍🦰","👨‍🦱","👨‍🦳","👨‍🦲","👱‍♂️","👴","🙍‍♂️","🙎‍♂️","🙅‍♂️","🙆‍♂️","💁‍♂️","🙋‍♂️","🧏‍♂️","🙇‍♂️","🤦‍♂️","🤷‍♂️","👨‍⚕️","👨‍🎓","👨‍🏫","👨‍⚖️","👨‍🌾","👨‍🍳","👨‍🔧","👨‍🏭","👨‍💼","👨‍🔬","👨‍💻","👨‍🎤","👨‍🎨","👨‍✈️","👨‍🚀","👨‍🚒","👮‍♂️","🕵️‍♂️","💂‍♂️","👷‍♂️","👳‍♂️","🤵‍♂️","👰‍♂️","🫃","👨‍🍼","🦸‍♂️","🦹‍♂️","🧙‍♂️","🧚‍♂️","🧛‍♂️","🧝‍♂️","🧞‍♂️","🧟‍♂️","💆‍♂️","💇‍♂️","🚶‍♂️","🧍‍♂️","🧎‍♂️","👨‍🦯","👨‍🦼","👨‍🦽","🏃‍♂️","🕺","🧖‍♂️","🧗‍♂️","🏌️‍♂️","🏄‍♂️","🚣‍♂️","🏊‍♂️","⛹️‍♂️","🏋️‍♂️","🚴‍♂️","🚵‍♂️","🤸‍♂️","🤽‍♂️","🤾‍♂️","🤹‍♂️","🧘‍♂️","👫","👩‍❤️‍💋‍👨","👨‍❤️‍💋‍👨","👩‍❤️‍👨","👨‍❤️‍👨","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👨‍👨‍👧‍👦","👨‍👨‍👦‍👦","👨‍👨‍👧‍👧","👨‍👦","👨‍👦‍👦","👨‍👧","👨‍👧‍👦","👨‍👧‍👧","👞","🇮🇲"],"beard":["🧔","🧔‍♂️","🧔‍♀️"],"woman":["🧔‍♀️","👩","👩‍🦰","👩‍🦱","👩‍🦳","👩‍🦲","👱‍♀️","👵","🙍‍♀️","🙎‍♀️","🙅‍♀️","🙆‍♀️","💁‍♀️","🙋‍♀️","🧏‍♀️","🙇‍♀️","🤦‍♀️","🤷‍♀️","👩‍⚕️","👩‍🎓","👩‍🏫","👩‍⚖️","👩‍🌾","👩‍🍳","👩‍🔧","👩‍🏭","👩‍💼","👩‍🔬","👩‍💻","👩‍🎤","👩‍🎨","👩‍✈️","👩‍🚀","👩‍🚒","👮‍♀️","🕵️‍♀️","💂‍♀️","👷‍♀️","👳‍♀️","🧕","🤵‍♀️","👰‍♀️","🤰","👩‍🍼","🦸‍♀️","🦹‍♀️","🧙‍♀️","🧚‍♀️","🧛‍♀️","🧝‍♀️","🧞‍♀️","🧟‍♀️","💆‍♀️","💇‍♀️","🚶‍♀️","🧍‍♀️","🧎‍♀️","👩‍🦯","👩‍🦼","👩‍🦽","🏃‍♀️","💃","🧖‍♀️","🧗‍♀️","🏌️‍♀️","🏄‍♀️","🚣‍♀️","🏊‍♀️","⛹️‍♀️","🏋️‍♀️","🚴‍♀️","🚵‍♀️","🤸‍♀️","🤽‍♀️","🤾‍♀️","🤹‍♀️","🧘‍♀️","👫","👩‍❤️‍💋‍👨","👩‍❤️‍💋‍👩","👩‍❤️‍👨","👩‍❤️‍👩","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👩‍👩‍👦","👩‍👩‍👧","👩‍👩‍👧‍👦","👩‍👩‍👦‍👦","👩‍👩‍👧‍👧","👩‍👦","👩‍👦‍👦","👩‍👧","👩‍👧‍👦","👩‍👧‍👧","👚","👡","👢","👒"],"curly":["👨‍🦱","👩‍🦱","🧑‍🦱","➰","➿"],"bald":["👨‍🦲","👩‍🦲","🧑‍🦲"],"older":["🧓"],"old":["👴","👵","🗝️"],"tip":["💁","💁‍♂️","💁‍♀️"],"deaf":["🧏","🧏‍♂️","🧏‍♀️"],"bow":["🙇","🙇‍♂️","🙇‍♀️","🏹"],"facepalm":["🤦","🤦‍♂️","🤦‍♀️"],"shrug":["🤷","🤷‍♂️","🤷‍♀️"],"health":["🧑‍⚕️","👨‍⚕️","👩‍⚕️"],"worker":["🧑‍⚕️","👨‍⚕️","👩‍⚕️","🧑‍🏭","👨‍🏭","👩‍🏭","🧑‍💼","👨‍💼","👩‍💼","👷","👷‍♂️","👷‍♀️","⛑️"],"student":["🧑‍🎓","👨‍🎓","👩‍🎓"],"teacher":["🧑‍🏫","👨‍🏫","👩‍🏫"],"judge":["🧑‍⚖️","👨‍⚖️","👩‍⚖️"],"farmer":["🧑‍🌾","👨‍🌾","👩‍🌾"],"cook":["🧑‍🍳","👨‍🍳","👩‍🍳","🍳","🇨🇰"],"mechanic":["🧑‍🔧","👨‍🔧","👩‍🔧"],"factory":["🧑‍🏭","👨‍🏭","👩‍🏭","🏭"],"office":["🧑‍💼","👨‍💼","👩‍💼","🏢","🏣","🏤"],"scientist":["🧑‍🔬","👨‍🔬","👩‍🔬"],"technologist":["🧑‍💻","👨‍💻","👩‍💻"],"singer":["🧑‍🎤","👨‍🎤","👩‍🎤"],"artist":["🧑‍🎨","👨‍🎨","👩‍🎨","🎨"],"pilot":["🧑‍✈️","👨‍✈️","👩‍✈️"],"astronaut":["🧑‍🚀","👨‍🚀","👩‍🚀"],"firefighter":["🧑‍🚒","👨‍🚒","👩‍🚒"],"police":["👮","👮‍♂️","👮‍♀️","🚓","🚔","🚨"],"officer":["👮","👮‍♂️","👮‍♀️"],"detective":["🕵️","🕵️‍♂️","🕵️‍♀️"],"guard":["💂","💂‍♂️","💂‍♀️"],"ninja":["🥷"],"construction":["👷","👷‍♂️","👷‍♀️","🏗️","🚧"],"crown":["🫅","👑"],"prince":["🤴"],"princess":["👸"],"wear":["👳","👳‍♂️","👳‍♀️"],"turban":["👳","👳‍♂️","👳‍♀️"],"skullcap":["👲"],"headscarf":["🧕"],"tuxedo":["🤵","🤵‍♂️","🤵‍♀️"],"veil":["👰","👰‍♂️","👰‍♀️"],"pregnant":["🤰","🫃","🫄"],"breast":["🤱"],"feed":["🤱","👩‍🍼","👨‍🍼","🧑‍🍼"],"angel":["👼"],"santa":["🎅"],"claus":["🎅","🤶","🧑‍🎄"],"mrs":["🤶"],"mx":["🧑‍🎄"],"superhero":["🦸","🦸‍♂️","🦸‍♀️"],"supervillain":["🦹","🦹‍♂️","🦹‍♀️"],"mage":["🧙","🧙‍♂️","🧙‍♀️"],"fairy":["🧚","🧚‍♂️","🧚‍♀️"],"vampire":["🧛","🧛‍♂️","🧛‍♀️"],"merperson":["🧜"],"merman":["🧜‍♂️"],"mermaid":["🧜‍♀️"],"elf":["🧝","🧝‍♂️","🧝‍♀️"],"genie":["🧞","🧞‍♂️","🧞‍♀️"],"zombie":["🧟","🧟‍♂️","🧟‍♀️"],"troll":["🧌"],"gett":["💆","💆‍♂️","💆‍♀️","💇","💇‍♂️","💇‍♀️"],"massage":["💆","💆‍♂️","💆‍♀️"],"haircut":["💇","💇‍♂️","💇‍♀️"],"walk":["🚶","🚶‍♂️","🚶‍♀️"],"stand":["🧍","🧍‍♂️","🧍‍♀️"],"kneel":["🧎","🧎‍♂️","🧎‍♀️"],"cane":["🧑‍🦯","👨‍🦯","👩‍🦯","🦯"],"motorized":["🧑‍🦼","👨‍🦼","👩‍🦼","🦼"],"wheelchair":["🧑‍🦼","👨‍🦼","👩‍🦼","🧑‍🦽","👨‍🦽","👩‍🦽","🦽","🦼","♿"],"manual":["🧑‍🦽","👨‍🦽","👩‍🦽","🦽"],"run":["🏃","🏃‍♂️","🏃‍♀️","🎽","👟"],"dance":["💃","🕺"],"suit":["🕴️","♠️","♥️","♦️","♣️"],"levitate":["🕴️"],"people":["👯","🤼","🧑‍🤝‍🧑","🫂"],"bunny":["👯","👯‍♂️","👯‍♀️"],"ears":["👯","👯‍♂️","👯‍♀️"],"men":["👯‍♂️","🤼‍♂️","👬","🚹"],"women":["👯‍♀️","🤼‍♀️","👭","🚺"],"steamy":["🧖","🧖‍♂️","🧖‍♀️"],"room":["🧖","🧖‍♂️","🧖‍♀️","🚹","🚺"],"climb":["🧗","🧗‍♂️","🧗‍♀️"],"fence":["🤺"],"horse":["🏇","🐴","🐎","🎠"],"race":["🏇","🏎️"],"skier":["⛷️"],"snowboarder":["🏂"],"golf":["🏌️","🏌️‍♂️","🏌️‍♀️"],"surf":["🏄","🏄‍♂️","🏄‍♀️"],"row":["🚣","🚣‍♂️","🚣‍♀️"],"boat":["🚣","🚣‍♂️","🚣‍♀️","🛥️"],"swim":["🏊","🏊‍♂️","🏊‍♀️"],"bounce":["⛹️","⛹️‍♂️","⛹️‍♀️"],"ball":["⛹️","⛹️‍♂️","⛹️‍♀️","🍙","🎊","⚽","🎱","🔮","🪩"],"lift":["🏋️","🏋️‍♂️","🏋️‍♀️"],"weights":["🏋️","🏋️‍♂️","🏋️‍♀️"],"bike":["🚴","🚴‍♂️","🚴‍♀️","🚵","🚵‍♂️","🚵‍♀️"],"mountain":["🚵","🚵‍♂️","🚵‍♀️","🏔️","⛰️","🚞","🚠"],"cartwheel":["🤸","🤸‍♂️","🤸‍♀️"],"wrestle":["🤼","🤼‍♂️","🤼‍♀️"],"play":["🤽","🤽‍♂️","🤽‍♀️","🤾","🤾‍♂️","🤾‍♀️","🎴","▶️","⏯️"],"water":["🤽","🤽‍♂️","🤽‍♀️","🐃","🌊","🔫","🚰","🚾","🚱"],"polo":["🤽","🤽‍♂️","🤽‍♀️"],"handball":["🤾","🤾‍♂️","🤾‍♀️"],"juggle":["🤹","🤹‍♂️","🤹‍♀️"],"lotus":["🧘","🧘‍♂️","🧘‍♀️","🪷"],"position":["🧘","🧘‍♂️","🧘‍♀️"],"take":["🛀"],"bath":["🛀"],"bed":["🛌","🛏️"],"couple":["💑","👩‍❤️‍👨","👨‍❤️‍👨","👩‍❤️‍👩"],"family":["👪","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👨‍👨‍👧‍👦","👨‍👨‍👦‍👦","👨‍👨‍👧‍👧","👩‍👩‍👦","👩‍👩‍👧","👩‍👩‍👧‍👦","👩‍👩‍👦‍👦","👩‍👩‍👧‍👧","👨‍👦","👨‍👦‍👦","👨‍👧","👨‍👧‍👦","👨‍👧‍👧","👩‍👦","👩‍👦‍👦","👩‍👧","👩‍👧‍👦","👩‍👧‍👧"],"bust":["👤"],"silhouette":["👤","👥"],"busts":["👥"],"hug":["🫂"],"footprints":["👣"],"gorilla":["🦍"],"orangutan":["🦧"],"dog":["🐶","🐕","🦮","🐕‍🦺","🌭"],"guide":["🦮"],"service":["🐕‍🦺","🈂️"],"poodle":["🐩"],"wolf":["🐺"],"fox":["🦊"],"raccoon":["🦝"],"lion":["🦁"],"tiger":["🐯","🐅"],"leopard":["🐆"],"moose":["🫎"],"donkey":["🫏"],"unicorn":["🦄"],"zebra":["🦓"],"deer":["🦌"],"bison":["🦬"],"cow":["🐮","🐄"],"ox":["🐂"],"buffalo":["🐃"],"pig":["🐷","🐖","🐽"],"boar":["🐗"],"ram":["🐏"],"ewe":["🐑"],"goat":["🐐"],"camel":["🐪","🐫"],"hump":["🐫"],"llama":["🦙"],"giraffe":["🦒"],"elephant":["🐘"],"mammoth":["🦣"],"rhinoceros":["🦏"],"hippopotamus":["🦛"],"mouse":["🐭","🐁","🖱️","🪤"],"rat":["🐀"],"hamster":["🐹"],"rabbit":["🐰","🐇"],"chipmunk":["🐿️"],"beaver":["🦫"],"hedgehog":["🦔"],"bat":["🦇"],"bear":["🐻","🐻‍❄️","🧸"],"polar":["🐻‍❄️"],"koala":["🐨"],"panda":["🐼"],"sloth":["🦥"],"otter":["🦦"],"skunk":["🦨"],"kangaroo":["🦘"],"badger":["🦡"],"paw":["🐾"],"prints":["🐾"],"turkey":["🦃","🇹🇷"],"chicken":["🐔"],"rooster":["🐓"],"hatch":["🐣"],"chick":["🐣","🐤","🐥"],"front":["🐥"],"bird":["🐦","🐦‍⬛"],"penguin":["🐧"],"dove":["🕊️"],"eagle":["🦅"],"duck":["🦆"],"swan":["🦢"],"owl":["🦉"],"dodo":["🦤"],"feather":["🪶"],"flamingo":["🦩"],"peacock":["🦚"],"parrot":["🦜"],"wing":["🪽"],"goose":["🪿"],"frog":["🐸"],"crocodile":["🐊"],"turtle":["🐢"],"lizard":["🦎"],"snake":["🐍"],"dragon":["🐲","🐉","🀄"],"sauropod":["🦕"],"rex":["🦖"],"spout":["🐳"],"whale":["🐳","🐋"],"dolphin":["🐬"],"seal":["🦭"],"fish":["🐟","🐠","🍥","🎣"],"tropical":["🐠","🍹"],"blowfish":["🐡"],"shark":["🦈"],"octopus":["🐙"],"shell":["🐚"],"coral":["🪸"],"jellyfish":["🪼"],"snail":["🐌"],"butterfly":["🦋"],"bug":["🐛"],"ant":["🐜"],"honeybee":["🐝"],"beetle":["🪲","🐞"],"lady":["🐞"],"cricket":["🦗","🏏"],"cockroach":["🪳"],"spider":["🕷️","🕸️"],"web":["🕸️"],"scorpion":["🦂"],"mosquito":["🦟"],"fly":["🪰","🛸","🥏"],"worm":["🪱"],"microbe":["🦠"],"bouquet":["💐"],"cherry":["🌸"],"blossom":["🌸","🌼"],"flower":["💮","🥀","🎴"],"rosette":["🏵️"],"rose":["🌹"],"wilted":["🥀"],"hibiscus":["🌺"],"sunflower":["🌻"],"tulip":["🌷"],"hyacinth":["🪻"],"seedle":["🌱"],"potted":["🪴"],"plant":["🪴"],"evergreen":["🌲"],"tree":["🌲","🌳","🌴","🎄","🎋"],"deciduous":["🌳"],"cactus":["🌵"],"sheaf":["🌾"],"rice":["🌾","🍘","🍙","🍚","🍛"],"herb":["🌿"],"shamrock":["☘️"],"four":["🍀","🕓","🕟"],"leaf":["🍀","🍁","🍂","🍃"],"clover":["🍀"],"maple":["🍁"],"fallen":["🍂"],"flutter":["🍃"],"wind":["🍃","🌬️","🎐"],"empty":["🪹"],"nest":["🪹","🪺","🪆"],"eggs":["🪺"],"mushroom":["🍄"],"grapes":["🍇"],"melon":["🍈"],"watermelon":["🍉"],"tangerine":["🍊"],"lemon":["🍋"],"banana":["🍌"],"pineapple":["🍍"],"mango":["🥭"],"apple":["🍎","🍏"],"pear":["🍐"],"peach":["🍑"],"cherries":["🍒"],"strawberry":["🍓"],"blueberries":["🫐"],"kiwi":["🥝"],"fruit":["🥝"],"tomato":["🍅"],"olive":["🫒"],"coconut":["🥥"],"avocado":["🥑"],"eggplant":["🍆"],"potato":["🥔","🍠"],"carrot":["🥕"],"corn":["🌽"],"pepper":["🌶️","🫑"],"bell":["🫑","🛎️","🔔","🔕"],"cucumber":["🥒"],"leafy":["🥬"],"broccoli":["🥦"],"garlic":["🧄"],"onion":["🧅"],"peanuts":["🥜"],"beans":["🫘"],"chestnut":["🌰"],"ginger":["🫚"],"root":["🫚"],"pea":["🫛"],"pod":["🫛"],"bread":["🍞","🥖"],"croissant":["🥐"],"baguette":["🥖"],"flatbread":["🫓","🥙"],"pretzel":["🥨"],"bagel":["🥯"],"pancakes":["🥞"],"waffle":["🧇"],"cheese":["🧀"],"wedge":["🧀"],"meat":["🍖","🥩"],"poultry":["🍗"],"cut":["🥩"],"bacon":["🥓"],"hamburger":["🍔"],"french":["🍟","🇬🇫","🇵🇫","🇹🇫"],"fries":["🍟"],"pizza":["🍕"],"sandwich":["🥪","🇬🇸"],"taco":["🌮"],"burrito":["🌯"],"tamale":["🫔"],"stuffed":["🥙"],"falafel":["🧆"],"egg":["🥚"],"shallow":["🥘"],"pan":["🥘"],"pot":["🍲","🍯"],"fondue":["🫕"],"bowl":["🥣","🍜","🎳"],"spoon":["🥣","🥄"],"salad":["🥗"],"popcorn":["🍿"],"butter":["🧈"],"salt":["🧂"],"canned":["🥫"],"bento":["🍱"],"box":["🍱","🥡","🧃","🥊","🗳️","🗃️","☑️"],"cracker":["🍘"],"cooked":["🍚"],"curry":["🍛"],"spaghetti":["🍝"],"roasted":["🍠"],"sweet":["🍠"],"oden":["🍢"],"sushi":["🍣"],"fried":["🍤"],"shrimp":["🍤","🦐"],"cake":["🍥","🥮","🎂"],"swirl":["🍥"],"moon":["🥮","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌙","🌚","🌛","🌜","🌝","🎑"],"dango":["🍡"],"dumple":["🥟"],"fortune":["🥠"],"cookie":["🥠","🍪"],"takeout":["🥡"],"crab":["🦀"],"lobster":["🦞"],"squid":["🦑"],"oyster":["🦪"],"soft":["🍦"],"ice":["🍦","🍧","🍨","🧊","🏒","⛸️"],"cream":["🍦","🍨"],"shaved":["🍧"],"doughnut":["🍩"],"birthday":["🎂"],"shortcake":["🍰"],"cupcake":["🧁"],"pie":["🥧"],"chocolate":["🍫"],"bar":["🍫","📊"],"candy":["🍬"],"lollipop":["🍭"],"custard":["🍮"],"honey":["🍯"],"bottle":["🍼","🍾","🧴"],"glass":["🥛","🍷","🍸","🥃","🔍","🔎"],"milk":["🥛"],"beverage":["☕","🧃"],"teapot":["🫖"],"teacup":["🍵"],"handle":["🍵"],"sake":["🍶"],"pop":["🍾"],"cork":["🍾"],"wine":["🍷"],"cocktail":["🍸"],"drink":["🍹"],"beer":["🍺","🍻"],"mug":["🍺"],"clink":["🍻","🥂"],"mugs":["🍻"],"glasses":["🥂","👓"],"tumbler":["🥃"],"pour":["🫗"],"liquid":["🫗"],"cup":["🥤"],"straw":["🥤"],"tea":["🧋"],"mate":["🧉"],"chopsticks":["🥢"],"fork":["🍽️","🍴"],"knife":["🍽️","🍴","🔪"],"plate":["🍽️"],"kitchen":["🔪"],"jar":["🫙"],"amphora":["🏺"],"globe":["🌍","🌎","🌏","🌐"],"show":["🌍","🌎","🌏"],"europe":["🌍"],"africa":["🌍","🇿🇦"],"americas":["🌎"],"asia":["🌏"],"australia":["🌏","🇦🇺"],"meridians":["🌐"],"world":["🗺️"],"map":["🗺️","🗾"],"japan":["🗾","🇯🇵"],"compass":["🧭"],"snow":["🏔️","🌨️","⛄"],"capped":["🏔️"],"volcano":["🌋"],"mount":["🗻"],"fuji":["🗻"],"camp":["🏕️"],"beach":["🏖️"],"umbrella":["🏖️","🌂","☂️","☔","⛱️"],"desert":["🏜️","🏝️"],"island":["🏝️","🇦🇨","🇧🇻","🇨🇵","🇨🇽","🇳🇫"],"national":["🏞️"],"park":["🏞️"],"stadium":["🏟️"],"classical":["🏛️"],"build":["🏛️","🏗️","🏢"],"brick":["🧱"],"rock":["🪨"],"wood":["🪵"],"hut":["🛖"],"houses":["🏘️"],"derelict":["🏚️"],"house":["🏚️","🏠","🏡"],"garden":["🏡"],"japanese":["🏣","🏯","🎎","🔰","🈁","🈂️","🈷️","🈶","🈯","🉐","🈹","🈚","🈲","🉑","🈸","🈴","🈳","㊗️","㊙️","🈺","🈵"],"post":["🏣","🏤"],"hospital":["🏥"],"bank":["🏦"],"hotel":["🏨","🏩"],"convenience":["🏪"],"store":["🏪","🏬"],"school":["🏫"],"department":["🏬"],"castle":["🏯","🏰"],"wed":["💒"],"tokyo":["🗼"],"tower":["🗼"],"statue":["🗽"],"liberty":["🗽"],"church":["⛪"],"mosque":["🕌"],"hindu":["🛕"],"temple":["🛕"],"synagogue":["🕍"],"shinto":["⛩️"],"shrine":["⛩️"],"kaaba":["🕋"],"fountain":["⛲","🖋️"],"tent":["⛺","🎪"],"foggy":["🌁"],"night":["🌃","🌉"],"stars":["🌃"],"cityscape":["🏙️","🌆"],"sunrise":["🌄","🌅"],"mountains":["🌄"],"dusk":["🌆"],"sunset":["🌇"],"bridge":["🌉"],"springs":["♨️"],"carousel":["🎠"],"playground":["🛝"],"slide":["🛝"],"ferris":["🎡"],"wheel":["🎡","🛞","☸️"],"roller":["🎢","🛼"],"coaster":["🎢"],"barber":["💈"],"pole":["💈","🎣"],"circus":["🎪"],"locomotive":["🚂"],"railway":["🚃","🚞","🛤️","🚟"],"car":["🚃","🚋","🚓","🚔","🏎️","🚨"],"high":["🚄","⚡","👠","🔊"],"speed":["🚄"],"train":["🚄","🚅","🚆"],"bullet":["🚅"],"metro":["🚇"],"rail":["🚈"],"station":["🚉"],"tram":["🚊","🚋"],"monorail":["🚝"],"bus":["🚌","🚍","🚏"],"trolleybus":["🚎"],"minibus":["🚐"],"ambulance":["🚑"],"engine":["🚒"],"taxi":["🚕","🚖"],"automobile":["🚗","🚘"],"sport":["🚙"],"utility":["🚙"],"vehicle":["🚙"],"pickup":["🛻"],"truck":["🛻","🚚"],"delivery":["🚚"],"articulated":["🚛"],"lorry":["🚛"],"tractor":["🚜"],"motorcycle":["🏍️"],"motor":["🛵","🛥️"],"scooter":["🛵","🛴"],"auto":["🛺"],"rickshaw":["🛺"],"bicycle":["🚲"],"kick":["🛴"],"skateboard":["🛹"],"skate":["🛼","⛸️"],"stop":["🚏","🛑","⏹️"],"motorway":["🛣️"],"track":["🛤️","⏭️","⏮️"],"oil":["🛢️"],"drum":["🛢️","🥁","🪘"],"fuel":["⛽"],"pump":["⛽"],"horizontal":["🚥"],"traffic":["🚥","🚦"],"vertical":["🚦","🔃"],"anchor":["⚓"],"ring":["🛟","💍"],"buoy":["🛟"],"sailboat":["⛵"],"canoe":["🛶"],"speedboat":["🚤"],"passenger":["🛳️"],"ship":["🛳️","🚢"],"ferry":["⛴️"],"airplane":["✈️","🛩️","🛫","🛬"],"small":["🛩️","🌤️","◾","◽","▪️","▫️","🔸","🔹"],"departure":["🛫"],"arrival":["🛬"],"parachute":["🪂"],"seat":["💺"],"helicopter":["🚁"],"suspension":["🚟"],"cableway":["🚠"],"aerial":["🚡"],"tramway":["🚡"],"satellite":["🛰️","📡"],"rocket":["🚀"],"saucer":["🛸"],"bellhop":["🛎️"],"luggage":["🧳","🛅"],"hourglass":["⌛","⏳"],"done":["⌛","⏳"],"not":["⏳","🈶"],"watch":["⌚"],"alarm":["⏰"],"clock":["⏰","⏲️","🕰️","🕛","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚"],"stopwatch":["⏱️"],"timer":["⏲️"],"mantelpiece":["🕰️"],"twelve":["🕛","🕧"],"thirty":["🕧","🕜","🕝","🕞","🕟","🕠","🕡","🕢","🕣","🕤","🕥","🕦"],"one":["🕐","🕜","🩱","🔞"],"three":["🕒","🕞"],"five":["🕔","🕠"],"six":["🕕","🕡","🔯"],"seven":["🕖","🕢"],"eight":["🕗","🕣","✳️","✴️"],"nine":["🕘","🕤"],"ten":["🕙","🕥"],"eleven":["🕚","🕦"],"new":["🌑","🌚","🆕","🇳🇨","🇳🇿","🇵🇬"],"wax":["🌒","🌔"],"crescent":["🌒","🌘","🌙","☪️"],"first":["🌓","🌛"],"quarter":["🌓","🌗","🌛","🌜"],"gibbous":["🌔","🌖"],"full":["🌕","🌝"],"wane":["🌖","🌘"],"last":["🌗","🌜","⏮️"],"sun":["☀️","🌞","⛅","🌤️","🌥️","🌦️"],"ringed":["🪐"],"planet":["🪐"],"glow":["🌟"],"shoot":["🌠"],"milky":["🌌"],"way":["🌌"],"cloud":["☁️","⛅","⛈️","🌤️","🌥️","🌦️","🌧️","🌨️","🌩️"],"behind":["⛅","🌤️","🌥️","🌦️"],"lightning":["⛈️","🌩️"],"rain":["⛈️","🌦️","🌧️","☔"],"large":["🌥️","⬛","⬜","🔶","🔷"],"tornado":["🌪️"],"fog":["🌫️"],"cyclone":["🌀"],"rainbow":["🌈","🏳️‍🌈"],"drops":["☔"],"ground":["⛱️"],"voltage":["⚡"],"snowflake":["❄️"],"snowman":["☃️","⛄"],"comet":["☄️"],"droplet":["💧"],"jack":["🎃"],"lantern":["🎃","🏮"],"christmas":["🎄","🇨🇽"],"fireworks":["🎆"],"sparkler":["🎇"],"firecracker":["🧨"],"sparkles":["✨"],"popper":["🎉"],"confetti":["🎊"],"tanabata":["🎋"],"pine":["🎍"],"dolls":["🎎","🪆"],"carp":["🎏"],"streamer":["🎏"],"chime":["🎐"],"view":["🎑"],"ceremony":["🎑"],"envelope":["🧧","✉️","📨","📩"],"wrapped":["🎁"],"gift":["🎁"],"reminder":["🎗️"],"admission":["🎟️"],"tickets":["🎟️"],"ticket":["🎫"],"military":["🎖️","🪖"],"medal":["🎖️","🏅","🥇","🥈","🥉"],"trophy":["🏆"],"sports":["🏅"],"1st":["🥇"],"place":["🥇","🥈","🥉","🛐"],"2nd":["🥈"],"3rd":["🥉"],"soccer":["⚽"],"baseball":["⚾"],"softball":["🥎"],"basketball":["🏀"],"volleyball":["🏐"],"american":["🏈","🇦🇸"],"football":["🏈","🏉"],"rugby":["🏉"],"tennis":["🎾"],"disc":["🥏"],"game":["🏏","🎮","🎲"],"field":["🏑"],"hockey":["🏑","🏒"],"lacrosse":["🥍"],"ping":["🏓"],"pong":["🏓"],"badminton":["🏸"],"glove":["🥊"],"martial":["🥋"],"arts":["🥋","🎭"],"uniform":["🥋"],"goal":["🥅"],"net":["🥅"],"flag":["⛳","📫","📪","📬","📭","🏁","🚩","🏴","🏳️","🏳️‍🌈","🏳️‍⚧️","🏴‍☠️","🇦🇨","🇦🇩","🇦🇪","🇦🇫","🇦🇬","🇦🇮","🇦🇱","🇦🇲","🇦🇴","🇦🇶","🇦🇷","🇦🇸","🇦🇹","🇦🇺","🇦🇼","🇦🇽","🇦🇿","🇧🇦","🇧🇧","🇧🇩","🇧🇪","🇧🇫","🇧🇬","🇧🇭","🇧🇮","🇧🇯","🇧🇱","🇧🇲","🇧🇳","🇧🇴","🇧🇶","🇧🇷","🇧🇸","🇧🇹","🇧🇻","🇧🇼","🇧🇾","🇧🇿","🇨🇦","🇨🇨","🇨🇩","🇨🇫","🇨🇬","🇨🇭","🇨🇮","🇨🇰","🇨🇱","🇨🇲","🇨🇳","🇨🇴","🇨🇵","🇨🇷","🇨🇺","🇨🇻","🇨🇼","🇨🇽","🇨🇾","🇨🇿","🇩🇪","🇩🇬","🇩🇯","🇩🇰","🇩🇲","🇩🇴","🇩🇿","🇪🇦","🇪🇨","🇪🇪","🇪🇬","🇪🇭","🇪🇷","🇪🇸","🇪🇹","🇪🇺","🇫🇮","🇫🇯","🇫🇰","🇫🇲","🇫🇴","🇫🇷","🇬🇦","🇬🇧","🇬🇩","🇬🇪","🇬🇫","🇬🇬","🇬🇭","🇬🇮","🇬🇱","🇬🇲","🇬🇳","🇬🇵","🇬🇶","🇬🇷","🇬🇸","🇬🇹","🇬🇺","🇬🇼","🇬🇾","🇭🇰","🇭🇲","🇭🇳","🇭🇷","🇭🇹","🇭🇺","🇮🇨","🇮🇩","🇮🇪","🇮🇱","🇮🇲","🇮🇳","🇮🇴","🇮🇶","🇮🇷","🇮🇸","🇮🇹","🇯🇪","🇯🇲","🇯🇴","🇯🇵","🇰🇪","🇰🇬","🇰🇭","🇰🇮","🇰🇲","🇰🇳","🇰🇵","🇰🇷","🇰🇼","🇰🇾","🇰🇿","🇱🇦","🇱🇧","🇱🇨","🇱🇮","🇱🇰","🇱🇷","🇱🇸","🇱🇹","🇱🇺","🇱🇻","🇱🇾","🇲🇦","🇲🇨","🇲🇩","🇲🇪","🇲🇫","🇲🇬","🇲🇭","🇲🇰","🇲🇱","🇲🇲","🇲🇳","🇲🇴","🇲🇵","🇲🇶","🇲🇷","🇲🇸","🇲🇹","🇲🇺","🇲🇻","🇲🇼","🇲🇽","🇲🇾","🇲🇿","🇳🇦","🇳🇨","🇳🇪","🇳🇫","🇳🇬","🇳🇮","🇳🇱","🇳🇴","🇳🇵","🇳🇷","🇳🇺","🇳🇿","🇴🇲","🇵🇦","🇵🇪","🇵🇫","🇵🇬","🇵🇭","🇵🇰","🇵🇱","🇵🇲","🇵🇳","🇵🇷","🇵🇸","🇵🇹","🇵🇼","🇵🇾","🇶🇦","🇷🇪","🇷🇴","🇷🇸","🇷🇺","🇷🇼","🇸🇦","🇸🇧","🇸🇨","🇸🇩","🇸🇪","🇸🇬","🇸🇭","🇸🇮","🇸🇯","🇸🇰","🇸🇱","🇸🇲","🇸🇳","🇸🇴","🇸🇷","🇸🇸","🇸🇹","🇸🇻","🇸🇽","🇸🇾","🇸🇿","🇹🇦","🇹🇨","🇹🇩","🇹🇫","🇹🇬","🇹🇭","🇹🇯","🇹🇰","🇹🇱","🇹🇲","🇹🇳","🇹🇴","🇹🇷","🇹🇹","🇹🇻","🇹🇼","🇹🇿","🇺🇦","🇺🇬","🇺🇲","🇺🇳","🇺🇸","🇺🇾","🇺🇿","🇻🇦","🇻🇨","🇻🇪","🇻🇬","🇻🇮","🇻🇳","🇻🇺","🇼🇫","🇼🇸","🇽🇰","🇾🇪","🇾🇹","🇿🇦","🇿🇲","🇿🇼","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁳󠁣󠁴󠁿","🏴󠁧󠁢󠁷󠁬󠁳󠁿"],"dive":["🤿"],"shirt":["🎽","👕"],"skis":["🎿"],"sled":["🛷"],"curl":["🥌","📃"],"stone":["🥌","💎"],"bullseye":["🎯"],"yo":["🪀"],"kite":["🪁"],"pistol":["🔫"],"pool":["🎱"],"crystal":["🔮"],"magic":["🪄"],"wand":["🪄"],"video":["🎮","📹"],"joystick":["🕹️"],"slot":["🎰"],"machine":["🎰","📠"],"die":["🎲"],"puzzle":["🧩"],"piece":["🧩","🩱"],"teddy":["🧸"],"pinata":["🪅"],"mirror":["🪩","🪞"],"spade":["♠️"],"diamond":["♦️","🔶","🔷","🔸","🔹","💠"],"club":["♣️"],"chess":["♟️"],"pawn":["♟️"],"joker":["🃏"],"mahjong":["🀄"],"cards":["🎴"],"perform":["🎭"],"framed":["🖼️"],"picture":["🖼️"],"palette":["🎨"],"thread":["🧵"],"sew":["🪡"],"needle":["🪡"],"yarn":["🧶"],"knot":["🪢"],"goggles":["🥽"],"lab":["🥼"],"coat":["🥼","🧥"],"safety":["🦺","🧷"],"vest":["🦺"],"necktie":["👔"],"jeans":["👖"],"scarf":["🧣"],"gloves":["🧤"],"socks":["🧦"],"dress":["👗"],"kimono":["👘"],"sari":["🥻"],"swimsuit":["🩱"],"briefs":["🩲"],"shorts":["🩳"],"bikini":["👙"],"clothes":["👚"],"fold":["🪭"],"fan":["🪭"],"purse":["👛"],"handbag":["👜"],"clutch":["👝"],"bag":["👝","💰"],"shop":["🛍️","🛒"],"bags":["🛍️"],"backpack":["🎒"],"thong":["🩴"],"sandal":["🩴","👡"],"shoe":["👞","👟","🥿","👠"],"hike":["🥾"],"boot":["🥾","👢"],"flat":["🥿"],"heeled":["👠"],"ballet":["🩰"],"shoes":["🩰"],"pick":["🪮","⛏️","⚒️"],"top":["🎩","🔝"],"graduation":["🎓"],"cap":["🎓","🧢"],"billed":["🧢"],"helmet":["🪖","⛑️"],"rescue":["⛑️"],"prayer":["📿"],"beads":["📿"],"lipstick":["💄"],"gem":["💎"],"muted":["🔇"],"speaker":["🔇","🔈","🔉","🔊"],"low":["🔈","🪫"],"volume":["🔈","🔉","🔊"],"medium":["🔉","◼️","◻️","◾","◽"],"loudspeaker":["📢"],"megaphone":["📣"],"postal":["📯"],"horn":["📯"],"slash":["🔕"],"musical":["🎼","🎵","🎶","🎹"],"score":["🎼"],"note":["🎵"],"notes":["🎶"],"studio":["🎙️"],"microphone":["🎙️","🎤"],"level":["🎚️"],"slider":["🎚️"],"control":["🎛️","🛂"],"knobs":["🎛️"],"headphone":["🎧"],"radio":["📻","🔘"],"saxophone":["🎷"],"accordion":["🪗"],"guitar":["🎸"],"keyboard":["🎹","⌨️"],"trumpet":["🎺"],"violin":["🎻"],"banjo":["🪕"],"long":["🪘"],"maracas":["🪇"],"flute":["🪈"],"mobile":["📱","📲","📵","📴"],"phone":["📱","📲","📴"],"telephone":["☎️","📞"],"receiver":["📞"],"pager":["📟"],"fax":["📠"],"battery":["🔋","🪫"],"electric":["🔌"],"plug":["🔌"],"laptop":["💻"],"desktop":["🖥️"],"computer":["🖥️","🖱️","💽"],"printer":["🖨️"],"trackball":["🖲️"],"disk":["💽","💾","💿"],"floppy":["💾"],"optical":["💿"],"dvd":["📀"],"abacus":["🧮"],"movie":["🎥"],"camera":["🎥","📷","📸","📹"],"film":["🎞️","📽️"],"frames":["🎞️"],"projector":["📽️"],"clapper":["🎬"],"board":["🎬"],"television":["📺"],"flash":["📸"],"videocassette":["📼"],"magnify":["🔍","🔎"],"tilted":["🔍","🔎"],"candle":["🕯️"],"bulb":["💡"],"flashlight":["🔦"],"paper":["🏮","🧻"],"diya":["🪔"],"lamp":["🪔","🛋️"],"notebook":["📔","📓"],"decorative":["📔"],"cover":["📔"],"book":["📕","📖","📗","📘","📙"],"books":["📚"],"ledger":["📒"],"page":["📃","📄"],"scroll":["📜"],"newspaper":["📰","🗞️"],"rolled":["🗞️"],"bookmark":["📑","🔖"],"tabs":["📑"],"label":["🏷️"],"coin":["🪙"],"yen":["💴","💹"],"banknote":["💴","💵","💶","💷"],"dollar":["💵","💲"],"euro":["💶"],"pound":["💷"],"wings":["💸"],"credit":["💳"],"card":["💳","🗂️","📇","🗃️","🪪"],"receipt":["🧾"],"chart":["💹","📈","📉","📊"],"increase":["💹","📈"],"mail":["📧"],"income":["📨"],"outbox":["📤"],"tray":["📤","📥"],"inbox":["📥"],"package":["📦"],"mailbox":["📫","📪","📬","📭"],"lowered":["📪","📭"],"postbox":["📮"],"ballot":["🗳️"],"pencil":["✏️"],"nib":["✒️"],"pen":["🖋️","🖊️","🔏"],"paintbrush":["🖌️"],"crayon":["🖍️"],"memo":["📝"],"briefcase":["💼"],"file":["📁","📂","🗃️","🗄️"],"folder":["📁","📂"],"dividers":["🗂️"],"calendar":["📅","📆","🗓️"],"off":["📆","📴"],"notepad":["🗒️"],"decrease":["📉"],"clipboard":["📋"],"pushpin":["📌","📍"],"round":["📍"],"paperclip":["📎"],"linked":["🖇️"],"paperclips":["🖇️"],"straight":["📏"],"ruler":["📏","📐"],"triangular":["📐","🚩"],"scissors":["✂️"],"cabinet":["🗄️"],"wastebasket":["🗑️"],"locked":["🔒","🔏","🔐"],"unlocked":["🔓"],"key":["🔐","🔑","🗝️"],"hammer":["🔨","⚒️","🛠️"],"axe":["🪓"],"wrench":["🛠️","🔧"],"dagger":["🗡️"],"swords":["⚔️"],"bomb":["💣"],"boomerang":["🪃"],"shield":["🛡️"],"carpentry":["🪚"],"saw":["🪚"],"screwdriver":["🪛"],"nut":["🔩"],"bolt":["🔩"],"gear":["⚙️"],"clamp":["🗜️"],"balance":["⚖️"],"scale":["⚖️"],"link":["🔗"],"chains":["⛓️"],"hook":["🪝"],"toolbox":["🧰"],"magnet":["🧲"],"ladder":["🪜"],"alembic":["⚗️"],"test":["🧪"],"tube":["🧪"],"petri":["🧫"],"dish":["🧫"],"dna":["🧬"],"microscope":["🔬"],"telescope":["🔭"],"antenna":["📡","📶"],"syringe":["💉"],"drop":["🩸"],"blood":["🩸","🅰️","🆎","🅱️","🅾️"],"pill":["💊"],"adhesive":["🩹"],"crutch":["🩼"],"stethoscope":["🩺"],"ray":["🩻"],"door":["🚪"],"elevator":["🛗"],"window":["🪟"],"couch":["🛋️"],"chair":["🪑"],"toilet":["🚽"],"plunger":["🪠"],"shower":["🚿"],"bathtub":["🛁"],"trap":["🪤"],"razor":["🪒"],"lotion":["🧴"],"pin":["🧷"],"broom":["🧹"],"basket":["🧺"],"bucket":["🪣"],"soap":["🧼"],"bubbles":["🫧"],"toothbrush":["🪥"],"sponge":["🧽"],"extinguisher":["🧯"],"cart":["🛒"],"cigarette":["🚬"],"coffin":["⚰️"],"headstone":["🪦"],"funeral":["⚱️"],"urn":["⚱️"],"nazar":["🧿"],"amulet":["🧿"],"hamsa":["🪬"],"moai":["🗿"],"placard":["🪧"],"identification":["🪪"],"atm":["🏧"],"litter":["🚮","🚯"],"bin":["🚮"],"potable":["🚰","🚱"],"restroom":["🚻"],"closet":["🚾"],"passport":["🛂"],"customs":["🛃"],"baggage":["🛄"],"claim":["🛄"],"warn":["⚠️"],"children":["🚸"],"cross":["🚸","✝️","☦️","❌","❎"],"entry":["⛔"],"prohibited":["🚫","🈲"],"bicycles":["🚳"],"smoke":["🚭"],"non":["🚱"],"pedestrians":["🚷"],"phones":["📵"],"under":["🔞"],"eighteen":["🔞"],"radioactive":["☢️"],"biohazard":["☣️"],"curve":["↩️","↪️","⤴️","⤵️"],"clockwise":["🔃"],"arrows":["🔃","🔄"],"counterclockwise":["🔄"],"button":["🔄","🔀","🔁","🔂","▶️","⏩","⏭️","⏯️","◀️","⏪","⏮️","🔼","⏫","🔽","⏬","⏸️","⏹️","⏺️","⏏️","🔅","🔆","✅","❎","🅰️","🆎","🅱️","🆑","🆒","🆓","🆔","🆕","🆖","🅾️","🆗","🅿️","🆘","🆙","🆚","🈁","🈂️","🈷️","🈶","🈯","🉐","🈹","🈚","🈲","🉑","🈸","🈴","🈳","㊗️","㊙️","🈺","🈵","🔘","🔳","🔲"],"end":["🔚"],"soon":["🔜"],"worship":["🛐"],"atom":["⚛️"],"om":["🕉️"],"david":["✡️"],"dharma":["☸️"],"yin":["☯️"],"yang":["☯️"],"latin":["✝️","🔠","🔡","🔤"],"orthodox":["☦️"],"peace":["☮️"],"menorah":["🕎"],"pointed":["🔯","✴️","🔺","🔻"],"khanda":["🪯"],"aries":["♈"],"taurus":["♉"],"gemini":["♊"],"cancer":["♋"],"leo":["♌"],"virgo":["♍"],"libra":["♎"],"scorpio":["♏"],"sagittarius":["♐"],"capricorn":["♑"],"aquarius":["♒"],"pisces":["♓"],"ophiuchus":["⛎"],"shuffle":["🔀"],"tracks":["🔀"],"repeat":["🔁","🔂"],"single":["🔂"],"fast":["⏩","⏪","⏫","⏬"],"forward":["⏩"],"next":["⏭️"],"or":["⏯️"],"pause":["⏯️","⏸️"],"reverse":["◀️","⏪"],"upwards":["🔼"],"downwards":["🔽"],"record":["⏺️"],"eject":["⏏️"],"cinema":["🎦"],"dim":["🔅"],"bright":["🔆"],"bars":["📶"],"wireless":["🛜"],"vibration":["📳"],"mode":["📳"],"female":["♀️"],"male":["♂️"],"transgender":["⚧️","🏳️‍⚧️"],"multiply":["✖️"],"plus":["➕"],"minus":["➖"],"divide":["➗"],"heavy":["🟰","💲"],"equals":["🟰"],"infinity":["♾️"],"double":["‼️","➿"],"question":["⁉️","❓","❔"],"wavy":["〰️"],"currency":["💱"],"exchange":["💱"],"recycle":["♻️"],"fleur":["⚜️"],"de":["⚜️"],"lis":["⚜️"],"trident":["🔱"],"emblem":["🔱"],"name":["📛"],"badge":["📛"],"for":["🔰","🈺"],"beginner":["🔰"],"hollow":["⭕"],"circle":["⭕","🔴","🟠","🟡","🟢","🔵","🟣","🟤","⚫","⚪"],"check":["✅","☑️","✔️"],"loop":["➰","➿"],"part":["〽️"],"alternation":["〽️"],"spoked":["✳️"],"asterisk":["✳️"],"copyright":["©️"],"registered":["®️"],"trade":["™️"],"keycap":["#️⃣","*️⃣","0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"],"input":["🔠","🔡","🔢","🔣","🔤"],"uppercase":["🔠"],"lowercase":["🔡"],"numbers":["🔢"],"letters":["🔤"],"type":["🅰️","🆎","🅱️","🅾️"],"ab":["🆎"],"cl":["🆑"],"cool":["🆒"],"free":["🆓","🈶","🈚"],"information":["ℹ️"],"id":["🆔"],"circled":["Ⓜ️"],"ng":["🆖"],"sos":["🆘"],"vs":["🆚"],"here":["🈁"],"charge":["🈂️","🈶","🈚"],"monthly":["🈷️"],"amount":["🈷️"],"reserved":["🈯"],"bargain":["🉐"],"discount":["🈹"],"acceptable":["🉑"],"application":["🈸"],"pass":["🈴"],"grade":["🈴"],"vacancy":["🈳","🈵"],"congratulations":["㊗️"],"secret":["㊙️"],"business":["🈺"],"square":["🟥","🟧","🟨","🟩","🟦","🟪","🟫","⬛","⬜","◼️","◻️","◾","◽","▪️","▫️","🔳","🔲"],"triangle":["🔺","🔻"],"dot":["💠"],"chequered":["🏁"],"flags":["🎌"],"pirate":["🏴‍☠️"],"ascension":["🇦🇨"],"andorra":["🇦🇩"],"united":["🇦🇪","🇬🇧","🇺🇳","🇺🇸"],"arab":["🇦🇪"],"emirates":["🇦🇪"],"afghanistan":["🇦🇫"],"antigua":["🇦🇬"],"barbuda":["🇦🇬"],"anguilla":["🇦🇮"],"albania":["🇦🇱"],"armenia":["🇦🇲"],"angola":["🇦🇴"],"antarctica":["🇦🇶"],"argentina":["🇦🇷"],"samoa":["🇦🇸","🇼🇸"],"austria":["🇦🇹"],"aruba":["🇦🇼"],"aland":["🇦🇽"],"islands":["🇦🇽","🇨🇨","🇨🇰","🇫🇰","🇫🇴","🇬🇸","🇭🇲","🇮🇨","🇰🇾","🇲🇭","🇲🇵","🇵🇳","🇸🇧","🇹🇨","🇺🇲","🇻🇬","🇻🇮"],"azerbaijan":["🇦🇿"],"bosnia":["🇧🇦"],"herzegovina":["🇧🇦"],"barbados":["🇧🇧"],"bangladesh":["🇧🇩"],"belgium":["🇧🇪"],"burkina":["🇧🇫"],"faso":["🇧🇫"],"bulgaria":["🇧🇬"],"bahrain":["🇧🇭"],"burundi":["🇧🇮"],"benin":["🇧🇯"],"st":["🇧🇱","🇰🇳","🇱🇨","🇲🇫","🇵🇲","🇸🇭","🇻🇨"],"barthelemy":["🇧🇱"],"bermuda":["🇧🇲"],"brunei":["🇧🇳"],"bolivia":["🇧🇴"],"caribbean":["🇧🇶"],"netherlands":["🇧🇶","🇳🇱"],"brazil":["🇧🇷"],"bahamas":["🇧🇸"],"bhutan":["🇧🇹"],"bouvet":["🇧🇻"],"botswana":["🇧🇼"],"belarus":["🇧🇾"],"belize":["🇧🇿"],"canada":["🇨🇦"],"cocos":["🇨🇨"],"keel":["🇨🇨"],"congo":["🇨🇩","🇨🇬"],"kinshasa":["🇨🇩"],"central":["🇨🇫"],"african":["🇨🇫"],"republic":["🇨🇫","🇩🇴"],"brazzaville":["🇨🇬"],"switzerland":["🇨🇭"],"cote":["🇨🇮"],"ivoire":["🇨🇮"],"chile":["🇨🇱"],"cameroon":["🇨🇲"],"china":["🇨🇳","🇭🇰","🇲🇴"],"colombia":["🇨🇴"],"clipperton":["🇨🇵"],"costa":["🇨🇷"],"rica":["🇨🇷"],"cuba":["🇨🇺"],"cape":["🇨🇻"],"verde":["🇨🇻"],"curacao":["🇨🇼"],"cyprus":["🇨🇾"],"czechia":["🇨🇿"],"germany":["🇩🇪"],"diego":["🇩🇬"],"garcia":["🇩🇬"],"djibouti":["🇩🇯"],"denmark":["🇩🇰"],"dominica":["🇩🇲"],"dominican":["🇩🇴"],"algeria":["🇩🇿"],"ceuta":["🇪🇦"],"melilla":["🇪🇦"],"ecuador":["🇪🇨"],"estonia":["🇪🇪"],"egypt":["🇪🇬"],"western":["🇪🇭"],"sahara":["🇪🇭"],"eritrea":["🇪🇷"],"spain":["🇪🇸"],"ethiopia":["🇪🇹"],"european":["🇪🇺"],"union":["🇪🇺"],"finland":["🇫🇮"],"fiji":["🇫🇯"],"falkland":["🇫🇰"],"micronesia":["🇫🇲"],"faroe":["🇫🇴"],"france":["🇫🇷"],"gabon":["🇬🇦"],"kingdom":["🇬🇧"],"grenada":["🇬🇩"],"georgia":["🇬🇪","🇬🇸"],"guiana":["🇬🇫"],"guernsey":["🇬🇬"],"ghana":["🇬🇭"],"gibraltar":["🇬🇮"],"greenland":["🇬🇱"],"gambia":["🇬🇲"],"guinea":["🇬🇳","🇬🇶","🇬🇼","🇵🇬"],"guadeloupe":["🇬🇵"],"equatorial":["🇬🇶"],"greece":["🇬🇷"],"south":["🇬🇸","🇰🇷","🇸🇸","🇿🇦"],"guatemala":["🇬🇹"],"guam":["🇬🇺"],"bissau":["🇬🇼"],"guyana":["🇬🇾"],"hong":["🇭🇰"],"kong":["🇭🇰"],"sar":["🇭🇰","🇲🇴"],"heard":["🇭🇲"],"mcdonald":["🇭🇲"],"honduras":["🇭🇳"],"croatia":["🇭🇷"],"haiti":["🇭🇹"],"hungary":["🇭🇺"],"canary":["🇮🇨"],"indonesia":["🇮🇩"],"ireland":["🇮🇪"],"israel":["🇮🇱"],"isle":["🇮🇲"],"india":["🇮🇳"],"british":["🇮🇴","🇻🇬"],"indian":["🇮🇴"],"ocean":["🇮🇴"],"territory":["🇮🇴"],"iraq":["🇮🇶"],"iran":["🇮🇷"],"iceland":["🇮🇸"],"italy":["🇮🇹"],"jersey":["🇯🇪"],"jamaica":["🇯🇲"],"jordan":["🇯🇴"],"kenya":["🇰🇪"],"kyrgyzstan":["🇰🇬"],"cambodia":["🇰🇭"],"kiribati":["🇰🇮"],"comoros":["🇰🇲"],"kitts":["🇰🇳"],"nevis":["🇰🇳"],"north":["🇰🇵","🇲🇰"],"korea":["🇰🇵","🇰🇷"],"kuwait":["🇰🇼"],"cayman":["🇰🇾"],"kazakhstan":["🇰🇿"],"laos":["🇱🇦"],"lebanon":["🇱🇧"],"lucia":["🇱🇨"],"liechtenstein":["🇱🇮"],"sri":["🇱🇰"],"lanka":["🇱🇰"],"liberia":["🇱🇷"],"lesotho":["🇱🇸"],"lithuania":["🇱🇹"],"luxembourg":["🇱🇺"],"latvia":["🇱🇻"],"libya":["🇱🇾"],"morocco":["🇲🇦"],"monaco":["🇲🇨"],"moldova":["🇲🇩"],"montenegro":["🇲🇪"],"martin":["🇲🇫"],"madagascar":["🇲🇬"],"marshall":["🇲🇭"],"macedonia":["🇲🇰"],"mali":["🇲🇱"],"myanmar":["🇲🇲"],"burma":["🇲🇲"],"mongolia":["🇲🇳"],"macao":["🇲🇴"],"northern":["🇲🇵"],"mariana":["🇲🇵"],"martinique":["🇲🇶"],"mauritania":["🇲🇷"],"montserrat":["🇲🇸"],"malta":["🇲🇹"],"mauritius":["🇲🇺"],"maldives":["🇲🇻"],"malawi":["🇲🇼"],"mexico":["🇲🇽"],"malaysia":["🇲🇾"],"mozambique":["🇲🇿"],"namibia":["🇳🇦"],"caledonia":["🇳🇨"],"niger":["🇳🇪"],"norfolk":["🇳🇫"],"nigeria":["🇳🇬"],"nicaragua":["🇳🇮"],"norway":["🇳🇴"],"nepal":["🇳🇵"],"nauru":["🇳🇷"],"niue":["🇳🇺"],"zealand":["🇳🇿"],"oman":["🇴🇲"],"panama":["🇵🇦"],"peru":["🇵🇪"],"polynesia":["🇵🇫"],"papua":["🇵🇬"],"philippines":["🇵🇭"],"pakistan":["🇵🇰"],"poland":["🇵🇱"],"pierre":["🇵🇲"],"miquelon":["🇵🇲"],"pitcairn":["🇵🇳"],"puerto":["🇵🇷"],"rico":["🇵🇷"],"palestinian":["🇵🇸"],"territories":["🇵🇸","🇹🇫"],"portugal":["🇵🇹"],"palau":["🇵🇼"],"paraguay":["🇵🇾"],"qatar":["🇶🇦"],"reunion":["🇷🇪"],"romania":["🇷🇴"],"serbia":["🇷🇸"],"russia":["🇷🇺"],"rwanda":["🇷🇼"],"saudi":["🇸🇦"],"arabia":["🇸🇦"],"solomon":["🇸🇧"],"seychelles":["🇸🇨"],"sudan":["🇸🇩","🇸🇸"],"sweden":["🇸🇪"],"singapore":["🇸🇬"],"helena":["🇸🇭"],"slovenia":["🇸🇮"],"svalbard":["🇸🇯"],"jan":["🇸🇯"],"mayen":["🇸🇯"],"slovakia":["🇸🇰"],"sierra":["🇸🇱"],"leone":["🇸🇱"],"san":["🇸🇲"],"marino":["🇸🇲"],"senegal":["🇸🇳"],"somalia":["🇸🇴"],"suriname":["🇸🇷"],"sao":["🇸🇹"],"tome":["🇸🇹"],"principe":["🇸🇹"],"el":["🇸🇻"],"salvador":["🇸🇻"],"sint":["🇸🇽"],"maarten":["🇸🇽"],"syria":["🇸🇾"],"eswatini":["🇸🇿"],"tristan":["🇹🇦"],"da":["🇹🇦"],"cunha":["🇹🇦"],"turks":["🇹🇨"],"caicos":["🇹🇨"],"chad":["🇹🇩"],"southern":["🇹🇫"],"togo":["🇹🇬"],"thailand":["🇹🇭"],"tajikistan":["🇹🇯"],"tokelau":["🇹🇰"],"timor":["🇹🇱"],"leste":["🇹🇱"],"turkmenistan":["🇹🇲"],"tunisia":["🇹🇳"],"tonga":["🇹🇴"],"trinidad":["🇹🇹"],"tobago":["🇹🇹"],"tuvalu":["🇹🇻"],"taiwan":["🇹🇼"],"tanzania":["🇹🇿"],"ukraine":["🇺🇦"],"uganda":["🇺🇬"],"us":["🇺🇲","🇻🇮"],"outly":["🇺🇲"],"nations":["🇺🇳"],"states":["🇺🇸"],"uruguay":["🇺🇾"],"uzbekistan":["🇺🇿"],"vatican":["🇻🇦"],"city":["🇻🇦"],"vincent":["🇻🇨"],"grenadines":["🇻🇨"],"venezuela":["🇻🇪"],"virgin":["🇻🇬","🇻🇮"],"vietnam":["🇻🇳"],"vanuatu":["🇻🇺"],"wallis":["🇼🇫"],"futuna":["🇼🇫"],"kosovo":["🇽🇰"],"yemen":["🇾🇪"],"mayotte":["🇾🇹"],"zambia":["🇿🇲"],"zimbabwe":["🇿🇼"],"england":["🏴󠁧󠁢󠁥󠁮󠁧󠁿"],"scotland":["🏴󠁧󠁢󠁳󠁣󠁴󠁿"],"wales":["🏴󠁧󠁢󠁷󠁬󠁳󠁿"]}
+},{}],127:[function(require,module,exports){
 module.exports={"߀":"0","́":""," ":" ","Ⓐ":"A","Ａ":"A","À":"A","Á":"A","Â":"A","Ầ":"A","Ấ":"A","Ẫ":"A","Ẩ":"A","Ã":"A","Ā":"A","Ă":"A","Ằ":"A","Ắ":"A","Ẵ":"A","Ẳ":"A","Ȧ":"A","Ǡ":"A","Ä":"A","Ǟ":"A","Ả":"A","Å":"A","Ǻ":"A","Ǎ":"A","Ȁ":"A","Ȃ":"A","Ạ":"A","Ậ":"A","Ặ":"A","Ḁ":"A","Ą":"A","Ⱥ":"A","Ɐ":"A","Ꜳ":"AA","Æ":"AE","Ǽ":"AE","Ǣ":"AE","Ꜵ":"AO","Ꜷ":"AU","Ꜹ":"AV","Ꜻ":"AV","Ꜽ":"AY","Ⓑ":"B","Ｂ":"B","Ḃ":"B","Ḅ":"B","Ḇ":"B","Ƀ":"B","Ɓ":"B","ｃ":"C","Ⓒ":"C","Ｃ":"C","Ꜿ":"C","Ḉ":"C","Ç":"C","Ⓓ":"D","Ｄ":"D","Ḋ":"D","Ď":"D","Ḍ":"D","Ḑ":"D","Ḓ":"D","Ḏ":"D","Đ":"D","Ɗ":"D","Ɖ":"D","ᴅ":"D","Ꝺ":"D","Ð":"Dh","Ǳ":"DZ","Ǆ":"DZ","ǲ":"Dz","ǅ":"Dz","ɛ":"E","Ⓔ":"E","Ｅ":"E","È":"E","É":"E","Ê":"E","Ề":"E","Ế":"E","Ễ":"E","Ể":"E","Ẽ":"E","Ē":"E","Ḕ":"E","Ḗ":"E","Ĕ":"E","Ė":"E","Ë":"E","Ẻ":"E","Ě":"E","Ȅ":"E","Ȇ":"E","Ẹ":"E","Ệ":"E","Ȩ":"E","Ḝ":"E","Ę":"E","Ḙ":"E","Ḛ":"E","Ɛ":"E","Ǝ":"E","ᴇ":"E","ꝼ":"F","Ⓕ":"F","Ｆ":"F","Ḟ":"F","Ƒ":"F","Ꝼ":"F","Ⓖ":"G","Ｇ":"G","Ǵ":"G","Ĝ":"G","Ḡ":"G","Ğ":"G","Ġ":"G","Ǧ":"G","Ģ":"G","Ǥ":"G","Ɠ":"G","Ꞡ":"G","Ᵹ":"G","Ꝿ":"G","ɢ":"G","Ⓗ":"H","Ｈ":"H","Ĥ":"H","Ḣ":"H","Ḧ":"H","Ȟ":"H","Ḥ":"H","Ḩ":"H","Ḫ":"H","Ħ":"H","Ⱨ":"H","Ⱶ":"H","Ɥ":"H","Ⓘ":"I","Ｉ":"I","Ì":"I","Í":"I","Î":"I","Ĩ":"I","Ī":"I","Ĭ":"I","İ":"I","Ï":"I","Ḯ":"I","Ỉ":"I","Ǐ":"I","Ȉ":"I","Ȋ":"I","Ị":"I","Į":"I","Ḭ":"I","Ɨ":"I","Ⓙ":"J","Ｊ":"J","Ĵ":"J","Ɉ":"J","ȷ":"J","Ⓚ":"K","Ｋ":"K","Ḱ":"K","Ǩ":"K","Ḳ":"K","Ķ":"K","Ḵ":"K","Ƙ":"K","Ⱪ":"K","Ꝁ":"K","Ꝃ":"K","Ꝅ":"K","Ꞣ":"K","Ⓛ":"L","Ｌ":"L","Ŀ":"L","Ĺ":"L","Ľ":"L","Ḷ":"L","Ḹ":"L","Ļ":"L","Ḽ":"L","Ḻ":"L","Ł":"L","Ƚ":"L","Ɫ":"L","Ⱡ":"L","Ꝉ":"L","Ꝇ":"L","Ꞁ":"L","Ǉ":"LJ","ǈ":"Lj","Ⓜ":"M","Ｍ":"M","Ḿ":"M","Ṁ":"M","Ṃ":"M","Ɱ":"M","Ɯ":"M","ϻ":"M","Ꞥ":"N","Ƞ":"N","Ⓝ":"N","Ｎ":"N","Ǹ":"N","Ń":"N","Ñ":"N","Ṅ":"N","Ň":"N","Ṇ":"N","Ņ":"N","Ṋ":"N","Ṉ":"N","Ɲ":"N","Ꞑ":"N","ᴎ":"N","Ǌ":"NJ","ǋ":"Nj","Ⓞ":"O","Ｏ":"O","Ò":"O","Ó":"O","Ô":"O","Ồ":"O","Ố":"O","Ỗ":"O","Ổ":"O","Õ":"O","Ṍ":"O","Ȭ":"O","Ṏ":"O","Ō":"O","Ṑ":"O","Ṓ":"O","Ŏ":"O","Ȯ":"O","Ȱ":"O","Ö":"O","Ȫ":"O","Ỏ":"O","Ő":"O","Ǒ":"O","Ȍ":"O","Ȏ":"O","Ơ":"O","Ờ":"O","Ớ":"O","Ỡ":"O","Ở":"O","Ợ":"O","Ọ":"O","Ộ":"O","Ǫ":"O","Ǭ":"O","Ø":"O","Ǿ":"O","Ɔ":"O","Ɵ":"O","Ꝋ":"O","Ꝍ":"O","Œ":"OE","Ƣ":"OI","Ꝏ":"OO","Ȣ":"OU","Ⓟ":"P","Ｐ":"P","Ṕ":"P","Ṗ":"P","Ƥ":"P","Ᵽ":"P","Ꝑ":"P","Ꝓ":"P","Ꝕ":"P","Ⓠ":"Q","Ｑ":"Q","Ꝗ":"Q","Ꝙ":"Q","Ɋ":"Q","Ⓡ":"R","Ｒ":"R","Ŕ":"R","Ṙ":"R","Ř":"R","Ȑ":"R","Ȓ":"R","Ṛ":"R","Ṝ":"R","Ŗ":"R","Ṟ":"R","Ɍ":"R","Ɽ":"R","Ꝛ":"R","Ꞧ":"R","Ꞃ":"R","Ⓢ":"S","Ｓ":"S","ẞ":"S","Ś":"S","Ṥ":"S","Ŝ":"S","Ṡ":"S","Š":"S","Ṧ":"S","Ṣ":"S","Ṩ":"S","Ș":"S","Ş":"S","Ȿ":"S","Ꞩ":"S","Ꞅ":"S","Ⓣ":"T","Ｔ":"T","Ṫ":"T","Ť":"T","Ṭ":"T","Ț":"T","Ţ":"T","Ṱ":"T","Ṯ":"T","Ŧ":"T","Ƭ":"T","Ʈ":"T","Ⱦ":"T","Ꞇ":"T","Þ":"Th","Ꜩ":"TZ","Ⓤ":"U","Ｕ":"U","Ù":"U","Ú":"U","Û":"U","Ũ":"U","Ṹ":"U","Ū":"U","Ṻ":"U","Ŭ":"U","Ü":"U","Ǜ":"U","Ǘ":"U","Ǖ":"U","Ǚ":"U","Ủ":"U","Ů":"U","Ű":"U","Ǔ":"U","Ȕ":"U","Ȗ":"U","Ư":"U","Ừ":"U","Ứ":"U","Ữ":"U","Ử":"U","Ự":"U","Ụ":"U","Ṳ":"U","Ų":"U","Ṷ":"U","Ṵ":"U","Ʉ":"U","Ⓥ":"V","Ｖ":"V","Ṽ":"V","Ṿ":"V","Ʋ":"V","Ꝟ":"V","Ʌ":"V","Ꝡ":"VY","Ⓦ":"W","Ｗ":"W","Ẁ":"W","Ẃ":"W","Ŵ":"W","Ẇ":"W","Ẅ":"W","Ẉ":"W","Ⱳ":"W","Ⓧ":"X","Ｘ":"X","Ẋ":"X","Ẍ":"X","Ⓨ":"Y","Ｙ":"Y","Ỳ":"Y","Ý":"Y","Ŷ":"Y","Ỹ":"Y","Ȳ":"Y","Ẏ":"Y","Ÿ":"Y","Ỷ":"Y","Ỵ":"Y","Ƴ":"Y","Ɏ":"Y","Ỿ":"Y","Ⓩ":"Z","Ｚ":"Z","Ź":"Z","Ẑ":"Z","Ż":"Z","Ž":"Z","Ẓ":"Z","Ẕ":"Z","Ƶ":"Z","Ȥ":"Z","Ɀ":"Z","Ⱬ":"Z","Ꝣ":"Z","ⓐ":"a","ａ":"a","ẚ":"a","à":"a","á":"a","â":"a","ầ":"a","ấ":"a","ẫ":"a","ẩ":"a","ã":"a","ā":"a","ă":"a","ằ":"a","ắ":"a","ẵ":"a","ẳ":"a","ȧ":"a","ǡ":"a","ä":"a","ǟ":"a","ả":"a","å":"a","ǻ":"a","ǎ":"a","ȁ":"a","ȃ":"a","ạ":"a","ậ":"a","ặ":"a","ḁ":"a","ą":"a","ⱥ":"a","ɐ":"a","ɑ":"a","ꜳ":"aa","æ":"ae","ǽ":"ae","ǣ":"ae","ꜵ":"ao","ꜷ":"au","ꜹ":"av","ꜻ":"av","ꜽ":"ay","ⓑ":"b","ｂ":"b","ḃ":"b","ḅ":"b","ḇ":"b","ƀ":"b","ƃ":"b","ɓ":"b","Ƃ":"b","ⓒ":"c","ć":"c","ĉ":"c","ċ":"c","č":"c","ç":"c","ḉ":"c","ƈ":"c","ȼ":"c","ꜿ":"c","ↄ":"c","C":"c","Ć":"c","Ĉ":"c","Ċ":"c","Č":"c","Ƈ":"c","Ȼ":"c","ⓓ":"d","ｄ":"d","ḋ":"d","ď":"d","ḍ":"d","ḑ":"d","ḓ":"d","ḏ":"d","đ":"d","ƌ":"d","ɖ":"d","ɗ":"d","Ƌ":"d","Ꮷ":"d","ԁ":"d","Ɦ":"d","ð":"dh","ǳ":"dz","ǆ":"dz","ⓔ":"e","ｅ":"e","è":"e","é":"e","ê":"e","ề":"e","ế":"e","ễ":"e","ể":"e","ẽ":"e","ē":"e","ḕ":"e","ḗ":"e","ĕ":"e","ė":"e","ë":"e","ẻ":"e","ě":"e","ȅ":"e","ȇ":"e","ẹ":"e","ệ":"e","ȩ":"e","ḝ":"e","ę":"e","ḙ":"e","ḛ":"e","ɇ":"e","ǝ":"e","ⓕ":"f","ｆ":"f","ḟ":"f","ƒ":"f","ﬀ":"ff","ﬁ":"fi","ﬂ":"fl","ﬃ":"ffi","ﬄ":"ffl","ⓖ":"g","ｇ":"g","ǵ":"g","ĝ":"g","ḡ":"g","ğ":"g","ġ":"g","ǧ":"g","ģ":"g","ǥ":"g","ɠ":"g","ꞡ":"g","ꝿ":"g","ᵹ":"g","ⓗ":"h","ｈ":"h","ĥ":"h","ḣ":"h","ḧ":"h","ȟ":"h","ḥ":"h","ḩ":"h","ḫ":"h","ẖ":"h","ħ":"h","ⱨ":"h","ⱶ":"h","ɥ":"h","ƕ":"hv","ⓘ":"i","ｉ":"i","ì":"i","í":"i","î":"i","ĩ":"i","ī":"i","ĭ":"i","ï":"i","ḯ":"i","ỉ":"i","ǐ":"i","ȉ":"i","ȋ":"i","ị":"i","į":"i","ḭ":"i","ɨ":"i","ı":"i","ⓙ":"j","ｊ":"j","ĵ":"j","ǰ":"j","ɉ":"j","ⓚ":"k","ｋ":"k","ḱ":"k","ǩ":"k","ḳ":"k","ķ":"k","ḵ":"k","ƙ":"k","ⱪ":"k","ꝁ":"k","ꝃ":"k","ꝅ":"k","ꞣ":"k","ⓛ":"l","ｌ":"l","ŀ":"l","ĺ":"l","ľ":"l","ḷ":"l","ḹ":"l","ļ":"l","ḽ":"l","ḻ":"l","ſ":"l","ł":"l","ƚ":"l","ɫ":"l","ⱡ":"l","ꝉ":"l","ꞁ":"l","ꝇ":"l","ɭ":"l","ǉ":"lj","ⓜ":"m","ｍ":"m","ḿ":"m","ṁ":"m","ṃ":"m","ɱ":"m","ɯ":"m","ⓝ":"n","ｎ":"n","ǹ":"n","ń":"n","ñ":"n","ṅ":"n","ň":"n","ṇ":"n","ņ":"n","ṋ":"n","ṉ":"n","ƞ":"n","ɲ":"n","ŉ":"n","ꞑ":"n","ꞥ":"n","ԉ":"n","ǌ":"nj","ⓞ":"o","ｏ":"o","ò":"o","ó":"o","ô":"o","ồ":"o","ố":"o","ỗ":"o","ổ":"o","õ":"o","ṍ":"o","ȭ":"o","ṏ":"o","ō":"o","ṑ":"o","ṓ":"o","ŏ":"o","ȯ":"o","ȱ":"o","ö":"o","ȫ":"o","ỏ":"o","ő":"o","ǒ":"o","ȍ":"o","ȏ":"o","ơ":"o","ờ":"o","ớ":"o","ỡ":"o","ở":"o","ợ":"o","ọ":"o","ộ":"o","ǫ":"o","ǭ":"o","ø":"o","ǿ":"o","ꝋ":"o","ꝍ":"o","ɵ":"o","ɔ":"o","ᴑ":"o","œ":"oe","ƣ":"oi","ꝏ":"oo","ȣ":"ou","ⓟ":"p","ｐ":"p","ṕ":"p","ṗ":"p","ƥ":"p","ᵽ":"p","ꝑ":"p","ꝓ":"p","ꝕ":"p","ρ":"p","ⓠ":"q","ｑ":"q","ɋ":"q","ꝗ":"q","ꝙ":"q","ⓡ":"r","ｒ":"r","ŕ":"r","ṙ":"r","ř":"r","ȑ":"r","ȓ":"r","ṛ":"r","ṝ":"r","ŗ":"r","ṟ":"r","ɍ":"r","ɽ":"r","ꝛ":"r","ꞧ":"r","ꞃ":"r","ⓢ":"s","ｓ":"s","ś":"s","ṥ":"s","ŝ":"s","ṡ":"s","š":"s","ṧ":"s","ṣ":"s","ṩ":"s","ș":"s","ş":"s","ȿ":"s","ꞩ":"s","ꞅ":"s","ẛ":"s","ʂ":"s","ß":"ss","ⓣ":"t","ｔ":"t","ṫ":"t","ẗ":"t","ť":"t","ṭ":"t","ț":"t","ţ":"t","ṱ":"t","ṯ":"t","ŧ":"t","ƭ":"t","ʈ":"t","ⱦ":"t","ꞇ":"t","þ":"th","ꜩ":"tz","ⓤ":"u","ｕ":"u","ù":"u","ú":"u","û":"u","ũ":"u","ṹ":"u","ū":"u","ṻ":"u","ŭ":"u","ü":"u","ǜ":"u","ǘ":"u","ǖ":"u","ǚ":"u","ủ":"u","ů":"u","ű":"u","ǔ":"u","ȕ":"u","ȗ":"u","ư":"u","ừ":"u","ứ":"u","ữ":"u","ử":"u","ự":"u","ụ":"u","ṳ":"u","ų":"u","ṷ":"u","ṵ":"u","ʉ":"u","ⓥ":"v","ｖ":"v","ṽ":"v","ṿ":"v","ʋ":"v","ꝟ":"v","ʌ":"v","ꝡ":"vy","ⓦ":"w","ｗ":"w","ẁ":"w","ẃ":"w","ŵ":"w","ẇ":"w","ẅ":"w","ẘ":"w","ẉ":"w","ⱳ":"w","ⓧ":"x","ｘ":"x","ẋ":"x","ẍ":"x","ⓨ":"y","ｙ":"y","ỳ":"y","ý":"y","ŷ":"y","ỹ":"y","ȳ":"y","ẏ":"y","ÿ":"y","ỷ":"y","ẙ":"y","ỵ":"y","ƴ":"y","ɏ":"y","ỿ":"y","ⓩ":"z","ｚ":"z","ź":"z","ẑ":"z","ż":"z","ž":"z","ẓ":"z","ẕ":"z","ƶ":"z","ȥ":"z","ɀ":"z","ⱬ":"z","ꝣ":"z"}
-},{}],123:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
+module.exports=[{"s":9728,"e":9747,"w":1},{"s":9748,"e":9749,"w":2},{"s":9750,"e":9799,"w":1},{"s":9800,"e":9811,"w":2},{"s":9812,"e":9854,"w":1},{"s":9855,"e":9855,"w":2},{"s":9856,"e":9874,"w":1},{"s":9875,"e":9875,"w":2},{"s":9876,"e":9888,"w":1},{"s":9889,"e":9889,"w":2},{"s":9890,"e":9897,"w":1},{"s":9898,"e":9899,"w":2},{"s":9900,"e":9916,"w":1},{"s":9917,"e":9918,"w":2},{"s":9919,"e":9923,"w":1},{"s":9924,"e":9925,"w":2},{"s":9926,"e":9933,"w":1},{"s":9934,"e":9934,"w":2},{"s":9935,"e":9939,"w":1},{"s":9940,"e":9940,"w":2},{"s":9941,"e":9961,"w":1},{"s":9962,"e":9962,"w":2},{"s":9963,"e":9969,"w":1},{"s":9970,"e":9971,"w":2},{"s":9972,"e":9972,"w":1},{"s":9973,"e":9973,"w":2},{"s":9974,"e":9977,"w":1},{"s":9978,"e":9978,"w":2},{"s":9979,"e":9980,"w":1},{"s":9981,"e":9981,"w":2},{"s":9982,"e":9983,"w":1},{"s":9984,"e":9988,"w":1},{"s":9989,"e":9989,"w":2},{"s":9990,"e":9993,"w":1},{"s":9994,"e":9995,"w":2},{"s":9996,"e":10023,"w":1},{"s":10024,"e":10024,"w":2},{"s":10025,"e":10059,"w":1},{"s":10060,"e":10060,"w":2},{"s":10061,"e":10061,"w":1},{"s":10062,"e":10062,"w":2},{"s":10063,"e":10066,"w":1},{"s":10067,"e":10069,"w":2},{"s":10070,"e":10070,"w":1},{"s":10071,"e":10071,"w":2},{"s":10072,"e":10132,"w":1},{"s":10133,"e":10135,"w":2},{"s":10136,"e":10159,"w":1},{"s":10160,"e":10160,"w":2},{"s":10161,"e":10174,"w":1},{"s":10175,"e":10175,"w":2},{"s":126976,"e":126979,"w":1},{"s":126980,"e":126980,"w":2},{"s":126981,"e":127182,"w":1},{"s":127183,"e":127183,"w":2},{"s":127184,"e":127373,"w":1},{"s":127374,"e":127374,"w":2},{"s":127375,"e":127376,"w":1},{"s":127377,"e":127386,"w":2},{"s":127387,"e":127487,"w":1},{"s":127744,"e":127776,"w":2},{"s":127777,"e":127788,"w":1},{"s":127789,"e":127797,"w":2},{"s":127798,"e":127798,"w":1},{"s":127799,"e":127868,"w":2},{"s":127869,"e":127869,"w":1},{"s":127870,"e":127891,"w":2},{"s":127892,"e":127903,"w":1},{"s":127904,"e":127946,"w":2},{"s":127947,"e":127950,"w":1},{"s":127951,"e":127955,"w":2},{"s":127956,"e":127967,"w":1},{"s":127968,"e":127984,"w":2},{"s":127985,"e":127987,"w":1},{"s":127988,"e":127988,"w":2},{"s":127989,"e":127991,"w":1},{"s":127992,"e":127994,"w":2},{"s":128000,"e":128062,"w":2},{"s":128063,"e":128063,"w":1},{"s":128064,"e":128064,"w":2},{"s":128065,"e":128065,"w":1},{"s":128066,"e":128252,"w":2},{"s":128253,"e":128254,"w":1},{"s":128255,"e":128317,"w":2},{"s":128318,"e":128330,"w":1},{"s":128331,"e":128334,"w":2},{"s":128335,"e":128335,"w":1},{"s":128336,"e":128359,"w":2},{"s":128360,"e":128377,"w":1},{"s":128378,"e":128378,"w":2},{"s":128379,"e":128404,"w":1},{"s":128405,"e":128406,"w":2},{"s":128407,"e":128419,"w":1},{"s":128420,"e":128420,"w":2},{"s":128421,"e":128506,"w":1},{"s":128507,"e":128591,"w":2},{"s":128592,"e":128639,"w":1},{"s":128640,"e":128709,"w":2},{"s":128710,"e":128715,"w":1},{"s":128716,"e":128716,"w":2},{"s":128717,"e":128719,"w":1},{"s":128720,"e":128722,"w":2},{"s":128723,"e":128724,"w":1},{"s":128725,"e":128727,"w":2},{"s":128728,"e":128746,"w":1},{"s":128747,"e":128748,"w":2},{"s":128749,"e":128755,"w":1},{"s":128756,"e":128764,"w":2},{"s":128765,"e":128991,"w":1},{"s":128992,"e":129003,"w":2},{"s":129004,"e":129291,"w":1},{"s":129292,"e":129338,"w":2},{"s":129339,"e":129339,"w":1},{"s":129340,"e":129349,"w":2},{"s":129350,"e":129350,"w":1},{"s":129351,"e":129400,"w":2},{"s":129401,"e":129401,"w":1},{"s":129402,"e":129483,"w":2},{"s":129484,"e":129484,"w":1},{"s":129485,"e":129535,"w":2},{"s":129536,"e":129647,"w":1},{"s":129648,"e":129652,"w":2},{"s":129653,"e":129655,"w":1},{"s":129656,"e":129658,"w":2},{"s":129659,"e":129663,"w":1},{"s":129664,"e":129670,"w":2},{"s":129671,"e":129679,"w":1},{"s":129680,"e":129704,"w":2},{"s":129705,"e":129711,"w":1},{"s":129712,"e":129718,"w":2},{"s":129719,"e":129727,"w":1},{"s":129728,"e":129730,"w":2},{"s":129731,"e":129743,"w":1},{"s":129744,"e":129750,"w":2},{"s":129751,"e":129791,"w":1}]
+
+},{}],129:[function(require,module,exports){
 /*
 	String Kit
 
@@ -44812,15 +46285,15 @@ module.exports={"߀":"0","́":""," ":" ","Ⓐ":"A","Ａ":"A","À":"A","Á":"A",
 
 
 
-var map = require( './latinize-map.json' ) ;
+const latinizeMap = require( './json-data/latinize-map.json' ) ;
 
 module.exports = function( str ) {
-	return str.replace( /[^\u0000-\u007e]/g , ( c ) => { return map[ c ] || c ; } ) ;
+	return str.replace( /[^\u0000-\u007e]/g , ( c ) => { return latinizeMap[ c ] || c ; } ) ;
 } ;
 
 
 
-},{"./latinize-map.json":122}],124:[function(require,module,exports){
+},{"./json-data/latinize-map.json":127}],130:[function(require,module,exports){
 /*
 	String Kit
 
@@ -44880,7 +46353,7 @@ exports.occurrenceCount = function( str , subStr , overlap = false ) {
 } ;
 
 
-},{}],125:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45027,7 +46500,7 @@ function naturalSort( a , b ) {
 module.exports = naturalSort ;
 
 
-},{}],126:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45084,7 +46557,7 @@ exports.regexp.array2alternatives = function array2alternatives( array ) {
 
 
 
-},{"./escape.js":118}],127:[function(require,module,exports){
+},{"./escape.js":121}],133:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45159,7 +46632,9 @@ Object.assign( stringKit ,
 		wordwrap: require( './wordwrap.js' ) ,
 		naturalSort: require( './naturalSort.js' ) ,
 		fuzzy: require( './fuzzy.js' ) ,
-		StringNumber: require( './StringNumber.js' )
+		StringNumber: require( './StringNumber.js' ) ,
+		english: require( './english.js' ) ,
+		emoji: require( './emoji.js' )
 	}
 ) ;
 
@@ -45177,7 +46652,7 @@ stringKit.installPolyfills = function installPolyfills() {
 //*/
 
 
-},{"./StringNumber.js":115,"./ansi.js":116,"./camel.js":117,"./escape.js":118,"./format.js":119,"./fuzzy.js":120,"./inspect.js":121,"./latinize.js":123,"./misc.js":124,"./naturalSort.js":125,"./regexp.js":126,"./toTitleCase.js":128,"./unicode.js":130,"./wordwrap.js":131}],128:[function(require,module,exports){
+},{"./StringNumber.js":116,"./ansi.js":117,"./camel.js":118,"./emoji.js":119,"./english.js":120,"./escape.js":121,"./format.js":122,"./fuzzy.js":123,"./inspect.js":124,"./latinize.js":129,"./misc.js":130,"./naturalSort.js":131,"./regexp.js":132,"./toTitleCase.js":134,"./unicode.js":135,"./wordwrap.js":136}],134:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45266,10 +46741,7 @@ module.exports = ( str , options = DEFAULT_OPTIONS ) => {
 } ;
 
 
-},{}],129:[function(require,module,exports){
-module.exports=[{"s":9728,"e":9747,"w":1},{"s":9748,"e":9749,"w":2},{"s":9750,"e":9799,"w":1},{"s":9800,"e":9811,"w":2},{"s":9812,"e":9854,"w":1},{"s":9855,"e":9855,"w":2},{"s":9856,"e":9874,"w":1},{"s":9875,"e":9875,"w":2},{"s":9876,"e":9888,"w":1},{"s":9889,"e":9889,"w":2},{"s":9890,"e":9897,"w":1},{"s":9898,"e":9899,"w":2},{"s":9900,"e":9916,"w":1},{"s":9917,"e":9918,"w":2},{"s":9919,"e":9923,"w":1},{"s":9924,"e":9925,"w":2},{"s":9926,"e":9933,"w":1},{"s":9934,"e":9934,"w":2},{"s":9935,"e":9939,"w":1},{"s":9940,"e":9940,"w":2},{"s":9941,"e":9961,"w":1},{"s":9962,"e":9962,"w":2},{"s":9963,"e":9969,"w":1},{"s":9970,"e":9971,"w":2},{"s":9972,"e":9972,"w":1},{"s":9973,"e":9973,"w":2},{"s":9974,"e":9977,"w":1},{"s":9978,"e":9978,"w":2},{"s":9979,"e":9980,"w":1},{"s":9981,"e":9981,"w":2},{"s":9982,"e":9983,"w":1},{"s":9984,"e":9988,"w":1},{"s":9989,"e":9989,"w":2},{"s":9990,"e":9993,"w":1},{"s":9994,"e":9995,"w":2},{"s":9996,"e":10023,"w":1},{"s":10024,"e":10024,"w":2},{"s":10025,"e":10059,"w":1},{"s":10060,"e":10060,"w":2},{"s":10061,"e":10061,"w":1},{"s":10062,"e":10062,"w":2},{"s":10063,"e":10066,"w":1},{"s":10067,"e":10069,"w":2},{"s":10070,"e":10070,"w":1},{"s":10071,"e":10071,"w":2},{"s":10072,"e":10132,"w":1},{"s":10133,"e":10135,"w":2},{"s":10136,"e":10159,"w":1},{"s":10160,"e":10160,"w":2},{"s":10161,"e":10174,"w":1},{"s":10175,"e":10175,"w":2},{"s":126976,"e":126979,"w":1},{"s":126980,"e":126980,"w":2},{"s":126981,"e":127182,"w":1},{"s":127183,"e":127183,"w":2},{"s":127184,"e":127373,"w":1},{"s":127374,"e":127374,"w":2},{"s":127375,"e":127376,"w":1},{"s":127377,"e":127386,"w":2},{"s":127387,"e":127487,"w":1},{"s":127744,"e":127776,"w":2},{"s":127777,"e":127788,"w":1},{"s":127789,"e":127797,"w":2},{"s":127798,"e":127798,"w":1},{"s":127799,"e":127868,"w":2},{"s":127869,"e":127869,"w":1},{"s":127870,"e":127891,"w":2},{"s":127892,"e":127903,"w":1},{"s":127904,"e":127946,"w":2},{"s":127947,"e":127950,"w":1},{"s":127951,"e":127955,"w":2},{"s":127956,"e":127967,"w":1},{"s":127968,"e":127984,"w":2},{"s":127985,"e":127987,"w":1},{"s":127988,"e":127988,"w":2},{"s":127989,"e":127991,"w":1},{"s":127992,"e":127994,"w":2},{"s":128000,"e":128062,"w":2},{"s":128063,"e":128063,"w":1},{"s":128064,"e":128064,"w":2},{"s":128065,"e":128065,"w":1},{"s":128066,"e":128252,"w":2},{"s":128253,"e":128254,"w":1},{"s":128255,"e":128317,"w":2},{"s":128318,"e":128330,"w":1},{"s":128331,"e":128334,"w":2},{"s":128335,"e":128335,"w":1},{"s":128336,"e":128359,"w":2},{"s":128360,"e":128377,"w":1},{"s":128378,"e":128378,"w":2},{"s":128379,"e":128404,"w":1},{"s":128405,"e":128406,"w":2},{"s":128407,"e":128419,"w":1},{"s":128420,"e":128420,"w":2},{"s":128421,"e":128506,"w":1},{"s":128507,"e":128591,"w":2},{"s":128592,"e":128639,"w":1},{"s":128640,"e":128709,"w":2},{"s":128710,"e":128715,"w":1},{"s":128716,"e":128716,"w":2},{"s":128717,"e":128719,"w":1},{"s":128720,"e":128722,"w":2},{"s":128723,"e":128724,"w":1},{"s":128725,"e":128727,"w":2},{"s":128728,"e":128746,"w":1},{"s":128747,"e":128748,"w":2},{"s":128749,"e":128755,"w":1},{"s":128756,"e":128764,"w":2},{"s":128765,"e":128991,"w":1},{"s":128992,"e":129003,"w":2},{"s":129004,"e":129291,"w":1},{"s":129292,"e":129338,"w":2},{"s":129339,"e":129339,"w":1},{"s":129340,"e":129349,"w":2},{"s":129350,"e":129350,"w":1},{"s":129351,"e":129400,"w":2},{"s":129401,"e":129401,"w":1},{"s":129402,"e":129483,"w":2},{"s":129484,"e":129484,"w":1},{"s":129485,"e":129535,"w":2},{"s":129536,"e":129647,"w":1},{"s":129648,"e":129652,"w":2},{"s":129653,"e":129655,"w":1},{"s":129656,"e":129658,"w":2},{"s":129659,"e":129663,"w":1},{"s":129664,"e":129670,"w":2},{"s":129671,"e":129679,"w":1},{"s":129680,"e":129704,"w":2},{"s":129705,"e":129711,"w":1},{"s":129712,"e":129718,"w":2},{"s":129719,"e":129727,"w":1},{"s":129728,"e":129730,"w":2},{"s":129731,"e":129743,"w":1},{"s":129744,"e":129750,"w":2},{"s":129751,"e":129791,"w":1}]
-
-},{}],130:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45397,6 +46869,22 @@ unicode.length = str => {
 
 
 
+// Return a string that does not exceed the character limit
+unicode.truncateLength = unicode.truncate = ( str , limit ) => {
+	var position = 0 , length = 0 ;
+
+	for ( let char of str ) {
+		if ( length === limit ) { return str.slice( 0 , position ) ; }
+		length ++ ;
+		position += char.length ;
+	}
+
+	// The string remains unchanged
+	return str ;
+} ;
+
+
+
 // Return the width of a string in a terminal/monospace font
 unicode.width = str => {
 	// for ... of is unicode-aware
@@ -45427,9 +46915,7 @@ unicode.arrayWidth = ( array , limit ) => {
 var lastTruncateWidth = 0 ;
 unicode.getLastTruncateWidth = () => lastTruncateWidth ;
 
-
-
-// Return a string that does not exceed the limit.
+// Return a string that does not exceed the width limit (taking wide-char into considerations)
 unicode.widthLimit =	// DEPRECATED
 unicode.truncateWidth = ( str , limit ) => {
 	var char , charWidth , position = 0 ;
@@ -45492,7 +46978,7 @@ unicode.charWidth = char => unicode.codePointWidth( char.codePointAt( 0 ) ) ;
 const emojiWidthLookup = new Map() ;
 
 ( function() {
-	var ranges = require( './unicode-emoji-width-ranges.json' ) ;
+	var ranges = require( './json-data/unicode-emoji-width-ranges.json' ) ;
 	for ( let range of ranges ) {
 		for ( let i = range.s ; i <= range.e ; i ++ ) {
 			emojiWidthLookup.set( i , range.w ) ;
@@ -45617,7 +47103,7 @@ unicode.isEmojiModifierCodePoint = code =>
 	code === 0xfe0f ;	// VARIATION SELECTOR-16 [VS16] {emoji variation selector}
 
 
-},{"./unicode-emoji-width-ranges.json":129}],131:[function(require,module,exports){
+},{"./json-data/unicode-emoji-width-ranges.json":128}],136:[function(require,module,exports){
 /*
 	String Kit
 
@@ -45821,7 +47307,51 @@ module.exports = function wordwrap( str , options ) {
 } ;
 
 
-},{"./unicode.js":130}],132:[function(require,module,exports){
+},{"./unicode.js":135}],137:[function(require,module,exports){
+/*
+	Tree Kit
+
+	Copyright (c) 2014 - 2021 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+// Mimic Array's prototype methods, like Array#map(), Array#filter(), and so on...
+
+exports.map = function( object , fn ) {
+	if ( ! object || typeof object !== 'object' ) { throw new Error( "Expecting an object" ) ; }
+	return Object.fromEntries( Object.entries( object ).map(   entry => [ entry[ 0 ] , fn( entry[ 1 ] ) ]   ) ) ;
+} ;
+
+exports.filter = function( object , fn ) {
+	if ( ! object || typeof object !== 'object' ) { throw new Error( "Expecting an object" ) ; }
+	return Object.fromEntries( Object.entries( object ).filter(   entry => fn( entry[ 1 ] )   ) ) ;
+} ;
+
+
+},{}],138:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -45930,7 +47460,7 @@ clone.opaque = new Map() ;
 clone.opaque.set( Date.prototype , src => new Date( src ) ) ;
 
 
-},{}],133:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46010,7 +47540,7 @@ function diff( left , right , options ) {
 		keyPath = options.path + options.pathSeparator + key ;
 		//console.log( 'L keyPath:' , keyPath ) ;
 
-		if ( ! Object.prototype.hasOwnProperty.call( right , key ) ) {
+		if ( ! Object.hasOwn( right , key ) ) {
 			diffObject[ keyPath ] = { path: keyPath , message: 'does not exist in right-hand side' } ;
 			continue ;
 		}
@@ -46074,7 +47604,7 @@ function diff( left , right , options ) {
 		keyPath = options.path + options.pathSeparator + key ;
 		//console.log( 'R keyPath:' , keyPath ) ;
 
-		if ( ! Object.prototype.hasOwnProperty.call( left , key ) ) {
+		if ( ! Object.hasOwn( left , key ) ) {
 			diffObject[ keyPath ] = { path: keyPath , message: 'does not exist in left-hand side' } ;
 			continue ;
 		}
@@ -46086,7 +47616,7 @@ function diff( left , right , options ) {
 exports.diff = diff ;
 
 
-},{}],134:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46140,21 +47670,24 @@ function toPathArray( path ) {
 
 	if ( ! path ) { return EMPTY_PATH ; }
 	if ( typeof path === 'string' ) {
-		return path[ path.length - 1 ] === '.' ? path.slice( 0 , -1 ).split( '.' ) : path.split( '.' ) ;
+		return path[ path.length - 1 ] === '.' ? path.slice( 0 , - 1 ).split( '.' ) : path.split( '.' ) ;
 	}
 
 	throw new TypeError( '[tree.dotPath]: the path argument should be a string or an array' ) ;
 }
 
+// Expose toPathArray()
+dotPath.toPathArray = toPathArray ;
+
 
 
 // Walk the tree using the path array.
 function walk( object , pathArray , maxOffset = 0 ) {
-	var i , iMax , key ,
+	var index , indexMax , key ,
 		pointer = object ;
 
-	for ( i = 0 , iMax = pathArray.length + maxOffset ; i < iMax ; i ++ ) {
-		key = pathArray[ i ] ;
+	for ( index = 0 , indexMax = pathArray.length + maxOffset ; index < indexMax ; index ++ ) {
+		key = pathArray[ index ] ;
 
 		if ( typeof key === 'object' || key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 		if ( ! pointer || typeof pointer !== 'object' ) { return undefined ; }
@@ -46171,11 +47704,11 @@ function walk( object , pathArray , maxOffset = 0 ) {
 // Return that before-the-last element.
 // Object MUST be an object! no check are performed for the first step!
 function pave( object , pathArray ) {
-	var i , iMax , key ,
+	var index , indexMax , key ,
 		pointer = object ;
 
-	for ( i = 0 , iMax = pathArray.length - 1 ; i < iMax ; i ++ ) {
-		key = pathArray[ i ] ;
+	for ( index = 0 , indexMax = pathArray.length - 1 ; index < indexMax ; index ++ ) {
+		key = pathArray[ index ] ;
 
 		if ( typeof key === 'object' || key === '__proto__' || typeof pointer[ key ] === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 		if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = {} ; }
@@ -46193,10 +47726,7 @@ dotPath.get = ( object , path ) => walk( object , toPathArray( path ) ) ;
 
 
 dotPath.set = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46213,10 +47743,7 @@ dotPath.set = ( object , path , value ) => {
 
 
 dotPath.define = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46227,16 +47754,13 @@ dotPath.define = ( object , path , value ) => {
 
 	if ( ! ( key in pointer ) ) { pointer[ key ] = value ; }
 
-	return value ;
+	return pointer[ key ] ;
 } ;
 
 
 
-dotPath.inc = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+dotPath.inc = ( object , path ) => {
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46248,16 +47772,13 @@ dotPath.inc = ( object , path , value ) => {
 	if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] ++ ; }
 	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = 1 ; }
 
-	return value ;
+	return pointer[ key ] ;
 } ;
 
 
 
-dotPath.dec = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+dotPath.dec = ( object , path ) => {
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46267,18 +47788,15 @@ dotPath.dec = ( object , path , value ) => {
 	var pointer = pave( object , pathArray ) ;
 
 	if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] -- ; }
-	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = -1 ; }
+	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = - 1 ; }
 
-	return value ;
+	return pointer[ key ] ;
 } ;
 
 
 
 dotPath.concat = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46293,16 +47811,13 @@ dotPath.concat = ( object , path , value ) => {
 	}
 	//else ? do nothing???
 
-	return value ;
+	return pointer[ key ] ;
 } ;
 
 
 
 dotPath.insert = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46317,7 +47832,7 @@ dotPath.insert = ( object , path , value ) => {
 	}
 	//else ? do nothing???
 
-	return value ;
+	return pointer[ key ] ;
 } ;
 
 
@@ -46328,20 +47843,19 @@ dotPath.delete = ( object , path ) => {
 
 	if ( typeof key === 'object' || key === '__proto__' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
 
-	var pointer = walk( object , pathArray , -1 ) ;
+	var pointer = walk( object , pathArray , - 1 ) ;
 
-	if ( ! pointer || typeof pointer !== 'object' ) { return false ; }
+	if ( ! pointer || typeof pointer !== 'object' || ! Object.hasOwn( pointer , key ) ) { return false ; }
 
-	return delete pointer[ key ] ;
+	delete pointer[ key ] ;
+
+	return true ;
 } ;
 
 
 
 dotPath.autoPush = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46360,10 +47874,7 @@ dotPath.autoPush = ( object , path , value ) => {
 
 
 dotPath.append = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46382,10 +47893,7 @@ dotPath.append = ( object , path , value ) => {
 
 
 dotPath.prepend = ( object , path , value ) => {
-	if ( ! object || typeof object !== 'object' ) {
-		// Throw?
-		return undefined ;
-	}
+	if ( ! object || typeof object !== 'object' ) { return ; }
 
 	var pathArray = toPathArray( path ) ,
 		key = pathArray[ pathArray.length - 1 ] ;
@@ -46402,7 +47910,7 @@ dotPath.prepend = ( object , path , value ) => {
 } ;
 
 
-},{}],135:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46555,10 +48063,7 @@ module.exports = extend ;
 
 
 function extendOne( runtime , options , target , source , mask ) {
-	var j , jmax , path ,
-		sourceKeys , sourceKey , sourceValue , sourceValueIsObject , sourceValueProto , sourceDescriptor ,
-		targetKey , targetPointer , targetValue , targetValueIsObject ,
-		indexOfSource = -1 ;
+	var sourceKeys , sourceKey ;
 
 	// Max depth check
 	if ( options.maxDepth && runtime.depth > options.maxDepth ) {
@@ -46571,162 +48076,196 @@ function extendOne( runtime , options , target , source , mask ) {
 		runtime.references.targets.push( target ) ;
 	}
 
-	if ( options.own ) {
+	// 'unflat' mode computing
+	if ( options.unflat && runtime.depth === 0 ) {
+		for ( sourceKey in source ) {
+			runtime.unflatKeys = sourceKey.split( options.unflat ) ;
+			runtime.unflatIndex = 0 ;
+			runtime.unflatFullKey = sourceKey ;
+			extendOneKV( runtime , options , target , source , runtime.unflatKeys[ runtime.unflatIndex ] , mask ) ;
+		}
+
+		delete runtime.unflatKeys ;
+		delete runtime.unflatIndex ;
+		delete runtime.unflatFullKey ;
+	}
+	else if ( options.own ) {
 		if ( options.nonEnum ) { sourceKeys = Object.getOwnPropertyNames( source ) ; }
 		else { sourceKeys = Object.keys( source ) ; }
+
+		for ( sourceKey of sourceKeys ) {
+			extendOneKV( runtime , options , target , source , sourceKey , mask ) ;
+		}
 	}
-	else { sourceKeys = source ; }
-
-	for ( sourceKey in sourceKeys ) {
-		if ( options.own ) { sourceKey = sourceKeys[ sourceKey ] ; }
-
-		// OMG, this DEPRECATED __proto__ shit is still alive and can be used to hack anything ><
-		if ( sourceKey === '__proto__' ) { continue ; }
-
-		// If descriptor is on, get it now
-		if ( options.descriptor ) {
-			sourceDescriptor = Object.getOwnPropertyDescriptor( source , sourceKey ) ;
-			sourceValue = sourceDescriptor.value ;
+	else {
+		for ( sourceKey in source ) {
+			extendOneKV( runtime , options , target , source , sourceKey , mask ) ;
 		}
-		else {
-			// We have to trigger an eventual getter only once
-			sourceValue = source[ sourceKey ] ;
-		}
-
-		targetPointer = target ;
-		targetKey = runtime.prefix + sourceKey ;
-
-		// Do not copy if property is a function and we don't want them
-		if ( options.nofunc && typeof sourceValue === 'function' ) { continue ; }
-
-		// 'unflat' mode computing
-		if ( options.unflat && runtime.depth === 0 ) {
-			path = sourceKey.split( options.unflat ) ;
-			jmax = path.length - 1 ;
-
-			if ( jmax ) {
-				for ( j = 0 ; j < jmax ; j ++ ) {
-					if ( ! targetPointer[ path[ j ] ] ||
-						( typeof targetPointer[ path[ j ] ] !== 'object' &&
-							typeof targetPointer[ path[ j ] ] !== 'function' ) ) {
-						targetPointer[ path[ j ] ] = {} ;
-					}
-
-					targetPointer = targetPointer[ path[ j ] ] ;
-				}
-
-				targetKey = runtime.prefix + path[ jmax ] ;
-			}
-		}
-
-		// Again, trigger an eventual getter only once
-		targetValue = targetPointer[ targetKey ] ;
-		targetValueIsObject = targetValue && ( typeof targetValue === 'object' || typeof targetValue === 'function' ) ;
-		sourceValueIsObject = sourceValue && ( typeof sourceValue === 'object' || typeof sourceValue === 'function' ) ;
-
-
-		if ( options.deep	// eslint-disable-line no-constant-condition
-			&& sourceValue
-			&& ( typeof sourceValue === 'object' || ( options.deepFunc && typeof sourceValue === 'function' ) )
-			&& ( ! options.descriptor || ! sourceDescriptor.get )
-			// not a condition we just cache sourceValueProto now... ok it's trashy ><
-			&& ( ( sourceValueProto = Object.getPrototypeOf( sourceValue ) ) || true )
-			&& ( ! ( options.deep instanceof Set ) || options.deep.has( sourceValueProto ) )
-			&& ( ! options.immutables || ! options.immutables.has( sourceValueProto ) )
-			&& ( ! options.preserve || targetValueIsObject )
-			&& ( ! mask || targetValueIsObject )
-		) {
-			if ( options.circular ) {
-				indexOfSource = runtime.references.sources.indexOf( sourceValue ) ;
-			}
-
-			if ( options.flat ) {
-				// No circular references reconnection when in 'flat' mode
-				if ( indexOfSource >= 0 ) { continue ; }
-
-				extendOne(
-					{ depth: runtime.depth + 1 , prefix: runtime.prefix + sourceKey + options.flat , references: runtime.references } ,
-					options , targetPointer , sourceValue , mask
-				) ;
-			}
-			else {
-				if ( indexOfSource >= 0 ) {
-					// Circular references reconnection...
-					targetValue = runtime.references.targets[ indexOfSource ] ;
-
-					if ( options.descriptor ) {
-						Object.defineProperty( targetPointer , targetKey , {
-							value: targetValue ,
-							enumerable: sourceDescriptor.enumerable ,
-							writable: sourceDescriptor.writable ,
-							configurable: sourceDescriptor.configurable
-						} ) ;
-					}
-					else {
-						targetPointer[ targetKey ] = targetValue ;
-					}
-
-					continue ;
-				}
-
-				if ( ! targetValueIsObject || ! Object.prototype.hasOwnProperty.call( targetPointer , targetKey ) ) {
-					if ( Array.isArray( sourceValue ) ) { targetValue = [] ; }
-					else if ( options.proto ) { targetValue = Object.create( sourceValueProto ) ; }	// jshint ignore:line
-					else if ( options.inherit ) { targetValue = Object.create( sourceValue ) ; }
-					else { targetValue = {} ; }
-
-					if ( options.descriptor ) {
-						Object.defineProperty( targetPointer , targetKey , {
-							value: targetValue ,
-							enumerable: sourceDescriptor.enumerable ,
-							writable: sourceDescriptor.writable ,
-							configurable: sourceDescriptor.configurable
-						} ) ;
-					}
-					else {
-						targetPointer[ targetKey ] = targetValue ;
-					}
-				}
-				else if ( options.proto && Object.getPrototypeOf( targetValue ) !== sourceValueProto ) {
-					Object.setPrototypeOf( targetValue , sourceValueProto ) ;
-				}
-				else if ( options.inherit && Object.getPrototypeOf( targetValue ) !== sourceValue ) {
-					Object.setPrototypeOf( targetValue , sourceValue ) ;
-				}
-
-				if ( options.circular ) {
-					runtime.references.sources.push( sourceValue ) ;
-					runtime.references.targets.push( targetValue ) ;
-				}
-
-				// Recursively extends sub-object
-				extendOne(
-					{ depth: runtime.depth + 1 , prefix: '' , references: runtime.references } ,
-					options , targetValue , sourceValue , mask
-				) ;
-			}
-		}
-		else if ( mask && ( targetValue === undefined || targetValueIsObject || sourceValueIsObject ) ) {
-			// Do not create new value, and so do not delete source's properties that were not moved.
-			// We also do not overwrite object with non-object, and we don't overwrite non-object with object (preserve hierarchy)
-			continue ;
-		}
-		else if ( options.preserve && targetValue !== undefined ) {
-			// Do not overwrite, and so do not delete source's properties that were not moved
-			continue ;
-		}
-		else if ( ! options.inherit ) {
-			if ( options.descriptor ) { Object.defineProperty( targetPointer , targetKey , sourceDescriptor ) ; }
-			else { targetPointer[ targetKey ] = targetValue = sourceValue ; }
-		}
-
-		// Delete owned property of the source object
-		if ( options.move ) { delete source[ sourceKey ] ; }
 	}
 }
 
 
-},{}],136:[function(require,module,exports){
+
+function extendOneKV( runtime , options , target , source , sourceKey , mask ) {
+	// OMG, this DEPRECATED __proto__ shit is still alive and can be used to hack anything ><
+	if ( sourceKey === '__proto__' ) { return ; }
+
+	let sourceValue , sourceDescriptor , sourceValueProto ;
+
+	if ( runtime.unflatKeys ) {
+		if ( runtime.unflatIndex < runtime.unflatKeys.length - 1 ) {
+			sourceValue = {} ;
+		}
+		else {
+			sourceValue = source[ runtime.unflatFullKey ] ;
+		}
+	}
+	else if ( options.descriptor ) {
+		// If descriptor is on, get it now
+		sourceDescriptor = Object.getOwnPropertyDescriptor( source , sourceKey ) ;
+		sourceValue = sourceDescriptor.value ;
+	}
+	else {
+		// We have to trigger an eventual getter only once
+		sourceValue = source[ sourceKey ] ;
+	}
+
+	let targetKey = runtime.prefix + sourceKey ;
+
+	// Do not copy if property is a function and we don't want them
+	if ( options.nofunc && typeof sourceValue === 'function' ) { return ; }
+
+	// Again, trigger an eventual getter only once
+	let targetValue = target[ targetKey ] ;
+	let targetValueIsObject = targetValue && ( typeof targetValue === 'object' || typeof targetValue === 'function' ) ;
+	let sourceValueIsObject = sourceValue && ( typeof sourceValue === 'object' || typeof sourceValue === 'function' ) ;
+
+	if (
+		( options.deep || runtime.unflatKeys )
+		&& sourceValue
+		&& ( typeof sourceValue === 'object' || ( options.deepFunc && typeof sourceValue === 'function' ) )
+		&& ( ! options.descriptor || ! sourceDescriptor.get )
+		// not a condition we just cache sourceValueProto now... ok it's trashy ><
+		&& ( ( sourceValueProto = Object.getPrototypeOf( sourceValue ) ) || true )
+		&& ( ! ( options.deep instanceof Set ) || options.deep.has( sourceValueProto ) )
+		&& ( ! options.immutables || ! options.immutables.has( sourceValueProto ) )
+		&& ( ! options.preserve || targetValueIsObject )
+		&& ( ! mask || targetValueIsObject )
+	) {
+		let indexOfSource = options.circular ? runtime.references.sources.indexOf( sourceValue ) : - 1 ;
+
+		if ( options.flat ) {
+			// No circular references reconnection when in 'flat' mode
+			if ( indexOfSource >= 0 ) { return ; }
+
+			extendOne(
+				{
+					depth: runtime.depth + 1 ,
+					prefix: runtime.prefix + sourceKey + options.flat ,
+					references: runtime.references
+				} ,
+				options , target , sourceValue , mask
+			) ;
+		}
+		else {
+			if ( indexOfSource >= 0 ) {
+				// Circular references reconnection...
+				targetValue = runtime.references.targets[ indexOfSource ] ;
+
+				if ( options.descriptor ) {
+					Object.defineProperty( target , targetKey , {
+						value: targetValue ,
+						enumerable: sourceDescriptor.enumerable ,
+						writable: sourceDescriptor.writable ,
+						configurable: sourceDescriptor.configurable
+					} ) ;
+				}
+				else {
+					target[ targetKey ] = targetValue ;
+				}
+
+				return ;
+			}
+
+			if ( ! targetValueIsObject || ! Object.hasOwn( target , targetKey ) ) {
+				if ( Array.isArray( sourceValue ) ) { targetValue = [] ; }
+				else if ( options.proto ) { targetValue = Object.create( sourceValueProto ) ; }
+				else if ( options.inherit ) { targetValue = Object.create( sourceValue ) ; }
+				else { targetValue = {} ; }
+
+				if ( options.descriptor ) {
+					Object.defineProperty( target , targetKey , {
+						value: targetValue ,
+						enumerable: sourceDescriptor.enumerable ,
+						writable: sourceDescriptor.writable ,
+						configurable: sourceDescriptor.configurable
+					} ) ;
+				}
+				else {
+					target[ targetKey ] = targetValue ;
+				}
+			}
+			else if ( options.proto && Object.getPrototypeOf( targetValue ) !== sourceValueProto ) {
+				Object.setPrototypeOf( targetValue , sourceValueProto ) ;
+			}
+			else if ( options.inherit && Object.getPrototypeOf( targetValue ) !== sourceValue ) {
+				Object.setPrototypeOf( targetValue , sourceValue ) ;
+			}
+
+			if ( options.circular ) {
+				runtime.references.sources.push( sourceValue ) ;
+				runtime.references.targets.push( targetValue ) ;
+			}
+
+			if ( runtime.unflatKeys && runtime.unflatIndex < runtime.unflatKeys.length - 1 ) {
+				// Finish unflatting this property
+				let nextSourceKey = runtime.unflatKeys[ runtime.unflatIndex + 1 ] ;
+
+				extendOneKV(
+					{
+						depth: runtime.depth ,	// keep the same depth
+						unflatKeys: runtime.unflatKeys ,
+						unflatIndex: runtime.unflatIndex + 1 ,
+						unflatFullKey: runtime.unflatFullKey ,
+						prefix: '' ,
+						references: runtime.references
+					} ,
+					options , targetValue , source , nextSourceKey , mask
+				) ;
+			}
+			else {
+				// Recursively extends sub-object
+				extendOne(
+					{
+						depth: runtime.depth + 1 ,
+						prefix: '' ,
+						references: runtime.references
+					} ,
+					options , targetValue , sourceValue , mask
+				) ;
+			}
+		}
+	}
+	else if ( mask && ( targetValue === undefined || targetValueIsObject || sourceValueIsObject ) ) {
+		// Do not create new value, and so do not delete source's properties that were not moved.
+		// We also do not overwrite object with non-object, and we don't overwrite non-object with object (preserve hierarchy)
+		return ;
+	}
+	else if ( options.preserve && targetValue !== undefined ) {
+		// Do not overwrite, and so do not delete source's properties that were not moved
+		return ;
+	}
+	else if ( ! options.inherit ) {
+		if ( options.descriptor ) { Object.defineProperty( target , targetKey , sourceDescriptor ) ; }
+		else { target[ targetKey ] = targetValue = sourceValue ; }
+	}
+
+	// Delete owned property of the source object
+	if ( options.move ) { delete source[ sourceKey ] ; }
+}
+
+
+},{}],142:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46782,7 +48321,7 @@ exports.defineLazyProperty = function defineLazyProperty( object , name , func )
 } ;
 
 
-},{}],137:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -46971,7 +48510,7 @@ masklib.Mask.prototype.applyTo = function applyTo( input , context , contextOver
 		if ( maskValue !== null && typeof maskValue === 'object' ) {
 			//console.log( 'sub' ) ;
 
-			if ( Object.prototype.hasOwnProperty.call( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
+			if ( Object.hasOwn( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
 				//console.log( 'recursive call' ) ;
 
 				if ( input.key instanceof masklib.Mask ) {
@@ -46988,7 +48527,7 @@ masklib.Mask.prototype.applyTo = function applyTo( input , context , contextOver
 			}
 		}
 		// If mask exists, add the key
-		else if ( Object.prototype.hasOwnProperty.call( input , key ) ) {
+		else if ( Object.hasOwn( input , key ) ) {
 			//console.log( 'property found' ) ;
 
 			if ( maskValue !== undefined && typeof context.options.leaf === 'function' ) {
@@ -47133,7 +48672,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 		if ( maskValue !== null && typeof maskValue === 'object' ) {
 			//console.log( 'sub' ) ;
 
-			if ( Object.prototype.hasOwnProperty.call( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
+			if ( Object.hasOwn( input , key ) && input[ key ] !== null && typeof input[ key ] === 'object' ) {
 				//console.log( 'recursive call' ) ;
 
 				if ( input.key instanceof masklib.Mask ) {
@@ -47145,7 +48684,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 			}
 		}
 		// If mask exists, remove the key
-		else if ( Object.prototype.hasOwnProperty.call( input , key ) ) {
+		else if ( Object.hasOwn( input , key ) ) {
 			delete output[ key ] ;
 		}
 	}
@@ -47154,7 +48693,7 @@ masklib.InverseMask.prototype.applyTo = function applyTo( input , context , cont
 } ;
 
 
-},{"./tree.js":139,"util":208}],138:[function(require,module,exports){
+},{"./tree.js":145,"util":214}],144:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -47372,7 +48911,7 @@ treePath.op = function( type , object , path , value ) {
 			return pointer[ key ] ;
 		case 'dec' :
 			if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] -- ; }
-			else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = -1 ; }
+			else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = - 1 ; }
 			return pointer[ key ] ;
 		case 'append' :
 			if ( ! pointer[ key ] ) { pointer[ key ] = [ value ] ; }
@@ -47458,7 +48997,7 @@ treePath.upgrade = function( object ) {
 } ;
 
 
-},{}],139:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 /*
 	Tree Kit
 
@@ -47499,15 +49038,346 @@ Object.assign( tree ,
 		extend: require( './extend.js' ) ,
 		clone: require( './clone.js' ) ,
 		path: require( './path.js' ) ,
-		dotPath: require( './dotPath.js' )
+		dotPath: require( './dotPath.js' ) ,
+		wildDotPath: require( './wildDotPath.js' )
 	} ,
 	require( './lazy.js' ) ,
 	require( './diff.js' ) ,
-	require( './mask.js' )
+	require( './mask.js' ) ,
+	require( './arrayLike.js' )
 ) ;
 
 
-},{"./clone.js":132,"./diff.js":133,"./dotPath.js":134,"./extend.js":135,"./lazy.js":136,"./mask.js":137,"./path.js":138}],140:[function(require,module,exports){
+},{"./arrayLike.js":137,"./clone.js":138,"./diff.js":139,"./dotPath.js":140,"./extend.js":141,"./lazy.js":142,"./mask.js":143,"./path.js":144,"./wildDotPath.js":146}],146:[function(require,module,exports){
+/*
+	Tree Kit
+
+	Copyright (c) 2014 - 2021 Cédric Ronvel
+
+	The MIT License (MIT)
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+const wildDotPath = {} ;
+module.exports = wildDotPath ;
+
+
+
+const EMPTY_PATH = [] ;
+const PROTO_POLLUTION_MESSAGE = 'This would cause prototype pollution' ;
+
+
+
+function toPathArray( path ) {
+	if ( Array.isArray( path ) ) {
+		/*
+		let i , iMax = path.length ;
+		for ( i = 0 ; i < iMax ; i ++ ) {
+			if ( typeof path[ i ] !== 'string' || typeof path[ i ] !== 'number' ) { path[ i ] = '' + path[ i ] ; }
+		}
+		//*/
+		return path ;
+	}
+
+	if ( ! path ) { return EMPTY_PATH ; }
+	if ( typeof path === 'string' ) {
+		return path[ path.length - 1 ] === '.' ? path.slice( 0 , - 1 ).split( '.' ) : path.split( '.' ) ;
+	}
+
+	throw new TypeError( '[tree.wildDotPath]: the path argument should be a string or an array' ) ;
+}
+
+// Expose toPathArray()
+wildDotPath.toPathArray = toPathArray ;
+
+
+
+// Walk the tree and return an array of values.
+function wildWalk( object , pathArray , maxOffset = 0 , index = 0 , result = [] ) {
+	var indexMax , key ,
+		pointer = object ;
+
+	for ( indexMax = pathArray.length + maxOffset ; index < indexMax ; index ++ ) {
+		key = pathArray[ index ] ;
+
+		if ( typeof key === 'object' || key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+		if ( ! pointer || typeof pointer !== 'object' ) { return result ; }
+
+		if ( key === '*' ) {
+			for ( let subPointer of Array.isArray( pointer ) ? pointer : Object.values( pointer ) ) {
+				wildWalk( subPointer , pathArray , maxOffset , index + 1 , result ) ;
+			}
+
+			return result ;
+		}
+
+		pointer = pointer[ key ] ;
+	}
+
+	result.push( pointer ) ;
+
+	return result ;
+}
+
+
+
+const VALUE_LIST_MODE = 0 ;
+const PATH_LIST_MODE = 1 ;
+const PATH_VALUE_MAP_MODE = 2 ;
+
+// Same than wildWalk, but either return an array of path, or an object of path => value.
+function wildWalkPathValue( object , pathArray , resultMode , maxOffset = 0 , index = 0 , path = '' , result = null ) {
+	if ( ! result ) {
+		result = resultMode === PATH_VALUE_MAP_MODE ? {} : [] ;
+	}
+
+	var indexMax , key ,
+		pointer = object ;
+
+	for ( indexMax = pathArray.length + maxOffset ; index < indexMax ; index ++ ) {
+		key = pathArray[ index ] ;
+
+		if ( typeof key === 'object' || key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+		if ( ! pointer || typeof pointer !== 'object' ) { return result ; }
+
+		if ( key === '*' ) {
+			if ( Array.isArray( pointer ) ) {
+				let subKey = 0 ;
+				for ( let subPointer of pointer ) {
+					wildWalkPathValue( subPointer , pathArray , resultMode , maxOffset , index + 1 , path ? path + '.' + subKey : subKey , result ) ;
+					subKey ++ ;
+				}
+			}
+			else {
+				for ( let [ subKey , subPointer ] of Object.entries( pointer ) ) {
+					wildWalkPathValue( subPointer , pathArray , resultMode , maxOffset , index + 1 , path ? path + '.' + subKey : subKey , result ) ;
+				}
+			}
+
+			return result ;
+		}
+
+		path = path ? path + '.' + key : key ;
+		pointer = pointer[ key ] ;
+	}
+
+	if ( resultMode === VALUE_LIST_MODE ) {
+		result.push( pointer ) ;
+	}
+	else if ( resultMode === PATH_LIST_MODE ) {
+		result.push( path ) ;
+	}
+	else if ( resultMode === PATH_VALUE_MAP_MODE ) {
+		result[ path ] = pointer ;
+	}
+
+	return result ;
+}
+
+
+
+// Get with wildcard, return an array
+wildDotPath.get = wildDotPath.getValues = ( object , path ) => wildWalk( object , toPathArray( path ) ) ;
+wildDotPath.getPaths = ( object , path ) => wildWalkPathValue( object , toPathArray( path ) , PATH_LIST_MODE ) ;
+wildDotPath.getPathValueMap = ( object , path ) => wildWalkPathValue( object , toPathArray( path ) , PATH_VALUE_MAP_MODE ) ;
+
+
+
+// Walk and pave the tree and exec a hook at leaf.
+// Object MUST be an object! no check are performed for the first step!
+function wildWalkPave( object , pathArray , leafHookFn , leafHookArg , index = 0 ) {
+	var indexMax , key ,
+		pointer = object ;
+
+	for ( indexMax = pathArray.length - 1 ; index < indexMax ; index ++ ) {
+		key = pathArray[ index ] ;
+
+		if ( typeof key === 'object' || key === '__proto__' || typeof pointer === 'function' ) { throw new Error( PROTO_POLLUTION_MESSAGE ) ; }
+		if ( ! pointer || typeof pointer !== 'object' ) { return 0 ; }
+
+		if ( key === '*' ) {
+			let count = 0 ;
+			for ( let subPointer of Array.isArray( pointer ) ? pointer : Object.values( pointer ) ) {
+				count += wildWalkPave( subPointer , pathArray , leafHookFn , leafHookArg , index + 1 ) ;
+			}
+
+			return count ;
+		}
+
+		// Pave
+		if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = {} ; }
+
+		pointer = pointer[ key ] ;
+	}
+
+	key = pathArray[ index ] ;	// last key
+	return leafHookFn( pointer , key , leafHookArg ) ;
+}
+
+
+
+const SET_HOOK = ( pointer , key , value ) => {
+	pointer[ key ] = value ;
+	return 1 ;
+} ;
+
+wildDotPath.set = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , SET_HOOK , value ) ;
+} ;
+
+
+
+const DEFINE_HOOK = ( pointer , key , value ) => {
+	if ( key in pointer ) { return 0 ; }
+	pointer[ key ] = value ;
+	return 1 ;
+} ;
+
+wildDotPath.define = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , DEFINE_HOOK , value ) ;
+} ;
+
+
+
+const INC_HOOK = ( pointer , key ) => {
+	if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] ++ ; }
+	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = 1 ; }
+	return 1 ;
+} ;
+
+wildDotPath.inc = ( object , path ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , INC_HOOK ) ;
+} ;
+
+
+
+const DEC_HOOK = ( pointer , key ) => {
+	if ( typeof pointer[ key ] === 'number' ) { pointer[ key ] -- ; }
+	else if ( ! pointer[ key ] || typeof pointer[ key ] !== 'object' ) { pointer[ key ] = - 1 ; }
+	return 1 ;
+} ;
+
+wildDotPath.dec = ( object , path ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , DEC_HOOK ) ;
+} ;
+
+
+
+const CONCAT_HOOK = ( pointer , key , value ) => {
+	if ( ! pointer[ key ] ) {
+		pointer[ key ] = value ;
+	}
+	else if ( Array.isArray( pointer[ key ] ) && Array.isArray( value ) ) {
+		pointer[ key ] = pointer[ key ].concat( value ) ;
+	}
+
+	return 1 ;
+} ;
+
+wildDotPath.concat = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , CONCAT_HOOK , value ) ;
+} ;
+
+
+
+const INSERT_HOOK = ( pointer , key , value ) => {
+	if ( ! pointer[ key ] ) {
+		pointer[ key ] = value ;
+	}
+	else if ( Array.isArray( pointer[ key ] ) && Array.isArray( value ) ) {
+		pointer[ key ] = value.concat( pointer[ key ] ) ;
+	}
+
+	return 1 ;
+} ;
+
+wildDotPath.insert = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , INSERT_HOOK , value ) ;
+} ;
+
+
+
+const DELETE_HOOK = ( pointer , key ) => {
+	if ( ! Object.hasOwn( pointer , key ) ) { return 0 ; }
+	delete pointer[ key ] ;
+	return 1 ;
+} ;
+
+wildDotPath.delete = ( object , path ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , DELETE_HOOK ) ;
+} ;
+
+
+
+const AUTOPUSH_HOOK = ( pointer , key , value ) => {
+	if ( pointer[ key ] === undefined ) { pointer[ key ] = value ; }
+	else if ( Array.isArray( pointer[ key ] ) ) { pointer[ key ].push( value ) ; }
+	else { pointer[ key ] = [ pointer[ key ] , value ] ; }
+
+	return 1 ;
+} ;
+
+wildDotPath.autoPush = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , AUTOPUSH_HOOK , value ) ;
+} ;
+
+
+
+const APPEND_HOOK = ( pointer , key , value ) => {
+	if ( ! pointer[ key ] ) { pointer[ key ] = [ value ] ; }
+	else if ( Array.isArray( pointer[ key ] ) ) { pointer[ key ].push( value ) ; }
+	return 1 ;
+} ;
+
+wildDotPath.append = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , APPEND_HOOK , value ) ;
+} ;
+
+
+
+const PREPEND_HOOK = ( pointer , key , value ) => {
+	if ( ! pointer[ key ] ) { pointer[ key ] = [ value ] ; }
+	else if ( Array.isArray( pointer[ key ] ) ) { pointer[ key ].unshift( value ) ; }
+	return 1 ;
+} ;
+
+wildDotPath.prepend = ( object , path , value ) => {
+	if ( ! object || typeof object !== 'object' ) { return 0 ; }
+	return wildWalkPave( object , toPathArray( path ) , PREPEND_HOOK , value ) ;
+} ;
+
+
+},{}],147:[function(require,module,exports){
 "use strict"
 
 function unique_pred(list, compare) {
@@ -47566,9 +49436,36 @@ function unique(list, compare, sorted) {
 
 module.exports = unique
 
-},{}],141:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 
-},{}],142:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
+
+/**
+ * Array#filter.
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @param {Object=} self
+ * @return {Array}
+ * @throw TypeError
+ */
+
+module.exports = function (arr, fn, self) {
+  if (arr.filter) return arr.filter(fn, self);
+  if (void 0 === arr || null === arr) throw new TypeError;
+  if ('function' != typeof fn) throw new TypeError;
+  var ret = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (!hasOwn.call(arr, i)) continue;
+    var val = arr[i];
+    if (fn.call(self, val, i, arr)) ret.push(val);
+  }
+  return ret;
+};
+
+var hasOwn = Object.prototype.hasOwnProperty;
+
+},{}],150:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -48078,7 +49975,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":171,"util/":145}],143:[function(require,module,exports){
+},{"object-assign":177,"util/":153}],151:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -48103,14 +50000,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],144:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],145:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -48700,38 +50597,32 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":144,"_process":185,"inherits":143}],146:[function(require,module,exports){
+},{"./support/isBuffer":152,"_process":191,"inherits":151}],154:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var possibleNames = [
-	'BigInt64Array',
-	'BigUint64Array',
-	'Float32Array',
-	'Float64Array',
-	'Int16Array',
-	'Int32Array',
-	'Int8Array',
-	'Uint16Array',
-	'Uint32Array',
-	'Uint8Array',
-	'Uint8ClampedArray'
-];
-
-var g = typeof globalThis === 'undefined' ? global : globalThis;
+var filter = require('array-filter');
 
 module.exports = function availableTypedArrays() {
-	var out = [];
-	for (var i = 0; i < possibleNames.length; i++) {
-		if (typeof g[possibleNames[i]] === 'function') {
-			out[out.length] = possibleNames[i];
-		}
-	}
-	return out;
+	return filter([
+		'BigInt64Array',
+		'BigUint64Array',
+		'Float32Array',
+		'Float64Array',
+		'Int16Array',
+		'Int32Array',
+		'Int8Array',
+		'Uint16Array',
+		'Uint32Array',
+		'Uint8Array',
+		'Uint8ClampedArray'
+	], function (typedArray) {
+		return typeof global[typedArray] === 'function';
+	});
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],147:[function(require,module,exports){
+},{"array-filter":149}],155:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -48883,9 +50774,9 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],148:[function(require,module,exports){
-arguments[4][141][0].apply(exports,arguments)
-},{"dup":141}],149:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
+arguments[4][148][0].apply(exports,arguments)
+},{"dup":148}],157:[function(require,module,exports){
 (function (process,Buffer){(function (){
 'use strict';
 /* eslint camelcase: "off" */
@@ -49297,7 +51188,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this)}).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":185,"assert":142,"buffer":151,"pako/lib/zlib/constants":175,"pako/lib/zlib/deflate.js":177,"pako/lib/zlib/inflate.js":179,"pako/lib/zlib/zstream":183}],150:[function(require,module,exports){
+},{"_process":191,"assert":150,"buffer":159,"pako/lib/zlib/constants":181,"pako/lib/zlib/deflate.js":183,"pako/lib/zlib/inflate.js":185,"pako/lib/zlib/zstream":189}],158:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -49909,7 +51800,7 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this)}).call(this,require('_process'))
-},{"./binding":149,"_process":185,"assert":142,"buffer":151,"stream":187,"util":208}],151:[function(require,module,exports){
+},{"./binding":157,"_process":191,"assert":150,"buffer":159,"stream":193,"util":214}],159:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -51690,7 +53581,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":147,"buffer":151,"ieee754":164}],152:[function(require,module,exports){
+},{"base64-js":155,"buffer":159,"ieee754":171}],160:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -51707,7 +53598,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":153,"get-intrinsic":159}],153:[function(require,module,exports){
+},{"./":161,"get-intrinsic":167}],161:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -51756,12 +53647,12 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"function-bind":158,"get-intrinsic":159}],154:[function(require,module,exports){
+},{"function-bind":166,"get-intrinsic":167}],162:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
 
-var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%', true);
+var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%');
 if ($gOPD) {
 	try {
 		$gOPD([], 'length');
@@ -51773,7 +53664,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"get-intrinsic":159}],155:[function(require,module,exports){
+},{"get-intrinsic":167}],163:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -52224,119 +54115,58 @@ function unwrapListeners(arr) {
 
 function once(emitter, name) {
   return new Promise(function (resolve, reject) {
-    function errorListener(err) {
-      emitter.removeListener(name, resolver);
-      reject(err);
-    }
-
-    function resolver() {
-      if (typeof emitter.removeListener === 'function') {
+    function eventListener() {
+      if (errorListener !== undefined) {
         emitter.removeListener('error', errorListener);
       }
       resolve([].slice.call(arguments));
     };
+    var errorListener;
 
-    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
+    // Adding an error listener is not optional because
+    // if an error is thrown on an event emitter we cannot
+    // guarantee that the actual event we are waiting will
+    // be fired. The result could be a silent way to create
+    // memory or file descriptor leaks, which is something
+    // we should avoid.
     if (name !== 'error') {
-      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
+      errorListener = function errorListener(err) {
+        emitter.removeListener(name, eventListener);
+        reject(err);
+      };
+
+      emitter.once('error', errorListener);
     }
+
+    emitter.once(name, eventListener);
   });
 }
 
-function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
-  if (typeof emitter.on === 'function') {
-    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
-  }
-}
+},{}],164:[function(require,module,exports){
 
-function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
-  if (typeof emitter.on === 'function') {
-    if (flags.once) {
-      emitter.once(name, listener);
-    } else {
-      emitter.on(name, listener);
-    }
-  } else if (typeof emitter.addEventListener === 'function') {
-    // EventTarget does not have `error` event semantics like Node
-    // EventEmitters, we do not listen for `error` events here.
-    emitter.addEventListener(name, function wrapListener(arg) {
-      // IE does not have builtin `{ once: true }` support so we
-      // have to do it manually.
-      if (flags.once) {
-        emitter.removeEventListener(name, wrapListener);
-      }
-      listener(arg);
-    });
-  } else {
-    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
-  }
-}
+var hasOwn = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
 
-},{}],156:[function(require,module,exports){
-'use strict';
-
-var isCallable = require('is-callable');
-
-var toStr = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-var forEachArray = function forEachArray(array, iterator, receiver) {
-    for (var i = 0, len = array.length; i < len; i++) {
-        if (hasOwnProperty.call(array, i)) {
-            if (receiver == null) {
-                iterator(array[i], i, array);
-            } else {
-                iterator.call(receiver, array[i], i, array);
-            }
-        }
-    }
-};
-
-var forEachString = function forEachString(string, iterator, receiver) {
-    for (var i = 0, len = string.length; i < len; i++) {
-        // no such thing as a sparse string.
-        if (receiver == null) {
-            iterator(string.charAt(i), i, string);
-        } else {
-            iterator.call(receiver, string.charAt(i), i, string);
-        }
-    }
-};
-
-var forEachObject = function forEachObject(object, iterator, receiver) {
-    for (var k in object) {
-        if (hasOwnProperty.call(object, k)) {
-            if (receiver == null) {
-                iterator(object[k], k, object);
-            } else {
-                iterator.call(receiver, object[k], k, object);
-            }
-        }
-    }
-};
-
-var forEach = function forEach(list, iterator, thisArg) {
-    if (!isCallable(iterator)) {
+module.exports = function forEach (obj, fn, ctx) {
+    if (toString.call(fn) !== '[object Function]') {
         throw new TypeError('iterator must be a function');
     }
-
-    var receiver;
-    if (arguments.length >= 3) {
-        receiver = thisArg;
-    }
-
-    if (toStr.call(list) === '[object Array]') {
-        forEachArray(list, iterator, receiver);
-    } else if (typeof list === 'string') {
-        forEachString(list, iterator, receiver);
+    var l = obj.length;
+    if (l === +l) {
+        for (var i = 0; i < l; i++) {
+            fn.call(ctx, obj[i], i, obj);
+        }
     } else {
-        forEachObject(list, iterator, receiver);
+        for (var k in obj) {
+            if (hasOwn.call(obj, k)) {
+                fn.call(ctx, obj[k], k, obj);
+            }
+        }
     }
 };
 
-module.exports = forEach;
 
-},{"is-callable":168}],157:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -52390,14 +54220,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],158:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":157}],159:[function(require,module,exports){
+},{"./implementation":165}],167:[function(require,module,exports){
 'use strict';
 
 var undefined;
@@ -52602,7 +54432,6 @@ var $concat = bind.call(Function.call, Array.prototype.concat);
 var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
 var $replace = bind.call(Function.call, String.prototype.replace);
 var $strSlice = bind.call(Function.call, String.prototype.slice);
-var $exec = bind.call(Function.call, RegExp.prototype.exec);
 
 /* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
 var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
@@ -52658,9 +54487,6 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 		throw new $TypeError('"allowMissing" argument must be a boolean');
 	}
 
-	if ($exec(/^%?[^%]*%?$/g, name) === null) {
-		throw new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');
-	}
 	var parts = stringToPath(name);
 	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
 
@@ -52733,10 +54559,11 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"function-bind":158,"has":163,"has-symbols":160}],160:[function(require,module,exports){
+},{"function-bind":166,"has":170,"has-symbols":168}],168:[function(require,module,exports){
+(function (global){(function (){
 'use strict';
 
-var origSymbol = typeof Symbol !== 'undefined' && Symbol;
+var origSymbol = global.Symbol;
 var hasSymbolSham = require('./shams');
 
 module.exports = function hasNativeSymbols() {
@@ -52748,7 +54575,8 @@ module.exports = function hasNativeSymbols() {
 	return hasSymbolSham();
 };
 
-},{"./shams":161}],161:[function(require,module,exports){
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./shams":169}],169:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
@@ -52774,7 +54602,7 @@ module.exports = function hasSymbols() {
 
 	var symVal = 42;
 	obj[sym] = symVal;
-	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
+	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax
 	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
 
 	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
@@ -52792,23 +54620,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],162:[function(require,module,exports){
-'use strict';
-
-var hasSymbols = require('has-symbols/shams');
-
-module.exports = function hasToStringTagShams() {
-	return hasSymbols() && !!Symbol.toStringTag;
-};
-
-},{"has-symbols/shams":161}],163:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":158}],164:[function(require,module,exports){
+},{"function-bind":166}],171:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -52895,7 +54714,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],165:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -52924,10 +54743,10 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],166:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 'use strict';
 
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
@@ -52959,91 +54778,15 @@ isStandardArguments.isLegacyArguments = isLegacyArguments; // for tests
 
 module.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
 
-},{"call-bind/callBound":152,"has-tostringtag/shams":162}],167:[function(require,module,exports){
-arguments[4][69][0].apply(exports,arguments)
-},{"dup":69}],168:[function(require,module,exports){
-'use strict';
-
-var fnToStr = Function.prototype.toString;
-var reflectApply = typeof Reflect === 'object' && Reflect !== null && Reflect.apply;
-var badArrayLike;
-var isCallableMarker;
-if (typeof reflectApply === 'function' && typeof Object.defineProperty === 'function') {
-	try {
-		badArrayLike = Object.defineProperty({}, 'length', {
-			get: function () {
-				throw isCallableMarker;
-			}
-		});
-		isCallableMarker = {};
-		// eslint-disable-next-line no-throw-literal
-		reflectApply(function () { throw 42; }, null, badArrayLike);
-	} catch (_) {
-		if (_ !== isCallableMarker) {
-			reflectApply = null;
-		}
-	}
-} else {
-	reflectApply = null;
-}
-
-var constructorRegex = /^\s*class\b/;
-var isES6ClassFn = function isES6ClassFunction(value) {
-	try {
-		var fnStr = fnToStr.call(value);
-		return constructorRegex.test(fnStr);
-	} catch (e) {
-		return false; // not a function
-	}
-};
-
-var tryFunctionObject = function tryFunctionToStr(value) {
-	try {
-		if (isES6ClassFn(value)) { return false; }
-		fnToStr.call(value);
-		return true;
-	} catch (e) {
-		return false;
-	}
-};
-var toStr = Object.prototype.toString;
-var fnClass = '[object Function]';
-var genClass = '[object GeneratorFunction]';
-var hasToStringTag = typeof Symbol === 'function' && !!Symbol.toStringTag; // better: use `has-tostringtag`
-/* globals document: false */
-var documentDotAll = typeof document === 'object' && typeof document.all === 'undefined' && document.all !== undefined ? document.all : {};
-
-module.exports = reflectApply
-	? function isCallable(value) {
-		if (value === documentDotAll) { return true; }
-		if (!value) { return false; }
-		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-		if (typeof value === 'function' && !value.prototype) { return true; }
-		try {
-			reflectApply(value, null, badArrayLike);
-		} catch (e) {
-			if (e !== isCallableMarker) { return false; }
-		}
-		return !isES6ClassFn(value);
-	}
-	: function isCallable(value) {
-		if (value === documentDotAll) { return true; }
-		if (!value) { return false; }
-		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-		if (typeof value === 'function' && !value.prototype) { return true; }
-		if (hasToStringTag) { return tryFunctionObject(value); }
-		if (isES6ClassFn(value)) { return false; }
-		var strClass = toStr.call(value);
-		return strClass === fnClass || strClass === genClass;
-	};
-
-},{}],169:[function(require,module,exports){
+},{"call-bind/callBound":160}],174:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"dup":70}],175:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
 var fnToStr = Function.prototype.toString;
 var isFnRegex = /^\s*(?:function)?\*/;
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
 var getProto = Object.getPrototypeOf;
 var getGeneratorFunc = function () { // eslint-disable-line consistent-return
 	if (!hasToStringTag) {
@@ -53054,7 +54797,8 @@ var getGeneratorFunc = function () { // eslint-disable-line consistent-return
 	} catch (e) {
 	}
 };
-var GeneratorFunction;
+var generatorFunc = getGeneratorFunc();
+var GeneratorFunction = getProto && generatorFunc ? getProto(generatorFunc) : false;
 
 module.exports = function isGeneratorFunction(fn) {
 	if (typeof fn !== 'function') {
@@ -53067,28 +54811,21 @@ module.exports = function isGeneratorFunction(fn) {
 		var str = toStr.call(fn);
 		return str === '[object GeneratorFunction]';
 	}
-	if (!getProto) {
-		return false;
-	}
-	if (typeof GeneratorFunction === 'undefined') {
-		var generatorFunc = getGeneratorFunc();
-		GeneratorFunction = generatorFunc ? getProto(generatorFunc) : false;
-	}
-	return getProto(fn) === GeneratorFunction;
+	return getProto && getProto(fn) === GeneratorFunction;
 };
 
-},{"has-tostringtag/shams":162}],170:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var forEach = require('for-each');
+var forEach = require('foreach');
 var availableTypedArrays = require('available-typed-arrays');
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasSymbols = require('has-symbols')();
+var hasToStringTag = hasSymbols && typeof Symbol.toStringTag === 'symbol';
 
-var g = typeof globalThis === 'undefined' ? global : globalThis;
 var typedArrays = availableTypedArrays();
 
 var $indexOf = callBound('Array.prototype.indexOf', true) || function indexOf(array, value) {
@@ -53105,16 +54842,17 @@ var gOPD = require('es-abstract/helpers/getOwnPropertyDescriptor');
 var getPrototypeOf = Object.getPrototypeOf; // require('getprototypeof');
 if (hasToStringTag && gOPD && getPrototypeOf) {
 	forEach(typedArrays, function (typedArray) {
-		var arr = new g[typedArray]();
-		if (Symbol.toStringTag in arr) {
-			var proto = getPrototypeOf(arr);
-			var descriptor = gOPD(proto, Symbol.toStringTag);
-			if (!descriptor) {
-				var superProto = getPrototypeOf(proto);
-				descriptor = gOPD(superProto, Symbol.toStringTag);
-			}
-			toStrTags[typedArray] = descriptor.get;
+		var arr = new global[typedArray]();
+		if (!(Symbol.toStringTag in arr)) {
+			throw new EvalError('this engine has support for Symbol.toStringTag, but ' + typedArray + ' does not have the property! Please report this.');
 		}
+		var proto = getPrototypeOf(arr);
+		var descriptor = gOPD(proto, Symbol.toStringTag);
+		if (!descriptor) {
+			var superProto = getPrototypeOf(proto);
+			descriptor = gOPD(superProto, Symbol.toStringTag);
+		}
+		toStrTags[typedArray] = descriptor.get;
 	});
 }
 
@@ -53132,7 +54870,7 @@ var tryTypedArrays = function tryAllTypedArrays(value) {
 
 module.exports = function isTypedArray(value) {
 	if (!value || typeof value !== 'object') { return false; }
-	if (!hasToStringTag || !(Symbol.toStringTag in value)) {
+	if (!hasToStringTag) {
 		var tag = $slice($toString(value), 8, -1);
 		return $indexOf(typedArrays, tag) > -1;
 	}
@@ -53141,7 +54879,7 @@ module.exports = function isTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":146,"call-bind/callBound":152,"es-abstract/helpers/getOwnPropertyDescriptor":154,"for-each":156,"has-tostringtag/shams":162}],171:[function(require,module,exports){
+},{"available-typed-arrays":154,"call-bind/callBound":160,"es-abstract/helpers/getOwnPropertyDescriptor":162,"foreach":164,"has-symbols":168}],177:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -53233,7 +54971,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],172:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -53284,7 +55022,7 @@ exports.homedir = function () {
 	return '/'
 };
 
-},{}],173:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 'use strict';
 
 
@@ -53391,7 +55129,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],174:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -53444,7 +55182,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],175:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -53514,7 +55252,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],176:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -53575,7 +55313,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],177:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -55451,7 +57189,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":173,"./adler32":174,"./crc32":176,"./messages":181,"./trees":182}],178:[function(require,module,exports){
+},{"../utils/common":179,"./adler32":180,"./crc32":182,"./messages":187,"./trees":188}],184:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -55798,7 +57536,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],179:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -57356,7 +59094,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":173,"./adler32":174,"./crc32":176,"./inffast":178,"./inftrees":180}],180:[function(require,module,exports){
+},{"../utils/common":179,"./adler32":180,"./crc32":182,"./inffast":184,"./inftrees":186}],186:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -57701,7 +59439,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":173}],181:[function(require,module,exports){
+},{"../utils/common":179}],187:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -57735,7 +59473,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],182:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -58959,7 +60697,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":173}],183:[function(require,module,exports){
+},{"../utils/common":179}],189:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -59008,7 +60746,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],184:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -59541,7 +61279,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":185}],185:[function(require,module,exports){
+},{"_process":191}],191:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -59727,7 +61465,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],186:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
@@ -59794,7 +61532,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":151}],187:[function(require,module,exports){
+},{"buffer":159}],193:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -59925,7 +61663,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":155,"inherits":165,"readable-stream/lib/_stream_duplex.js":189,"readable-stream/lib/_stream_passthrough.js":190,"readable-stream/lib/_stream_readable.js":191,"readable-stream/lib/_stream_transform.js":192,"readable-stream/lib/_stream_writable.js":193,"readable-stream/lib/internal/streams/end-of-stream.js":197,"readable-stream/lib/internal/streams/pipeline.js":199}],188:[function(require,module,exports){
+},{"events":163,"inherits":172,"readable-stream/lib/_stream_duplex.js":195,"readable-stream/lib/_stream_passthrough.js":196,"readable-stream/lib/_stream_readable.js":197,"readable-stream/lib/_stream_transform.js":198,"readable-stream/lib/_stream_writable.js":199,"readable-stream/lib/internal/streams/end-of-stream.js":203,"readable-stream/lib/internal/streams/pipeline.js":205}],194:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -60054,7 +61792,7 @@ createErrorType('ERR_UNKNOWN_ENCODING', function (arg) {
 createErrorType('ERR_STREAM_UNSHIFT_AFTER_END_EVENT', 'stream.unshift() after end event');
 module.exports.codes = codes;
 
-},{}],189:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -60196,7 +61934,7 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
   }
 });
 }).call(this)}).call(this,require('_process'))
-},{"./_stream_readable":191,"./_stream_writable":193,"_process":185,"inherits":165}],190:[function(require,module,exports){
+},{"./_stream_readable":197,"./_stream_writable":199,"_process":191,"inherits":172}],196:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -60236,7 +61974,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":192,"inherits":165}],191:[function(require,module,exports){
+},{"./_stream_transform":198,"inherits":172}],197:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -61363,7 +63101,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":188,"./_stream_duplex":189,"./internal/streams/async_iterator":194,"./internal/streams/buffer_list":195,"./internal/streams/destroy":196,"./internal/streams/from":198,"./internal/streams/state":200,"./internal/streams/stream":201,"_process":185,"buffer":151,"events":155,"inherits":165,"string_decoder/":202,"util":148}],192:[function(require,module,exports){
+},{"../errors":194,"./_stream_duplex":195,"./internal/streams/async_iterator":200,"./internal/streams/buffer_list":201,"./internal/streams/destroy":202,"./internal/streams/from":204,"./internal/streams/state":206,"./internal/streams/stream":207,"_process":191,"buffer":159,"events":163,"inherits":172,"string_decoder/":208,"util":156}],198:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -61565,7 +63303,7 @@ function done(stream, er, data) {
   if (stream._transformState.transforming) throw new ERR_TRANSFORM_ALREADY_TRANSFORMING();
   return stream.push(null);
 }
-},{"../errors":188,"./_stream_duplex":189,"inherits":165}],193:[function(require,module,exports){
+},{"../errors":194,"./_stream_duplex":195,"inherits":172}],199:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -62265,7 +64003,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../errors":188,"./_stream_duplex":189,"./internal/streams/destroy":196,"./internal/streams/state":200,"./internal/streams/stream":201,"_process":185,"buffer":151,"inherits":165,"util-deprecate":205}],194:[function(require,module,exports){
+},{"../errors":194,"./_stream_duplex":195,"./internal/streams/destroy":202,"./internal/streams/state":206,"./internal/streams/stream":207,"_process":191,"buffer":159,"inherits":172,"util-deprecate":211}],200:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -62475,7 +64213,7 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 
 module.exports = createReadableStreamAsyncIterator;
 }).call(this)}).call(this,require('_process'))
-},{"./end-of-stream":197,"_process":185}],195:[function(require,module,exports){
+},{"./end-of-stream":203,"_process":191}],201:[function(require,module,exports){
 'use strict';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -62686,7 +64424,7 @@ function () {
 
   return BufferList;
 }();
-},{"buffer":151,"util":148}],196:[function(require,module,exports){
+},{"buffer":159,"util":156}],202:[function(require,module,exports){
 (function (process){(function (){
 'use strict'; // undocumented cb() API, needed for core, not for public API
 
@@ -62794,7 +64532,7 @@ module.exports = {
   errorOrDestroy: errorOrDestroy
 };
 }).call(this)}).call(this,require('_process'))
-},{"_process":185}],197:[function(require,module,exports){
+},{"_process":191}],203:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/end-of-stream with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -62899,12 +64637,12 @@ function eos(stream, opts, callback) {
 }
 
 module.exports = eos;
-},{"../../../errors":188}],198:[function(require,module,exports){
+},{"../../../errors":194}],204:[function(require,module,exports){
 module.exports = function () {
   throw new Error('Readable.from is not available in the browser')
 };
 
-},{}],199:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 // Ported from https://github.com/mafintosh/pump with
 // permission from the author, Mathias Buus (@mafintosh).
 'use strict';
@@ -63002,7 +64740,7 @@ function pipeline() {
 }
 
 module.exports = pipeline;
-},{"../../../errors":188,"./end-of-stream":197}],200:[function(require,module,exports){
+},{"../../../errors":194,"./end-of-stream":203}],206:[function(require,module,exports){
 'use strict';
 
 var ERR_INVALID_OPT_VALUE = require('../../../errors').codes.ERR_INVALID_OPT_VALUE;
@@ -63030,10 +64768,10 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 module.exports = {
   getHighWaterMark: getHighWaterMark
 };
-},{"../../../errors":188}],201:[function(require,module,exports){
+},{"../../../errors":194}],207:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":155}],202:[function(require,module,exports){
+},{"events":163}],208:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63330,7 +65068,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":186}],203:[function(require,module,exports){
+},{"safe-buffer":192}],209:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -63409,7 +65147,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":185,"timers":203}],204:[function(require,module,exports){
+},{"process/browser.js":191,"timers":209}],210:[function(require,module,exports){
 exports.isatty = function () { return false; };
 
 function ReadStream() {
@@ -63422,7 +65160,7 @@ function WriteStream() {
 }
 exports.WriteStream = WriteStream;
 
-},{}],205:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 (function (global){(function (){
 
 /**
@@ -63493,9 +65231,9 @@ function config (name) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],206:[function(require,module,exports){
-arguments[4][144][0].apply(exports,arguments)
-},{"dup":144}],207:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
+arguments[4][152][0].apply(exports,arguments)
+},{"dup":152}],213:[function(require,module,exports){
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
@@ -63733,23 +65471,21 @@ function isDataView(value) {
 }
 exports.isDataView = isDataView;
 
-// Store a copy of SharedArrayBuffer in case it's deleted elsewhere
-var SharedArrayBufferCopy = typeof SharedArrayBuffer !== 'undefined' ? SharedArrayBuffer : undefined;
 function isSharedArrayBufferToString(value) {
   return ObjectToString(value) === '[object SharedArrayBuffer]';
 }
+isSharedArrayBufferToString.working = (
+  typeof SharedArrayBuffer !== 'undefined' &&
+  isSharedArrayBufferToString(new SharedArrayBuffer())
+);
 function isSharedArrayBuffer(value) {
-  if (typeof SharedArrayBufferCopy === 'undefined') {
+  if (typeof SharedArrayBuffer === 'undefined') {
     return false;
-  }
-
-  if (typeof isSharedArrayBufferToString.working === 'undefined') {
-    isSharedArrayBufferToString.working = isSharedArrayBufferToString(new SharedArrayBufferCopy());
   }
 
   return isSharedArrayBufferToString.working
     ? isSharedArrayBufferToString(value)
-    : value instanceof SharedArrayBufferCopy;
+    : value instanceof SharedArrayBuffer;
 }
 exports.isSharedArrayBuffer = isSharedArrayBuffer;
 
@@ -63831,7 +65567,7 @@ exports.isAnyArrayBuffer = isAnyArrayBuffer;
   });
 });
 
-},{"is-arguments":166,"is-generator-function":169,"is-typed-array":170,"which-typed-array":209}],208:[function(require,module,exports){
+},{"is-arguments":173,"is-generator-function":175,"is-typed-array":176,"which-typed-array":215}],214:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -64550,18 +66286,18 @@ function callbackify(original) {
 exports.callbackify = callbackify;
 
 }).call(this)}).call(this,require('_process'))
-},{"./support/isBuffer":206,"./support/types":207,"_process":185,"inherits":165}],209:[function(require,module,exports){
+},{"./support/isBuffer":212,"./support/types":213,"_process":191,"inherits":172}],215:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
-var forEach = require('for-each');
+var forEach = require('foreach');
 var availableTypedArrays = require('available-typed-arrays');
 var callBound = require('call-bind/callBound');
 
 var $toString = callBound('Object.prototype.toString');
-var hasToStringTag = require('has-tostringtag/shams')();
+var hasSymbols = require('has-symbols')();
+var hasToStringTag = hasSymbols && typeof Symbol.toStringTag === 'symbol';
 
-var g = typeof globalThis === 'undefined' ? global : globalThis;
 var typedArrays = availableTypedArrays();
 
 var $slice = callBound('String.prototype.slice');
@@ -64570,17 +66306,18 @@ var gOPD = require('es-abstract/helpers/getOwnPropertyDescriptor');
 var getPrototypeOf = Object.getPrototypeOf; // require('getprototypeof');
 if (hasToStringTag && gOPD && getPrototypeOf) {
 	forEach(typedArrays, function (typedArray) {
-		if (typeof g[typedArray] === 'function') {
-			var arr = new g[typedArray]();
-			if (Symbol.toStringTag in arr) {
-				var proto = getPrototypeOf(arr);
-				var descriptor = gOPD(proto, Symbol.toStringTag);
-				if (!descriptor) {
-					var superProto = getPrototypeOf(proto);
-					descriptor = gOPD(superProto, Symbol.toStringTag);
-				}
-				toStrTags[typedArray] = descriptor.get;
+		if (typeof global[typedArray] === 'function') {
+			var arr = new global[typedArray]();
+			if (!(Symbol.toStringTag in arr)) {
+				throw new EvalError('this engine has support for Symbol.toStringTag, but ' + typedArray + ' does not have the property! Please report this.');
 			}
+			var proto = getPrototypeOf(arr);
+			var descriptor = gOPD(proto, Symbol.toStringTag);
+			if (!descriptor) {
+				var superProto = getPrototypeOf(proto);
+				descriptor = gOPD(superProto, Symbol.toStringTag);
+			}
+			toStrTags[typedArray] = descriptor.get;
 		}
 	});
 }
@@ -64604,10 +66341,10 @@ var isTypedArray = require('is-typed-array');
 
 module.exports = function whichTypedArray(value) {
 	if (!isTypedArray(value)) { return false; }
-	if (!hasToStringTag || !(Symbol.toStringTag in value)) { return $slice($toString(value), 8, -1); }
+	if (!hasToStringTag) { return $slice($toString(value), 8, -1); }
 	return tryTypedArrays(value);
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":146,"call-bind/callBound":152,"es-abstract/helpers/getOwnPropertyDescriptor":154,"for-each":156,"has-tostringtag/shams":162,"is-typed-array":170}]},{},[9])(9)
+},{"available-typed-arrays":154,"call-bind/callBound":160,"es-abstract/helpers/getOwnPropertyDescriptor":162,"foreach":164,"has-symbols":168,"is-typed-array":176}]},{},[9])(9)
 });

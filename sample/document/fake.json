@@ -1,0 +1,20 @@
+{
+	"name": "John" ,
+	"nickname": "jsnow" ,
+	"age": 28 ,
+	"single": true ,
+	"subDocument": {
+		"whateverkey1": "whatevervalue1" ,
+		"whateverkey2": "whatevervalue2" ,
+		"whateverkey3": "whatevervalue3" ,
+		"subSubDocument": {
+			"whateverkey1": "whatevervalue1" ,
+			"whateverkey2": "whatevervalue2"
+		}
+	} ,
+	"array": [
+		"whatevervalue1" ,
+		"whatevervalue2" ,
+		"whatevervalue3"
+	]
+}

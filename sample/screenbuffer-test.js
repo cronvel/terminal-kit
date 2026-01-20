@@ -65,6 +65,7 @@ buffer.put( { x: 4 , y: 5 , attr: { color: 'brightYellow' , bold: true } } , 'ğ
 //*
 var buffer = new termkit.ScreenBufferHD( { dst: term , width: 8 , height: 8 } )
 buffer.fill( { attr: { bgColor: {r:12,g:12,b:12} } } ) ;
+buffer.put( { x: 2 , y: 1 } , 'bob' ) ;
 buffer.put( { x: 3 , y: 2 , attr: { color: {r:233,g:33,b:34} , bgColor: 'brightBlack' , underline: true } } , 'toto' ) ;
 buffer.put( { x: 4 , y: 5 , attr: { color: {r:233,g:233,b:34} , bold: true } } , 'ğŒ†' ) ;	// <-- takes more than one UCS-2 character
 //*/

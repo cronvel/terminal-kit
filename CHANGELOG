@@ -1,4 +1,36 @@
 
+v3.1.2
+------
+
+String-kit dependency (support for roman numeral with %V/%v)
+
+
+v3.1.1
+------
+
+More paths added to .npmignore
+
+
+v3.1.0
+------
+
+Publishing the new Document widget: Inspector
+
+
+v3.0.2
+------
+
+New Document's Element API: .destroyNoRedraw()
+ColumnMenu (and BaseMenu): improved key navigation
+Dependencies upgraded
+
+
+v3.0.1
+------
+
+Piping to a file should provide a virtually infinite width and height (should partly fix #240)
+
+
 v3.0.0
 ------
 

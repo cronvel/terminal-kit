@@ -31,19 +31,16 @@ var term = require( 'terminal-kit' ).terminal ;
 var progressBar , progress = 0 ;
 
 
-function doProgress()
-{
+function doProgress() {
 	// Add random progress
 	progress += Math.random() / 10 ;
 	progressBar.update( progress ) ;
-	
-	if ( progress >= 1 )
-	{
+
+	if ( progress >= 1 ) {
 		// Cleanup and exit
-		setTimeout( function() { term( '\n' ) ; process.exit() ; } , 200 ) ;
+		setTimeout( () => { term( '\n' ) ; process.exit() ; } , 200 ) ;
 	}
-	else
-	{
+	else {
 		setTimeout( doProgress , 100 + Math.random() * 400 ) ;
 	}
 }
@@ -57,4 +54,3 @@ progressBar = term.progressBar( {
 } ) ;
 
 doProgress() ;
-                                
