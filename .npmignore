@@ -69,3 +69,12 @@ demo/
 wfm.json
 test
 sample
+bench/
+Makefile
+documentation.md
+bdd-spec.md
+SECURITY.md
+.eslintrc.js
+eslint.config.js
+esbuild.config.js
+.jshintrc
