@@ -1,4 +1,10 @@
 
+v3.1.4
+------
+
+Pull request #272: Fix crash on mouse drag arriving without a prior button press
+
+
 v3.1.3
 ------
 
